@@ -30,7 +30,7 @@ namespace Asv.Mavlink.V2.Common
 
     public static class CommonHelper
     {
-        public static void RegisterCommonDialect(this IPacketDecoder<IPacket<IPayload>,IPayload> src)
+        public static void RegisterCommonDialect(this IPacketDecoder<IPacketV2<IPayload>> src)
         {
             src.Register(()=>new HeartbeatPacket());
             src.Register(()=>new SysStatusPacket());
@@ -4775,6 +4775,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 0;
         public override HeartbeatPayload Payload { get; } = new HeartbeatPayload();
 
+        public override string Name => "HEARTBEAT";
         public override string ToString()
         {
             var name = "HEARTBEAT".PadLeft(30);
@@ -4866,6 +4867,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 1;
         public override SysStatusPayload Payload { get; } = new SysStatusPayload();
 
+        public override string Name => "SYS_STATUS";
         public override string ToString()
         {
             var name = "SYS_STATUS".PadLeft(30);
@@ -5013,6 +5015,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 2;
         public override SystemTimePayload Payload { get; } = new SystemTimePayload();
 
+        public override string Name => "SYSTEM_TIME";
         public override string ToString()
         {
             var name = "SYSTEM_TIME".PadLeft(30);
@@ -5072,6 +5075,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 4;
         public override PingPayload Payload { get; } = new PingPayload();
 
+        public override string Name => "PING";
         public override string ToString()
         {
             var name = "PING".PadLeft(30);
@@ -5147,6 +5151,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 5;
         public override ChangeOperatorControlPayload Payload { get; } = new ChangeOperatorControlPayload();
 
+        public override string Name => "CHANGE_OPERATOR_CONTROL";
         public override string ToString()
         {
             var name = "CHANGE_OPERATOR_CONTROL".PadLeft(30);
@@ -5224,6 +5229,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 6;
         public override ChangeOperatorControlAckPayload Payload { get; } = new ChangeOperatorControlAckPayload();
 
+        public override string Name => "CHANGE_OPERATOR_CONTROL_ACK";
         public override string ToString()
         {
             var name = "CHANGE_OPERATOR_CONTROL_ACK".PadLeft(30);
@@ -5291,6 +5297,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 7;
         public override AuthKeyPayload Payload { get; } = new AuthKeyPayload();
 
+        public override string Name => "AUTH_KEY";
         public override string ToString()
         {
             var name = "AUTH_KEY".PadLeft(30);
@@ -5344,6 +5351,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 11;
         public override SetModePayload Payload { get; } = new SetModePayload();
 
+        public override string Name => "SET_MODE";
         public override string ToString()
         {
             var name = "SET_MODE".PadLeft(30);
@@ -5411,6 +5419,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 20;
         public override ParamRequestReadPayload Payload { get; } = new ParamRequestReadPayload();
 
+        public override string Name => "PARAM_REQUEST_READ";
         public override string ToString()
         {
             var name = "PARAM_REQUEST_READ".PadLeft(30);
@@ -5488,6 +5497,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 21;
         public override ParamRequestListPayload Payload { get; } = new ParamRequestListPayload();
 
+        public override string Name => "PARAM_REQUEST_LIST";
         public override string ToString()
         {
             var name = "PARAM_REQUEST_LIST".PadLeft(30);
@@ -5547,6 +5557,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 22;
         public override ParamValuePayload Payload { get; } = new ParamValuePayload();
 
+        public override string Name => "PARAM_VALUE";
         public override string ToString()
         {
             var name = "PARAM_VALUE".PadLeft(30);
@@ -5632,6 +5643,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 23;
         public override ParamSetPayload Payload { get; } = new ParamSetPayload();
 
+        public override string Name => "PARAM_SET";
         public override string ToString()
         {
             var name = "PARAM_SET".PadLeft(30);
@@ -5718,6 +5730,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 24;
         public override GpsRawIntPayload Payload { get; } = new GpsRawIntPayload();
 
+        public override string Name => "GPS_RAW_INT";
         public override string ToString()
         {
             var name = "GPS_RAW_INT".PadLeft(30);
@@ -5881,6 +5894,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 25;
         public override GpsStatusPayload Payload { get; } = new GpsStatusPayload();
 
+        public override string Name => "GPS_STATUS";
         public override string ToString()
         {
             var name = "GPS_STATUS".PadLeft(30);
@@ -6002,6 +6016,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 26;
         public override ScaledImuPayload Payload { get; } = new ScaledImuPayload();
 
+        public override string Name => "SCALED_IMU";
         public override string ToString()
         {
             var name = "SCALED_IMU".PadLeft(30);
@@ -6125,6 +6140,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 27;
         public override RawImuPayload Payload { get; } = new RawImuPayload();
 
+        public override string Name => "RAW_IMU";
         public override string ToString()
         {
             var name = "RAW_IMU".PadLeft(30);
@@ -6248,6 +6264,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 28;
         public override RawPressurePayload Payload { get; } = new RawPressurePayload();
 
+        public override string Name => "RAW_PRESSURE";
         public override string ToString()
         {
             var name = "RAW_PRESSURE".PadLeft(30);
@@ -6331,6 +6348,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 29;
         public override ScaledPressurePayload Payload { get; } = new ScaledPressurePayload();
 
+        public override string Name => "SCALED_PRESSURE";
         public override string ToString()
         {
             var name = "SCALED_PRESSURE".PadLeft(30);
@@ -6406,6 +6424,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 30;
         public override AttitudePayload Payload { get; } = new AttitudePayload();
 
+        public override string Name => "ATTITUDE";
         public override string ToString()
         {
             var name = "ATTITUDE".PadLeft(30);
@@ -6505,6 +6524,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 31;
         public override AttitudeQuaternionPayload Payload { get; } = new AttitudeQuaternionPayload();
 
+        public override string Name => "ATTITUDE_QUATERNION";
         public override string ToString()
         {
             var name = "ATTITUDE_QUATERNION".PadLeft(30);
@@ -6612,6 +6632,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 32;
         public override LocalPositionNedPayload Payload { get; } = new LocalPositionNedPayload();
 
+        public override string Name => "LOCAL_POSITION_NED";
         public override string ToString()
         {
             var name = "LOCAL_POSITION_NED".PadLeft(30);
@@ -6712,6 +6733,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 33;
         public override GlobalPositionIntPayload Payload { get; } = new GlobalPositionIntPayload();
 
+        public override string Name => "GLOBAL_POSITION_INT";
         public override string ToString()
         {
             var name = "GLOBAL_POSITION_INT".PadLeft(30);
@@ -6827,6 +6849,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 34;
         public override RcChannelsScaledPayload Payload { get; } = new RcChannelsScaledPayload();
 
+        public override string Name => "RC_CHANNELS_SCALED";
         public override string ToString()
         {
             var name = "RC_CHANNELS_SCALED".PadLeft(30);
@@ -6958,6 +6981,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 35;
         public override RcChannelsRawPayload Payload { get; } = new RcChannelsRawPayload();
 
+        public override string Name => "RC_CHANNELS_RAW";
         public override string ToString()
         {
             var name = "RC_CHANNELS_RAW".PadLeft(30);
@@ -7089,6 +7113,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 36;
         public override ServoOutputRawPayload Payload { get; } = new ServoOutputRawPayload();
 
+        public override string Name => "SERVO_OUTPUT_RAW";
         public override string ToString()
         {
             var name = "SERVO_OUTPUT_RAW".PadLeft(30);
@@ -7276,6 +7301,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 37;
         public override MissionRequestPartialListPayload Payload { get; } = new MissionRequestPartialListPayload();
 
+        public override string Name => "MISSION_REQUEST_PARTIAL_LIST";
         public override string ToString()
         {
             var name = "MISSION_REQUEST_PARTIAL_LIST".PadLeft(30);
@@ -7359,6 +7385,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 38;
         public override MissionWritePartialListPayload Payload { get; } = new MissionWritePartialListPayload();
 
+        public override string Name => "MISSION_WRITE_PARTIAL_LIST";
         public override string ToString()
         {
             var name = "MISSION_WRITE_PARTIAL_LIST".PadLeft(30);
@@ -7443,6 +7470,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 39;
         public override MissionItemPayload Payload { get; } = new MissionItemPayload();
 
+        public override string Name => "MISSION_ITEM";
         public override string ToString()
         {
             var name = "MISSION_ITEM".PadLeft(30);
@@ -7606,6 +7634,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 40;
         public override MissionRequestPayload Payload { get; } = new MissionRequestPayload();
 
+        public override string Name => "MISSION_REQUEST";
         public override string ToString()
         {
             var name = "MISSION_REQUEST".PadLeft(30);
@@ -7681,6 +7710,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 41;
         public override MissionSetCurrentPayload Payload { get; } = new MissionSetCurrentPayload();
 
+        public override string Name => "MISSION_SET_CURRENT";
         public override string ToString()
         {
             var name = "MISSION_SET_CURRENT".PadLeft(30);
@@ -7748,6 +7778,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 42;
         public override MissionCurrentPayload Payload { get; } = new MissionCurrentPayload();
 
+        public override string Name => "MISSION_CURRENT";
         public override string ToString()
         {
             var name = "MISSION_CURRENT".PadLeft(30);
@@ -7799,6 +7830,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 43;
         public override MissionRequestListPayload Payload { get; } = new MissionRequestListPayload();
 
+        public override string Name => "MISSION_REQUEST_LIST";
         public override string ToString()
         {
             var name = "MISSION_REQUEST_LIST".PadLeft(30);
@@ -7866,6 +7898,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 44;
         public override MissionCountPayload Payload { get; } = new MissionCountPayload();
 
+        public override string Name => "MISSION_COUNT";
         public override string ToString()
         {
             var name = "MISSION_COUNT".PadLeft(30);
@@ -7941,6 +7974,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 45;
         public override MissionClearAllPayload Payload { get; } = new MissionClearAllPayload();
 
+        public override string Name => "MISSION_CLEAR_ALL";
         public override string ToString()
         {
             var name = "MISSION_CLEAR_ALL".PadLeft(30);
@@ -8008,6 +8042,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 46;
         public override MissionItemReachedPayload Payload { get; } = new MissionItemReachedPayload();
 
+        public override string Name => "MISSION_ITEM_REACHED";
         public override string ToString()
         {
             var name = "MISSION_ITEM_REACHED".PadLeft(30);
@@ -8059,6 +8094,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 47;
         public override MissionAckPayload Payload { get; } = new MissionAckPayload();
 
+        public override string Name => "MISSION_ACK";
         public override string ToString()
         {
             var name = "MISSION_ACK".PadLeft(30);
@@ -8134,6 +8170,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 48;
         public override SetGpsGlobalOriginPayload Payload { get; } = new SetGpsGlobalOriginPayload();
 
+        public override string Name => "SET_GPS_GLOBAL_ORIGIN";
         public override string ToString()
         {
             var name = "SET_GPS_GLOBAL_ORIGIN".PadLeft(30);
@@ -8217,6 +8254,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 49;
         public override GpsGlobalOriginPayload Payload { get; } = new GpsGlobalOriginPayload();
 
+        public override string Name => "GPS_GLOBAL_ORIGIN";
         public override string ToString()
         {
             var name = "GPS_GLOBAL_ORIGIN".PadLeft(30);
@@ -8292,6 +8330,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 50;
         public override ParamMapRcPayload Payload { get; } = new ParamMapRcPayload();
 
+        public override string Name => "PARAM_MAP_RC";
         public override string ToString()
         {
             var name = "PARAM_MAP_RC".PadLeft(30);
@@ -8409,6 +8448,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 51;
         public override MissionRequestIntPayload Payload { get; } = new MissionRequestIntPayload();
 
+        public override string Name => "MISSION_REQUEST_INT";
         public override string ToString()
         {
             var name = "MISSION_REQUEST_INT".PadLeft(30);
@@ -8484,6 +8524,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 54;
         public override SafetySetAllowedAreaPayload Payload { get; } = new SafetySetAllowedAreaPayload();
 
+        public override string Name => "SAFETY_SET_ALLOWED_AREA";
         public override string ToString()
         {
             var name = "SAFETY_SET_ALLOWED_AREA".PadLeft(30);
@@ -8599,6 +8640,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 55;
         public override SafetyAllowedAreaPayload Payload { get; } = new SafetyAllowedAreaPayload();
 
+        public override string Name => "SAFETY_ALLOWED_AREA";
         public override string ToString()
         {
             var name = "SAFETY_ALLOWED_AREA".PadLeft(30);
@@ -8698,6 +8740,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 61;
         public override AttitudeQuaternionCovPayload Payload { get; } = new AttitudeQuaternionCovPayload();
 
+        public override string Name => "ATTITUDE_QUATERNION_COV";
         public override string ToString()
         {
             var name = "ATTITUDE_QUATERNION_COV".PadLeft(30);
@@ -8801,6 +8844,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 62;
         public override NavControllerOutputPayload Payload { get; } = new NavControllerOutputPayload();
 
+        public override string Name => "NAV_CONTROLLER_OUTPUT";
         public override string ToString()
         {
             var name = "NAV_CONTROLLER_OUTPUT".PadLeft(30);
@@ -8908,6 +8952,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 63;
         public override GlobalPositionIntCovPayload Payload { get; } = new GlobalPositionIntCovPayload();
 
+        public override string Name => "GLOBAL_POSITION_INT_COV";
         public override string ToString()
         {
             var name = "GLOBAL_POSITION_INT_COV".PadLeft(30);
@@ -9037,6 +9082,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 64;
         public override LocalPositionNedCovPayload Payload { get; } = new LocalPositionNedCovPayload();
 
+        public override string Name => "LOCAL_POSITION_NED_COV";
         public override string ToString()
         {
             var name = "LOCAL_POSITION_NED_COV".PadLeft(30);
@@ -9182,6 +9228,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 65;
         public override RcChannelsPayload Payload { get; } = new RcChannelsPayload();
 
+        public override string Name => "RC_CHANNELS";
         public override string ToString()
         {
             var name = "RC_CHANNELS".PadLeft(30);
@@ -9393,6 +9440,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 66;
         public override RequestDataStreamPayload Payload { get; } = new RequestDataStreamPayload();
 
+        public override string Name => "REQUEST_DATA_STREAM";
         public override string ToString()
         {
             var name = "REQUEST_DATA_STREAM".PadLeft(30);
@@ -9476,6 +9524,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 67;
         public override DataStreamPayload Payload { get; } = new DataStreamPayload();
 
+        public override string Name => "DATA_STREAM";
         public override string ToString()
         {
             var name = "DATA_STREAM".PadLeft(30);
@@ -9543,6 +9592,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 69;
         public override ManualControlPayload Payload { get; } = new ManualControlPayload();
 
+        public override string Name => "MANUAL_CONTROL";
         public override string ToString()
         {
             var name = "MANUAL_CONTROL".PadLeft(30);
@@ -9634,6 +9684,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 70;
         public override RcChannelsOverridePayload Payload { get; } = new RcChannelsOverridePayload();
 
+        public override string Name => "RC_CHANNELS_OVERRIDE";
         public override string ToString()
         {
             var name = "RC_CHANNELS_OVERRIDE".PadLeft(30);
@@ -9838,6 +9889,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 73;
         public override MissionItemIntPayload Payload { get; } = new MissionItemIntPayload();
 
+        public override string Name => "MISSION_ITEM_INT";
         public override string ToString()
         {
             var name = "MISSION_ITEM_INT".PadLeft(30);
@@ -10001,6 +10053,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 74;
         public override VfrHudPayload Payload { get; } = new VfrHudPayload();
 
+        public override string Name => "VFR_HUD";
         public override string ToString()
         {
             var name = "VFR_HUD".PadLeft(30);
@@ -10092,6 +10145,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 75;
         public override CommandIntPayload Payload { get; } = new CommandIntPayload();
 
+        public override string Name => "COMMAND_INT";
         public override string ToString()
         {
             var name = "COMMAND_INT".PadLeft(30);
@@ -10239,6 +10293,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 76;
         public override CommandLongPayload Payload { get; } = new CommandLongPayload();
 
+        public override string Name => "COMMAND_LONG";
         public override string ToString()
         {
             var name = "COMMAND_LONG".PadLeft(30);
@@ -10370,6 +10425,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 77;
         public override CommandAckPayload Payload { get; } = new CommandAckPayload();
 
+        public override string Name => "COMMAND_ACK";
         public override string ToString()
         {
             var name = "COMMAND_ACK".PadLeft(30);
@@ -10461,6 +10517,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 81;
         public override ManualSetpointPayload Payload { get; } = new ManualSetpointPayload();
 
+        public override string Name => "MANUAL_SETPOINT";
         public override string ToString()
         {
             var name = "MANUAL_SETPOINT".PadLeft(30);
@@ -10560,6 +10617,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 82;
         public override SetAttitudeTargetPayload Payload { get; } = new SetAttitudeTargetPayload();
 
+        public override string Name => "SET_ATTITUDE_TARGET";
         public override string ToString()
         {
             var name = "SET_ATTITUDE_TARGET".PadLeft(30);
@@ -10681,6 +10739,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 83;
         public override AttitudeTargetPayload Payload { get; } = new AttitudeTargetPayload();
 
+        public override string Name => "ATTITUDE_TARGET";
         public override string ToString()
         {
             var name = "ATTITUDE_TARGET".PadLeft(30);
@@ -10786,6 +10845,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 84;
         public override SetPositionTargetLocalNedPayload Payload { get; } = new SetPositionTargetLocalNedPayload();
 
+        public override string Name => "SET_POSITION_TARGET_LOCAL_NED";
         public override string ToString()
         {
             var name = "SET_POSITION_TARGET_LOCAL_NED".PadLeft(30);
@@ -10957,6 +11017,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 85;
         public override PositionTargetLocalNedPayload Payload { get; } = new PositionTargetLocalNedPayload();
 
+        public override string Name => "POSITION_TARGET_LOCAL_NED";
         public override string ToString()
         {
             var name = "POSITION_TARGET_LOCAL_NED".PadLeft(30);
@@ -11112,6 +11173,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 86;
         public override SetPositionTargetGlobalIntPayload Payload { get; } = new SetPositionTargetGlobalIntPayload();
 
+        public override string Name => "SET_POSITION_TARGET_GLOBAL_INT";
         public override string ToString()
         {
             var name = "SET_POSITION_TARGET_GLOBAL_INT".PadLeft(30);
@@ -11283,6 +11345,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 87;
         public override PositionTargetGlobalIntPayload Payload { get; } = new PositionTargetGlobalIntPayload();
 
+        public override string Name => "POSITION_TARGET_GLOBAL_INT";
         public override string ToString()
         {
             var name = "POSITION_TARGET_GLOBAL_INT".PadLeft(30);
@@ -11438,6 +11501,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 89;
         public override LocalPositionNedSystemGlobalOffsetPayload Payload { get; } = new LocalPositionNedSystemGlobalOffsetPayload();
 
+        public override string Name => "LOCAL_POSITION_NED_SYSTEM_GLOBAL_OFFSET";
         public override string ToString()
         {
             var name = "LOCAL_POSITION_NED_SYSTEM_GLOBAL_OFFSET".PadLeft(30);
@@ -11537,6 +11601,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 90;
         public override HilStatePayload Payload { get; } = new HilStatePayload();
 
+        public override string Name => "HIL_STATE";
         public override string ToString()
         {
             var name = "HIL_STATE".PadLeft(30);
@@ -11708,6 +11773,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 91;
         public override HilControlsPayload Payload { get; } = new HilControlsPayload();
 
+        public override string Name => "HIL_CONTROLS";
         public override string ToString()
         {
             var name = "HIL_CONTROLS".PadLeft(30);
@@ -11839,6 +11905,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 92;
         public override HilRcInputsRawPayload Payload { get; } = new HilRcInputsRawPayload();
 
+        public override string Name => "HIL_RC_INPUTS_RAW";
         public override string ToString()
         {
             var name = "HIL_RC_INPUTS_RAW".PadLeft(30);
@@ -11994,6 +12061,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 93;
         public override HilActuatorControlsPayload Payload { get; } = new HilActuatorControlsPayload();
 
+        public override string Name => "HIL_ACTUATOR_CONTROLS";
         public override string ToString()
         {
             var name = "HIL_ACTUATOR_CONTROLS".PadLeft(30);
@@ -12075,6 +12143,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 100;
         public override OpticalFlowPayload Payload { get; } = new OpticalFlowPayload();
 
+        public override string Name => "OPTICAL_FLOW";
         public override string ToString()
         {
             var name = "OPTICAL_FLOW".PadLeft(30);
@@ -12197,6 +12266,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 101;
         public override GlobalVisionPositionEstimatePayload Payload { get; } = new GlobalVisionPositionEstimatePayload();
 
+        public override string Name => "GLOBAL_VISION_POSITION_ESTIMATE";
         public override string ToString()
         {
             var name = "GLOBAL_VISION_POSITION_ESTIMATE".PadLeft(30);
@@ -12309,6 +12379,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 102;
         public override VisionPositionEstimatePayload Payload { get; } = new VisionPositionEstimatePayload();
 
+        public override string Name => "VISION_POSITION_ESTIMATE";
         public override string ToString()
         {
             var name = "VISION_POSITION_ESTIMATE".PadLeft(30);
@@ -12421,6 +12492,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 103;
         public override VisionSpeedEstimatePayload Payload { get; } = new VisionSpeedEstimatePayload();
 
+        public override string Name => "VISION_SPEED_ESTIMATE";
         public override string ToString()
         {
             var name = "VISION_SPEED_ESTIMATE".PadLeft(30);
@@ -12509,6 +12581,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 104;
         public override ViconPositionEstimatePayload Payload { get; } = new ViconPositionEstimatePayload();
 
+        public override string Name => "VICON_POSITION_ESTIMATE";
         public override string ToString()
         {
             var name = "VICON_POSITION_ESTIMATE".PadLeft(30);
@@ -12622,6 +12695,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 105;
         public override HighresImuPayload Payload { get; } = new HighresImuPayload();
 
+        public override string Name => "HIGHRES_IMU";
         public override string ToString()
         {
             var name = "HIGHRES_IMU".PadLeft(30);
@@ -12785,6 +12859,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 106;
         public override OpticalFlowRadPayload Payload { get; } = new OpticalFlowRadPayload();
 
+        public override string Name => "OPTICAL_FLOW_RAD";
         public override string ToString()
         {
             var name = "OPTICAL_FLOW_RAD".PadLeft(30);
@@ -12924,6 +12999,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 107;
         public override HilSensorPayload Payload { get; } = new HilSensorPayload();
 
+        public override string Name => "HIL_SENSOR";
         public override string ToString()
         {
             var name = "HIL_SENSOR".PadLeft(30);
@@ -13087,6 +13163,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 108;
         public override SimStatePayload Payload { get; } = new SimStatePayload();
 
+        public override string Name => "SIM_STATE";
         public override string ToString()
         {
             var name = "SIM_STATE".PadLeft(30);
@@ -13298,6 +13375,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 109;
         public override RadioStatusPayload Payload { get; } = new RadioStatusPayload();
 
+        public override string Name => "RADIO_STATUS";
         public override string ToString()
         {
             var name = "RADIO_STATUS".PadLeft(30);
@@ -13397,6 +13475,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 110;
         public override FileTransferProtocolPayload Payload { get; } = new FileTransferProtocolPayload();
 
+        public override string Name => "FILE_TRANSFER_PROTOCOL";
         public override string ToString()
         {
             var name = "FILE_TRANSFER_PROTOCOL".PadLeft(30);
@@ -13478,6 +13557,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 111;
         public override TimesyncPayload Payload { get; } = new TimesyncPayload();
 
+        public override string Name => "TIMESYNC";
         public override string ToString()
         {
             var name = "TIMESYNC".PadLeft(30);
@@ -13537,6 +13617,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 112;
         public override CameraTriggerPayload Payload { get; } = new CameraTriggerPayload();
 
+        public override string Name => "CAMERA_TRIGGER";
         public override string ToString()
         {
             var name = "CAMERA_TRIGGER".PadLeft(30);
@@ -13597,6 +13678,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 113;
         public override HilGpsPayload Payload { get; } = new HilGpsPayload();
 
+        public override string Name => "HIL_GPS";
         public override string ToString()
         {
             var name = "HIL_GPS".PadLeft(30);
@@ -13744,6 +13826,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 114;
         public override HilOpticalFlowPayload Payload { get; } = new HilOpticalFlowPayload();
 
+        public override string Name => "HIL_OPTICAL_FLOW";
         public override string ToString()
         {
             var name = "HIL_OPTICAL_FLOW".PadLeft(30);
@@ -13883,6 +13966,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 115;
         public override HilStateQuaternionPayload Payload { get; } = new HilStateQuaternionPayload();
 
+        public override string Name => "HIL_STATE_QUATERNION";
         public override string ToString()
         {
             var name = "HIL_STATE_QUATERNION".PadLeft(30);
@@ -14060,6 +14144,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 116;
         public override ScaledImu2Payload Payload { get; } = new ScaledImu2Payload();
 
+        public override string Name => "SCALED_IMU2";
         public override string ToString()
         {
             var name = "SCALED_IMU2".PadLeft(30);
@@ -14183,6 +14268,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 117;
         public override LogRequestListPayload Payload { get; } = new LogRequestListPayload();
 
+        public override string Name => "LOG_REQUEST_LIST";
         public override string ToString()
         {
             var name = "LOG_REQUEST_LIST".PadLeft(30);
@@ -14258,6 +14344,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 118;
         public override LogEntryPayload Payload { get; } = new LogEntryPayload();
 
+        public override string Name => "LOG_ENTRY";
         public override string ToString()
         {
             var name = "LOG_ENTRY".PadLeft(30);
@@ -14341,6 +14428,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 119;
         public override LogRequestDataPayload Payload { get; } = new LogRequestDataPayload();
 
+        public override string Name => "LOG_REQUEST_DATA";
         public override string ToString()
         {
             var name = "LOG_REQUEST_DATA".PadLeft(30);
@@ -14424,6 +14512,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 120;
         public override LogDataPayload Payload { get; } = new LogDataPayload();
 
+        public override string Name => "LOG_DATA";
         public override string ToString()
         {
             var name = "LOG_DATA".PadLeft(30);
@@ -14505,6 +14594,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 121;
         public override LogErasePayload Payload { get; } = new LogErasePayload();
 
+        public override string Name => "LOG_ERASE";
         public override string ToString()
         {
             var name = "LOG_ERASE".PadLeft(30);
@@ -14564,6 +14654,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 122;
         public override LogRequestEndPayload Payload { get; } = new LogRequestEndPayload();
 
+        public override string Name => "LOG_REQUEST_END";
         public override string ToString()
         {
             var name = "LOG_REQUEST_END".PadLeft(30);
@@ -14623,6 +14714,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 123;
         public override GpsInjectDataPayload Payload { get; } = new GpsInjectDataPayload();
 
+        public override string Name => "GPS_INJECT_DATA";
         public override string ToString()
         {
             var name = "GPS_INJECT_DATA".PadLeft(30);
@@ -14704,6 +14796,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 124;
         public override Gps2RawPayload Payload { get; } = new Gps2RawPayload();
 
+        public override string Name => "GPS2_RAW";
         public override string ToString()
         {
             var name = "GPS2_RAW".PadLeft(30);
@@ -14843,6 +14936,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 125;
         public override PowerStatusPayload Payload { get; } = new PowerStatusPayload();
 
+        public override string Name => "POWER_STATUS";
         public override string ToString()
         {
             var name = "POWER_STATUS".PadLeft(30);
@@ -14910,6 +15004,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 126;
         public override SerialControlPayload Payload { get; } = new SerialControlPayload();
 
+        public override string Name => "SERIAL_CONTROL";
         public override string ToString()
         {
             var name = "SERIAL_CONTROL".PadLeft(30);
@@ -15007,6 +15102,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 127;
         public override GpsRtkPayload Payload { get; } = new GpsRtkPayload();
 
+        public override string Name => "GPS_RTK";
         public override string ToString()
         {
             var name = "GPS_RTK".PadLeft(30);
@@ -15154,6 +15250,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 128;
         public override Gps2RtkPayload Payload { get; } = new Gps2RtkPayload();
 
+        public override string Name => "GPS2_RTK";
         public override string ToString()
         {
             var name = "GPS2_RTK".PadLeft(30);
@@ -15301,6 +15398,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 129;
         public override ScaledImu3Payload Payload { get; } = new ScaledImu3Payload();
 
+        public override string Name => "SCALED_IMU3";
         public override string ToString()
         {
             var name = "SCALED_IMU3".PadLeft(30);
@@ -15423,6 +15521,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 130;
         public override DataTransmissionHandshakePayload Payload { get; } = new DataTransmissionHandshakePayload();
 
+        public override string Name => "DATA_TRANSMISSION_HANDSHAKE";
         public override string ToString()
         {
             var name = "DATA_TRANSMISSION_HANDSHAKE".PadLeft(30);
@@ -15521,6 +15620,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 131;
         public override EncapsulatedDataPayload Payload { get; } = new EncapsulatedDataPayload();
 
+        public override string Name => "ENCAPSULATED_DATA";
         public override string ToString()
         {
             var name = "ENCAPSULATED_DATA".PadLeft(30);
@@ -15585,6 +15685,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 132;
         public override DistanceSensorPayload Payload { get; } = new DistanceSensorPayload();
 
+        public override string Name => "DISTANCE_SENSOR";
         public override string ToString()
         {
             var name = "DISTANCE_SENSOR".PadLeft(30);
@@ -15692,6 +15793,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 133;
         public override TerrainRequestPayload Payload { get; } = new TerrainRequestPayload();
 
+        public override string Name => "TERRAIN_REQUEST";
         public override string ToString()
         {
             var name = "TERRAIN_REQUEST".PadLeft(30);
@@ -15767,6 +15869,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 134;
         public override TerrainDataPayload Payload { get; } = new TerrainDataPayload();
 
+        public override string Name => "TERRAIN_DATA";
         public override string ToString()
         {
             var name = "TERRAIN_DATA".PadLeft(30);
@@ -15856,6 +15959,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 135;
         public override TerrainCheckPayload Payload { get; } = new TerrainCheckPayload();
 
+        public override string Name => "TERRAIN_CHECK";
         public override string ToString()
         {
             var name = "TERRAIN_CHECK".PadLeft(30);
@@ -15915,6 +16019,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 136;
         public override TerrainReportPayload Payload { get; } = new TerrainReportPayload();
 
+        public override string Name => "TERRAIN_REPORT";
         public override string ToString()
         {
             var name = "TERRAIN_REPORT".PadLeft(30);
@@ -16014,6 +16119,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 137;
         public override ScaledPressure2Payload Payload { get; } = new ScaledPressure2Payload();
 
+        public override string Name => "SCALED_PRESSURE2";
         public override string ToString()
         {
             var name = "SCALED_PRESSURE2".PadLeft(30);
@@ -16089,6 +16195,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 138;
         public override AttPosMocapPayload Payload { get; } = new AttPosMocapPayload();
 
+        public override string Name => "ATT_POS_MOCAP";
         public override string ToString()
         {
             var name = "ATT_POS_MOCAP".PadLeft(30);
@@ -16192,6 +16299,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 139;
         public override SetActuatorControlTargetPayload Payload { get; } = new SetActuatorControlTargetPayload();
 
+        public override string Name => "SET_ACTUATOR_CONTROL_TARGET";
         public override string ToString()
         {
             var name = "SET_ACTUATOR_CONTROL_TARGET".PadLeft(30);
@@ -16281,6 +16389,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 140;
         public override ActuatorControlTargetPayload Payload { get; } = new ActuatorControlTargetPayload();
 
+        public override string Name => "ACTUATOR_CONTROL_TARGET";
         public override string ToString()
         {
             var name = "ACTUATOR_CONTROL_TARGET".PadLeft(30);
@@ -16354,6 +16463,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 141;
         public override AltitudePayload Payload { get; } = new AltitudePayload();
 
+        public override string Name => "ALTITUDE";
         public override string ToString()
         {
             var name = "ALTITUDE".PadLeft(30);
@@ -16453,6 +16563,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 142;
         public override ResourceRequestPayload Payload { get; } = new ResourceRequestPayload();
 
+        public override string Name => "RESOURCE_REQUEST";
         public override string ToString()
         {
             var name = "RESOURCE_REQUEST".PadLeft(30);
@@ -16548,6 +16659,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 143;
         public override ScaledPressure3Payload Payload { get; } = new ScaledPressure3Payload();
 
+        public override string Name => "SCALED_PRESSURE3";
         public override string ToString()
         {
             var name = "SCALED_PRESSURE3".PadLeft(30);
@@ -16623,6 +16735,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 144;
         public override FollowTargetPayload Payload { get; } = new FollowTargetPayload();
 
+        public override string Name => "FOLLOW_TARGET";
         public override string ToString()
         {
             var name = "FOLLOW_TARGET".PadLeft(30);
@@ -16784,6 +16897,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 146;
         public override ControlSystemStatePayload Payload { get; } = new ControlSystemStatePayload();
 
+        public override string Name => "CONTROL_SYSTEM_STATE";
         public override string ToString()
         {
             var name = "CONTROL_SYSTEM_STATE".PadLeft(30);
@@ -16981,6 +17095,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 147;
         public override BatteryStatusPayload Payload { get; } = new BatteryStatusPayload();
 
+        public override string Name => "BATTERY_STATUS";
         public override string ToString()
         {
             var name = "BATTERY_STATUS".PadLeft(30);
@@ -17118,6 +17233,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 148;
         public override AutopilotVersionPayload Payload { get; } = new AutopilotVersionPayload();
 
+        public override string Name => "AUTOPILOT_VERSION";
         public override string ToString()
         {
             var name = "AUTOPILOT_VERSION".PadLeft(30);
@@ -17281,6 +17397,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 149;
         public override LandingTargetPayload Payload { get; } = new LandingTargetPayload();
 
+        public override string Name => "LANDING_TARGET";
         public override string ToString()
         {
             var name = "LANDING_TARGET".PadLeft(30);
@@ -17442,6 +17559,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 230;
         public override EstimatorStatusPayload Payload { get; } = new EstimatorStatusPayload();
 
+        public override string Name => "ESTIMATOR_STATUS";
         public override string ToString()
         {
             var name = "ESTIMATOR_STATUS".PadLeft(30);
@@ -17564,6 +17682,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 231;
         public override WindCovPayload Payload { get; } = new WindCovPayload();
 
+        public override string Name => "WIND_COV";
         public override string ToString()
         {
             var name = "WIND_COV".PadLeft(30);
@@ -17679,6 +17798,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 232;
         public override GpsInputPayload Payload { get; } = new GpsInputPayload();
 
+        public override string Name => "GPS_INPUT";
         public override string ToString()
         {
             var name = "GPS_INPUT".PadLeft(30);
@@ -17866,6 +17986,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 233;
         public override GpsRtcmDataPayload Payload { get; } = new GpsRtcmDataPayload();
 
+        public override string Name => "GPS_RTCM_DATA";
         public override string ToString()
         {
             var name = "GPS_RTCM_DATA".PadLeft(30);
@@ -17939,6 +18060,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 234;
         public override HighLatencyPayload Payload { get; } = new HighLatencyPayload();
 
+        public override string Name => "HIGH_LATENCY";
         public override string ToString()
         {
             var name = "HIGH_LATENCY".PadLeft(30);
@@ -18174,6 +18296,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 235;
         public override HighLatency2Payload Payload { get; } = new HighLatency2Payload();
 
+        public override string Name => "HIGH_LATENCY2";
         public override string ToString()
         {
             var name = "HIGH_LATENCY2".PadLeft(30);
@@ -18433,6 +18556,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 241;
         public override VibrationPayload Payload { get; } = new VibrationPayload();
 
+        public override string Name => "VIBRATION";
         public override string ToString()
         {
             var name = "VIBRATION".PadLeft(30);
@@ -18532,6 +18656,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 242;
         public override HomePositionPayload Payload { get; } = new HomePositionPayload();
 
+        public override string Name => "HOME_POSITION";
         public override string ToString()
         {
             var name = "HOME_POSITION".PadLeft(30);
@@ -18669,6 +18794,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 243;
         public override SetHomePositionPayload Payload { get; } = new SetHomePositionPayload();
 
+        public override string Name => "SET_HOME_POSITION";
         public override string ToString()
         {
             var name = "SET_HOME_POSITION".PadLeft(30);
@@ -18814,6 +18940,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 244;
         public override MessageIntervalPayload Payload { get; } = new MessageIntervalPayload();
 
+        public override string Name => "MESSAGE_INTERVAL";
         public override string ToString()
         {
             var name = "MESSAGE_INTERVAL".PadLeft(30);
@@ -18873,6 +19000,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 245;
         public override ExtendedSysStatePayload Payload { get; } = new ExtendedSysStatePayload();
 
+        public override string Name => "EXTENDED_SYS_STATE";
         public override string ToString()
         {
             var name = "EXTENDED_SYS_STATE".PadLeft(30);
@@ -18932,6 +19060,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 246;
         public override AdsbVehiclePayload Payload { get; } = new AdsbVehiclePayload();
 
+        public override string Name => "ADSB_VEHICLE";
         public override string ToString()
         {
             var name = "ADSB_VEHICLE".PadLeft(30);
@@ -19081,6 +19210,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 247;
         public override CollisionPayload Payload { get; } = new CollisionPayload();
 
+        public override string Name => "COLLISION";
         public override string ToString()
         {
             var name = "COLLISION".PadLeft(30);
@@ -19180,6 +19310,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 248;
         public override V2ExtensionPayload Payload { get; } = new V2ExtensionPayload();
 
+        public override string Name => "V2_EXTENSION";
         public override string ToString()
         {
             var name = "V2_EXTENSION".PadLeft(30);
@@ -19269,6 +19400,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 249;
         public override MemoryVectPayload Payload { get; } = new MemoryVectPayload();
 
+        public override string Name => "MEMORY_VECT";
         public override string ToString()
         {
             var name = "MEMORY_VECT".PadLeft(30);
@@ -19350,6 +19482,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 250;
         public override DebugVectPayload Payload { get; } = new DebugVectPayload();
 
+        public override string Name => "DEBUG_VECT";
         public override string ToString()
         {
             var name = "DEBUG_VECT".PadLeft(30);
@@ -19435,6 +19568,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 251;
         public override NamedValueFloatPayload Payload { get; } = new NamedValueFloatPayload();
 
+        public override string Name => "NAMED_VALUE_FLOAT";
         public override string ToString()
         {
             var name = "NAMED_VALUE_FLOAT".PadLeft(30);
@@ -19504,6 +19638,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 252;
         public override NamedValueIntPayload Payload { get; } = new NamedValueIntPayload();
 
+        public override string Name => "NAMED_VALUE_INT";
         public override string ToString()
         {
             var name = "NAMED_VALUE_INT".PadLeft(30);
@@ -19573,6 +19708,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 253;
         public override StatustextPayload Payload { get; } = new StatustextPayload();
 
+        public override string Name => "STATUSTEXT";
         public override string ToString()
         {
             var name = "STATUSTEXT".PadLeft(30);
@@ -19634,6 +19770,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 254;
         public override DebugPayload Payload { get; } = new DebugPayload();
 
+        public override string Name => "DEBUG";
         public override string ToString()
         {
             var name = "DEBUG".PadLeft(30);
@@ -19701,6 +19838,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 256;
         public override SetupSigningPayload Payload { get; } = new SetupSigningPayload();
 
+        public override string Name => "SETUP_SIGNING";
         public override string ToString()
         {
             var name = "SETUP_SIGNING".PadLeft(30);
@@ -19782,6 +19920,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 257;
         public override ButtonChangePayload Payload { get; } = new ButtonChangePayload();
 
+        public override string Name => "BUTTON_CHANGE";
         public override string ToString()
         {
             var name = "BUTTON_CHANGE".PadLeft(30);
@@ -19849,6 +19988,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 258;
         public override PlayTunePayload Payload { get; } = new PlayTunePayload();
 
+        public override string Name => "PLAY_TUNE";
         public override string ToString()
         {
             var name = "PLAY_TUNE".PadLeft(30);
@@ -19928,6 +20068,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 259;
         public override CameraInformationPayload Payload { get; } = new CameraInformationPayload();
 
+        public override string Name => "CAMERA_INFORMATION";
         public override string ToString()
         {
             var name = "CAMERA_INFORMATION".PadLeft(30);
@@ -20089,6 +20230,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 260;
         public override CameraSettingsPayload Payload { get; } = new CameraSettingsPayload();
 
+        public override string Name => "CAMERA_SETTINGS";
         public override string ToString()
         {
             var name = "CAMERA_SETTINGS".PadLeft(30);
@@ -20148,6 +20290,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 261;
         public override StorageInformationPayload Payload { get; } = new StorageInformationPayload();
 
+        public override string Name => "STORAGE_INFORMATION";
         public override string ToString()
         {
             var name = "STORAGE_INFORMATION".PadLeft(30);
@@ -20263,6 +20406,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 262;
         public override CameraCaptureStatusPayload Payload { get; } = new CameraCaptureStatusPayload();
 
+        public override string Name => "CAMERA_CAPTURE_STATUS";
         public override string ToString()
         {
             var name = "CAMERA_CAPTURE_STATUS".PadLeft(30);
@@ -20354,6 +20498,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 263;
         public override CameraImageCapturedPayload Payload { get; } = new CameraImageCapturedPayload();
 
+        public override string Name => "CAMERA_IMAGE_CAPTURED";
         public override string ToString()
         {
             var name = "CAMERA_IMAGE_CAPTURED".PadLeft(30);
@@ -20493,6 +20638,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 264;
         public override FlightInformationPayload Payload { get; } = new FlightInformationPayload();
 
+        public override string Name => "FLIGHT_INFORMATION";
         public override string ToString()
         {
             var name = "FLIGHT_INFORMATION".PadLeft(30);
@@ -20568,6 +20714,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 265;
         public override MountOrientationPayload Payload { get; } = new MountOrientationPayload();
 
+        public override string Name => "MOUNT_ORIENTATION";
         public override string ToString()
         {
             var name = "MOUNT_ORIENTATION".PadLeft(30);
@@ -20651,6 +20798,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 266;
         public override LoggingDataPayload Payload { get; } = new LoggingDataPayload();
 
+        public override string Name => "LOGGING_DATA";
         public override string ToString()
         {
             var name = "LOGGING_DATA".PadLeft(30);
@@ -20748,6 +20896,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 267;
         public override LoggingDataAckedPayload Payload { get; } = new LoggingDataAckedPayload();
 
+        public override string Name => "LOGGING_DATA_ACKED";
         public override string ToString()
         {
             var name = "LOGGING_DATA_ACKED".PadLeft(30);
@@ -20845,6 +20994,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 268;
         public override LoggingAckPayload Payload { get; } = new LoggingAckPayload();
 
+        public override string Name => "LOGGING_ACK";
         public override string ToString()
         {
             var name = "LOGGING_ACK".PadLeft(30);
@@ -20912,6 +21062,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 269;
         public override VideoStreamInformationPayload Payload { get; } = new VideoStreamInformationPayload();
 
+        public override string Name => "VIDEO_STREAM_INFORMATION";
         public override string ToString()
         {
             var name = "VIDEO_STREAM_INFORMATION".PadLeft(30);
@@ -21021,6 +21172,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 270;
         public override SetVideoStreamSettingsPayload Payload { get; } = new SetVideoStreamSettingsPayload();
 
+        public override string Name => "SET_VIDEO_STREAM_SETTINGS";
         public override string ToString()
         {
             var name = "SET_VIDEO_STREAM_SETTINGS".PadLeft(30);
@@ -21138,6 +21290,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 299;
         public override WifiConfigApPayload Payload { get; } = new WifiConfigApPayload();
 
+        public override string Name => "WIFI_CONFIG_AP";
         public override string ToString()
         {
             var name = "WIFI_CONFIG_AP".PadLeft(30);
@@ -21201,6 +21354,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 300;
         public override ProtocolVersionPayload Payload { get; } = new ProtocolVersionPayload();
 
+        public override string Name => "PROTOCOL_VERSION";
         public override string ToString()
         {
             var name = "PROTOCOL_VERSION".PadLeft(30);
@@ -21296,6 +21450,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 310;
         public override UavcanNodeStatusPayload Payload { get; } = new UavcanNodeStatusPayload();
 
+        public override string Name => "UAVCAN_NODE_STATUS";
         public override string ToString()
         {
             var name = "UAVCAN_NODE_STATUS".PadLeft(30);
@@ -21387,6 +21542,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 311;
         public override UavcanNodeInfoPayload Payload { get; } = new UavcanNodeInfoPayload();
 
+        public override string Name => "UAVCAN_NODE_INFO";
         public override string ToString()
         {
             var name = "UAVCAN_NODE_INFO".PadLeft(30);
@@ -21510,6 +21666,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 320;
         public override ParamExtRequestReadPayload Payload { get; } = new ParamExtRequestReadPayload();
 
+        public override string Name => "PARAM_EXT_REQUEST_READ";
         public override string ToString()
         {
             var name = "PARAM_EXT_REQUEST_READ".PadLeft(30);
@@ -21587,6 +21744,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 321;
         public override ParamExtRequestListPayload Payload { get; } = new ParamExtRequestListPayload();
 
+        public override string Name => "PARAM_EXT_REQUEST_LIST";
         public override string ToString()
         {
             var name = "PARAM_EXT_REQUEST_LIST".PadLeft(30);
@@ -21646,6 +21804,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 322;
         public override ParamExtValuePayload Payload { get; } = new ParamExtValuePayload();
 
+        public override string Name => "PARAM_EXT_VALUE";
         public override string ToString()
         {
             var name = "PARAM_EXT_VALUE".PadLeft(30);
@@ -21733,6 +21892,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 323;
         public override ParamExtSetPayload Payload { get; } = new ParamExtSetPayload();
 
+        public override string Name => "PARAM_EXT_SET";
         public override string ToString()
         {
             var name = "PARAM_EXT_SET".PadLeft(30);
@@ -21820,6 +21980,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 324;
         public override ParamExtAckPayload Payload { get; } = new ParamExtAckPayload();
 
+        public override string Name => "PARAM_EXT_ACK";
         public override string ToString()
         {
             var name = "PARAM_EXT_ACK".PadLeft(30);
@@ -21899,6 +22060,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 330;
         public override ObstacleDistancePayload Payload { get; } = new ObstacleDistancePayload();
 
+        public override string Name => "OBSTACLE_DISTANCE";
         public override string ToString()
         {
             var name = "OBSTACLE_DISTANCE".PadLeft(30);
@@ -21996,6 +22158,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 331;
         public override OdometryPayload Payload { get; } = new OdometryPayload();
 
+        public override string Name => "ODOMETRY";
         public override string ToString()
         {
             var name = "ODOMETRY".PadLeft(30);
@@ -22177,6 +22340,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 332;
         public override TrajectoryRepresentationWaypointsPayload Payload { get; } = new TrajectoryRepresentationWaypointsPayload();
 
+        public override string Name => "TRAJECTORY_REPRESENTATION_WAYPOINTS";
         public override string ToString()
         {
             var name = "TRAJECTORY_REPRESENTATION_WAYPOINTS".PadLeft(30);
@@ -22390,6 +22554,7 @@ namespace Asv.Mavlink.V2.Common
         public override int MessageId => 333;
         public override TrajectoryRepresentationBezierPayload Payload { get; } = new TrajectoryRepresentationBezierPayload();
 
+        public override string Name => "TRAJECTORY_REPRESENTATION_BEZIER";
         public override string ToString()
         {
             var name = "TRAJECTORY_REPRESENTATION_BEZIER".PadLeft(30);

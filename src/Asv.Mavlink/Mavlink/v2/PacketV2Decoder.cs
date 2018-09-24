@@ -4,7 +4,7 @@ using System.Reactive.Subjects;
 
 namespace Asv.Mavlink.Decoder
 {
-    public class PacketV2Decoder : IPacketDecoder<IPacketV2<IPayload>, IPayload>
+    public class PacketV2Decoder : IPacketDecoder<IPacketV2<IPayload>>
     {
         private readonly byte[] _buffer = new byte[PacketV2Helper.PacketV2MaxSize];
         private DecodeStep _decodeStep;

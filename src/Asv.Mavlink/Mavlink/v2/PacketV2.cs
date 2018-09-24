@@ -12,6 +12,7 @@
         public byte SystemId { get; set; }
         public byte ComponenId { get; set; }
         public abstract TPayload Payload { get; }
+        public abstract string Name { get; }
         public ISignature Signature { get; } = new Signature();
 
         public int Serialize(byte[] buffer, int inx)

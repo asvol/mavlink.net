@@ -19,5 +19,9 @@
         /// Signature, optional
         /// </summary>
         ISignature Signature { get; }
+        /// <summary>
+        /// Message name
+        /// </summary>
+        string Name { get; }
     }
 }

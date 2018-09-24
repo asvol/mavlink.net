@@ -30,7 +30,7 @@ namespace Asv.Mavlink.V2.Standard
 
     public static class StandardHelper
     {
-        public static void RegisterStandardDialect(this IPacketDecoder<IPacket<IPayload>,IPayload> src)
+        public static void RegisterStandardDialect(this IPacketDecoder<IPacketV2<IPayload>> src)
         {
         }
     }

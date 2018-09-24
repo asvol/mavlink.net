@@ -30,7 +30,7 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
 
     public static class {{ Namespace }}Helper
     {
-        public static void Register{{ Namespace }}Dialect(this IPacketDecoder<IPacket<IPayload>,IPayload> src)
+        public static void Register{{ Namespace }}Dialect(this IPacketDecoder<IPacketV2<IPayload>> src)
         {
             {%- for msg in Messages -%}
             src.Register(()=>new {{ msg.CamelCaseName }}Packet());
@@ -82,6 +82,7 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
         public override int MessageId => {{ msg.Id }};
         public override {{ msg.CamelCaseName }}Payload Payload { get; } = new {{ msg.CamelCaseName }}Payload();
 
+        public override string Name => "{{ msg.Name }}";
         public override string ToString()
         {
             var name = "{{ msg.Name }}".PadLeft(30);
