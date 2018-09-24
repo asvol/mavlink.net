@@ -72,6 +72,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dialects\common.cs" />
+    <Compile Include="Dialects\standard.cs" />
     <Compile Include="Mavlink\IPayload.cs" />
     <Compile Include="Mavlink\IPacketDecoder.cs" />
     <Compile Include="Mavlink\IPacket.cs" />
