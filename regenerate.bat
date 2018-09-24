@@ -1,0 +1,1 @@
+"mavgen.net/mavgen-net.exe" gen -t=standard.xml -i=mavgen.net/in -o=src/Asv.Mavlink/Dialects -e=cs mavgen.net/csharp.tpl
