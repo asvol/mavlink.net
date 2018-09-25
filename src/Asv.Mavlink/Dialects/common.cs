@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// This code was generate by tool Asv.Mavlink.Gen version v0.1.0-0-g8733181
+// This code was generate by tool Asv.Mavlink.Gen version v0.1.0-1-gc4aa4a6
 
 using System;
 using System.Text;
@@ -4812,10 +4812,10 @@ namespace Asv.Mavlink.V2.Common
         public int Serialize(byte[] buffer, int index)
         {
             BitConverter.GetBytes(CustomMode).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes((byte)Type).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)Autopilot).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)BaseMode).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)SystemStatus).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Type;index+=1;
+            buffer[index] = (byte)Autopilot;index+=1;
+            buffer[index] = (byte)BaseMode;index+=1;
+            buffer[index] = (byte)SystemStatus;index+=1;
             BitConverter.GetBytes(MavlinkVersion).CopyTo(buffer, index);index+=1;
             return ByteSize;
         }
@@ -5189,8 +5189,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(ControlRequest).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Version).CopyTo(buffer, index);index+=1;
-            Encoding.ASCII.GetBytes(Passkey,0,25,buffer,index);
-            index+=25;
+            Encoding.ASCII.GetBytes(Passkey,0,25,buffer,index);index+=25;
             return ByteSize;
         }
 
@@ -5329,8 +5328,7 @@ namespace Asv.Mavlink.V2.Common
 
         public int Serialize(byte[] buffer, int index)
         {
-            Encoding.ASCII.GetBytes(Key,0,32,buffer,index);
-            index+=32;
+            Encoding.ASCII.GetBytes(Key,0,32,buffer,index);index+=32;
             return ByteSize;
         }
 
@@ -5386,7 +5384,7 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(CustomMode).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)BaseMode).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)BaseMode;index+=1;
             return ByteSize;
         }
 
@@ -5457,8 +5455,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(ParamIndex).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);
-            index+=16;
+            Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);index+=16;
             return ByteSize;
         }
 
@@ -5596,9 +5593,8 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(ParamValue).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(ParamCount).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(ParamIndex).CopyTo(buffer, index);index+=2;
-            Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);
-            index+=16;
-            BitConverter.GetBytes((byte)ParamType).CopyTo(buffer, index);index+=1;
+            Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);index+=16;
+            buffer[index] = (byte)ParamType;index+=1;
             return ByteSize;
         }
 
@@ -5682,9 +5678,8 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(ParamValue).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);
-            index+=16;
-            BitConverter.GetBytes((byte)ParamType).CopyTo(buffer, index);index+=1;
+            Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);index+=16;
+            buffer[index] = (byte)ParamType;index+=1;
             return ByteSize;
         }
 
@@ -5751,7 +5746,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class GpsRawIntPayload : IPayload
     {
-        public byte ByteSize => 30;
+        public byte ByteSize => 50;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -5783,7 +5778,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Epv).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Vel).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Cog).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes((byte)FixType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)FixType;index+=1;
             BitConverter.GetBytes(SatellitesVisible).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(AltEllipsoid).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(HAcc).CopyTo(buffer, index);index+=4;
@@ -5948,23 +5943,23 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(SatellitesVisible).CopyTo(buffer, index);index+=1;
             for(var i=0;i<20;i++)
             {
-                BitConverter.GetBytes(SatellitePrn[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)SatellitePrn[i];index+=1;
             }
             for(var i=0;i<20;i++)
             {
-                BitConverter.GetBytes(SatelliteUsed[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)SatelliteUsed[i];index+=1;
             }
             for(var i=0;i<20;i++)
             {
-                BitConverter.GetBytes(SatelliteElevation[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)SatelliteElevation[i];index+=1;
             }
             for(var i=0;i<20;i++)
             {
-                BitConverter.GetBytes(SatelliteAzimuth[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)SatelliteAzimuth[i];index+=1;
             }
             for(var i=0;i<20;i++)
             {
-                BitConverter.GetBytes(SatelliteSnr[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)SatelliteSnr[i];index+=1;
             }
             return ByteSize;
         }
@@ -7134,7 +7129,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ServoOutputRawPayload : IPayload
     {
-        public byte ByteSize => 21;
+        public byte ByteSize => 37;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -7322,7 +7317,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionRequestPartialListPayload : IPayload
     {
-        public byte ByteSize => 6;
+        public byte ByteSize => 7;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -7340,7 +7335,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(EndIndex).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)MissionType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)MissionType;index+=1;
             return ByteSize;
         }
 
@@ -7406,7 +7401,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionWritePartialListPayload : IPayload
     {
-        public byte ByteSize => 6;
+        public byte ByteSize => 7;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -7424,7 +7419,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(EndIndex).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)MissionType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)MissionType;index+=1;
             return ByteSize;
         }
 
@@ -7491,7 +7486,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionItemPayload : IPayload
     {
-        public byte ByteSize => 37;
+        public byte ByteSize => 38;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -7526,10 +7521,10 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes((ushort)Command).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)Frame).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Frame;index+=1;
             BitConverter.GetBytes(Current).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Autocontinue).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)MissionType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)MissionType;index+=1;
             return ByteSize;
         }
 
@@ -7655,7 +7650,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionRequestPayload : IPayload
     {
-        public byte ByteSize => 4;
+        public byte ByteSize => 5;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -7671,7 +7666,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Seq).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)MissionType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)MissionType;index+=1;
             return ByteSize;
         }
 
@@ -7851,7 +7846,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionRequestListPayload : IPayload
     {
-        public byte ByteSize => 2;
+        public byte ByteSize => 3;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -7865,7 +7860,7 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)MissionType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)MissionType;index+=1;
             return ByteSize;
         }
 
@@ -7919,7 +7914,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionCountPayload : IPayload
     {
-        public byte ByteSize => 4;
+        public byte ByteSize => 5;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -7935,7 +7930,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Count).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)MissionType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)MissionType;index+=1;
             return ByteSize;
         }
 
@@ -7995,7 +7990,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionClearAllPayload : IPayload
     {
-        public byte ByteSize => 2;
+        public byte ByteSize => 3;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -8009,7 +8004,7 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)MissionType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)MissionType;index+=1;
             return ByteSize;
         }
 
@@ -8115,7 +8110,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionAckPayload : IPayload
     {
-        public byte ByteSize => 3;
+        public byte ByteSize => 4;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -8130,8 +8125,8 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)Type).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)MissionType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Type;index+=1;
+            buffer[index] = (byte)MissionType;index+=1;
             return ByteSize;
         }
 
@@ -8191,7 +8186,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SetGpsGlobalOriginPayload : IPayload
     {
-        public byte ByteSize => 13;
+        public byte ByteSize => 21;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -8275,7 +8270,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class GpsGlobalOriginPayload : IPayload
     {
-        public byte ByteSize => 12;
+        public byte ByteSize => 20;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -8377,8 +8372,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(ParamIndex).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);
-            index+=16;
+            Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);index+=16;
             BitConverter.GetBytes(ParameterRcChannelIndex).CopyTo(buffer, index);index+=1;
             return ByteSize;
         }
@@ -8469,7 +8463,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionRequestIntPayload : IPayload
     {
-        public byte ByteSize => 4;
+        public byte ByteSize => 5;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -8485,7 +8479,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Seq).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)MissionType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)MissionType;index+=1;
             return ByteSize;
         }
 
@@ -8571,7 +8565,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(P2z).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)Frame).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Frame;index+=1;
             return ByteSize;
         }
 
@@ -8683,7 +8677,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(P2x).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(P2y).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(P2z).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes((byte)Frame).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Frame;index+=1;
             return ByteSize;
         }
 
@@ -9007,7 +9001,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 BitConverter.GetBytes(Covariance[i]).CopyTo(buffer, index);index+=4;
             }
-            BitConverter.GetBytes((byte)EstimatorType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)EstimatorType;index+=1;
             return ByteSize;
         }
 
@@ -9141,7 +9135,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 BitConverter.GetBytes(Covariance[i]).CopyTo(buffer, index);index+=4;
             }
-            BitConverter.GetBytes((byte)EstimatorType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)EstimatorType;index+=1;
             return ByteSize;
         }
 
@@ -9705,7 +9699,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class RcChannelsOverridePayload : IPayload
     {
-        public byte ByteSize => 18;
+        public byte ByteSize => 38;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -9910,7 +9904,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionItemIntPayload : IPayload
     {
-        public byte ByteSize => 37;
+        public byte ByteSize => 38;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -9945,10 +9939,10 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes((ushort)Command).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)Frame).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Frame;index+=1;
             BitConverter.GetBytes(Current).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Autocontinue).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)MissionType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)MissionType;index+=1;
             return ByteSize;
         }
 
@@ -10198,7 +10192,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes((ushort)Command).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)Frame).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Frame;index+=1;
             BitConverter.GetBytes(Current).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Autocontinue).CopyTo(buffer, index);index+=1;
             return ByteSize;
@@ -10446,7 +10440,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class CommandAckPayload : IPayload
     {
-        public byte ByteSize => 3;
+        public byte ByteSize => 10;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -10462,7 +10456,7 @@ namespace Asv.Mavlink.V2.Common
         public int Serialize(byte[] buffer, int index)
         {
             BitConverter.GetBytes((ushort)Command).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes((byte)Result).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Result;index+=1;
             BitConverter.GetBytes(Progress).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(ResultParam2).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
@@ -10906,7 +10900,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TypeMask).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)CoordinateFrame).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)CoordinateFrame;index+=1;
             return ByteSize;
         }
 
@@ -11074,7 +11068,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Yaw).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(YawRate).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TypeMask).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes((byte)CoordinateFrame).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)CoordinateFrame;index+=1;
             return ByteSize;
         }
 
@@ -11234,7 +11228,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TypeMask).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)CoordinateFrame).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)CoordinateFrame;index+=1;
             return ByteSize;
         }
 
@@ -11402,7 +11396,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Yaw).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(YawRate).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TypeMask).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes((byte)CoordinateFrame).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)CoordinateFrame;index+=1;
             return ByteSize;
         }
 
@@ -11823,7 +11817,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Aux2).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Aux3).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Aux4).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes((byte)Mode).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Mode;index+=1;
             BitConverter.GetBytes(NavMode).CopyTo(buffer, index);index+=1;
             return ByteSize;
         }
@@ -12104,7 +12098,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 BitConverter.GetBytes(Controls[i]).CopyTo(buffer, index);index+=4;
             }
-            BitConverter.GetBytes((byte)Mode).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Mode;index+=1;
             return ByteSize;
         }
 
@@ -12164,7 +12158,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class OpticalFlowPayload : IPayload
     {
-        public byte ByteSize => 26;
+        public byte ByteSize => 34;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -12287,7 +12281,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class GlobalVisionPositionEstimatePayload : IPayload
     {
-        public byte ByteSize => 32;
+        public byte ByteSize => 116;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -12400,7 +12394,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class VisionPositionEstimatePayload : IPayload
     {
-        public byte ByteSize => 32;
+        public byte ByteSize => 116;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -12513,7 +12507,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class VisionSpeedEstimatePayload : IPayload
     {
-        public byte ByteSize => 20;
+        public byte ByteSize => 56;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -12602,7 +12596,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ViconPositionEstimatePayload : IPayload
     {
-        public byte ByteSize => 32;
+        public byte ByteSize => 116;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -13517,7 +13511,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             for(var i=0;i<251;i++)
             {
-                BitConverter.GetBytes(Payload[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)Payload[i];index+=1;
             }
             return ByteSize;
         }
@@ -14554,7 +14548,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Count).CopyTo(buffer, index);index+=1;
             for(var i=0;i<90;i++)
             {
-                BitConverter.GetBytes(Data[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)Data[i];index+=1;
             }
             return ByteSize;
         }
@@ -14756,7 +14750,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Len).CopyTo(buffer, index);index+=1;
             for(var i=0;i<110;i++)
             {
-                BitConverter.GetBytes(Data[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)Data[i];index+=1;
             }
             return ByteSize;
         }
@@ -14847,7 +14841,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Epv).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Vel).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Cog).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes((byte)FixType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)FixType;index+=1;
             BitConverter.GetBytes(SatellitesVisible).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(DgpsNumch).CopyTo(buffer, index);index+=1;
             return ByteSize;
@@ -15045,12 +15039,12 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(Baudrate).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Timeout).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes((byte)Device).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)Flags).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Device;index+=1;
+            buffer[index] = (byte)Flags;index+=1;
             BitConverter.GetBytes(Count).CopyTo(buffer, index);index+=1;
             for(var i=0;i<70;i++)
             {
-                BitConverter.GetBytes(Data[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)Data[i];index+=1;
             }
             return ByteSize;
         }
@@ -15157,7 +15151,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(RtkHealth).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(RtkRate).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Nsats).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)BaselineCoordsType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)BaselineCoordsType;index+=1;
             return ByteSize;
         }
 
@@ -15305,7 +15299,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(RtkHealth).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(RtkRate).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Nsats).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)BaselineCoordsType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)BaselineCoordsType;index+=1;
             return ByteSize;
         }
 
@@ -15562,7 +15556,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Width).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Height).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Packets).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes((byte)Type).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Type;index+=1;
             BitConverter.GetBytes(Payload).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(JpgQuality).CopyTo(buffer, index);index+=1;
             return ByteSize;
@@ -15658,7 +15652,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Seqnr).CopyTo(buffer, index);index+=2;
             for(var i=0;i<253;i++)
             {
-                BitConverter.GetBytes(Data[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)Data[i];index+=1;
             }
             return ByteSize;
         }
@@ -15727,9 +15721,9 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(MinDistance).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(MaxDistance).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(CurrentDistance).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes((byte)Type).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Type;index+=1;
             BitConverter.GetBytes(Id).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)Orientation).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Orientation;index+=1;
             BitConverter.GetBytes(Covariance).CopyTo(buffer, index);index+=1;
             return ByteSize;
         }
@@ -16216,7 +16210,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class AttPosMocapPayload : IPayload
     {
-        public byte ByteSize => 36;
+        public byte ByteSize => 120;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -16608,12 +16602,12 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(UriType).CopyTo(buffer, index);index+=1;
             for(var i=0;i<120;i++)
             {
-                BitConverter.GetBytes(Uri[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)Uri[i];index+=1;
             }
             BitConverter.GetBytes(TransferType).CopyTo(buffer, index);index+=1;
             for(var i=0;i<120;i++)
             {
-                BitConverter.GetBytes(Storage[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)Storage[i];index+=1;
             }
             return ByteSize;
         }
@@ -17116,7 +17110,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class BatteryStatusPayload : IPayload
     {
-        public byte ByteSize => 36;
+        public byte ByteSize => 41;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -17148,11 +17142,11 @@ namespace Asv.Mavlink.V2.Common
             }
             BitConverter.GetBytes(CurrentBattery).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Id).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)BatteryFunction).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)Type).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)BatteryFunction;index+=1;
+            buffer[index] = (byte)Type;index+=1;
             BitConverter.GetBytes(BatteryRemaining).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TimeRemaining).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes((byte)ChargeState).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)ChargeState;index+=1;
             return ByteSize;
         }
 
@@ -17254,7 +17248,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class AutopilotVersionPayload : IPayload
     {
-        public byte ByteSize => 60;
+        public byte ByteSize => 78;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -17297,19 +17291,19 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(ProductId).CopyTo(buffer, index);index+=2;
             for(var i=0;i<8;i++)
             {
-                BitConverter.GetBytes(FlightCustomVersion[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)FlightCustomVersion[i];index+=1;
             }
             for(var i=0;i<8;i++)
             {
-                BitConverter.GetBytes(MiddlewareCustomVersion[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)MiddlewareCustomVersion[i];index+=1;
             }
             for(var i=0;i<8;i++)
             {
-                BitConverter.GetBytes(OsCustomVersion[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)OsCustomVersion[i];index+=1;
             }
             for(var i=0;i<18;i++)
             {
-                BitConverter.GetBytes(Uid2[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)Uid2[i];index+=1;
             }
             return ByteSize;
         }
@@ -17418,7 +17412,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class LandingTargetPayload : IPayload
     {
-        public byte ByteSize => 30;
+        public byte ByteSize => 60;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -17451,7 +17445,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(SizeX).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(SizeY).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetNum).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)Frame).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Frame;index+=1;
             BitConverter.GetBytes(X).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Y).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Z).CopyTo(buffer, index);index+=4;
@@ -17459,7 +17453,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 BitConverter.GetBytes(Q[i]).CopyTo(buffer, index);index+=4;
             }
-            BitConverter.GetBytes((byte)Type).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Type;index+=1;
             BitConverter.GetBytes(PositionValid).CopyTo(buffer, index);index+=1;
             return ByteSize;
         }
@@ -18026,7 +18020,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Len).CopyTo(buffer, index);index+=1;
             for(var i=0;i<180;i++)
             {
-                BitConverter.GetBytes(Data[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)Data[i];index+=1;
             }
             return ByteSize;
         }
@@ -18124,15 +18118,15 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(AltitudeAmsl).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(AltitudeSp).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(WpDistance).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes((byte)BaseMode).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)LandedState).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)BaseMode;index+=1;
+            buffer[index] = (byte)LandedState;index+=1;
             BitConverter.GetBytes(Throttle).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Airspeed).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(AirspeedSp).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Groundspeed).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(ClimbRate).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(GpsNsat).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)GpsFixType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)GpsFixType;index+=1;
             BitConverter.GetBytes(BatteryRemaining).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Temperature).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TemperatureAir).CopyTo(buffer, index);index+=1;
@@ -18362,8 +18356,8 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetDistance).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(WpNum).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes((ushort)FailureFlags).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes((byte)Type).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)Autopilot).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Type;index+=1;
+            buffer[index] = (byte)Autopilot;index+=1;
             BitConverter.GetBytes(Heading).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetHeading).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Throttle).CopyTo(buffer, index);index+=1;
@@ -18677,7 +18671,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class HomePositionPayload : IPayload
     {
-        public byte ByteSize => 52;
+        public byte ByteSize => 60;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -18815,7 +18809,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SetHomePositionPayload : IPayload
     {
-        public byte ByteSize => 53;
+        public byte ByteSize => 61;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -19032,8 +19026,8 @@ namespace Asv.Mavlink.V2.Common
 
         public int Serialize(byte[] buffer, int index)
         {
-            BitConverter.GetBytes((byte)VtolState).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)LandedState).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)VtolState;index+=1;
+            buffer[index] = (byte)LandedState;index+=1;
             return ByteSize;
         }
 
@@ -19113,10 +19107,9 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(VerVelocity).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes((ushort)Flags).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Squawk).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes((byte)AltitudeType).CopyTo(buffer, index);index+=1;
-            Encoding.ASCII.GetBytes(Callsign,0,9,buffer,index);
-            index+=9;
-            BitConverter.GetBytes((byte)EmitterType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)AltitudeType;index+=1;
+            Encoding.ASCII.GetBytes(Callsign,0,9,buffer,index);index+=9;
+            buffer[index] = (byte)EmitterType;index+=1;
             BitConverter.GetBytes(Tslc).CopyTo(buffer, index);index+=1;
             return ByteSize;
         }
@@ -19251,9 +19244,9 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TimeToMinimumDelta).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(AltitudeMinimumDelta).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(HorizontalMinimumDelta).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes((byte)Src).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)Action).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)ThreatLevel).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Src;index+=1;
+            buffer[index] = (byte)Action;index+=1;
+            buffer[index] = (byte)ThreatLevel;index+=1;
             return ByteSize;
         }
 
@@ -19354,7 +19347,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             for(var i=0;i<249;i++)
             {
-                BitConverter.GetBytes(Payload[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)Payload[i];index+=1;
             }
             return ByteSize;
         }
@@ -19442,7 +19435,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Type).CopyTo(buffer, index);index+=1;
             for(var i=0;i<32;i++)
             {
-                BitConverter.GetBytes(Value[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)Value[i];index+=1;
             }
             return ByteSize;
         }
@@ -19522,8 +19515,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(X).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Y).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Z).CopyTo(buffer, index);index+=4;
-            Encoding.ASCII.GetBytes(Name,0,10,buffer,index);
-            index+=10;
+            Encoding.ASCII.GetBytes(Name,0,10,buffer,index);index+=10;
             return ByteSize;
         }
 
@@ -19604,8 +19596,7 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(TimeBootMs).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Value).CopyTo(buffer, index);index+=4;
-            Encoding.ASCII.GetBytes(Name,0,10,buffer,index);
-            index+=10;
+            Encoding.ASCII.GetBytes(Name,0,10,buffer,index);index+=10;
             return ByteSize;
         }
 
@@ -19674,8 +19665,7 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(TimeBootMs).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Value).CopyTo(buffer, index);index+=4;
-            Encoding.ASCII.GetBytes(Name,0,10,buffer,index);
-            index+=10;
+            Encoding.ASCII.GetBytes(Name,0,10,buffer,index);index+=10;
             return ByteSize;
         }
 
@@ -19741,9 +19731,8 @@ namespace Asv.Mavlink.V2.Common
 
         public int Serialize(byte[] buffer, int index)
         {
-            BitConverter.GetBytes((byte)Severity).CopyTo(buffer, index);index+=1;
-            Encoding.ASCII.GetBytes(Text,0,50,buffer,index);
-            index+=50;
+            buffer[index] = (byte)Severity;index+=1;
+            Encoding.ASCII.GetBytes(Text,0,50,buffer,index);index+=50;
             return ByteSize;
         }
 
@@ -19880,7 +19869,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             for(var i=0;i<32;i++)
             {
-                BitConverter.GetBytes(SecretKey[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)SecretKey[i];index+=1;
             }
             return ByteSize;
         }
@@ -20009,7 +19998,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class PlayTunePayload : IPayload
     {
-        public byte ByteSize => 32;
+        public byte ByteSize => 232;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -20026,10 +20015,8 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            Encoding.ASCII.GetBytes(Tune,0,30,buffer,index);
-            index+=30;
-            Encoding.ASCII.GetBytes(Tune2,0,200,buffer,index);
-            index+=200;
+            Encoding.ASCII.GetBytes(Tune,0,30,buffer,index);index+=30;
+            Encoding.ASCII.GetBytes(Tune2,0,200,buffer,index);index+=200;
             return ByteSize;
         }
 
@@ -20129,15 +20116,14 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(CamDefinitionVersion).CopyTo(buffer, index);index+=2;
             for(var i=0;i<32;i++)
             {
-                BitConverter.GetBytes(VendorName[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)VendorName[i];index+=1;
             }
             for(var i=0;i<32;i++)
             {
-                BitConverter.GetBytes(ModelName[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)ModelName[i];index+=1;
             }
             BitConverter.GetBytes(LensId).CopyTo(buffer, index);index+=1;
-            Encoding.ASCII.GetBytes(CamDefinitionUri,0,140,buffer,index);
-            index+=140;
+            Encoding.ASCII.GetBytes(CamDefinitionUri,0,140,buffer,index);index+=140;
             return ByteSize;
         }
 
@@ -20263,7 +20249,7 @@ namespace Asv.Mavlink.V2.Common
         public int Serialize(byte[] buffer, int index)
         {
             BitConverter.GetBytes(TimeBootMs).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes((byte)ModeId).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)ModeId;index+=1;
             return ByteSize;
         }
 
@@ -20556,8 +20542,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(ImageIndex).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(CameraId).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(CaptureResult).CopyTo(buffer, index);index+=1;
-            Encoding.ASCII.GetBytes(FileUrl,0,205,buffer,index);
-            index+=205;
+            Encoding.ASCII.GetBytes(FileUrl,0,205,buffer,index);index+=205;
             return ByteSize;
         }
 
@@ -20735,7 +20720,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MountOrientationPayload : IPayload
     {
-        public byte ByteSize => 16;
+        public byte ByteSize => 20;
 
         public int Deserialize(byte[] buffer, int index)
         {
@@ -20844,7 +20829,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(FirstMessageOffset).CopyTo(buffer, index);index+=1;
             for(var i=0;i<249;i++)
             {
-                BitConverter.GetBytes(Data[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)Data[i];index+=1;
             }
             return ByteSize;
         }
@@ -20942,7 +20927,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(FirstMessageOffset).CopyTo(buffer, index);index+=1;
             for(var i=0;i<249;i++)
             {
-                BitConverter.GetBytes(Data[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)Data[i];index+=1;
             }
             return ByteSize;
         }
@@ -21108,8 +21093,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Rotation).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(CameraId).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Status).CopyTo(buffer, index);index+=1;
-            Encoding.ASCII.GetBytes(Uri,0,230,buffer,index);
-            index+=230;
+            Encoding.ASCII.GetBytes(Uri,0,230,buffer,index);index+=230;
             return ByteSize;
         }
 
@@ -21220,8 +21204,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(CameraId).CopyTo(buffer, index);index+=1;
-            Encoding.ASCII.GetBytes(Uri,0,230,buffer,index);
-            index+=230;
+            Encoding.ASCII.GetBytes(Uri,0,230,buffer,index);index+=230;
             return ByteSize;
         }
 
@@ -21324,10 +21307,8 @@ namespace Asv.Mavlink.V2.Common
 
         public int Serialize(byte[] buffer, int index)
         {
-            Encoding.ASCII.GetBytes(Ssid,0,32,buffer,index);
-            index+=32;
-            Encoding.ASCII.GetBytes(Password,0,64,buffer,index);
-            index+=64;
+            Encoding.ASCII.GetBytes(Ssid,0,32,buffer,index);index+=32;
+            Encoding.ASCII.GetBytes(Password,0,64,buffer,index);index+=64;
             return ByteSize;
         }
 
@@ -21400,11 +21381,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(MaxVersion).CopyTo(buffer, index);index+=2;
             for(var i=0;i<8;i++)
             {
-                BitConverter.GetBytes(SpecVersionHash[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)SpecVersionHash[i];index+=1;
             }
             for(var i=0;i<8;i++)
             {
-                BitConverter.GetBytes(LibraryVersionHash[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)LibraryVersionHash[i];index+=1;
             }
             return ByteSize;
         }
@@ -21489,8 +21470,8 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
             BitConverter.GetBytes(UptimeSec).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(VendorSpecificStatusCode).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes((byte)Health).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)Mode).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Health;index+=1;
+            buffer[index] = (byte)Mode;index+=1;
             BitConverter.GetBytes(SubMode).CopyTo(buffer, index);index+=1;
             return ByteSize;
         }
@@ -21588,13 +21569,12 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
             BitConverter.GetBytes(UptimeSec).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(SwVcsCommit).CopyTo(buffer, index);index+=4;
-            Encoding.ASCII.GetBytes(Name,0,80,buffer,index);
-            index+=80;
+            Encoding.ASCII.GetBytes(Name,0,80,buffer,index);index+=80;
             BitConverter.GetBytes(HwVersionMajor).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(HwVersionMinor).CopyTo(buffer, index);index+=1;
             for(var i=0;i<16;i++)
             {
-                BitConverter.GetBytes(HwUniqueId[i]).CopyTo(buffer, index);index+=1;
+                buffer[index] = (byte)HwUniqueId[i];index+=1;
             }
             BitConverter.GetBytes(SwVersionMajor).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(SwVersionMinor).CopyTo(buffer, index);index+=1;
@@ -21704,8 +21684,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(ParamIndex).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);
-            index+=16;
+            Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);index+=16;
             return ByteSize;
         }
 
@@ -21843,11 +21822,9 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(ParamCount).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(ParamIndex).CopyTo(buffer, index);index+=2;
-            Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);
-            index+=16;
-            Encoding.ASCII.GetBytes(ParamValue,0,128,buffer,index);
-            index+=128;
-            BitConverter.GetBytes((byte)ParamType).CopyTo(buffer, index);index+=1;
+            Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);index+=16;
+            Encoding.ASCII.GetBytes(ParamValue,0,128,buffer,index);index+=128;
+            buffer[index] = (byte)ParamType;index+=1;
             return ByteSize;
         }
 
@@ -21931,11 +21908,9 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);
-            index+=16;
-            Encoding.ASCII.GetBytes(ParamValue,0,128,buffer,index);
-            index+=128;
-            BitConverter.GetBytes((byte)ParamType).CopyTo(buffer, index);index+=1;
+            Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);index+=16;
+            Encoding.ASCII.GetBytes(ParamValue,0,128,buffer,index);index+=128;
+            buffer[index] = (byte)ParamType;index+=1;
             return ByteSize;
         }
 
@@ -22016,12 +21991,10 @@ namespace Asv.Mavlink.V2.Common
 
         public int Serialize(byte[] buffer, int index)
         {
-            Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);
-            index+=16;
-            Encoding.ASCII.GetBytes(ParamValue,0,128,buffer,index);
-            index+=128;
-            BitConverter.GetBytes((byte)ParamType).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)ParamResult).CopyTo(buffer, index);index+=1;
+            Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);index+=16;
+            Encoding.ASCII.GetBytes(ParamValue,0,128,buffer,index);index+=128;
+            buffer[index] = (byte)ParamType;index+=1;
+            buffer[index] = (byte)ParamResult;index+=1;
             return ByteSize;
         }
 
@@ -22106,7 +22079,7 @@ namespace Asv.Mavlink.V2.Common
             }
             BitConverter.GetBytes(MinDistance).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(MaxDistance).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes((byte)SensorType).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)SensorType;index+=1;
             BitConverter.GetBytes(Increment).CopyTo(buffer, index);index+=1;
             return ByteSize;
         }
@@ -22234,8 +22207,8 @@ namespace Asv.Mavlink.V2.Common
             {
                 BitConverter.GetBytes(TwistCovariance[i]).CopyTo(buffer, index);index+=4;
             }
-            BitConverter.GetBytes((byte)FrameId).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes((byte)ChildFrameId).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)FrameId;index+=1;
+            buffer[index] = (byte)ChildFrameId;index+=1;
             return ByteSize;
         }
 

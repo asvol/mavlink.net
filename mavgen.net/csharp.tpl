@@ -216,22 +216,41 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
         {%- if field.IsArray -%}
             for(var i=0;i<{{ field.ArrayLength }};i++)
             {
+                {%- case field.Type -%}
+                {%- when 'char' or 'double' or 'float'-%}
+                ERROR => ENUM as 'char' or 'double' or 'float' ???????
+                {%- when 'sbyte' or 'byte' -%}
+                buffer[index] = (byte){{ field.CamelCaseName }}[i];index+={{ field.FieldTypeByteSize }};
+                {%- when 'ulong' or 'long' or 'uint' or 'int' or 'ushort' or 'short' -%}
                 BitConverter.GetBytes(({{ field.Type }}){{ field.CamelCaseName }}[i]).CopyTo(buffer, index);index+={{ field.FieldTypeByteSize }};
+                {%- endcase -%}
             }
         {%- else -%}
+            {%- case field.Type -%}
+            {%- when 'char' or 'double' or 'float'-%}
+            ERROR => ENUM as 'char' or 'double' or 'float' ???????
+            {%- when 'sbyte' or 'byte' -%}
+            buffer[index] = (byte){{ field.CamelCaseName }};index+={{ field.FieldTypeByteSize }};
+            {%- when 'ulong' or 'long' or 'uint' or 'int' or 'ushort' or 'short'  -%}
             BitConverter.GetBytes(({{ field.Type }}){{ field.CamelCaseName }}).CopyTo(buffer, index);index+={{ field.FieldTypeByteSize }};
+            {%- endcase -%}
         {%- endif -%}
     {%- else -%}
         {%- if field.IsArray -%}
-            {%- if field.Type == 'char' -%}
-            Encoding.ASCII.GetBytes({{ field.CamelCaseName }},0,{{ field.ArrayLength }},buffer,index);
-            index+={{ field.ArrayLength }};
-            {%- else -%}
+            {%- case field.Type -%}
+            {%- when 'char' -%}
+            Encoding.ASCII.GetBytes({{ field.CamelCaseName }},0,{{ field.ArrayLength }},buffer,index);index+={{ field.ArrayLength }};
+            {%- when 'sbyte' or 'byte' -%}
+            for(var i=0;i<{{ field.ArrayLength }};i++)
+            {
+                buffer[index] = (byte){{ field.CamelCaseName }}[i];index+={{ field.FieldTypeByteSize }};
+            }
+            {%- when 'double' or 'float' or 'ulong' or 'long' or 'uint' or 'int' or 'ushort' or 'short'  -%}
             for(var i=0;i<{{ field.ArrayLength }};i++)
             {
                 BitConverter.GetBytes({{ field.CamelCaseName }}[i]).CopyTo(buffer, index);index+={{ field.FieldTypeByteSize }};
             }
-            {%- endif -%}
+            {%- endcase -%}
         {%- else -%}
             BitConverter.GetBytes({{ field.CamelCaseName }}).CopyTo(buffer, index);index+={{ field.FieldTypeByteSize }};
         {%- endif -%}
