@@ -1,6 +1,4 @@
-﻿using System.Windows.Forms;
-
-namespace Asv.Mavlink
+﻿namespace Asv.Mavlink
 {
     public class Signature : ISignature
     {

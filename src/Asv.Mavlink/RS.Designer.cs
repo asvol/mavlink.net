@@ -106,6 +106,15 @@ namespace Asv.Mavlink {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connection string &apos;{0}&apos; is invalid.
+        /// </summary>
+        internal static string RemoteStreamFactory_CreateStream_Connection_string_is_invalid {
+            get {
+                return ResourceManager.GetString("RemoteStreamFactory_CreateStream_Connection_string_is_invalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unknown STX value. Need {0}. Get {1}.
         /// </summary>
         internal static string WheelKnownConstant_VerifyStx_Unknown_STX_value {
