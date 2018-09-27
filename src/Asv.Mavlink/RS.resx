@@ -107,9 +107,6 @@
     <data name="WheelKnownConstant_VerifyStx_Unknown_STX_value" xml:space="preserve">
     <value>Unknown STX value. Need {0}. Get {1}</value>
   </data>
-    <data name="PacketV2_Deserialize_Packet_payload_length_error" xml:space="preserve">
-    <value>Packet payload length error: want {0}, got {1}</value>
-  </data>
     <data name="PacketV2_Deserialize_Error_message_id_type" xml:space="preserve">
     <value>Error message id type. Want {0}, Got {1}</value>
   </data>

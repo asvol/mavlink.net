@@ -20,7 +20,7 @@
         public const int PacketV2MaxSize = 279;
 
         /// <summary>
-        /// Packet frame byte size without Payload and CRC  Signature
+        /// Packet frame byte size without Payload and Signature
         /// </summary>
         public const int PacketV2FrameSize = 13;
         public const int PaylodStartIndexInFrame = PacketV2FrameSize - /*STX*/1 - 2 /*CRC*/ ;

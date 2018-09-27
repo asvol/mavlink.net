@@ -4,9 +4,8 @@ using System.Threading.Tasks;
 
 namespace Asv.Mavlink
 {
-    public interface IRemoteStream : IObservable<byte[]>, IDisposable
+    public interface IRemoteStream : IObservable<byte[]>,IObserver<byte[]>, IDisposable
     {
         Task Start(CancellationToken cancel);
-        Task Send(byte[] buffer, int count, CancellationToken cancel);
     }
 }

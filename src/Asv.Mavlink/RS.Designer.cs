@@ -88,15 +88,6 @@ namespace Asv.Mavlink {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Packet payload length error: want {0}, got {1}.
-        /// </summary>
-        internal static string PacketV2_Deserialize_Packet_payload_length_error {
-            get {
-                return ResourceManager.GetString("PacketV2_Deserialize_Packet_payload_length_error", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Bad X25Crc: want {0}, got {1}.
         /// </summary>
         internal static string PacketV2Helper_VerifyCrc_Bad_X25Crc {

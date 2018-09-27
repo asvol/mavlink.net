@@ -58,9 +58,23 @@ namespace Asv.Mavlink
             _dataSubject.OnNext(data);
         }
 
-        public Task Send(byte[] buffer, int count, CancellationToken cancel)
+
+        public void OnNext(byte[] value)
         {
-            return _serial.BaseStream.WriteAsync(buffer, 0, count,cancel);
+            _taskFactory.StartNew(() =>
+            {
+                _serial.BaseStream.Write(value, 0, value.Length);
+            });
+        }
+
+        public void OnError(Exception error)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnCompleted()
+        {
+            Dispose();
         }
     }
 }

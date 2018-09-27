@@ -1,6 +1,6 @@
 ﻿namespace Asv.Mavlink
 {
-    public interface IPacket<out TPayload> : ISerializable
+    public interface IPacket<out TPayload>: ISerializable
         where TPayload:IPayload
     {
         /// <summary>
@@ -27,10 +27,5 @@
         /// Message payload
         /// </summary>
         TPayload Payload { get; }
-        /// <summary>
-        /// Messsge size in bytes
-        /// </summary>
-        int ByteSize { get; }
-        
     }
 }

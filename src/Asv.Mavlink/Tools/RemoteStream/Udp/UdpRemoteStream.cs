@@ -24,8 +24,12 @@ namespace Asv.Mavlink
             while (!_cancel.IsCancellationRequested)
             {
                 var remoteEp = new IPEndPoint(IPAddress.Any,0);
-                Interlocked.CompareExchange(ref _sendEndpoint, remoteEp, _sendEndpoint);
                 var data = _client.Receive(ref remoteEp);
+                if (_sendEndpoint == null)
+                {
+                    _client.Connect(remoteEp);
+                    _sendEndpoint = remoteEp;
+                }
                 _dataSubject.OnNext(data);
             }
         }
@@ -42,13 +46,24 @@ namespace Asv.Mavlink
 
         public Task Start(CancellationToken cancel)
         {
-            Task.Factory.StartNew(AsyncRead, _cancel.Token);
+            Task.Factory.StartNew(AsyncRead, _cancel.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             return Task.CompletedTask;
         }
 
-        public Task Send(byte[] buffer, int count, CancellationToken cancel)
+        public void OnNext(byte[] value)
         {
-            return _sendEndpoint == null ? Task.FromResult(count) : _client.SendAsync(buffer, count, _sendEndpoint);
+            if (_sendEndpoint == null) return;
+            _client.Send(value, value.Length);
+        }
+
+        public void OnError(Exception error)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnCompleted()
+        {
+            Dispose();
         }
     }
 }
