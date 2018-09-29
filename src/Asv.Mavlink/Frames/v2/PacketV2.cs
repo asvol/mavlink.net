@@ -1,9 +1,11 @@
-﻿namespace Asv.Mavlink
+﻿using System;
+
+namespace Asv.Mavlink
 {
     public abstract class PacketV2<TPayload> : IPacketV2<TPayload> where TPayload : IPayload
     {
         public byte Magic => PacketV2Helper.MagicMarkerV2;
-        public abstract byte CrcEtra { get; }
+        public abstract byte GetCrcEtra();
         public abstract int MessageId { get; }
         public byte IncompatFlags { get; set; }
         public byte CompatFlags { get; set; }
@@ -14,7 +16,7 @@
         public abstract string Name { get; }
         public ISignature Signature { get; } = new Signature();
 
-        public int MaxByteSize => Payload.MaxByteSize + Signature.MaxByteSize + PacketV2Helper.PacketV2FrameSize;
+        public int GetMaxByteSize() => Payload.GetMaxByteSize() + Signature.GetMaxByteSize() + PacketV2Helper.PacketV2FrameSize;
 
         public int Serialize(byte[] buffer, int offset)
         {
@@ -27,7 +29,7 @@
             PacketV2Helper.SetMessageId(buffer, offset, MessageId);
             var payloadSize = Payload.Serialize(buffer, offset + PacketV2Helper.PaylodStartIndexInFrame);
             PacketV2Helper.SetPayloadSize(buffer, offset, (byte) payloadSize);
-            PacketV2Helper.SetCrc(buffer, offset, CrcEtra);
+            PacketV2Helper.SetCrc(buffer, offset, GetCrcEtra());
             if (Signature.IsPresent)
             {
                 Signature.Serialize(buffer, offset + payloadSize + PacketV2Helper.PacketV2FrameSize);
@@ -48,7 +50,7 @@
             if (messageId != MessageId)
                 throw new MavlinkException(string.Format(RS.PacketV2_Deserialize_Error_message_id_type, MessageId, messageId));
             Payload.Deserialize(buffer, offset + PacketV2Helper.PaylodStartIndexInFrame, payloadSize);
-            PacketV2Helper.VerifyCrc(buffer,offset, CrcEtra);
+            PacketV2Helper.VerifyCrc(buffer,offset, GetCrcEtra());
             if (PacketV2Helper.CheckSignaturePresent(buffer, offset))
             {
                 Signature.Deserialize(buffer, PacketV2Helper.GetSignatureStartIndex(buffer, offset));
@@ -56,6 +58,17 @@
             return payloadSize + Signature.ByteSize + PacketV2Helper.PacketV2FrameSize;
         }
 
-        
+        public override string ToString()
+        {
+            return $"{Name.PadRight(30)}(" +
+                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
+                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
+                   $"SEQ:{Sequence:000}|" +
+                   $"SYS:{SystemId:000}|" +
+                   $"COM:{ComponenId:000}|" +
+                   $"MSG:{MessageId:000000}|" +
+                   $"{Payload.ToString()})";
+        }
+
     }
 }

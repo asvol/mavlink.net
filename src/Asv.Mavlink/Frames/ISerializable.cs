@@ -5,7 +5,7 @@
         /// <summary>
         /// Maximum size in bytes
         /// </summary>
-        int MaxByteSize { get; }
+        int GetMaxByteSize();
         /// <summary>
         /// Serialize object to buffer
         /// </summary>

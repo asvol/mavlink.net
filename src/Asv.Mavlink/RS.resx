@@ -116,4 +116,5 @@
     <data name="RemoteStreamFactory_CreateStream_Connection_string_is_invalid" xml:space="preserve">
     <value>Connection string '{0}' is invalid</value>
   </data>
+    
 </root>

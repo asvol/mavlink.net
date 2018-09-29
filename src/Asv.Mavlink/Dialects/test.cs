@@ -51,24 +51,11 @@ namespace Asv.Mavlink.V2.Test
     {
 	public const int PacketMessageId = 0;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 103;
+        public override byte GetCrcEtra() => 103;
 
         public override TestTypesPayload Payload { get; } = new TestTypesPayload();
 
         public override string Name => "TEST_TYPES";
-        public override string ToString()
-        {
-            var name = "TEST_TYPES".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -76,7 +63,7 @@ namespace Asv.Mavlink.V2.Test
     /// </summary>
     public class TestTypesPayload : IPayload
     {
-        public byte MaxByteSize => 179;
+        public byte GetMaxByteSize() => 179;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -86,7 +73,7 @@ namespace Asv.Mavlink.V2.Test
             U64 = BitConverter.ToUInt64(buffer,index);index+=8;
             S64 = BitConverter.ToInt64(buffer,index);index+=8;
             D = BitConverter.ToDouble(buffer, index);index+=8;
-            arraySize = /*ArrayLength*/3 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/8 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/3 - Math.Max(0,((/*PayloadByteSize*/179 - payloadSize - /*ExtendedFieldsLength*/0)/8 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<3;i++)
             {
                 U64Array[i] = default(ulong);
@@ -208,7 +195,7 @@ namespace Asv.Mavlink.V2.Test
             {
                 buffer[index] = (byte)S8Array[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/179;
         }
 
         /// <summary>

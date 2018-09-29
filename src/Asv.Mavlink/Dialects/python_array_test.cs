@@ -58,24 +58,11 @@ namespace Asv.Mavlink.V2.PythonArrayTest
     {
 	public const int PacketMessageId = 150;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 26;
+        public override byte GetCrcEtra() => 26;
 
         public override ArrayTest0Payload Payload { get; } = new ArrayTest0Payload();
 
         public override string Name => "ARRAY_TEST_0";
-        public override string ToString()
-        {
-            var name = "ARRAY_TEST_0".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -83,14 +70,14 @@ namespace Asv.Mavlink.V2.PythonArrayTest
     /// </summary>
     public class ArrayTest0Payload : IPayload
     {
-        public byte MaxByteSize => 33;
+        public byte GetMaxByteSize() => 33;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
             var index = offset;
             var endIndex = offset + payloadSize;
             var arraySize = 0;
-            arraySize = /*ArrayLength*/4 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/4 - Math.Max(0,((/*PayloadByteSize*/33 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<4;i++)
             {
                 ArU32[i] = default(uint);
@@ -136,7 +123,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
             {
                 buffer[index] = (byte)ArU8[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/33;
         }
 
         /// <summary>
@@ -173,24 +160,11 @@ namespace Asv.Mavlink.V2.PythonArrayTest
     {
 	public const int PacketMessageId = 151;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 72;
+        public override byte GetCrcEtra() => 72;
 
         public override ArrayTest1Payload Payload { get; } = new ArrayTest1Payload();
 
         public override string Name => "ARRAY_TEST_1";
-        public override string ToString()
-        {
-            var name = "ARRAY_TEST_1".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -198,14 +172,14 @@ namespace Asv.Mavlink.V2.PythonArrayTest
     /// </summary>
     public class ArrayTest1Payload : IPayload
     {
-        public byte MaxByteSize => 16;
+        public byte GetMaxByteSize() => 16;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
             var index = offset;
             var endIndex = offset + payloadSize;
             var arraySize = 0;
-            arraySize = /*ArrayLength*/4 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/4 - Math.Max(0,((/*PayloadByteSize*/16 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<4;i++)
             {
                 ArU32[i] = default(uint);
@@ -222,7 +196,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
             {
                 BitConverter.GetBytes(ArU32[i]).CopyTo(buffer, index);index+=4;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/16;
         }
 
         /// <summary>
@@ -239,24 +213,11 @@ namespace Asv.Mavlink.V2.PythonArrayTest
     {
 	public const int PacketMessageId = 153;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 19;
+        public override byte GetCrcEtra() => 19;
 
         public override ArrayTest3Payload Payload { get; } = new ArrayTest3Payload();
 
         public override string Name => "ARRAY_TEST_3";
-        public override string ToString()
-        {
-            var name = "ARRAY_TEST_3".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -264,14 +225,14 @@ namespace Asv.Mavlink.V2.PythonArrayTest
     /// </summary>
     public class ArrayTest3Payload : IPayload
     {
-        public byte MaxByteSize => 17;
+        public byte GetMaxByteSize() => 17;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
             var index = offset;
             var endIndex = offset + payloadSize;
             var arraySize = 0;
-            arraySize = /*ArrayLength*/4 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/4 - Math.Max(0,((/*PayloadByteSize*/17 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<4;i++)
             {
                 ArU32[i] = default(uint);
@@ -290,7 +251,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
                 BitConverter.GetBytes(ArU32[i]).CopyTo(buffer, index);index+=4;
             }
             BitConverter.GetBytes(V).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/17;
         }
 
         /// <summary>
@@ -312,24 +273,11 @@ namespace Asv.Mavlink.V2.PythonArrayTest
     {
 	public const int PacketMessageId = 154;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 89;
+        public override byte GetCrcEtra() => 89;
 
         public override ArrayTest4Payload Payload { get; } = new ArrayTest4Payload();
 
         public override string Name => "ARRAY_TEST_4";
-        public override string ToString()
-        {
-            var name = "ARRAY_TEST_4".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -337,14 +285,14 @@ namespace Asv.Mavlink.V2.PythonArrayTest
     /// </summary>
     public class ArrayTest4Payload : IPayload
     {
-        public byte MaxByteSize => 17;
+        public byte GetMaxByteSize() => 17;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
             var index = offset;
             var endIndex = offset + payloadSize;
             var arraySize = 0;
-            arraySize = /*ArrayLength*/4 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/4 - Math.Max(0,((/*PayloadByteSize*/17 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<4;i++)
             {
                 ArU32[i] = default(uint);
@@ -363,7 +311,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
                 BitConverter.GetBytes(ArU32[i]).CopyTo(buffer, index);index+=4;
             }
             BitConverter.GetBytes(V).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/17;
         }
 
         /// <summary>
@@ -385,24 +333,11 @@ namespace Asv.Mavlink.V2.PythonArrayTest
     {
 	public const int PacketMessageId = 155;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 27;
+        public override byte GetCrcEtra() => 27;
 
         public override ArrayTest5Payload Payload { get; } = new ArrayTest5Payload();
 
         public override string Name => "ARRAY_TEST_5";
-        public override string ToString()
-        {
-            var name = "ARRAY_TEST_5".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -410,14 +345,14 @@ namespace Asv.Mavlink.V2.PythonArrayTest
     /// </summary>
     public class ArrayTest5Payload : IPayload
     {
-        public byte MaxByteSize => 10;
+        public byte GetMaxByteSize() => 10;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
             var index = offset;
             var endIndex = offset + payloadSize;
             var arraySize = 0;
-            arraySize = /*ArrayLength*/5 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/5 - Math.Max(0,((/*PayloadByteSize*/10 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<5;i++)
             {
                 C1[i] = default(char);
@@ -433,7 +368,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
         {
             Encoding.ASCII.GetBytes(C1,0,5,buffer,index);index+=5;
             Encoding.ASCII.GetBytes(C2,0,5,buffer,index);index+=5;
-            return MaxByteSize;
+            return /*PayloadByteSize*/10;
         }
 
         /// <summary>
@@ -455,24 +390,11 @@ namespace Asv.Mavlink.V2.PythonArrayTest
     {
 	public const int PacketMessageId = 156;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 14;
+        public override byte GetCrcEtra() => 14;
 
         public override ArrayTest6Payload Payload { get; } = new ArrayTest6Payload();
 
         public override string Name => "ARRAY_TEST_6";
-        public override string ToString()
-        {
-            var name = "ARRAY_TEST_6".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -480,7 +402,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
     /// </summary>
     public class ArrayTest6Payload : IPayload
     {
-        public byte MaxByteSize => 91;
+        public byte GetMaxByteSize() => 91;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -530,7 +452,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
             {
                 ArI8[i] = (sbyte)buffer[index++];
             }
-            arraySize = /*ArrayLength*/32 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/32 - Math.Max(0,((/*PayloadByteSize*/91 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<32;i++)
             {
                 ArC[i] = default(char);
@@ -577,7 +499,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
                 buffer[index] = (byte)ArI8[i];index+=1;
             }
             Encoding.ASCII.GetBytes(ArC,0,32,buffer,index);index+=32;
-            return MaxByteSize;
+            return /*PayloadByteSize*/91;
         }
 
         /// <summary>
@@ -649,24 +571,11 @@ namespace Asv.Mavlink.V2.PythonArrayTest
     {
 	public const int PacketMessageId = 157;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 187;
+        public override byte GetCrcEtra() => 187;
 
         public override ArrayTest7Payload Payload { get; } = new ArrayTest7Payload();
 
         public override string Name => "ARRAY_TEST_7";
-        public override string ToString()
-        {
-            var name = "ARRAY_TEST_7".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -674,7 +583,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
     /// </summary>
     public class ArrayTest7Payload : IPayload
     {
-        public byte MaxByteSize => 84;
+        public byte GetMaxByteSize() => 84;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -721,7 +630,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
             {
                 ArI8[i] = (sbyte)buffer[index++];
             }
-            arraySize = /*ArrayLength*/32 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/32 - Math.Max(0,((/*PayloadByteSize*/84 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<32;i++)
             {
                 ArC[i] = default(char);
@@ -765,7 +674,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
                 buffer[index] = (byte)ArI8[i];index+=1;
             }
             Encoding.ASCII.GetBytes(ArC,0,32,buffer,index);index+=32;
-            return MaxByteSize;
+            return /*PayloadByteSize*/84;
         }
 
         /// <summary>
@@ -822,24 +731,11 @@ namespace Asv.Mavlink.V2.PythonArrayTest
     {
 	public const int PacketMessageId = 158;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 106;
+        public override byte GetCrcEtra() => 106;
 
         public override ArrayTest8Payload Payload { get; } = new ArrayTest8Payload();
 
         public override string Name => "ARRAY_TEST_8";
-        public override string ToString()
-        {
-            var name = "ARRAY_TEST_8".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -847,14 +743,14 @@ namespace Asv.Mavlink.V2.PythonArrayTest
     /// </summary>
     public class ArrayTest8Payload : IPayload
     {
-        public byte MaxByteSize => 24;
+        public byte GetMaxByteSize() => 24;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
             var index = offset;
             var endIndex = offset + payloadSize;
             var arraySize = 0;
-            arraySize = /*ArrayLength*/2 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/8 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/2 - Math.Max(0,((/*PayloadByteSize*/24 - payloadSize - /*ExtendedFieldsLength*/0)/8 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<2;i++)
             {
                 ArD[i] = default(double);
@@ -882,7 +778,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
             {
                 BitConverter.GetBytes(ArU16[i]).CopyTo(buffer, index);index+=2;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/24;
         }
 
         /// <summary>

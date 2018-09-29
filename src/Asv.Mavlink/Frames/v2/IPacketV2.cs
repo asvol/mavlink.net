@@ -6,7 +6,7 @@
         /// <summary>
         /// CrcEtra
         /// </summary>
-        byte CrcEtra { get; }
+        byte GetCrcEtra();
         /// <summary>
         /// flags that must be understood
         /// </summary>

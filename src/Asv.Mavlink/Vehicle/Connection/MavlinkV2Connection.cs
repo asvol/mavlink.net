@@ -34,7 +34,7 @@ namespace Asv.Mavlink
 
         public Task Send(IPacketV2<IPayload> packet, CancellationToken cancel)
         {
-            var buffer = new byte[packet.MaxByteSize];
+            var buffer = new byte[packet.GetMaxByteSize()];
             var size = packet.Serialize(buffer, 0);
             return Port.Send(buffer,size, cancel);
         }

@@ -39,7 +39,7 @@
             return ByteSize;
         }
 
-        public int MaxByteSize => PacketV2Helper.SignatureByteSize;
+        public int GetMaxByteSize() => PacketV2Helper.SignatureByteSize;
 
         public int Serialize(byte[] buffer, int offset)
         {

@@ -34,7 +34,12 @@ namespace Asv.Mavlink
 
         public IDisposable Subscribe(IObserver<TValue> observer)
         {
-            return _subject.DistinctUntilChanged().Subscribe(observer);
+            return _subject.Subscribe(observer);
+        }
+
+        public override string ToString()
+        {
+            return Value?.ToString() ?? string.Empty;
         }
     }
 }

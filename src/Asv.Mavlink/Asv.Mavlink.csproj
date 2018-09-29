@@ -74,6 +74,10 @@
     <Compile Include="Dialects\python_array_test.cs" />
     <Compile Include="Dialects\test.cs" />
     <Compile Include="Frames\ISerializable.cs" />
+    <Compile Include="Tools\GeoMath\Extension.cs" />
+    <Compile Include="Tools\GeoMath\GeoMath.cs" />
+    <Compile Include="Tools\GeoMath\GeoPoint.cs" />
+    <Compile Include="Tools\StringExtensions.cs" />
     <Compile Include="VehiclePx4\VehiclePx4.cs" />
     <Compile Include="Vehicle\Connection\IMavlinkV2Connection.cs" />
     <Compile Include="Vehicle\Port\IPort.cs" />

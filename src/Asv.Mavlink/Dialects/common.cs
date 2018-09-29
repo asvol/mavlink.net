@@ -195,8 +195,7 @@ namespace Asv.Mavlink.V2.Common
             src.Register(()=>new ParamExtAckPacket());
             src.Register(()=>new ObstacleDistancePacket());
             src.Register(()=>new OdometryPacket());
-            src.Register(()=>new TrajectoryRepresentationWaypointsPacket());
-            src.Register(()=>new TrajectoryRepresentationBezierPacket());
+            src.Register(()=>new TrajectoryPacket());
         }
     }
 
@@ -1181,11 +1180,6 @@ namespace Asv.Mavlink.V2.Common
         /// MAV_SYS_STATUS_SENSOR_PROXIMITY
         /// </summary>
         MavSysStatusSensorProximity = 67108864,
-        /// <summary>
-        /// 0x8000000 Satellite Communication 
-        /// MAV_SYS_STATUS_SENSOR_SATCOM
-        /// </summary>
-        MavSysStatusSensorSatcom = 134217728,
     }
 
     /// <summary>
@@ -1660,20 +1654,20 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdDoFollowReposition = 33,
         /// <summary>
-        /// Start orbiting on the circumference of a circle defined by the parameters. Setting any value NaN results in using defaults.
+        /// WIP: Start orbiting on the circumference of a circle defined by the parameters. Setting any value NaN results in using defaults.
         /// Param 1 - Radius of the circle in meters. positive: Orbit clockwise. negative: Orbit counter-clockwise. 
         /// Param 2 - Velocity tangential in m/s. NaN: Vehicle configuration default.
-        /// Param 3 - Yaw behavior of the vehicle. 0: vehicle front points to the center (default). 1: Hold last heading. 2: Leave yaw uncontrolled.
+        /// Param 3 - Yaw behaviour of the vehicle. 0: vehicle front points to the center (default). 1: Hold last heading. 2: Leave yaw uncontrolled.
         /// Param 4 - Reserved (e.g. for dynamic center beacon options)
-        /// Param 5 - Center point latitude (if no MAV_FRAME specified) / X coordinate according to MAV_FRAME. NaN: Use current vehicle position or current center if already orbiting.
-        /// Param 6 - Center point longitude (if no MAV_FRAME specified) / Y coordinate according to MAV_FRAME. NaN: Use current vehicle position or current center if already orbiting.
-        /// Param 7 - Center point altitude (AMSL) (if no MAV_FRAME specified) / Z coordinate according to MAV_FRAME. NaN: Use current vehicle position or current center if already orbiting.
+        /// Param 5 - Center point latitude / X coordinate. NaN: Use current vehicle position or current center if already orbiting.
+        /// Param 6 - Center point longitude / Y coordinate.
+        /// Param 7 - Center point altitude / Z coordinate.
         /// MAV_CMD_DO_ORBIT
         /// </summary>
         MavCmdDoOrbit = 34,
         /// <summary>
-        /// Sets the region of interest (ROI) for a sensor set or the vehicle itself. This can then be used by the vehicles control system to control the vehicle attitude and the attitude of various sensors such as cameras.
-        /// Param 1 - Region of interest mode. (see MAV_ROI enum)
+        /// THIS INTERFACE IS DEPRECATED AS OF JANUARY 2018. Please use MAV_CMD_DO_SET_ROI_* messages instead. Sets the region of interest (ROI) for a sensor set or the vehicle itself. This can then be used by the vehicles control system to control the vehicle attitude and the attitude of various sensors such as cameras.
+        /// Param 1 - Region of intereset mode. (see MAV_ROI enum)
         /// Param 2 - Waypoint index/ target ID. (see MAV_ROI enum)
         /// Param 3 - ROI index (allows a vehicle to manage multiple ROI's)
         /// Param 4 - Empty
@@ -1912,7 +1906,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdDoSetRelay = 181,
         /// <summary>
-        /// Cycle a relay on and off for a desired number of cycles with a desired period.
+        /// Cycle a relay on and off for a desired number of cyles with a desired period.
         /// Param 1 - Relay number
         /// Param 2 - Cycle count
         /// Param 3 - Cycle time (seconds, decimal)
@@ -1996,7 +1990,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdDoRallyLand = 190,
         /// <summary>
-        /// Mission command to safely abort an autonomous landing.
+        /// Mission command to safely abort an autonmous landing.
         /// Param 1 - Altitude (meters)
         /// Param 2 - Empty
         /// Param 3 - Empty
@@ -2092,8 +2086,8 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdDoControlVideo = 200,
         /// <summary>
-        /// Sets the region of interest (ROI) for a sensor set or the vehicle itself. This can then be used by the vehicles control system to control the vehicle attitude and the attitude of various sensors such as cameras.
-        /// Param 1 - Region of interest mode. (see MAV_ROI enum)
+        /// THIS INTERFACE IS DEPRECATED AS OF JANUARY 2018. Please use MAV_CMD_DO_SET_ROI_* messages instead. Sets the region of interest (ROI) for a sensor set or the vehicle itself. This can then be used by the vehicles control system to control the vehicle attitude and the attitude of various sensors such as cameras.
+        /// Param 1 - Region of intereset mode. (see MAV_ROI enum)
         /// Param 2 - Waypoint index/ target ID. (see MAV_ROI enum)
         /// Param 3 - ROI index (allows a vehicle to manage multiple ROI's)
         /// Param 4 - Empty
@@ -2133,9 +2127,9 @@ namespace Asv.Mavlink.V2.Common
         /// Param 2 - stabilize roll? (1 = yes, 0 = no)
         /// Param 3 - stabilize pitch? (1 = yes, 0 = no)
         /// Param 4 - stabilize yaw? (1 = yes, 0 = no)
-        /// Param 5 - roll input (0 = angle body frame, 1 = angular rate, 2 = angle absolute frame)
-        /// Param 6 - pitch input (0 = angle body frame, 1 = angular rate, 2 = angle absolute frame)
-        /// Param 7 - yaw input (0 = angle body frame, 1 = angular rate, 2 = angle absolute frame)
+        /// Param 5 - roll input (0 = angle, 1 = angular rate)
+        /// Param 6 - pitch input (0 = angle, 1 = angular rate)
+        /// Param 7 - yaw input (0 = angle, 1 = angular rate)
         /// MAV_CMD_DO_MOUNT_CONFIGURE
         /// </summary>
         MavCmdDoMountConfigure = 204,
@@ -2152,7 +2146,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdDoMountControl = 205,
         /// <summary>
-        /// Mission command to set camera trigger distance for this flight. The camera is triggered each time this distance is exceeded. This command can also be used to set the shutter integration time for the camera.
+        /// Mission command to set camera trigger distance for this flight. The camera is trigerred each time this distance is exceeded. This command can also be used to set the shutter integration time for the camera.
         /// Param 1 - Camera trigger distance (meters). 0 to stop triggering.
         /// Param 2 - Camera shutter integration time (milliseconds). -1 or 0 to ignore
         /// Param 3 - Trigger camera once immediately. (0 = no trigger, 1 = trigger)
@@ -2262,9 +2256,9 @@ namespace Asv.Mavlink.V2.Common
         /// <summary>
         /// set limits for external control
         /// Param 1 - timeout - maximum time (in seconds) that external controller will be allowed to control vehicle. 0 means no timeout
-        /// Param 2 - Absolute altitude (AMSL) min, in meters - if vehicle moves below this alt, the command will be aborted and the mission will continue. 0 means no lower altitude limit
-        /// Param 3 - Absolute altitude (AMSL) max, in meters - if vehicle moves above this alt, the command will be aborted and the mission will continue. 0 means no upper altitude limit
-        /// Param 4 - Horizontal move limit (AMSL), in meters - if vehicle moves more than this distance from its location at the moment the command was executed, the command will be aborted and the mission will continue. 0 means no horizontal altitude limit
+        /// Param 2 - absolute altitude min (in meters, AMSL) - if vehicle moves below this alt, the command will be aborted and the mission will continue.  0 means no lower altitude limit
+        /// Param 3 - absolute altitude max (in meters)- if vehicle moves above this alt, the command will be aborted and the mission will continue.  0 means no upper altitude limit
+        /// Param 4 - horizontal move limit (in meters, AMSL) - if vehicle moves more than this distance from it's location at the moment the command was executed, the command will be aborted and the mission will continue. 0 means no horizontal altitude limit
         /// Param 5 - Empty
         /// Param 6 - Empty
         /// Param 7 - Empty
@@ -2284,19 +2278,6 @@ namespace Asv.Mavlink.V2.Common
         /// MAV_CMD_DO_ENGINE_CONTROL
         /// </summary>
         MavCmdDoEngineControl = 223,
-        /// <summary>
-        /// Set the mission item with sequence number seq as current item. This means that the MAV will continue to this mission item on the shortest path (not following the mission items in-between).
-        /// Param 1 - Mission sequence value to set
-        /// Param 2 - Empty
-        /// Param 3 - Empty
-        /// Param 4 - Empty
-        /// Param 5 - Empty
-        /// Param 5 - Empty
-        /// Param 6 - Empty
-        /// Param 7 - Empty
-        /// MAV_CMD_DO_SET_MISSION_CURRENT
-        /// </summary>
-        MavCmdDoSetMissionCurrent = 224,
         /// <summary>
         /// NOP - This command is only used to mark the upper limit of the DO commands in the enumeration
         /// Param 1 - Empty
@@ -2455,7 +2436,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdRequestCameraSettings = 522,
         /// <summary>
-        /// Request storage information (STORAGE_INFORMATION). Use the command's target_component to target a specific component's storage.
+        /// WIP: Request storage information (STORAGE_INFORMATION). Use the command's target_component to target a specific component's storage.
         /// Param 1 - Storage ID (0 for all, 1 for first, 2 for second, etc.)
         /// Param 2 - 0: No Action 1: Request storage information
         /// Param 3 - Reserved (all remaining params)
@@ -2463,7 +2444,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdRequestStorageInformation = 525,
         /// <summary>
-        /// Format a storage medium. Once format is complete, a STORAGE_INFORMATION message is sent. Use the command's target_component to target a specific component's storage.
+        /// WIP: Format a storage medium. Once format is complete, a STORAGE_INFORMATION message is sent. Use the command's target_component to target a specific component's storage.
         /// Param 1 - Storage ID (1 for first, 2 for second, etc.)
         /// Param 2 - 0: No action 1: Format storage
         /// Param 3 - Reserved (all remaining params)
@@ -2478,7 +2459,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdRequestCameraCaptureStatus = 527,
         /// <summary>
-        /// Request flight information (FLIGHT_INFORMATION)
+        /// WIP: Request flight information (FLIGHT_INFORMATION)
         /// Param 1 - 1: Request flight information
         /// Param 2 - Reserved (all remaining params)
         /// MAV_CMD_REQUEST_FLIGHT_INFORMATION
@@ -2517,7 +2498,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdImageStopCapture = 2001,
         /// <summary>
-        /// Re-request a CAMERA_IMAGE_CAPTURE packet. Use NAN for reserved values.
+        /// WIP: Re-request a CAMERA_IMAGE_CAPTURE packet. Use NAN for reserved values.
         /// Param 1 - Sequence number for missing CAMERA_IMAGE_CAPTURE packet
         /// Param 2 - Reserved (all remaining params)
         /// MAV_CMD_REQUEST_CAMERA_IMAGE_CAPTURE
@@ -2547,21 +2528,21 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdVideoStopCapture = 2501,
         /// <summary>
-        /// Start video streaming
+        /// WIP: Start video streaming
         /// Param 1 - Camera ID (0 for all cameras, 1 for first, 2 for second, etc.)
         /// Param 2 - Reserved
         /// MAV_CMD_VIDEO_START_STREAMING
         /// </summary>
         MavCmdVideoStartStreaming = 2502,
         /// <summary>
-        /// Stop the current video streaming
+        /// WIP: Stop the current video streaming
         /// Param 1 - Camera ID (0 for all cameras, 1 for first, 2 for second, etc.)
         /// Param 2 - Reserved
         /// MAV_CMD_VIDEO_STOP_STREAMING
         /// </summary>
         MavCmdVideoStopStreaming = 2503,
         /// <summary>
-        /// Request video stream information (VIDEO_STREAM_INFORMATION)
+        /// WIP: Request video stream information (VIDEO_STREAM_INFORMATION)
         /// Param 1 - Camera ID (0 for all cameras, 1 for first, 2 for second, etc.)
         /// Param 2 - 0: No Action 1: Request video stream information
         /// Param 3 - Reserved (all remaining params)
@@ -2606,7 +2587,7 @@ namespace Asv.Mavlink.V2.Common
         MavCmdAirframeConfiguration = 2520,
         /// <summary>
         /// Request to start/stop transmitting over the high latency telemetry
-        /// Param 1 - Control transmission over high latency telemetry (0: stop, 1: start)
+        /// Param 1 - Control transmittion over high latency telemetry (0: stop, 1: start)
         /// Param 2 - Empty
         /// Param 3 - Empty
         /// Param 4 - Empty
@@ -2632,14 +2613,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdDoVtolTransition = 3000,
         /// <summary>
-        /// Request authorization to arm the vehicle to a external entity, the arm authorizer is responsible to request all data that is needs from the vehicle before authorize or deny the request. If approved the progress of command_ack message should be set with period of time that this authorization is valid in seconds or in case it was denied it should be set with one of the reasons in ARM_AUTH_DENIED_REASON.
-        ///         
-        /// Param 1 - Vehicle system id, this way ground station can request arm authorization on behalf of any vehicle
-        /// MAV_CMD_ARM_AUTHORIZATION_REQUEST
-        /// </summary>
-        MavCmdArmAuthorizationRequest = 3001,
-        /// <summary>
-        /// This command sets the submode to standard guided when vehicle is in guided mode. The vehicle holds position and altitude and the user can input the desired velocities along all three axes.
+        /// This command sets the submode to standard guided when vehicle is in guided mode. The vehicle holds position and altitude and the user can input the desired velocites along all three axes.
         ///                   
         /// MAV_CMD_SET_GUIDED_SUBMODE_STANDARD
         /// </summary>
@@ -2657,7 +2631,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdSetGuidedSubmodeCircle = 4001,
         /// <summary>
-        /// Delay mission state machine until gate has been reached.
+        /// WIP: Delay mission state machine until gate has been reached.
         /// Param 1 - Geometry: 0: orthogonal to path between previous and next waypoint.
         /// Param 2 - Altitude: 0: ignore altitude
         /// Param 3 - Empty
@@ -2668,6 +2642,13 @@ namespace Asv.Mavlink.V2.Common
         /// MAV_CMD_CONDITION_GATE
         /// </summary>
         MavCmdConditionGate = 4501,
+        /// <summary>
+        /// Request authorization to arm the vehicle to a external entity, the arm authorizer is resposible to request all data that is needs from the vehicle before authorize or deny the request. If approved the progress of command_ack message should be set with period of time that this authorization is valid in seconds or in case it was denied it should be set with one of the reasons in ARM_AUTH_DENIED_REASON.
+        ///         
+        /// Param 1 - Vehicle system id, this way ground station can request arm authorization on behalf of any vehicle
+        /// MAV_CMD_ARM_AUTHORIZATION_REQUEST
+        /// </summary>
+        MavCmdArmAuthorizationRequest = 3001,
         /// <summary>
         /// Fence return point. There can only be one fence return point.
         ///         
@@ -2762,17 +2743,17 @@ namespace Asv.Mavlink.V2.Common
         /// Deploy payload on a Lat / Lon / Alt position. This includes the navigation to reach the required release position and velocity.
         /// Param 1 - Operation mode. 0: prepare single payload deploy (overwriting previous requests), but do not execute it. 1: execute payload deploy immediately (rejecting further deploy commands during execution, but allowing abort). 2: add payload deploy to existing deployment list.
         /// Param 2 - Desired approach vector in degrees compass heading (0..360). A negative value indicates the system can define the approach vector at will.
-        /// Param 3 - Desired ground speed at release time. This can be overridden by the airframe in case it needs to meet minimum airspeed. A negative value indicates the system can define the ground speed at will.
+        /// Param 3 - Desired ground speed at release time. This can be overriden by the airframe in case it needs to meet minimum airspeed. A negative value indicates the system can define the ground speed at will.
         /// Param 4 - Minimum altitude clearance to the release position in meters. A negative value indicates the system can define the clearance at will.
         /// Param 5 - Latitude unscaled for MISSION_ITEM or in 1e7 degrees for MISSION_ITEM_INT
         /// Param 6 - Longitude unscaled for MISSION_ITEM or in 1e7 degrees for MISSION_ITEM_INT
-        /// Param 7 - Altitude (AMSL), in meters
+        /// Param 7 - Altitude, in meters AMSL
         /// MAV_CMD_PAYLOAD_PREPARE_DEPLOY
         /// </summary>
         MavCmdPayloadPrepareDeploy = 30001,
         /// <summary>
         /// Control the payload deployment.
-        /// Param 1 - Operation mode. 0: Abort deployment, continue normal mission. 1: switch to payload deployment mode. 100: delete first payload deployment request. 101: delete all payload deployment requests.
+        /// Param 1 - Operation mode. 0: Abort deployment, continue normal mission. 1: switch to payload deploment mode. 100: delete first payload deployment request. 101: delete all payload deployment requests.
         /// Param 2 - Reserved
         /// Param 3 - Reserved
         /// Param 4 - Reserved
@@ -2790,7 +2771,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude (AMSL), in meters
+        /// Param 7 - Altitude, in meters AMSL
         /// MAV_CMD_WAYPOINT_USER_1
         /// </summary>
         MavCmdWaypointUser1 = 31000,
@@ -2802,7 +2783,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude (AMSL), in meters
+        /// Param 7 - Altitude, in meters AMSL
         /// MAV_CMD_WAYPOINT_USER_2
         /// </summary>
         MavCmdWaypointUser2 = 31001,
@@ -2814,7 +2795,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude (AMSL), in meters
+        /// Param 7 - Altitude, in meters AMSL
         /// MAV_CMD_WAYPOINT_USER_3
         /// </summary>
         MavCmdWaypointUser3 = 31002,
@@ -2826,7 +2807,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude (AMSL), in meters
+        /// Param 7 - Altitude, in meters AMSL
         /// MAV_CMD_WAYPOINT_USER_4
         /// </summary>
         MavCmdWaypointUser4 = 31003,
@@ -2838,7 +2819,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude (AMSL), in meters
+        /// Param 7 - Altitude, in meters AMSL
         /// MAV_CMD_WAYPOINT_USER_5
         /// </summary>
         MavCmdWaypointUser5 = 31004,
@@ -2850,7 +2831,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude (AMSL), in meters
+        /// Param 7 - Altitude, in meters AMSL
         /// MAV_CMD_SPATIAL_USER_1
         /// </summary>
         MavCmdSpatialUser1 = 31005,
@@ -2862,7 +2843,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude (AMSL), in meters
+        /// Param 7 - Altitude, in meters AMSL
         /// MAV_CMD_SPATIAL_USER_2
         /// </summary>
         MavCmdSpatialUser2 = 31006,
@@ -2874,7 +2855,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude (AMSL), in meters
+        /// Param 7 - Altitude, in meters AMSL
         /// MAV_CMD_SPATIAL_USER_3
         /// </summary>
         MavCmdSpatialUser3 = 31007,
@@ -2886,7 +2867,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude (AMSL), in meters
+        /// Param 7 - Altitude, in meters AMSL
         /// MAV_CMD_SPATIAL_USER_4
         /// </summary>
         MavCmdSpatialUser4 = 31008,
@@ -2898,7 +2879,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude (AMSL), in meters
+        /// Param 7 - Altitude, in meters AMSL
         /// MAV_CMD_SPATIAL_USER_5
         /// </summary>
         MavCmdSpatialUser5 = 31009,
@@ -2965,7 +2946,7 @@ namespace Asv.Mavlink.V2.Common
     }
 
     /// <summary>
-    /// A data stream is not a fixed set of messages, but rather a
+    /// THIS INTERFACE IS DEPRECATED AS OF JULY 2015. Please use MESSAGE_INTERVAL instead. A data stream is not a fixed set of messages, but rather a
     ///      recommendation to the autopilot software. Individual autopilots may or may not obey
     ///      the recommended messages.
     ///  MAV_DATA_STREAM
@@ -3020,7 +3001,7 @@ namespace Asv.Mavlink.V2.Common
     }
 
     /// <summary>
-    /// The ROI (region of interest) for the vehicle. This can be
+    /// THIS INTERFACE IS DEPRECATED AS OF JANUARY 2018. Please use MAV_CMD_DO_SET_ROI_* messages instead. The ROI (region of interest) for the vehicle. This can be
     ///                 be used by the vehicle for camera/vehicle attitude alignment (see
     ///                 MAV_CMD_NAV_ROI).
     ///  MAV_ROI
@@ -3267,7 +3248,7 @@ namespace Asv.Mavlink.V2.Common
     }
 
     /// <summary>
-    /// result in a MAVLink mission ack
+    /// result in a mavlink mission ack
     ///  MAV_MISSION_RESULT
     /// </summary>
     public enum MavMissionResult
@@ -3381,7 +3362,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavSeverityWarning = 4,
         /// <summary>
-        /// An unusual event has occurred, though not an error condition. This should be investigated for the root cause.
+        /// An unusual event has occured, though not an error condition. This should be investigated for the root cause.
         /// MAV_SEVERITY_NOTICE
         /// </summary>
         MavSeverityNotice = 5,
@@ -3731,25 +3712,10 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavSensorRotationRoll90Yaw270 = 37,
         /// <summary>
-        /// Roll: 90, Pitch: 68, Yaw: 293
-        /// MAV_SENSOR_ROTATION_ROLL_90_PITCH_68_YAW_293
+        /// Roll: 315, Pitch: 315, Yaw: 315
+        /// MAV_SENSOR_ROTATION_ROLL_315_PITCH_315_YAW_315
         /// </summary>
-        MavSensorRotationRoll90Pitch68Yaw293 = 38,
-        /// <summary>
-        /// Pitch: 315
-        /// MAV_SENSOR_ROTATION_PITCH_315
-        /// </summary>
-        MavSensorRotationPitch315 = 39,
-        /// <summary>
-        /// Roll: 90, Pitch: 315
-        /// MAV_SENSOR_ROTATION_ROLL_90_PITCH_315
-        /// </summary>
-        MavSensorRotationRoll90Pitch315 = 40,
-        /// <summary>
-        /// Custom orientation
-        /// MAV_SENSOR_ROTATION_CUSTOM
-        /// </summary>
-        MavSensorRotationCustom = 100,
+        MavSensorRotationRoll315Pitch315Yaw315 = 38,
     }
 
     /// <summary>
@@ -3824,7 +3790,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavProtocolCapabilityCompassCalibration = 4096,
         /// <summary>
-        /// Autopilot supports MAVLink version 2.
+        /// Autopilot supports mavlink version 2.
         /// MAV_PROTOCOL_CAPABILITY_MAVLINK2
         /// </summary>
         MavProtocolCapabilityMavlink2 = 8192,
@@ -4224,7 +4190,7 @@ namespace Asv.Mavlink.V2.Common
     }
 
     /// <summary>
-    /// Bitmap of options for the MAV_CMD_DO_REPOSITION
+    /// Bitmask of options for the MAV_CMD_DO_REPOSITION
     ///  MAV_DO_REPOSITION_FLAGS
     /// </summary>
     public enum MavDoRepositionFlags
@@ -4538,24 +4504,6 @@ namespace Asv.Mavlink.V2.Common
     }
 
     /// <summary>
-    /// RTK GPS baseline coordinate system, used for RTK corrections
-    ///  RTK_BASELINE_COORDINATE_SYSTEM
-    /// </summary>
-    public enum RtkBaselineCoordinateSystem
-    {
-        /// <summary>
-        /// Earth-centered, Earth-fixed
-        /// RTK_BASELINE_COORDINATE_SYSTEM_ECEF
-        /// </summary>
-        RtkBaselineCoordinateSystemEcef = 0,
-        /// <summary>
-        /// North, East, Down
-        /// RTK_BASELINE_COORDINATE_SYSTEM_NED
-        /// </summary>
-        RtkBaselineCoordinateSystemNed = 1,
-    }
-
-    /// <summary>
     /// Type of landing target
     ///  LANDING_TARGET_TYPE
     /// </summary>
@@ -4743,6 +4691,24 @@ namespace Asv.Mavlink.V2.Common
     }
 
     /// <summary>
+    /// RTK GPS baseline coordinate system, used for RTK corrections
+    ///  RTK_BASELINE_COORDINATE_SYSTEM
+    /// </summary>
+    public enum RtkBaselineCoordinateSystem
+    {
+        /// <summary>
+        /// Earth-centered, Earth-fixed
+        /// RTK_BASELINE_COORDINATE_SYSTEM_ECEF
+        /// </summary>
+        RtkBaselineCoordinateSystemEcef = 0,
+        /// <summary>
+        /// North, East, Down
+        /// RTK_BASELINE_COORDINATE_SYSTEM_NED
+        /// </summary>
+        RtkBaselineCoordinateSystemNed = 1,
+    }
+
+    /// <summary>
     /// RC type
     ///  RC_TYPE
     /// </summary>
@@ -4760,6 +4726,40 @@ namespace Asv.Mavlink.V2.Common
         RcTypeSpektrumDsmx = 1,
     }
 
+    /// <summary>
+    /// WORK IN PROGRESS! DO NOT DEPLOY! Enumeration of possible waypoint/trajectory representation
+    ///  MAV_TRAJECTORY_REPRESENTATION
+    /// </summary>
+    public enum MavTrajectoryRepresentation
+    {
+        /// <summary>
+        /// Array of waypoints with the following order
+        /// Param 1 - X-coordinate of waypoint [m], set to NaN if not being used
+        /// Param 2 - Y-coordinate of waypoint [m], set to NaN if not being used
+        /// Param 3 - Z-coordinate of waypoint [m], set to NaN if not being used
+        /// Param 4 - X-velocity of waypoint [m/s], set to NaN if not being used
+        /// Param 5 - Y-velocity of waypoint [m/s], set to NaN if not being used
+        /// Param 6 - Z-velocity of waypoint [m/s], set to NaN if not being used
+        /// Param 7 - X-acceleration of waypoint [m/s/s], set to NaN if not being used
+        /// Param 8 - Y-acceleration of waypoint [m/s/s], set to NaN if not being used
+        /// Param 9 - Z-acceleration of waypoint [m/s/s], set to NaN if not being used
+        /// Param 10 - Yaw [rad], set to NaN for unchanged
+        /// Param 11 - Yaw-rate [rad/s], set to NaN for unchanged
+        /// MAV_TRAJECTORY_REPRESENTATION_WAYPOINTS
+        /// </summary>
+        MavTrajectoryRepresentationWaypoints = 0,
+        /// <summary>
+        /// WORK IN PROGRESS! DO NOT DEPLOY! Array of bezier points with the following order
+        /// Param 1 - X-coordinate of starting bezier point [m], set to NaN if not being used
+        /// Param 2 - Y-coordinate of starting bezier point [m], set to NaN if not being used
+        /// Param 3 - Z-coordinate of starting bezier point [m], set to NaN if not being used
+        /// Param 4 - Bezier time horizon [s], set to NaN if velocity/acceleration should not be incorporated
+        /// Param 5 - Yaw [rad], set to NaN for unchanged
+        /// MAV_TRAJECTORY_REPRESENTATION_BEZIER
+        /// </summary>
+        MavTrajectoryRepresentationBezier = 1,
+    }
+
 
 #endregion
 
@@ -4773,24 +4773,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 0;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 50;
+        public override byte GetCrcEtra() => 50;
 
         public override HeartbeatPayload Payload { get; } = new HeartbeatPayload();
 
         public override string Name => "HEARTBEAT";
-        public override string ToString()
-        {
-            var name = "HEARTBEAT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -4798,7 +4785,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class HeartbeatPayload : IPayload
     {
-        public byte MaxByteSize => 9;
+        public byte GetMaxByteSize() => 9;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -4821,7 +4808,7 @@ namespace Asv.Mavlink.V2.Common
             buffer[index] = (byte)BaseMode;index+=1;
             buffer[index] = (byte)SystemStatus;index+=1;
             BitConverter.GetBytes(MavlinkVersion).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/9;
         }
 
         /// <summary>
@@ -4830,22 +4817,22 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint CustomMode { get; set; }
         /// <summary>
-        /// Type of the MAV (quadrotor, helicopter, etc.)
+        /// Type of the MAV (quadrotor, helicopter, etc., up to 15 types, defined in MAV_TYPE ENUM)
         /// OriginName: type, Units: , IsExtended: false
         /// </summary>
         public MavType Type { get; set; }
         /// <summary>
-        /// Autopilot type / class.
+        /// Autopilot type / class. defined in MAV_AUTOPILOT ENUM
         /// OriginName: autopilot, Units: , IsExtended: false
         /// </summary>
         public MavAutopilot Autopilot { get; set; }
         /// <summary>
-        /// System mode bitmap.
+        /// System mode bitfield, as defined by MAV_MODE_FLAG enum
         /// OriginName: base_mode, Units: , IsExtended: false
         /// </summary>
         public MavModeFlag BaseMode { get; set; }
         /// <summary>
-        /// System status flag.
+        /// System status flag, as defined by MAV_STATE enum
         /// OriginName: system_status, Units: , IsExtended: false
         /// </summary>
         public MavState SystemStatus { get; set; }
@@ -4856,31 +4843,18 @@ namespace Asv.Mavlink.V2.Common
         public byte MavlinkVersion { get; set; }
     }
     /// <summary>
-    /// The general system state. If the system is following the MAVLink standard, the system state is mainly defined by three orthogonal states/modes: The system mode, which is either LOCKED (motors shut down and locked), MANUAL (system under RC control), GUIDED (system with autonomous position control, position setpoint controlled manually) or AUTO (system guided by path/waypoint planner). The NAV_MODE defined the current flight state: LIFTOFF (often an open-loop maneuver), LANDING, WAYPOINTS or VECTOR. This represents the internal navigation state machine. The system status shows whether the system is currently active or not and if an emergency occurred. During the CRITICAL and EMERGENCY states the MAV is still considered to be active, but should start emergency procedures autonomously. After a failure occurred it should first move from active to critical to allow manual intervention and then move to emergency after a certain timeout.
+    /// The general system state. If the system is following the MAVLink standard, the system state is mainly defined by three orthogonal states/modes: The system mode, which is either LOCKED (motors shut down and locked), MANUAL (system under RC control), GUIDED (system with autonomous position control, position setpoint controlled manually) or AUTO (system guided by path/waypoint planner). The NAV_MODE defined the current flight state: LIFTOFF (often an open-loop maneuver), LANDING, WAYPOINTS or VECTOR. This represents the internal navigation state machine. The system status shows whether the system is currently active or not and if an emergency occured. During the CRITICAL and EMERGENCY states the MAV is still considered to be active, but should start emergency procedures autonomously. After a failure occured it should first move from active to critical to allow manual intervention and then move to emergency after a certain timeout.
     ///  SYS_STATUS
     /// </summary>
     public class SysStatusPacket: PacketV2<SysStatusPayload>
     {
 	public const int PacketMessageId = 1;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 124;
+        public override byte GetCrcEtra() => 124;
 
         public override SysStatusPayload Payload { get; } = new SysStatusPayload();
 
         public override string Name => "SYS_STATUS";
-        public override string ToString()
-        {
-            var name = "SYS_STATUS".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -4888,7 +4862,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SysStatusPayload : IPayload
     {
-        public byte MaxByteSize => 31;
+        public byte GetMaxByteSize() => 31;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -4925,41 +4899,41 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(ErrorsCount3).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(ErrorsCount4).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(BatteryRemaining).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/31;
         }
 
         /// <summary>
-        /// Bitmap showing which onboard controllers and sensors are present. Value of 0: not present. Value of 1: present.
+        /// Bitmask showing which onboard controllers and sensors are present. Value of 0: not present. Value of 1: present. Indices defined by ENUM MAV_SYS_STATUS_SENSOR
         /// OriginName: onboard_control_sensors_present, Units: , IsExtended: false
         /// </summary>
         public MavSysStatusSensor OnboardControlSensorsPresent { get; set; }
         /// <summary>
-        /// Bitmap showing which onboard controllers and sensors are enabled:  Value of 0: not enabled. Value of 1: enabled.
+        /// Bitmask showing which onboard controllers and sensors are enabled:  Value of 0: not enabled. Value of 1: enabled. Indices defined by ENUM MAV_SYS_STATUS_SENSOR
         /// OriginName: onboard_control_sensors_enabled, Units: , IsExtended: false
         /// </summary>
         public MavSysStatusSensor OnboardControlSensorsEnabled { get; set; }
         /// <summary>
-        /// Bitmap showing which onboard controllers and sensors are operational or have an error:  Value of 0: not enabled. Value of 1: enabled.
+        /// Bitmask showing which onboard controllers and sensors are operational or have an error:  Value of 0: not enabled. Value of 1: enabled. Indices defined by ENUM MAV_SYS_STATUS_SENSOR
         /// OriginName: onboard_control_sensors_health, Units: , IsExtended: false
         /// </summary>
         public MavSysStatusSensor OnboardControlSensorsHealth { get; set; }
         /// <summary>
-        /// Maximum usage in percent of the mainloop time. Values: [0-1000] - should always be below 1000
+        /// Maximum usage in percent of the mainloop time, (0%: 0, 100%: 1000) should be always below 1000
         /// OriginName: load, Units: d%, IsExtended: false
         /// </summary>
         public ushort Load { get; set; }
         /// <summary>
-        /// Battery voltage
+        /// Battery voltage, in millivolts (1 = 1 millivolt)
         /// OriginName: voltage_battery, Units: mV, IsExtended: false
         /// </summary>
         public ushort VoltageBattery { get; set; }
         /// <summary>
-        /// Battery current, -1: autopilot does not measure the current
+        /// Battery current, in 10*milliamperes (1 = 10 milliampere), -1: autopilot does not measure the current
         /// OriginName: current_battery, Units: cA, IsExtended: false
         /// </summary>
         public short CurrentBattery { get; set; }
         /// <summary>
-        /// Communication drop rate, (UART, I2C, SPI, CAN), dropped packets on all links (packets that were corrupted on reception on the MAV)
+        /// Communication drops in percent, (0%: 0, 100%: 10'000), (UART, I2C, SPI, CAN), dropped packets on all links (packets that were corrupted on reception on the MAV)
         /// OriginName: drop_rate_comm, Units: c%, IsExtended: false
         /// </summary>
         public ushort DropRateComm { get; set; }
@@ -4989,7 +4963,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort ErrorsCount4 { get; set; }
         /// <summary>
-        /// Remaining battery energy, -1: autopilot estimate the remaining battery
+        /// Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot estimate the remaining battery
         /// OriginName: battery_remaining, Units: %, IsExtended: false
         /// </summary>
         public sbyte BatteryRemaining { get; set; }
@@ -5002,24 +4976,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 2;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 137;
+        public override byte GetCrcEtra() => 137;
 
         public override SystemTimePayload Payload { get; } = new SystemTimePayload();
 
         public override string Name => "SYSTEM_TIME";
-        public override string ToString()
-        {
-            var name = "SYSTEM_TIME".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -5027,7 +4988,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SystemTimePayload : IPayload
     {
-        public byte MaxByteSize => 12;
+        public byte GetMaxByteSize() => 12;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -5042,16 +5003,16 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(TimeUnixUsec).CopyTo(buffer, index);index+=8;
             BitConverter.GetBytes(TimeBootMs).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/12;
         }
 
         /// <summary>
-        /// Timestamp (UNIX epoch time).
+        /// Timestamp of the master clock in microseconds since UNIX epoch.
         /// OriginName: time_unix_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUnixUsec { get; set; }
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp of the component clock since boot time in milliseconds.
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -5064,24 +5025,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 4;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 237;
+        public override byte GetCrcEtra() => 237;
 
         public override PingPayload Payload { get; } = new PingPayload();
 
         public override string Name => "PING";
-        public override string ToString()
-        {
-            var name = "PING".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -5089,7 +5037,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class PingPayload : IPayload
     {
-        public byte MaxByteSize => 14;
+        public byte GetMaxByteSize() => 14;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -5108,11 +5056,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Seq).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/14;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Unix timestamp in microseconds or since system boot if smaller than MAVLink epoch (1.1.2009)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -5140,24 +5088,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 5;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 217;
+        public override byte GetCrcEtra() => 217;
 
         public override ChangeOperatorControlPayload Payload { get; } = new ChangeOperatorControlPayload();
 
         public override string Name => "CHANGE_OPERATOR_CONTROL";
-        public override string ToString()
-        {
-            var name = "CHANGE_OPERATOR_CONTROL".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -5165,7 +5100,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ChangeOperatorControlPayload : IPayload
     {
-        public byte MaxByteSize => 28;
+        public byte GetMaxByteSize() => 28;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -5175,7 +5110,7 @@ namespace Asv.Mavlink.V2.Common
             TargetSystem = (byte)buffer[index++];
             ControlRequest = (byte)buffer[index++];
             Version = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/25 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/25 - Math.Max(0,((/*PayloadByteSize*/28 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<25;i++)
             {
                 Passkey[i] = default(char);
@@ -5190,7 +5125,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(ControlRequest).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Version).CopyTo(buffer, index);index+=1;
             Encoding.ASCII.GetBytes(Passkey,0,25,buffer,index);index+=25;
-            return MaxByteSize;
+            return /*PayloadByteSize*/28;
         }
 
         /// <summary>
@@ -5222,24 +5157,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 6;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 104;
+        public override byte GetCrcEtra() => 104;
 
         public override ChangeOperatorControlAckPayload Payload { get; } = new ChangeOperatorControlAckPayload();
 
         public override string Name => "CHANGE_OPERATOR_CONTROL_ACK";
-        public override string ToString()
-        {
-            var name = "CHANGE_OPERATOR_CONTROL_ACK".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -5247,7 +5169,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ChangeOperatorControlAckPayload : IPayload
     {
-        public byte MaxByteSize => 3;
+        public byte GetMaxByteSize() => 3;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -5264,7 +5186,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(GcsSystemId).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(ControlRequest).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Ack).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/3;
         }
 
         /// <summary>
@@ -5291,24 +5213,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 7;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 119;
+        public override byte GetCrcEtra() => 119;
 
         public override AuthKeyPayload Payload { get; } = new AuthKeyPayload();
 
         public override string Name => "AUTH_KEY";
-        public override string ToString()
-        {
-            var name = "AUTH_KEY".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -5316,14 +5225,14 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class AuthKeyPayload : IPayload
     {
-        public byte MaxByteSize => 32;
+        public byte GetMaxByteSize() => 32;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
             var index = offset;
             var endIndex = offset + payloadSize;
             var arraySize = 0;
-            arraySize = /*ArrayLength*/32 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/32 - Math.Max(0,((/*PayloadByteSize*/32 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<32;i++)
             {
                 Key[i] = default(char);
@@ -5335,7 +5244,7 @@ namespace Asv.Mavlink.V2.Common
         public int Serialize(byte[] buffer, int index)
         {
             Encoding.ASCII.GetBytes(Key,0,32,buffer,index);index+=32;
-            return MaxByteSize;
+            return /*PayloadByteSize*/32;
         }
 
         /// <summary>
@@ -5345,31 +5254,18 @@ namespace Asv.Mavlink.V2.Common
         public char[] Key { get; } = new char[32];
     }
     /// <summary>
-    /// Set the system mode, as defined by enum MAV_MODE. There is no target component id as the mode is by definition for the overall aircraft, not only for one component.
+    /// THIS INTERFACE IS DEPRECATED. USE COMMAND_LONG with MAV_CMD_DO_SET_MODE INSTEAD. Set the system mode, as defined by enum MAV_MODE. There is no target component id as the mode is by definition for the overall aircraft, not only for one component.
     ///  SET_MODE
     /// </summary>
     public class SetModePacket: PacketV2<SetModePayload>
     {
 	public const int PacketMessageId = 11;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 89;
+        public override byte GetCrcEtra() => 89;
 
         public override SetModePayload Payload { get; } = new SetModePayload();
 
         public override string Name => "SET_MODE";
-        public override string ToString()
-        {
-            var name = "SET_MODE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -5377,7 +5273,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SetModePayload : IPayload
     {
-        public byte MaxByteSize => 6;
+        public byte GetMaxByteSize() => 6;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -5394,7 +5290,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(CustomMode).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)BaseMode;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/6;
         }
 
         /// <summary>
@@ -5408,7 +5304,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetSystem { get; set; }
         /// <summary>
-        /// The new base mode.
+        /// The new base mode
         /// OriginName: base_mode, Units: , IsExtended: false
         /// </summary>
         public MavMode BaseMode { get; set; }
@@ -5421,24 +5317,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 20;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 214;
+        public override byte GetCrcEtra() => 214;
 
         public override ParamRequestReadPayload Payload { get; } = new ParamRequestReadPayload();
 
         public override string Name => "PARAM_REQUEST_READ";
-        public override string ToString()
-        {
-            var name = "PARAM_REQUEST_READ".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -5446,7 +5329,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ParamRequestReadPayload : IPayload
     {
-        public byte MaxByteSize => 20;
+        public byte GetMaxByteSize() => 20;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -5456,7 +5339,7 @@ namespace Asv.Mavlink.V2.Common
             ParamIndex = BitConverter.ToInt16(buffer,index);index+=2;
             TargetSystem = (byte)buffer[index++];
             TargetComponent = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/16 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/16 - Math.Max(0,((/*PayloadByteSize*/20 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<16;i++)
             {
                 ParamId[i] = default(char);
@@ -5471,7 +5354,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);index+=16;
-            return MaxByteSize;
+            return /*PayloadByteSize*/20;
         }
 
         /// <summary>
@@ -5503,24 +5386,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 21;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 159;
+        public override byte GetCrcEtra() => 159;
 
         public override ParamRequestListPayload Payload { get; } = new ParamRequestListPayload();
 
         public override string Name => "PARAM_REQUEST_LIST";
-        public override string ToString()
-        {
-            var name = "PARAM_REQUEST_LIST".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -5528,7 +5398,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ParamRequestListPayload : IPayload
     {
-        public byte MaxByteSize => 2;
+        public byte GetMaxByteSize() => 2;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -5543,7 +5413,7 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/2;
         }
 
         /// <summary>
@@ -5565,24 +5435,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 22;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 220;
+        public override byte GetCrcEtra() => 220;
 
         public override ParamValuePayload Payload { get; } = new ParamValuePayload();
 
         public override string Name => "PARAM_VALUE";
-        public override string ToString()
-        {
-            var name = "PARAM_VALUE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -5590,7 +5447,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ParamValuePayload : IPayload
     {
-        public byte MaxByteSize => 25;
+        public byte GetMaxByteSize() => 25;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -5600,7 +5457,7 @@ namespace Asv.Mavlink.V2.Common
             ParamValue = BitConverter.ToSingle(buffer, index);index+=4;
             ParamCount = BitConverter.ToUInt16(buffer,index);index+=2;
             ParamIndex = BitConverter.ToUInt16(buffer,index);index+=2;
-            arraySize = /*ArrayLength*/16 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/16 - Math.Max(0,((/*PayloadByteSize*/25 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<16;i++)
             {
                 ParamId[i] = default(char);
@@ -5617,7 +5474,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(ParamIndex).CopyTo(buffer, index);index+=2;
             Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);index+=16;
             buffer[index] = (byte)ParamType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/25;
         }
 
         /// <summary>
@@ -5641,7 +5498,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public char[] ParamId { get; } = new char[16];
         /// <summary>
-        /// Onboard parameter type.
+        /// Onboard parameter type: see the MAV_PARAM_TYPE enum for supported data types.
         /// OriginName: param_type, Units: , IsExtended: false
         /// </summary>
         public MavParamType ParamType { get; set; }
@@ -5654,24 +5511,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 23;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 168;
+        public override byte GetCrcEtra() => 168;
 
         public override ParamSetPayload Payload { get; } = new ParamSetPayload();
 
         public override string Name => "PARAM_SET";
-        public override string ToString()
-        {
-            var name = "PARAM_SET".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -5679,7 +5523,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ParamSetPayload : IPayload
     {
-        public byte MaxByteSize => 23;
+        public byte GetMaxByteSize() => 23;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -5689,7 +5533,7 @@ namespace Asv.Mavlink.V2.Common
             ParamValue = BitConverter.ToSingle(buffer, index);index+=4;
             TargetSystem = (byte)buffer[index++];
             TargetComponent = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/16 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/16 - Math.Max(0,((/*PayloadByteSize*/23 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<16;i++)
             {
                 ParamId[i] = default(char);
@@ -5706,7 +5550,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);index+=16;
             buffer[index] = (byte)ParamType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/23;
         }
 
         /// <summary>
@@ -5730,7 +5574,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public char[] ParamId { get; } = new char[16];
         /// <summary>
-        /// Onboard parameter type.
+        /// Onboard parameter type: see the MAV_PARAM_TYPE enum for supported data types.
         /// OriginName: param_type, Units: , IsExtended: false
         /// </summary>
         public MavParamType ParamType { get; set; }
@@ -5744,24 +5588,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 24;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 24;
+        public override byte GetCrcEtra() => 24;
 
         public override GpsRawIntPayload Payload { get; } = new GpsRawIntPayload();
 
         public override string Name => "GPS_RAW_INT";
-        public override string ToString()
-        {
-            var name = "GPS_RAW_INT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -5769,7 +5600,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class GpsRawIntPayload : IPayload
     {
-        public byte MaxByteSize => 50;
+        public byte GetMaxByteSize() => 50;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -5820,26 +5651,26 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(VAcc).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(VelAcc).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(HdgAcc).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/50;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Latitude (WGS84, EGM96 ellipsoid)
+        /// Latitude (WGS84, EGM96 ellipsoid), in degrees * 1E7
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude (WGS84, EGM96 ellipsoid)
+        /// Longitude (WGS84, EGM96 ellipsoid), in degrees * 1E7
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude (AMSL). Positive for up. Note that virtually all GPS modules provide the AMSL altitude in addition to the WGS84 altitude.
+        /// Altitude (AMSL, NOT WGS84), in meters * 1000 (positive for up). Note that virtually all GPS modules provide the AMSL altitude in addition to the WGS84 altitude.
         /// OriginName: alt, Units: mm, IsExtended: false
         /// </summary>
         public int Alt { get; set; }
@@ -5854,7 +5685,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort Epv { get; set; }
         /// <summary>
-        /// GPS ground speed. If unknown, set to: UINT16_MAX
+        /// GPS ground speed (m/s * 100). If unknown, set to: UINT16_MAX
         /// OriginName: vel, Units: cm/s, IsExtended: false
         /// </summary>
         public ushort Vel { get; set; }
@@ -5864,7 +5695,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort Cog { get; set; }
         /// <summary>
-        /// GPS fix type.
+        /// See the GPS_FIX_TYPE enum.
         /// OriginName: fix_type, Units: , IsExtended: false
         /// </summary>
         public GpsFixType FixType { get; set; }
@@ -5874,27 +5705,27 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte SatellitesVisible { get; set; }
         /// <summary>
-        /// Altitude (above WGS84, EGM96 ellipsoid). Positive for up.
+        /// Altitude (above WGS84, EGM96 ellipsoid), in meters * 1000 (positive for up).
         /// OriginName: alt_ellipsoid, Units: mm, IsExtended: true
         /// </summary>
         public int AltEllipsoid { get; set; }
         /// <summary>
-        /// Position uncertainty. Positive for up.
+        /// Position uncertainty in meters * 1000 (positive for up).
         /// OriginName: h_acc, Units: mm, IsExtended: true
         /// </summary>
         public uint HAcc { get; set; }
         /// <summary>
-        /// Altitude uncertainty. Positive for up.
+        /// Altitude uncertainty in meters * 1000 (positive for up).
         /// OriginName: v_acc, Units: mm, IsExtended: true
         /// </summary>
         public uint VAcc { get; set; }
         /// <summary>
-        /// Speed uncertainty. Positive for up.
+        /// Speed uncertainty in meters * 1000 (positive for up).
         /// OriginName: vel_acc, Units: mm, IsExtended: true
         /// </summary>
         public uint VelAcc { get; set; }
         /// <summary>
-        /// Heading / track uncertainty
+        /// Heading / track uncertainty in degrees * 1e5.
         /// OriginName: hdg_acc, Units: degE5, IsExtended: true
         /// </summary>
         public uint HdgAcc { get; set; }
@@ -5907,24 +5738,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 25;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 23;
+        public override byte GetCrcEtra() => 23;
 
         public override GpsStatusPayload Payload { get; } = new GpsStatusPayload();
 
         public override string Name => "GPS_STATUS";
-        public override string ToString()
-        {
-            var name = "GPS_STATUS".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -5932,7 +5750,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class GpsStatusPayload : IPayload
     {
-        public byte MaxByteSize => 101;
+        public byte GetMaxByteSize() => 101;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -5940,7 +5758,7 @@ namespace Asv.Mavlink.V2.Common
             var endIndex = offset + payloadSize;
             var arraySize = 0;
             SatellitesVisible = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/20 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/20 - Math.Max(0,((/*PayloadByteSize*/101 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<20;i++)
             {
                 SatellitePrn[i] = default(byte);
@@ -5994,7 +5812,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 buffer[index] = (byte)SatelliteSnr[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/101;
         }
 
         /// <summary>
@@ -6036,24 +5854,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 26;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 170;
+        public override byte GetCrcEtra() => 170;
 
         public override ScaledImuPayload Payload { get; } = new ScaledImuPayload();
 
         public override string Name => "SCALED_IMU";
-        public override string ToString()
-        {
-            var name = "SCALED_IMU".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -6061,7 +5866,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ScaledImuPayload : IPayload
     {
-        public byte MaxByteSize => 22;
+        public byte GetMaxByteSize() => 22;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -6092,56 +5897,56 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Xmag).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Ymag).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Zmag).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/22;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// X acceleration
+        /// X acceleration (mg)
         /// OriginName: xacc, Units: mG, IsExtended: false
         /// </summary>
         public short Xacc { get; set; }
         /// <summary>
-        /// Y acceleration
+        /// Y acceleration (mg)
         /// OriginName: yacc, Units: mG, IsExtended: false
         /// </summary>
         public short Yacc { get; set; }
         /// <summary>
-        /// Z acceleration
+        /// Z acceleration (mg)
         /// OriginName: zacc, Units: mG, IsExtended: false
         /// </summary>
         public short Zacc { get; set; }
         /// <summary>
-        /// Angular speed around X axis
+        /// Angular speed around X axis (millirad /sec)
         /// OriginName: xgyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Xgyro { get; set; }
         /// <summary>
-        /// Angular speed around Y axis
+        /// Angular speed around Y axis (millirad /sec)
         /// OriginName: ygyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Ygyro { get; set; }
         /// <summary>
-        /// Angular speed around Z axis
+        /// Angular speed around Z axis (millirad /sec)
         /// OriginName: zgyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Zgyro { get; set; }
         /// <summary>
-        /// X Magnetic field
+        /// X Magnetic field (milli tesla)
         /// OriginName: xmag, Units: mT, IsExtended: false
         /// </summary>
         public short Xmag { get; set; }
         /// <summary>
-        /// Y Magnetic field
+        /// Y Magnetic field (milli tesla)
         /// OriginName: ymag, Units: mT, IsExtended: false
         /// </summary>
         public short Ymag { get; set; }
         /// <summary>
-        /// Z Magnetic field
+        /// Z Magnetic field (milli tesla)
         /// OriginName: zmag, Units: mT, IsExtended: false
         /// </summary>
         public short Zmag { get; set; }
@@ -6154,24 +5959,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 27;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 144;
+        public override byte GetCrcEtra() => 144;
 
         public override RawImuPayload Payload { get; } = new RawImuPayload();
 
         public override string Name => "RAW_IMU";
-        public override string ToString()
-        {
-            var name = "RAW_IMU".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -6179,7 +5971,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class RawImuPayload : IPayload
     {
-        public byte MaxByteSize => 26;
+        public byte GetMaxByteSize() => 26;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -6210,11 +6002,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Xmag).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Ymag).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Zmag).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/26;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -6272,24 +6064,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 28;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 67;
+        public override byte GetCrcEtra() => 67;
 
         public override RawPressurePayload Payload { get; } = new RawPressurePayload();
 
         public override string Name => "RAW_PRESSURE";
-        public override string ToString()
-        {
-            var name = "RAW_PRESSURE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -6297,7 +6076,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class RawPressurePayload : IPayload
     {
-        public byte MaxByteSize => 16;
+        public byte GetMaxByteSize() => 16;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -6318,11 +6097,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(PressDiff1).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(PressDiff2).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Temperature).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/16;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -6332,12 +6111,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public short PressAbs { get; set; }
         /// <summary>
-        /// Differential pressure 1 (raw, 0 if nonexistent)
+        /// Differential pressure 1 (raw, 0 if nonexistant)
         /// OriginName: press_diff1, Units: , IsExtended: false
         /// </summary>
         public short PressDiff1 { get; set; }
         /// <summary>
-        /// Differential pressure 2 (raw, 0 if nonexistent)
+        /// Differential pressure 2 (raw, 0 if nonexistant)
         /// OriginName: press_diff2, Units: , IsExtended: false
         /// </summary>
         public short PressDiff2 { get; set; }
@@ -6355,24 +6134,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 29;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 115;
+        public override byte GetCrcEtra() => 115;
 
         public override ScaledPressurePayload Payload { get; } = new ScaledPressurePayload();
 
         public override string Name => "SCALED_PRESSURE";
-        public override string ToString()
-        {
-            var name = "SCALED_PRESSURE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -6380,7 +6146,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ScaledPressurePayload : IPayload
     {
-        public byte MaxByteSize => 14;
+        public byte GetMaxByteSize() => 14;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -6399,26 +6165,26 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(PressAbs).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(PressDiff).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Temperature).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/14;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Absolute pressure
+        /// Absolute pressure (hectopascal)
         /// OriginName: press_abs, Units: hPa, IsExtended: false
         /// </summary>
         public float PressAbs { get; set; }
         /// <summary>
-        /// Differential pressure 1
+        /// Differential pressure 1 (hectopascal)
         /// OriginName: press_diff, Units: hPa, IsExtended: false
         /// </summary>
         public float PressDiff { get; set; }
         /// <summary>
-        /// Temperature
+        /// Temperature measurement (0.01 degrees celsius)
         /// OriginName: temperature, Units: cdegC, IsExtended: false
         /// </summary>
         public short Temperature { get; set; }
@@ -6431,24 +6197,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 30;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 39;
+        public override byte GetCrcEtra() => 39;
 
         public override AttitudePayload Payload { get; } = new AttitudePayload();
 
         public override string Name => "ATTITUDE";
-        public override string ToString()
-        {
-            var name = "ATTITUDE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -6456,7 +6209,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class AttitudePayload : IPayload
     {
-        public byte MaxByteSize => 28;
+        public byte GetMaxByteSize() => 28;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -6481,41 +6234,41 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Rollspeed).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Pitchspeed).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Yawspeed).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/28;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Roll angle (-pi..+pi)
+        /// Roll angle (rad, -pi..+pi)
         /// OriginName: roll, Units: rad, IsExtended: false
         /// </summary>
         public float Roll { get; set; }
         /// <summary>
-        /// Pitch angle (-pi..+pi)
+        /// Pitch angle (rad, -pi..+pi)
         /// OriginName: pitch, Units: rad, IsExtended: false
         /// </summary>
         public float Pitch { get; set; }
         /// <summary>
-        /// Yaw angle (-pi..+pi)
+        /// Yaw angle (rad, -pi..+pi)
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
         /// <summary>
-        /// Roll angular speed
+        /// Roll angular speed (rad/s)
         /// OriginName: rollspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Rollspeed { get; set; }
         /// <summary>
-        /// Pitch angular speed
+        /// Pitch angular speed (rad/s)
         /// OriginName: pitchspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Pitchspeed { get; set; }
         /// <summary>
-        /// Yaw angular speed
+        /// Yaw angular speed (rad/s)
         /// OriginName: yawspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Yawspeed { get; set; }
@@ -6528,24 +6281,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 31;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 246;
+        public override byte GetCrcEtra() => 246;
 
         public override AttitudeQuaternionPayload Payload { get; } = new AttitudeQuaternionPayload();
 
         public override string Name => "ATTITUDE_QUATERNION";
-        public override string ToString()
-        {
-            var name = "ATTITUDE_QUATERNION".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -6553,7 +6293,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class AttitudeQuaternionPayload : IPayload
     {
-        public byte MaxByteSize => 32;
+        public byte GetMaxByteSize() => 32;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -6580,11 +6320,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Rollspeed).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Pitchspeed).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Yawspeed).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/32;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -6609,17 +6349,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Q4 { get; set; }
         /// <summary>
-        /// Roll angular speed
+        /// Roll angular speed (rad/s)
         /// OriginName: rollspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Rollspeed { get; set; }
         /// <summary>
-        /// Pitch angular speed
+        /// Pitch angular speed (rad/s)
         /// OriginName: pitchspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Pitchspeed { get; set; }
         /// <summary>
-        /// Yaw angular speed
+        /// Yaw angular speed (rad/s)
         /// OriginName: yawspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Yawspeed { get; set; }
@@ -6632,24 +6372,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 32;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 185;
+        public override byte GetCrcEtra() => 185;
 
         public override LocalPositionNedPayload Payload { get; } = new LocalPositionNedPayload();
 
         public override string Name => "LOCAL_POSITION_NED";
-        public override string ToString()
-        {
-            var name = "LOCAL_POSITION_NED".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -6657,7 +6384,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class LocalPositionNedPayload : IPayload
     {
-        public byte MaxByteSize => 28;
+        public byte GetMaxByteSize() => 28;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -6682,11 +6409,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Vx).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Vy).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Vz).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/28;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -6730,24 +6457,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 33;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 104;
+        public override byte GetCrcEtra() => 104;
 
         public override GlobalPositionIntPayload Payload { get; } = new GlobalPositionIntPayload();
 
         public override string Name => "GLOBAL_POSITION_INT";
-        public override string ToString()
-        {
-            var name = "GLOBAL_POSITION_INT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -6755,7 +6469,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class GlobalPositionIntPayload : IPayload
     {
-        public byte MaxByteSize => 28;
+        public byte GetMaxByteSize() => 28;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -6784,81 +6498,68 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Vy).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Vz).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Hdg).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/28;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Latitude, expressed
+        /// Latitude, expressed as degrees * 1E7
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude, expressed
+        /// Longitude, expressed as degrees * 1E7
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude (AMSL). Note that virtually all GPS modules provide both WGS84 and AMSL.
+        /// Altitude in meters, expressed as * 1000 (millimeters), AMSL (not WGS84 - note that virtually all GPS modules provide the AMSL as well)
         /// OriginName: alt, Units: mm, IsExtended: false
         /// </summary>
         public int Alt { get; set; }
         /// <summary>
-        /// Altitude above ground
+        /// Altitude above ground in meters, expressed as * 1000 (millimeters)
         /// OriginName: relative_alt, Units: mm, IsExtended: false
         /// </summary>
         public int RelativeAlt { get; set; }
         /// <summary>
-        /// Ground X Speed (Latitude, positive north)
+        /// Ground X Speed (Latitude, positive north), expressed as m/s * 100
         /// OriginName: vx, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vx { get; set; }
         /// <summary>
-        /// Ground Y Speed (Longitude, positive east)
+        /// Ground Y Speed (Longitude, positive east), expressed as m/s * 100
         /// OriginName: vy, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vy { get; set; }
         /// <summary>
-        /// Ground Z Speed (Altitude, positive down)
+        /// Ground Z Speed (Altitude, positive down), expressed as m/s * 100
         /// OriginName: vz, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vz { get; set; }
         /// <summary>
-        /// Vehicle heading (yaw angle), 0.0..359.99 degrees. If unknown, set to: UINT16_MAX
+        /// Vehicle heading (yaw angle) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: UINT16_MAX
         /// OriginName: hdg, Units: cdeg, IsExtended: false
         /// </summary>
         public ushort Hdg { get; set; }
     }
     /// <summary>
-    /// The scaled values of the RC channels received: (-100%) -10000, (0%) 0, (100%) 10000. Channels that are inactive should be set to UINT16_MAX.
+    /// The scaled values of the RC channels received. (-100%) -10000, (0%) 0, (100%) 10000. Channels that are inactive should be set to UINT16_MAX.
     ///  RC_CHANNELS_SCALED
     /// </summary>
     public class RcChannelsScaledPacket: PacketV2<RcChannelsScaledPayload>
     {
 	public const int PacketMessageId = 34;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 237;
+        public override byte GetCrcEtra() => 237;
 
         public override RcChannelsScaledPayload Payload { get; } = new RcChannelsScaledPayload();
 
         public override string Name => "RC_CHANNELS_SCALED";
-        public override string ToString()
-        {
-            var name = "RC_CHANNELS_SCALED".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -6866,7 +6567,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class RcChannelsScaledPayload : IPayload
     {
-        public byte MaxByteSize => 22;
+        public byte GetMaxByteSize() => 22;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -6899,51 +6600,51 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Chan8Scaled).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Port).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Rssi).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/22;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// RC channel 1 value scaled.
+        /// RC channel 1 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
         /// OriginName: chan1_scaled, Units: , IsExtended: false
         /// </summary>
         public short Chan1Scaled { get; set; }
         /// <summary>
-        /// RC channel 2 value scaled.
+        /// RC channel 2 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
         /// OriginName: chan2_scaled, Units: , IsExtended: false
         /// </summary>
         public short Chan2Scaled { get; set; }
         /// <summary>
-        /// RC channel 3 value scaled.
+        /// RC channel 3 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
         /// OriginName: chan3_scaled, Units: , IsExtended: false
         /// </summary>
         public short Chan3Scaled { get; set; }
         /// <summary>
-        /// RC channel 4 value scaled.
+        /// RC channel 4 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
         /// OriginName: chan4_scaled, Units: , IsExtended: false
         /// </summary>
         public short Chan4Scaled { get; set; }
         /// <summary>
-        /// RC channel 5 value scaled.
+        /// RC channel 5 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
         /// OriginName: chan5_scaled, Units: , IsExtended: false
         /// </summary>
         public short Chan5Scaled { get; set; }
         /// <summary>
-        /// RC channel 6 value scaled.
+        /// RC channel 6 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
         /// OriginName: chan6_scaled, Units: , IsExtended: false
         /// </summary>
         public short Chan6Scaled { get; set; }
         /// <summary>
-        /// RC channel 7 value scaled.
+        /// RC channel 7 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
         /// OriginName: chan7_scaled, Units: , IsExtended: false
         /// </summary>
         public short Chan7Scaled { get; set; }
         /// <summary>
-        /// RC channel 8 value scaled.
+        /// RC channel 8 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
         /// OriginName: chan8_scaled, Units: , IsExtended: false
         /// </summary>
         public short Chan8Scaled { get; set; }
@@ -6953,37 +6654,24 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Port { get; set; }
         /// <summary>
-        /// Receive signal strength indicator. Values: [0-100], 255: invalid/unknown.
+        /// Receive signal strength indicator, 0: 0%, 100: 100%, 255: invalid/unknown.
         /// OriginName: rssi, Units: %, IsExtended: false
         /// </summary>
         public byte Rssi { get; set; }
     }
     /// <summary>
-    /// The RAW values of the RC channels received. The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%. A value of UINT16_MAX implies the channel is unused. Individual receivers/transmitters might violate this specification.
+    /// The RAW values of the RC channels received. The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%. Individual receivers/transmitters might violate this specification.
     ///  RC_CHANNELS_RAW
     /// </summary>
     public class RcChannelsRawPacket: PacketV2<RcChannelsRawPayload>
     {
 	public const int PacketMessageId = 35;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 244;
+        public override byte GetCrcEtra() => 244;
 
         public override RcChannelsRawPayload Payload { get; } = new RcChannelsRawPayload();
 
         public override string Name => "RC_CHANNELS_RAW";
-        public override string ToString()
-        {
-            var name = "RC_CHANNELS_RAW".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -6991,7 +6679,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class RcChannelsRawPayload : IPayload
     {
-        public byte MaxByteSize => 22;
+        public byte GetMaxByteSize() => 22;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -7024,51 +6712,51 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Chan8Raw).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Port).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Rssi).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/22;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// RC channel 1 value.
+        /// RC channel 1 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan1_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan1Raw { get; set; }
         /// <summary>
-        /// RC channel 2 value.
+        /// RC channel 2 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan2_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan2Raw { get; set; }
         /// <summary>
-        /// RC channel 3 value.
+        /// RC channel 3 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan3_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan3Raw { get; set; }
         /// <summary>
-        /// RC channel 4 value.
+        /// RC channel 4 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan4_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan4Raw { get; set; }
         /// <summary>
-        /// RC channel 5 value.
+        /// RC channel 5 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan5_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan5Raw { get; set; }
         /// <summary>
-        /// RC channel 6 value.
+        /// RC channel 6 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan6_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan6Raw { get; set; }
         /// <summary>
-        /// RC channel 7 value.
+        /// RC channel 7 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan7_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan7Raw { get; set; }
         /// <summary>
-        /// RC channel 8 value.
+        /// RC channel 8 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan8_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan8Raw { get; set; }
@@ -7078,7 +6766,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Port { get; set; }
         /// <summary>
-        /// Receive signal strength indicator. Values: [0-100], 255: invalid/unknown.
+        /// Receive signal strength indicator, 0: 0%, 100: 100%, 255: invalid/unknown.
         /// OriginName: rssi, Units: %, IsExtended: false
         /// </summary>
         public byte Rssi { get; set; }
@@ -7091,24 +6779,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 36;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 222;
+        public override byte GetCrcEtra() => 222;
 
         public override ServoOutputRawPayload Payload { get; } = new ServoOutputRawPayload();
 
         public override string Name => "SERVO_OUTPUT_RAW";
-        public override string ToString()
-        {
-            var name = "SERVO_OUTPUT_RAW".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -7116,7 +6791,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ServoOutputRawPayload : IPayload
     {
-        public byte MaxByteSize => 37;
+        public byte GetMaxByteSize() => 37;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -7179,51 +6854,51 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Servo14Raw).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Servo15Raw).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Servo16Raw).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/37;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public uint TimeUsec { get; set; }
         /// <summary>
-        /// Servo output 1 value
+        /// Servo output 1 value, in microseconds
         /// OriginName: servo1_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Servo1Raw { get; set; }
         /// <summary>
-        /// Servo output 2 value
+        /// Servo output 2 value, in microseconds
         /// OriginName: servo2_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Servo2Raw { get; set; }
         /// <summary>
-        /// Servo output 3 value
+        /// Servo output 3 value, in microseconds
         /// OriginName: servo3_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Servo3Raw { get; set; }
         /// <summary>
-        /// Servo output 4 value
+        /// Servo output 4 value, in microseconds
         /// OriginName: servo4_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Servo4Raw { get; set; }
         /// <summary>
-        /// Servo output 5 value
+        /// Servo output 5 value, in microseconds
         /// OriginName: servo5_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Servo5Raw { get; set; }
         /// <summary>
-        /// Servo output 6 value
+        /// Servo output 6 value, in microseconds
         /// OriginName: servo6_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Servo6Raw { get; set; }
         /// <summary>
-        /// Servo output 7 value
+        /// Servo output 7 value, in microseconds
         /// OriginName: servo7_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Servo7Raw { get; set; }
         /// <summary>
-        /// Servo output 8 value
+        /// Servo output 8 value, in microseconds
         /// OriginName: servo8_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Servo8Raw { get; set; }
@@ -7233,42 +6908,42 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Port { get; set; }
         /// <summary>
-        /// Servo output 9 value
+        /// Servo output 9 value, in microseconds
         /// OriginName: servo9_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Servo9Raw { get; set; }
         /// <summary>
-        /// Servo output 10 value
+        /// Servo output 10 value, in microseconds
         /// OriginName: servo10_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Servo10Raw { get; set; }
         /// <summary>
-        /// Servo output 11 value
+        /// Servo output 11 value, in microseconds
         /// OriginName: servo11_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Servo11Raw { get; set; }
         /// <summary>
-        /// Servo output 12 value
+        /// Servo output 12 value, in microseconds
         /// OriginName: servo12_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Servo12Raw { get; set; }
         /// <summary>
-        /// Servo output 13 value
+        /// Servo output 13 value, in microseconds
         /// OriginName: servo13_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Servo13Raw { get; set; }
         /// <summary>
-        /// Servo output 14 value
+        /// Servo output 14 value, in microseconds
         /// OriginName: servo14_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Servo14Raw { get; set; }
         /// <summary>
-        /// Servo output 15 value
+        /// Servo output 15 value, in microseconds
         /// OriginName: servo15_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Servo15Raw { get; set; }
         /// <summary>
-        /// Servo output 16 value
+        /// Servo output 16 value, in microseconds
         /// OriginName: servo16_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Servo16Raw { get; set; }
@@ -7281,24 +6956,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 37;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 212;
+        public override byte GetCrcEtra() => 212;
 
         public override MissionRequestPartialListPayload Payload { get; } = new MissionRequestPartialListPayload();
 
         public override string Name => "MISSION_REQUEST_PARTIAL_LIST";
-        public override string ToString()
-        {
-            var name = "MISSION_REQUEST_PARTIAL_LIST".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -7306,7 +6968,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionRequestPartialListPayload : IPayload
     {
-        public byte MaxByteSize => 7;
+        public byte GetMaxByteSize() => 7;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -7329,7 +6991,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)MissionType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/7;
         }
 
         /// <summary>
@@ -7353,7 +7015,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Mission type.
+        /// Mission type, see MAV_MISSION_TYPE
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -7366,24 +7028,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 38;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 9;
+        public override byte GetCrcEtra() => 9;
 
         public override MissionWritePartialListPayload Payload { get; } = new MissionWritePartialListPayload();
 
         public override string Name => "MISSION_WRITE_PARTIAL_LIST";
-        public override string ToString()
-        {
-            var name = "MISSION_WRITE_PARTIAL_LIST".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -7391,7 +7040,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionWritePartialListPayload : IPayload
     {
-        public byte MaxByteSize => 7;
+        public byte GetMaxByteSize() => 7;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -7414,7 +7063,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)MissionType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/7;
         }
 
         /// <summary>
@@ -7438,7 +7087,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Mission type.
+        /// Mission type, see MAV_MISSION_TYPE
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -7452,24 +7101,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 39;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 254;
+        public override byte GetCrcEtra() => 254;
 
         public override MissionItemPayload Payload { get; } = new MissionItemPayload();
 
         public override string Name => "MISSION_ITEM";
-        public override string ToString()
-        {
-            var name = "MISSION_ITEM".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -7477,7 +7113,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionItemPayload : IPayload
     {
-        public byte MaxByteSize => 38;
+        public byte GetMaxByteSize() => 38;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -7520,7 +7156,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Current).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Autocontinue).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)MissionType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/38;
         }
 
         /// <summary>
@@ -7564,7 +7200,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort Seq { get; set; }
         /// <summary>
-        /// The scheduled action for the waypoint.
+        /// The scheduled action for the waypoint, as defined by MAV_CMD enum
         /// OriginName: command, Units: , IsExtended: false
         /// </summary>
         public MavCmd Command { get; set; }
@@ -7579,7 +7215,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// The coordinate system of the waypoint.
+        /// The coordinate system of the waypoint, as defined by MAV_FRAME enum
         /// OriginName: frame, Units: , IsExtended: false
         /// </summary>
         public MavFrame Frame { get; set; }
@@ -7589,12 +7225,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Current { get; set; }
         /// <summary>
-        /// Autocontinue to next waypoint
+        /// autocontinue to next wp
         /// OriginName: autocontinue, Units: , IsExtended: false
         /// </summary>
         public byte Autocontinue { get; set; }
         /// <summary>
-        /// Mission type.
+        /// Mission type, see MAV_MISSION_TYPE
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -7607,24 +7243,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 40;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 230;
+        public override byte GetCrcEtra() => 230;
 
         public override MissionRequestPayload Payload { get; } = new MissionRequestPayload();
 
         public override string Name => "MISSION_REQUEST";
-        public override string ToString()
-        {
-            var name = "MISSION_REQUEST".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -7632,7 +7255,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionRequestPayload : IPayload
     {
-        public byte MaxByteSize => 5;
+        public byte GetMaxByteSize() => 5;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -7653,7 +7276,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)MissionType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/5;
         }
 
         /// <summary>
@@ -7672,7 +7295,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Mission type.
+        /// Mission type, see MAV_MISSION_TYPE
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -7685,24 +7308,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 41;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 28;
+        public override byte GetCrcEtra() => 28;
 
         public override MissionSetCurrentPayload Payload { get; } = new MissionSetCurrentPayload();
 
         public override string Name => "MISSION_SET_CURRENT";
-        public override string ToString()
-        {
-            var name = "MISSION_SET_CURRENT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -7710,7 +7320,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionSetCurrentPayload : IPayload
     {
-        public byte MaxByteSize => 4;
+        public byte GetMaxByteSize() => 4;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -7727,7 +7337,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Seq).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/4;
         }
 
         /// <summary>
@@ -7754,24 +7364,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 42;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 28;
+        public override byte GetCrcEtra() => 28;
 
         public override MissionCurrentPayload Payload { get; } = new MissionCurrentPayload();
 
         public override string Name => "MISSION_CURRENT";
-        public override string ToString()
-        {
-            var name = "MISSION_CURRENT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -7779,7 +7376,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionCurrentPayload : IPayload
     {
-        public byte MaxByteSize => 2;
+        public byte GetMaxByteSize() => 2;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -7792,7 +7389,7 @@ namespace Asv.Mavlink.V2.Common
         public int Serialize(byte[] buffer, int index)
         {
             BitConverter.GetBytes(Seq).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/2;
         }
 
         /// <summary>
@@ -7809,24 +7406,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 43;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 132;
+        public override byte GetCrcEtra() => 132;
 
         public override MissionRequestListPayload Payload { get; } = new MissionRequestListPayload();
 
         public override string Name => "MISSION_REQUEST_LIST";
-        public override string ToString()
-        {
-            var name = "MISSION_REQUEST_LIST".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -7834,7 +7418,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionRequestListPayload : IPayload
     {
-        public byte MaxByteSize => 3;
+        public byte GetMaxByteSize() => 3;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -7853,7 +7437,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)MissionType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/3;
         }
 
         /// <summary>
@@ -7867,7 +7451,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Mission type.
+        /// Mission type, see MAV_MISSION_TYPE
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -7880,24 +7464,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 44;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 221;
+        public override byte GetCrcEtra() => 221;
 
         public override MissionCountPayload Payload { get; } = new MissionCountPayload();
 
         public override string Name => "MISSION_COUNT";
-        public override string ToString()
-        {
-            var name = "MISSION_COUNT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -7905,7 +7476,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionCountPayload : IPayload
     {
-        public byte MaxByteSize => 5;
+        public byte GetMaxByteSize() => 5;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -7926,7 +7497,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)MissionType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/5;
         }
 
         /// <summary>
@@ -7945,7 +7516,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Mission type.
+        /// Mission type, see MAV_MISSION_TYPE
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -7958,24 +7529,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 45;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 232;
+        public override byte GetCrcEtra() => 232;
 
         public override MissionClearAllPayload Payload { get; } = new MissionClearAllPayload();
 
         public override string Name => "MISSION_CLEAR_ALL";
-        public override string ToString()
-        {
-            var name = "MISSION_CLEAR_ALL".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -7983,7 +7541,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionClearAllPayload : IPayload
     {
-        public byte MaxByteSize => 3;
+        public byte GetMaxByteSize() => 3;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -8002,7 +7560,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)MissionType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/3;
         }
 
         /// <summary>
@@ -8016,7 +7574,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Mission type.
+        /// Mission type, see MAV_MISSION_TYPE
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -8029,24 +7587,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 46;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 11;
+        public override byte GetCrcEtra() => 11;
 
         public override MissionItemReachedPayload Payload { get; } = new MissionItemReachedPayload();
 
         public override string Name => "MISSION_ITEM_REACHED";
-        public override string ToString()
-        {
-            var name = "MISSION_ITEM_REACHED".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -8054,7 +7599,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionItemReachedPayload : IPayload
     {
-        public byte MaxByteSize => 2;
+        public byte GetMaxByteSize() => 2;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -8067,7 +7612,7 @@ namespace Asv.Mavlink.V2.Common
         public int Serialize(byte[] buffer, int index)
         {
             BitConverter.GetBytes(Seq).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/2;
         }
 
         /// <summary>
@@ -8077,31 +7622,18 @@ namespace Asv.Mavlink.V2.Common
         public ushort Seq { get; set; }
     }
     /// <summary>
-    /// Acknowledgment message during waypoint handling. The type field states if this message is a positive ack (type=0) or if an error happened (type=non-zero).
+    /// Ack message during waypoint handling. The type field states if this message is a positive ack (type=0) or if an error happened (type=non-zero).
     ///  MISSION_ACK
     /// </summary>
     public class MissionAckPacket: PacketV2<MissionAckPayload>
     {
 	public const int PacketMessageId = 47;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 153;
+        public override byte GetCrcEtra() => 153;
 
         public override MissionAckPayload Payload { get; } = new MissionAckPayload();
 
         public override string Name => "MISSION_ACK";
-        public override string ToString()
-        {
-            var name = "MISSION_ACK".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -8109,7 +7641,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionAckPayload : IPayload
     {
-        public byte MaxByteSize => 4;
+        public byte GetMaxByteSize() => 4;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -8130,7 +7662,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)Type;index+=1;
             buffer[index] = (byte)MissionType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/4;
         }
 
         /// <summary>
@@ -8144,12 +7676,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Mission result.
+        /// See MAV_MISSION_RESULT enum
         /// OriginName: type, Units: , IsExtended: false
         /// </summary>
         public MavMissionResult Type { get; set; }
         /// <summary>
-        /// Mission type.
+        /// Mission type, see MAV_MISSION_TYPE
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -8162,24 +7694,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 48;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 41;
+        public override byte GetCrcEtra() => 41;
 
         public override SetGpsGlobalOriginPayload Payload { get; } = new SetGpsGlobalOriginPayload();
 
         public override string Name => "SET_GPS_GLOBAL_ORIGIN";
-        public override string ToString()
-        {
-            var name = "SET_GPS_GLOBAL_ORIGIN".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -8187,7 +7706,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SetGpsGlobalOriginPayload : IPayload
     {
-        public byte MaxByteSize => 21;
+        public byte GetMaxByteSize() => 21;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -8210,21 +7729,21 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Altitude).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
-            return MaxByteSize;
+            return /*PayloadByteSize*/21;
         }
 
         /// <summary>
-        /// Latitude (WGS84)
+        /// Latitude (WGS84), in degrees * 1E7
         /// OriginName: latitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Latitude { get; set; }
         /// <summary>
-        /// Longitude (WGS84)
+        /// Longitude (WGS84), in degrees * 1E7
         /// OriginName: longitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Longitude { get; set; }
         /// <summary>
-        /// Altitude (AMSL). Positive for up.
+        /// Altitude (AMSL), in meters * 1000 (positive for up)
         /// OriginName: altitude, Units: mm, IsExtended: false
         /// </summary>
         public int Altitude { get; set; }
@@ -8234,7 +7753,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetSystem { get; set; }
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: true
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -8247,24 +7766,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 49;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 39;
+        public override byte GetCrcEtra() => 39;
 
         public override GpsGlobalOriginPayload Payload { get; } = new GpsGlobalOriginPayload();
 
         public override string Name => "GPS_GLOBAL_ORIGIN";
-        public override string ToString()
-        {
-            var name = "GPS_GLOBAL_ORIGIN".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -8272,7 +7778,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class GpsGlobalOriginPayload : IPayload
     {
-        public byte MaxByteSize => 20;
+        public byte GetMaxByteSize() => 20;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -8293,56 +7799,43 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Longitude).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Altitude).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
-            return MaxByteSize;
+            return /*PayloadByteSize*/20;
         }
 
         /// <summary>
-        /// Latitude (WGS84)
+        /// Latitude (WGS84), in degrees * 1E7
         /// OriginName: latitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Latitude { get; set; }
         /// <summary>
-        /// Longitude (WGS84)
+        /// Longitude (WGS84), in degrees * 1E7
         /// OriginName: longitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Longitude { get; set; }
         /// <summary>
-        /// Altitude (AMSL). Positive for up.
+        /// Altitude (AMSL), in meters * 1000 (positive for up)
         /// OriginName: altitude, Units: mm, IsExtended: false
         /// </summary>
         public int Altitude { get; set; }
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: true
         /// </summary>
         public ulong TimeUsec { get; set; }
     }
     /// <summary>
-    /// Bind a RC channel to a parameter. The parameter should change according to the RC channel value.
+    /// Bind a RC channel to a parameter. The parameter should change accoding to the RC channel value.
     ///  PARAM_MAP_RC
     /// </summary>
     public class ParamMapRcPacket: PacketV2<ParamMapRcPayload>
     {
 	public const int PacketMessageId = 50;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 78;
+        public override byte GetCrcEtra() => 78;
 
         public override ParamMapRcPayload Payload { get; } = new ParamMapRcPayload();
 
         public override string Name => "PARAM_MAP_RC";
-        public override string ToString()
-        {
-            var name = "PARAM_MAP_RC".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -8350,7 +7843,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ParamMapRcPayload : IPayload
     {
-        public byte MaxByteSize => 37;
+        public byte GetMaxByteSize() => 37;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -8364,7 +7857,7 @@ namespace Asv.Mavlink.V2.Common
             ParamIndex = BitConverter.ToInt16(buffer,index);index+=2;
             TargetSystem = (byte)buffer[index++];
             TargetComponent = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/16 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/16 - Math.Max(0,((/*PayloadByteSize*/37 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<16;i++)
             {
                 ParamId[i] = default(char);
@@ -8385,7 +7878,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);index+=16;
             BitConverter.GetBytes(ParameterRcChannelIndex).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/37;
         }
 
         /// <summary>
@@ -8429,7 +7922,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public char[] ParamId { get; } = new char[16];
         /// <summary>
-        /// Index of parameter RC channel. Not equal to the RC channel id. Typically corresponds to a potentiometer-knob on the RC.
+        /// Index of parameter RC channel. Not equal to the RC channel id. Typically correpsonds to a potentiometer-knob on the RC.
         /// OriginName: parameter_rc_channel_index, Units: , IsExtended: false
         /// </summary>
         public byte ParameterRcChannelIndex { get; set; }
@@ -8442,24 +7935,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 51;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 196;
+        public override byte GetCrcEtra() => 196;
 
         public override MissionRequestIntPayload Payload { get; } = new MissionRequestIntPayload();
 
         public override string Name => "MISSION_REQUEST_INT";
-        public override string ToString()
-        {
-            var name = "MISSION_REQUEST_INT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -8467,7 +7947,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionRequestIntPayload : IPayload
     {
-        public byte MaxByteSize => 5;
+        public byte GetMaxByteSize() => 5;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -8488,7 +7968,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)MissionType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/5;
         }
 
         /// <summary>
@@ -8507,7 +7987,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Mission type.
+        /// Mission type, see MAV_MISSION_TYPE
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -8520,24 +8000,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 54;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 15;
+        public override byte GetCrcEtra() => 15;
 
         public override SafetySetAllowedAreaPayload Payload { get; } = new SafetySetAllowedAreaPayload();
 
         public override string Name => "SAFETY_SET_ALLOWED_AREA";
-        public override string ToString()
-        {
-            var name = "SAFETY_SET_ALLOWED_AREA".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -8545,7 +8012,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SafetySetAllowedAreaPayload : IPayload
     {
-        public byte MaxByteSize => 27;
+        public byte GetMaxByteSize() => 27;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -8574,7 +8041,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)Frame;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/27;
         }
 
         /// <summary>
@@ -8618,7 +8085,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Coordinate frame. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
+        /// Coordinate frame, as defined by MAV_FRAME enum. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
         /// OriginName: frame, Units: , IsExtended: false
         /// </summary>
         public MavFrame Frame { get; set; }
@@ -8631,24 +8098,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 55;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 3;
+        public override byte GetCrcEtra() => 3;
 
         public override SafetyAllowedAreaPayload Payload { get; } = new SafetyAllowedAreaPayload();
 
         public override string Name => "SAFETY_ALLOWED_AREA";
-        public override string ToString()
-        {
-            var name = "SAFETY_ALLOWED_AREA".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -8656,7 +8110,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SafetyAllowedAreaPayload : IPayload
     {
-        public byte MaxByteSize => 25;
+        public byte GetMaxByteSize() => 25;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -8681,7 +8135,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(P2y).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(P2z).CopyTo(buffer, index);index+=4;
             buffer[index] = (byte)Frame;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/25;
         }
 
         /// <summary>
@@ -8715,7 +8169,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float P2z { get; set; }
         /// <summary>
-        /// Coordinate frame. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
+        /// Coordinate frame, as defined by MAV_FRAME enum. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
         /// OriginName: frame, Units: , IsExtended: false
         /// </summary>
         public MavFrame Frame { get; set; }
@@ -8728,24 +8182,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 61;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 167;
+        public override byte GetCrcEtra() => 167;
 
         public override AttitudeQuaternionCovPayload Payload { get; } = new AttitudeQuaternionCovPayload();
 
         public override string Name => "ATTITUDE_QUATERNION_COV";
-        public override string ToString()
-        {
-            var name = "ATTITUDE_QUATERNION_COV".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -8753,7 +8194,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class AttitudeQuaternionCovPayload : IPayload
     {
-        public byte MaxByteSize => 72;
+        public byte GetMaxByteSize() => 72;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -8769,7 +8210,7 @@ namespace Asv.Mavlink.V2.Common
             Rollspeed = BitConverter.ToSingle(buffer, index);index+=4;
             Pitchspeed = BitConverter.ToSingle(buffer, index);index+=4;
             Yawspeed = BitConverter.ToSingle(buffer, index);index+=4;
-            arraySize = /*ArrayLength*/9 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/9 - Math.Max(0,((/*PayloadByteSize*/72 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<9;i++)
             {
                 Covariance[i] = default(float);
@@ -8794,11 +8235,11 @@ namespace Asv.Mavlink.V2.Common
             {
                 BitConverter.GetBytes(Covariance[i]).CopyTo(buffer, index);index+=4;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/72;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since system boot or since UNIX epoch)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -8808,17 +8249,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float[] Q { get; } = new float[4];
         /// <summary>
-        /// Roll angular speed
+        /// Roll angular speed (rad/s)
         /// OriginName: rollspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Rollspeed { get; set; }
         /// <summary>
-        /// Pitch angular speed
+        /// Pitch angular speed (rad/s)
         /// OriginName: pitchspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Pitchspeed { get; set; }
         /// <summary>
-        /// Yaw angular speed
+        /// Yaw angular speed (rad/s)
         /// OriginName: yawspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Yawspeed { get; set; }
@@ -8836,24 +8277,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 62;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 183;
+        public override byte GetCrcEtra() => 183;
 
         public override NavControllerOutputPayload Payload { get; } = new NavControllerOutputPayload();
 
         public override string Name => "NAV_CONTROLLER_OUTPUT";
-        public override string ToString()
-        {
-            var name = "NAV_CONTROLLER_OUTPUT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -8861,7 +8289,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class NavControllerOutputPayload : IPayload
     {
-        public byte MaxByteSize => 26;
+        public byte GetMaxByteSize() => 26;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -8888,46 +8316,46 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(NavBearing).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetBearing).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(WpDist).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/26;
         }
 
         /// <summary>
-        /// Current desired roll
+        /// Current desired roll in degrees
         /// OriginName: nav_roll, Units: deg, IsExtended: false
         /// </summary>
         public float NavRoll { get; set; }
         /// <summary>
-        /// Current desired pitch
+        /// Current desired pitch in degrees
         /// OriginName: nav_pitch, Units: deg, IsExtended: false
         /// </summary>
         public float NavPitch { get; set; }
         /// <summary>
-        /// Current altitude error
+        /// Current altitude error in meters
         /// OriginName: alt_error, Units: m, IsExtended: false
         /// </summary>
         public float AltError { get; set; }
         /// <summary>
-        /// Current airspeed error
+        /// Current airspeed error in meters/second
         /// OriginName: aspd_error, Units: m/s, IsExtended: false
         /// </summary>
         public float AspdError { get; set; }
         /// <summary>
-        /// Current crosstrack error on x-y plane
+        /// Current crosstrack error on x-y plane in meters
         /// OriginName: xtrack_error, Units: m, IsExtended: false
         /// </summary>
         public float XtrackError { get; set; }
         /// <summary>
-        /// Current desired heading
+        /// Current desired heading in degrees
         /// OriginName: nav_bearing, Units: deg, IsExtended: false
         /// </summary>
         public short NavBearing { get; set; }
         /// <summary>
-        /// Bearing to current waypoint/target
+        /// Bearing to current waypoint/target in degrees
         /// OriginName: target_bearing, Units: deg, IsExtended: false
         /// </summary>
         public short TargetBearing { get; set; }
         /// <summary>
-        /// Distance to active waypoint
+        /// Distance to active waypoint in meters
         /// OriginName: wp_dist, Units: m, IsExtended: false
         /// </summary>
         public ushort WpDist { get; set; }
@@ -8940,24 +8368,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 63;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 119;
+        public override byte GetCrcEtra() => 119;
 
         public override GlobalPositionIntCovPayload Payload { get; } = new GlobalPositionIntCovPayload();
 
         public override string Name => "GLOBAL_POSITION_INT_COV";
-        public override string ToString()
-        {
-            var name = "GLOBAL_POSITION_INT_COV".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -8965,7 +8380,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class GlobalPositionIntCovPayload : IPayload
     {
-        public byte MaxByteSize => 181;
+        public byte GetMaxByteSize() => 181;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -8980,7 +8395,7 @@ namespace Asv.Mavlink.V2.Common
             Vx = BitConverter.ToSingle(buffer, index);index+=4;
             Vy = BitConverter.ToSingle(buffer, index);index+=4;
             Vz = BitConverter.ToSingle(buffer, index);index+=4;
-            arraySize = /*ArrayLength*/36 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/36 - Math.Max(0,((/*PayloadByteSize*/181 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<36;i++)
             {
                 Covariance[i] = default(float);
@@ -9007,46 +8422,46 @@ namespace Asv.Mavlink.V2.Common
                 BitConverter.GetBytes(Covariance[i]).CopyTo(buffer, index);index+=4;
             }
             buffer[index] = (byte)EstimatorType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/181;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since system boot or since UNIX epoch)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Latitude
+        /// Latitude, expressed as degrees * 1E7
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude
+        /// Longitude, expressed as degrees * 1E7
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude in meters above MSL
+        /// Altitude in meters, expressed as * 1000 (millimeters), above MSL
         /// OriginName: alt, Units: mm, IsExtended: false
         /// </summary>
         public int Alt { get; set; }
         /// <summary>
-        /// Altitude above ground
+        /// Altitude above ground in meters, expressed as * 1000 (millimeters)
         /// OriginName: relative_alt, Units: mm, IsExtended: false
         /// </summary>
         public int RelativeAlt { get; set; }
         /// <summary>
-        /// Ground X Speed (Latitude)
+        /// Ground X Speed (Latitude), expressed as m/s
         /// OriginName: vx, Units: m/s, IsExtended: false
         /// </summary>
         public float Vx { get; set; }
         /// <summary>
-        /// Ground Y Speed (Longitude)
+        /// Ground Y Speed (Longitude), expressed as m/s
         /// OriginName: vy, Units: m/s, IsExtended: false
         /// </summary>
         public float Vy { get; set; }
         /// <summary>
-        /// Ground Z Speed (Altitude)
+        /// Ground Z Speed (Altitude), expressed as m/s
         /// OriginName: vz, Units: m/s, IsExtended: false
         /// </summary>
         public float Vz { get; set; }
@@ -9069,24 +8484,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 64;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 191;
+        public override byte GetCrcEtra() => 191;
 
         public override LocalPositionNedCovPayload Payload { get; } = new LocalPositionNedCovPayload();
 
         public override string Name => "LOCAL_POSITION_NED_COV";
-        public override string ToString()
-        {
-            var name = "LOCAL_POSITION_NED_COV".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -9094,7 +8496,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class LocalPositionNedCovPayload : IPayload
     {
-        public byte MaxByteSize => 225;
+        public byte GetMaxByteSize() => 225;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -9111,7 +8513,7 @@ namespace Asv.Mavlink.V2.Common
             Ax = BitConverter.ToSingle(buffer, index);index+=4;
             Ay = BitConverter.ToSingle(buffer, index);index+=4;
             Az = BitConverter.ToSingle(buffer, index);index+=4;
-            arraySize = /*ArrayLength*/45 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/45 - Math.Max(0,((/*PayloadByteSize*/225 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<45;i++)
             {
                 Covariance[i] = default(float);
@@ -9140,11 +8542,11 @@ namespace Asv.Mavlink.V2.Common
                 BitConverter.GetBytes(Covariance[i]).CopyTo(buffer, index);index+=4;
             }
             buffer[index] = (byte)EstimatorType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/225;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since system boot or since UNIX epoch)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -9164,32 +8566,32 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Z { get; set; }
         /// <summary>
-        /// X Speed
+        /// X Speed (m/s)
         /// OriginName: vx, Units: m/s, IsExtended: false
         /// </summary>
         public float Vx { get; set; }
         /// <summary>
-        /// Y Speed
+        /// Y Speed (m/s)
         /// OriginName: vy, Units: m/s, IsExtended: false
         /// </summary>
         public float Vy { get; set; }
         /// <summary>
-        /// Z Speed
+        /// Z Speed (m/s)
         /// OriginName: vz, Units: m/s, IsExtended: false
         /// </summary>
         public float Vz { get; set; }
         /// <summary>
-        /// X Acceleration
+        /// X Acceleration (m/s^2)
         /// OriginName: ax, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Ax { get; set; }
         /// <summary>
-        /// Y Acceleration
+        /// Y Acceleration (m/s^2)
         /// OriginName: ay, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Ay { get; set; }
         /// <summary>
-        /// Z Acceleration
+        /// Z Acceleration (m/s^2)
         /// OriginName: az, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Az { get; set; }
@@ -9205,31 +8607,18 @@ namespace Asv.Mavlink.V2.Common
         public MavEstimatorType EstimatorType { get; set; }
     }
     /// <summary>
-    /// The PPM values of the RC channels received. The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%.  A value of UINT16_MAX implies the channel is unused. Individual receivers/transmitters might violate this specification.
+    /// The PPM values of the RC channels received. The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%. Individual receivers/transmitters might violate this specification.
     ///  RC_CHANNELS
     /// </summary>
     public class RcChannelsPacket: PacketV2<RcChannelsPayload>
     {
 	public const int PacketMessageId = 65;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 118;
+        public override byte GetCrcEtra() => 118;
 
         public override RcChannelsPayload Payload { get; } = new RcChannelsPayload();
 
         public override string Name => "RC_CHANNELS";
-        public override string ToString()
-        {
-            var name = "RC_CHANNELS".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -9237,7 +8626,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class RcChannelsPayload : IPayload
     {
-        public byte MaxByteSize => 42;
+        public byte GetMaxByteSize() => 42;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -9290,101 +8679,101 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Chan18Raw).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Chancount).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Rssi).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/42;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// RC channel 1 value.
+        /// RC channel 1 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan1_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan1Raw { get; set; }
         /// <summary>
-        /// RC channel 2 value.
+        /// RC channel 2 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan2_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan2Raw { get; set; }
         /// <summary>
-        /// RC channel 3 value.
+        /// RC channel 3 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan3_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan3Raw { get; set; }
         /// <summary>
-        /// RC channel 4 value.
+        /// RC channel 4 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan4_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan4Raw { get; set; }
         /// <summary>
-        /// RC channel 5 value.
+        /// RC channel 5 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan5_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan5Raw { get; set; }
         /// <summary>
-        /// RC channel 6 value.
+        /// RC channel 6 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan6_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan6Raw { get; set; }
         /// <summary>
-        /// RC channel 7 value.
+        /// RC channel 7 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan7_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan7Raw { get; set; }
         /// <summary>
-        /// RC channel 8 value.
+        /// RC channel 8 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan8_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan8Raw { get; set; }
         /// <summary>
-        /// RC channel 9 value.
+        /// RC channel 9 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan9_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan9Raw { get; set; }
         /// <summary>
-        /// RC channel 10 value.
+        /// RC channel 10 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan10_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan10Raw { get; set; }
         /// <summary>
-        /// RC channel 11 value.
+        /// RC channel 11 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan11_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan11Raw { get; set; }
         /// <summary>
-        /// RC channel 12 value.
+        /// RC channel 12 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan12_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan12Raw { get; set; }
         /// <summary>
-        /// RC channel 13 value.
+        /// RC channel 13 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan13_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan13Raw { get; set; }
         /// <summary>
-        /// RC channel 14 value.
+        /// RC channel 14 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan14_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan14Raw { get; set; }
         /// <summary>
-        /// RC channel 15 value.
+        /// RC channel 15 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan15_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan15Raw { get; set; }
         /// <summary>
-        /// RC channel 16 value.
+        /// RC channel 16 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan16_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan16Raw { get; set; }
         /// <summary>
-        /// RC channel 17 value.
+        /// RC channel 17 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan17_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan17Raw { get; set; }
         /// <summary>
-        /// RC channel 18 value.
+        /// RC channel 18 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
         /// OriginName: chan18_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan18Raw { get; set; }
@@ -9394,37 +8783,24 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Chancount { get; set; }
         /// <summary>
-        /// Receive signal strength indicator. Values: [0-100], 255: invalid/unknown.
+        /// Receive signal strength indicator, 0: 0%, 100: 100%, 255: invalid/unknown.
         /// OriginName: rssi, Units: %, IsExtended: false
         /// </summary>
         public byte Rssi { get; set; }
     }
     /// <summary>
-    /// Request a data stream.
+    /// THIS INTERFACE IS DEPRECATED. USE SET_MESSAGE_INTERVAL INSTEAD.
     ///  REQUEST_DATA_STREAM
     /// </summary>
     public class RequestDataStreamPacket: PacketV2<RequestDataStreamPayload>
     {
 	public const int PacketMessageId = 66;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 148;
+        public override byte GetCrcEtra() => 148;
 
         public override RequestDataStreamPayload Payload { get; } = new RequestDataStreamPayload();
 
         public override string Name => "REQUEST_DATA_STREAM";
-        public override string ToString()
-        {
-            var name = "REQUEST_DATA_STREAM".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -9432,7 +8808,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class RequestDataStreamPayload : IPayload
     {
-        public byte MaxByteSize => 6;
+        public byte GetMaxByteSize() => 6;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -9453,7 +8829,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(ReqStreamId).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(StartStop).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/6;
         }
 
         /// <summary>
@@ -9483,31 +8859,18 @@ namespace Asv.Mavlink.V2.Common
         public byte StartStop { get; set; }
     }
     /// <summary>
-    /// Data stream status information.
+    /// THIS INTERFACE IS DEPRECATED. USE MESSAGE_INTERVAL INSTEAD.
     ///  DATA_STREAM
     /// </summary>
     public class DataStreamPacket: PacketV2<DataStreamPayload>
     {
 	public const int PacketMessageId = 67;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 21;
+        public override byte GetCrcEtra() => 21;
 
         public override DataStreamPayload Payload { get; } = new DataStreamPayload();
 
         public override string Name => "DATA_STREAM";
-        public override string ToString()
-        {
-            var name = "DATA_STREAM".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -9515,7 +8878,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class DataStreamPayload : IPayload
     {
-        public byte MaxByteSize => 4;
+        public byte GetMaxByteSize() => 4;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -9532,7 +8895,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(MessageRate).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(StreamId).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(OnOff).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/4;
         }
 
         /// <summary>
@@ -9559,24 +8922,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 69;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 243;
+        public override byte GetCrcEtra() => 243;
 
         public override ManualControlPayload Payload { get; } = new ManualControlPayload();
 
         public override string Name => "MANUAL_CONTROL";
-        public override string ToString()
-        {
-            var name = "MANUAL_CONTROL".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -9584,7 +8934,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ManualControlPayload : IPayload
     {
-        public byte MaxByteSize => 11;
+        public byte GetMaxByteSize() => 11;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -9607,7 +8957,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(R).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Buttons).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Target).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/11;
         }
 
         /// <summary>
@@ -9649,24 +8999,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 70;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 124;
+        public override byte GetCrcEtra() => 124;
 
         public override RcChannelsOverridePayload Payload { get; } = new RcChannelsOverridePayload();
 
         public override string Name => "RC_CHANNELS_OVERRIDE";
-        public override string ToString()
-        {
-            var name = "RC_CHANNELS_OVERRIDE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -9674,7 +9011,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class RcChannelsOverridePayload : IPayload
     {
-        public byte MaxByteSize => 38;
+        public byte GetMaxByteSize() => 38;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -9745,46 +9082,46 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Chan16Raw).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Chan17Raw).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Chan18Raw).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/38;
         }
 
         /// <summary>
-        /// RC channel 1 value. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 1 value, in microseconds. A value of UINT16_MAX means to ignore this field.
         /// OriginName: chan1_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan1Raw { get; set; }
         /// <summary>
-        /// RC channel 2 value. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 2 value, in microseconds. A value of UINT16_MAX means to ignore this field.
         /// OriginName: chan2_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan2Raw { get; set; }
         /// <summary>
-        /// RC channel 3 value. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 3 value, in microseconds. A value of UINT16_MAX means to ignore this field.
         /// OriginName: chan3_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan3Raw { get; set; }
         /// <summary>
-        /// RC channel 4 value. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 4 value, in microseconds. A value of UINT16_MAX means to ignore this field.
         /// OriginName: chan4_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan4Raw { get; set; }
         /// <summary>
-        /// RC channel 5 value. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 5 value, in microseconds. A value of UINT16_MAX means to ignore this field.
         /// OriginName: chan5_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan5Raw { get; set; }
         /// <summary>
-        /// RC channel 6 value. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 6 value, in microseconds. A value of UINT16_MAX means to ignore this field.
         /// OriginName: chan6_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan6Raw { get; set; }
         /// <summary>
-        /// RC channel 7 value. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 7 value, in microseconds. A value of UINT16_MAX means to ignore this field.
         /// OriginName: chan7_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan7Raw { get; set; }
         /// <summary>
-        /// RC channel 8 value. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 8 value, in microseconds. A value of UINT16_MAX means to ignore this field.
         /// OriginName: chan8_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan8Raw { get; set; }
@@ -9799,52 +9136,52 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// RC channel 9 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 9 value, in microseconds. A value of 0 means to ignore this field.
         /// OriginName: chan9_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan9Raw { get; set; }
         /// <summary>
-        /// RC channel 10 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 10 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan10_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan10Raw { get; set; }
         /// <summary>
-        /// RC channel 11 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 11 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan11_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan11Raw { get; set; }
         /// <summary>
-        /// RC channel 12 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 12 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan12_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan12Raw { get; set; }
         /// <summary>
-        /// RC channel 13 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 13 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan13_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan13Raw { get; set; }
         /// <summary>
-        /// RC channel 14 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 14 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan14_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan14Raw { get; set; }
         /// <summary>
-        /// RC channel 15 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 15 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan15_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan15Raw { get; set; }
         /// <summary>
-        /// RC channel 16 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 16 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan16_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan16Raw { get; set; }
         /// <summary>
-        /// RC channel 17 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 17 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan17_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan17Raw { get; set; }
         /// <summary>
-        /// RC channel 18 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 18 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan18_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan18Raw { get; set; }
@@ -9858,24 +9195,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 73;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 38;
+        public override byte GetCrcEtra() => 38;
 
         public override MissionItemIntPayload Payload { get; } = new MissionItemIntPayload();
 
         public override string Name => "MISSION_ITEM_INT";
-        public override string ToString()
-        {
-            var name = "MISSION_ITEM_INT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -9883,7 +9207,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MissionItemIntPayload : IPayload
     {
-        public byte MaxByteSize => 38;
+        public byte GetMaxByteSize() => 38;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -9926,7 +9250,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Current).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Autocontinue).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)MissionType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/38;
         }
 
         /// <summary>
@@ -9970,7 +9294,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort Seq { get; set; }
         /// <summary>
-        /// The scheduled action for the waypoint.
+        /// The scheduled action for the waypoint, as defined by MAV_CMD enum
         /// OriginName: command, Units: , IsExtended: false
         /// </summary>
         public MavCmd Command { get; set; }
@@ -9985,7 +9309,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// The coordinate system of the waypoint.
+        /// The coordinate system of the waypoint, as defined by MAV_FRAME enum
         /// OriginName: frame, Units: , IsExtended: false
         /// </summary>
         public MavFrame Frame { get; set; }
@@ -9995,12 +9319,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Current { get; set; }
         /// <summary>
-        /// Autocontinue to next waypoint
+        /// autocontinue to next wp
         /// OriginName: autocontinue, Units: , IsExtended: false
         /// </summary>
         public byte Autocontinue { get; set; }
         /// <summary>
-        /// Mission type.
+        /// Mission type, see MAV_MISSION_TYPE
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -10013,24 +9337,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 74;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 20;
+        public override byte GetCrcEtra() => 20;
 
         public override VfrHudPayload Payload { get; } = new VfrHudPayload();
 
         public override string Name => "VFR_HUD";
-        public override string ToString()
-        {
-            var name = "VFR_HUD".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -10038,7 +9349,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class VfrHudPayload : IPayload
     {
-        public byte MaxByteSize => 20;
+        public byte GetMaxByteSize() => 20;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -10061,26 +9372,26 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Climb).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Heading).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Throttle).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/20;
         }
 
         /// <summary>
-        /// Current airspeed
+        /// Current airspeed in m/s
         /// OriginName: airspeed, Units: m/s, IsExtended: false
         /// </summary>
         public float Airspeed { get; set; }
         /// <summary>
-        /// Current ground speed
+        /// Current ground speed in m/s
         /// OriginName: groundspeed, Units: m/s, IsExtended: false
         /// </summary>
         public float Groundspeed { get; set; }
         /// <summary>
-        /// Current altitude (MSL)
+        /// Current altitude (MSL), in meters
         /// OriginName: alt, Units: m, IsExtended: false
         /// </summary>
         public float Alt { get; set; }
         /// <summary>
-        /// Current climb rate
+        /// Current climb rate in meters/second
         /// OriginName: climb, Units: m/s, IsExtended: false
         /// </summary>
         public float Climb { get; set; }
@@ -10103,24 +9414,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 75;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 158;
+        public override byte GetCrcEtra() => 158;
 
         public override CommandIntPayload Payload { get; } = new CommandIntPayload();
 
         public override string Name => "COMMAND_INT";
-        public override string ToString()
-        {
-            var name = "COMMAND_INT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -10128,7 +9426,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class CommandIntPayload : IPayload
     {
-        public byte MaxByteSize => 35;
+        public byte GetMaxByteSize() => 35;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -10165,7 +9463,7 @@ namespace Asv.Mavlink.V2.Common
             buffer[index] = (byte)Frame;index+=1;
             BitConverter.GetBytes(Current).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Autocontinue).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/35;
         }
 
         /// <summary>
@@ -10199,12 +9497,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public int Y { get; set; }
         /// <summary>
-        /// PARAM7 / z position: global: altitude in meters (relative or absolute, depending on frame).
+        /// PARAM7 / z position: global: altitude in meters (relative or absolute, depending on frame.
         /// OriginName: z, Units: , IsExtended: false
         /// </summary>
         public float Z { get; set; }
         /// <summary>
-        /// The scheduled action for the mission item.
+        /// The scheduled action for the mission item, as defined by MAV_CMD enum
         /// OriginName: command, Units: , IsExtended: false
         /// </summary>
         public MavCmd Command { get; set; }
@@ -10219,7 +9517,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// The coordinate system of the COMMAND.
+        /// The coordinate system of the COMMAND, as defined by MAV_FRAME enum
         /// OriginName: frame, Units: , IsExtended: false
         /// </summary>
         public MavFrame Frame { get; set; }
@@ -10242,24 +9540,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 76;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 152;
+        public override byte GetCrcEtra() => 152;
 
         public override CommandLongPayload Payload { get; } = new CommandLongPayload();
 
         public override string Name => "COMMAND_LONG";
-        public override string ToString()
-        {
-            var name = "COMMAND_LONG".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -10267,7 +9552,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class CommandLongPayload : IPayload
     {
-        public byte MaxByteSize => 33;
+        public byte GetMaxByteSize() => 33;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -10300,46 +9585,46 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Confirmation).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/33;
         }
 
         /// <summary>
-        /// Parameter 1 (for the specific command).
+        /// Parameter 1, as defined by MAV_CMD enum.
         /// OriginName: param1, Units: , IsExtended: false
         /// </summary>
         public float Param1 { get; set; }
         /// <summary>
-        /// Parameter 2 (for the specific command).
+        /// Parameter 2, as defined by MAV_CMD enum.
         /// OriginName: param2, Units: , IsExtended: false
         /// </summary>
         public float Param2 { get; set; }
         /// <summary>
-        /// Parameter 3 (for the specific command).
+        /// Parameter 3, as defined by MAV_CMD enum.
         /// OriginName: param3, Units: , IsExtended: false
         /// </summary>
         public float Param3 { get; set; }
         /// <summary>
-        /// Parameter 4 (for the specific command).
+        /// Parameter 4, as defined by MAV_CMD enum.
         /// OriginName: param4, Units: , IsExtended: false
         /// </summary>
         public float Param4 { get; set; }
         /// <summary>
-        /// Parameter 5 (for the specific command).
+        /// Parameter 5, as defined by MAV_CMD enum.
         /// OriginName: param5, Units: , IsExtended: false
         /// </summary>
         public float Param5 { get; set; }
         /// <summary>
-        /// Parameter 6 (for the specific command).
+        /// Parameter 6, as defined by MAV_CMD enum.
         /// OriginName: param6, Units: , IsExtended: false
         /// </summary>
         public float Param6 { get; set; }
         /// <summary>
-        /// Parameter 7 (for the specific command).
+        /// Parameter 7, as defined by MAV_CMD enum.
         /// OriginName: param7, Units: , IsExtended: false
         /// </summary>
         public float Param7 { get; set; }
         /// <summary>
-        /// Command ID (of command to send).
+        /// Command ID, as defined by MAV_CMD enum.
         /// OriginName: command, Units: , IsExtended: false
         /// </summary>
         public MavCmd Command { get; set; }
@@ -10367,24 +9652,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 77;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 143;
+        public override byte GetCrcEtra() => 143;
 
         public override CommandAckPayload Payload { get; } = new CommandAckPayload();
 
         public override string Name => "COMMAND_ACK";
-        public override string ToString()
-        {
-            var name = "COMMAND_ACK".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -10392,7 +9664,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class CommandAckPayload : IPayload
     {
-        public byte MaxByteSize => 10;
+        public byte GetMaxByteSize() => 10;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -10423,16 +9695,16 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(ResultParam2).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/10;
         }
 
         /// <summary>
-        /// Command ID (of acknowledged command).
+        /// Command ID, as defined by MAV_CMD enum.
         /// OriginName: command, Units: , IsExtended: false
         /// </summary>
         public MavCmd Command { get; set; }
         /// <summary>
-        /// Result of command.
+        /// See MAV_RESULT enum
         /// OriginName: result, Units: , IsExtended: false
         /// </summary>
         public MavResult Result { get; set; }
@@ -10465,24 +9737,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 81;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 106;
+        public override byte GetCrcEtra() => 106;
 
         public override ManualSetpointPayload Payload { get; } = new ManualSetpointPayload();
 
         public override string Name => "MANUAL_SETPOINT";
-        public override string ToString()
-        {
-            var name = "MANUAL_SETPOINT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -10490,7 +9749,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ManualSetpointPayload : IPayload
     {
-        public byte MaxByteSize => 22;
+        public byte GetMaxByteSize() => 22;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -10515,26 +9774,26 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Thrust).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(ModeSwitch).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(ManualOverrideSwitch).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/22;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp in milliseconds since system boot
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Desired roll rate
+        /// Desired roll rate in radians per second
         /// OriginName: roll, Units: rad/s, IsExtended: false
         /// </summary>
         public float Roll { get; set; }
         /// <summary>
-        /// Desired pitch rate
+        /// Desired pitch rate in radians per second
         /// OriginName: pitch, Units: rad/s, IsExtended: false
         /// </summary>
         public float Pitch { get; set; }
         /// <summary>
-        /// Desired yaw rate
+        /// Desired yaw rate in radians per second
         /// OriginName: yaw, Units: rad/s, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
@@ -10562,24 +9821,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 82;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 49;
+        public override byte GetCrcEtra() => 49;
 
         public override SetAttitudeTargetPayload Payload { get; } = new SetAttitudeTargetPayload();
 
         public override string Name => "SET_ATTITUDE_TARGET";
-        public override string ToString()
-        {
-            var name = "SET_ATTITUDE_TARGET".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -10587,7 +9833,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SetAttitudeTargetPayload : IPayload
     {
-        public byte MaxByteSize => 39;
+        public byte GetMaxByteSize() => 39;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -10595,7 +9841,7 @@ namespace Asv.Mavlink.V2.Common
             var endIndex = offset + payloadSize;
             var arraySize = 0;
             TimeBootMs = BitConverter.ToUInt32(buffer,index);index+=4;
-            arraySize = /*ArrayLength*/4 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/4 - Math.Max(0,((/*PayloadByteSize*/39 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<4;i++)
             {
                 Q[i] = default(float);
@@ -10627,11 +9873,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TypeMask).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/39;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp in milliseconds since system boot
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -10641,17 +9887,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float[] Q { get; } = new float[4];
         /// <summary>
-        /// Body roll rate
+        /// Body roll rate in radians per second
         /// OriginName: body_roll_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float BodyRollRate { get; set; }
         /// <summary>
-        /// Body pitch rate
+        /// Body pitch rate in radians per second
         /// OriginName: body_pitch_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float BodyPitchRate { get; set; }
         /// <summary>
-        /// Body yaw rate
+        /// Body yaw rate in radians per second
         /// OriginName: body_yaw_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float BodyYawRate { get; set; }
@@ -10684,24 +9930,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 83;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 22;
+        public override byte GetCrcEtra() => 22;
 
         public override AttitudeTargetPayload Payload { get; } = new AttitudeTargetPayload();
 
         public override string Name => "ATTITUDE_TARGET";
-        public override string ToString()
-        {
-            var name = "ATTITUDE_TARGET".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -10709,7 +9942,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class AttitudeTargetPayload : IPayload
     {
-        public byte MaxByteSize => 37;
+        public byte GetMaxByteSize() => 37;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -10717,7 +9950,7 @@ namespace Asv.Mavlink.V2.Common
             var endIndex = offset + payloadSize;
             var arraySize = 0;
             TimeBootMs = BitConverter.ToUInt32(buffer,index);index+=4;
-            arraySize = /*ArrayLength*/4 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/4 - Math.Max(0,((/*PayloadByteSize*/37 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<4;i++)
             {
                 Q[i] = default(float);
@@ -10745,11 +9978,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(BodyYawRate).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Thrust).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TypeMask).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/37;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp in milliseconds since system boot
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -10759,17 +9992,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float[] Q { get; } = new float[4];
         /// <summary>
-        /// Body roll rate
+        /// Body roll rate in radians per second
         /// OriginName: body_roll_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float BodyRollRate { get; set; }
         /// <summary>
-        /// Body pitch rate
+        /// Body pitch rate in radians per second
         /// OriginName: body_pitch_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float BodyPitchRate { get; set; }
         /// <summary>
-        /// Body yaw rate
+        /// Body yaw rate in radians per second
         /// OriginName: body_yaw_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float BodyYawRate { get; set; }
@@ -10792,24 +10025,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 84;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 143;
+        public override byte GetCrcEtra() => 143;
 
         public override SetPositionTargetLocalNedPayload Payload { get; } = new SetPositionTargetLocalNedPayload();
 
         public override string Name => "SET_POSITION_TARGET_LOCAL_NED";
-        public override string ToString()
-        {
-            var name = "SET_POSITION_TARGET_LOCAL_NED".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -10817,7 +10037,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SetPositionTargetLocalNedPayload : IPayload
     {
-        public byte MaxByteSize => 53;
+        public byte GetMaxByteSize() => 53;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -10860,41 +10080,41 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)CoordinateFrame;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/53;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp in milliseconds since system boot
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// X Position in NED frame
+        /// X Position in NED frame in meters
         /// OriginName: x, Units: m, IsExtended: false
         /// </summary>
         public float X { get; set; }
         /// <summary>
-        /// Y Position in NED frame
+        /// Y Position in NED frame in meters
         /// OriginName: y, Units: m, IsExtended: false
         /// </summary>
         public float Y { get; set; }
         /// <summary>
-        /// Z Position in NED frame (note, altitude is negative in NED)
+        /// Z Position in NED frame in meters (note, altitude is negative in NED)
         /// OriginName: z, Units: m, IsExtended: false
         /// </summary>
         public float Z { get; set; }
         /// <summary>
-        /// X velocity in NED frame
+        /// X velocity in NED frame in meter / s
         /// OriginName: vx, Units: m/s, IsExtended: false
         /// </summary>
         public float Vx { get; set; }
         /// <summary>
-        /// Y velocity in NED frame
+        /// Y velocity in NED frame in meter / s
         /// OriginName: vy, Units: m/s, IsExtended: false
         /// </summary>
         public float Vy { get; set; }
         /// <summary>
-        /// Z velocity in NED frame
+        /// Z velocity in NED frame in meter / s
         /// OriginName: vz, Units: m/s, IsExtended: false
         /// </summary>
         public float Vz { get; set; }
@@ -10914,17 +10134,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Afz { get; set; }
         /// <summary>
-        /// yaw setpoint
+        /// yaw setpoint in rad
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
         /// <summary>
-        /// yaw rate setpoint
+        /// yaw rate setpoint in rad/s
         /// OriginName: yaw_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float YawRate { get; set; }
         /// <summary>
-        /// Bitmap to indicate which dimensions should be ignored by the vehicle: a value of 0b0000000000000000 or 0b0000001000000000 indicates that none of the setpoint dimensions should be ignored. If bit 10 is set the floats afx afy afz should be interpreted as force instead of acceleration. Mapping: bit 1: x, bit 2: y, bit 3: z, bit 4: vx, bit 5: vy, bit 6: vz, bit 7: ax, bit 8: ay, bit 9: az, bit 10: is force setpoint, bit 11: yaw, bit 12: yaw rate
+        /// Bitmask to indicate which dimensions should be ignored by the vehicle: a value of 0b0000000000000000 or 0b0000001000000000 indicates that none of the setpoint dimensions should be ignored. If bit 10 is set the floats afx afy afz should be interpreted as force instead of acceleration. Mapping: bit 1: x, bit 2: y, bit 3: z, bit 4: vx, bit 5: vy, bit 6: vz, bit 7: ax, bit 8: ay, bit 9: az, bit 10: is force setpoint, bit 11: yaw, bit 12: yaw rate
         /// OriginName: type_mask, Units: , IsExtended: false
         /// </summary>
         public ushort TypeMask { get; set; }
@@ -10952,24 +10172,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 85;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 140;
+        public override byte GetCrcEtra() => 140;
 
         public override PositionTargetLocalNedPayload Payload { get; } = new PositionTargetLocalNedPayload();
 
         public override string Name => "POSITION_TARGET_LOCAL_NED";
-        public override string ToString()
-        {
-            var name = "POSITION_TARGET_LOCAL_NED".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -10977,7 +10184,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class PositionTargetLocalNedPayload : IPayload
     {
-        public byte MaxByteSize => 51;
+        public byte GetMaxByteSize() => 51;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -11016,41 +10223,41 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(YawRate).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TypeMask).CopyTo(buffer, index);index+=2;
             buffer[index] = (byte)CoordinateFrame;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/51;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp in milliseconds since system boot
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// X Position in NED frame
+        /// X Position in NED frame in meters
         /// OriginName: x, Units: m, IsExtended: false
         /// </summary>
         public float X { get; set; }
         /// <summary>
-        /// Y Position in NED frame
+        /// Y Position in NED frame in meters
         /// OriginName: y, Units: m, IsExtended: false
         /// </summary>
         public float Y { get; set; }
         /// <summary>
-        /// Z Position in NED frame (note, altitude is negative in NED)
+        /// Z Position in NED frame in meters (note, altitude is negative in NED)
         /// OriginName: z, Units: m, IsExtended: false
         /// </summary>
         public float Z { get; set; }
         /// <summary>
-        /// X velocity in NED frame
+        /// X velocity in NED frame in meter / s
         /// OriginName: vx, Units: m/s, IsExtended: false
         /// </summary>
         public float Vx { get; set; }
         /// <summary>
-        /// Y velocity in NED frame
+        /// Y velocity in NED frame in meter / s
         /// OriginName: vy, Units: m/s, IsExtended: false
         /// </summary>
         public float Vy { get; set; }
         /// <summary>
-        /// Z velocity in NED frame
+        /// Z velocity in NED frame in meter / s
         /// OriginName: vz, Units: m/s, IsExtended: false
         /// </summary>
         public float Vz { get; set; }
@@ -11070,17 +10277,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Afz { get; set; }
         /// <summary>
-        /// yaw setpoint
+        /// yaw setpoint in rad
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
         /// <summary>
-        /// yaw rate setpoint
+        /// yaw rate setpoint in rad/s
         /// OriginName: yaw_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float YawRate { get; set; }
         /// <summary>
-        /// Bitmap to indicate which dimensions should be ignored by the vehicle: a value of 0b0000000000000000 or 0b0000001000000000 indicates that none of the setpoint dimensions should be ignored. If bit 10 is set the floats afx afy afz should be interpreted as force instead of acceleration. Mapping: bit 1: x, bit 2: y, bit 3: z, bit 4: vx, bit 5: vy, bit 6: vz, bit 7: ax, bit 8: ay, bit 9: az, bit 10: is force setpoint, bit 11: yaw, bit 12: yaw rate
+        /// Bitmask to indicate which dimensions should be ignored by the vehicle: a value of 0b0000000000000000 or 0b0000001000000000 indicates that none of the setpoint dimensions should be ignored. If bit 10 is set the floats afx afy afz should be interpreted as force instead of acceleration. Mapping: bit 1: x, bit 2: y, bit 3: z, bit 4: vx, bit 5: vy, bit 6: vz, bit 7: ax, bit 8: ay, bit 9: az, bit 10: is force setpoint, bit 11: yaw, bit 12: yaw rate
         /// OriginName: type_mask, Units: , IsExtended: false
         /// </summary>
         public ushort TypeMask { get; set; }
@@ -11098,24 +10305,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 86;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 5;
+        public override byte GetCrcEtra() => 5;
 
         public override SetPositionTargetGlobalIntPayload Payload { get; } = new SetPositionTargetGlobalIntPayload();
 
         public override string Name => "SET_POSITION_TARGET_GLOBAL_INT";
-        public override string ToString()
-        {
-            var name = "SET_POSITION_TARGET_GLOBAL_INT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -11123,7 +10317,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SetPositionTargetGlobalIntPayload : IPayload
     {
-        public byte MaxByteSize => 53;
+        public byte GetMaxByteSize() => 53;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -11166,41 +10360,41 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)CoordinateFrame;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/53;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot). The rationale for the timestamp in the setpoint is to allow the system to compensate for the transport delay of the setpoint. This allows the system to compensate processing latency.
+        /// Timestamp in milliseconds since system boot. The rationale for the timestamp in the setpoint is to allow the system to compensate for the transport delay of the setpoint. This allows the system to compensate processing latency.
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// X Position in WGS84 frame
+        /// X Position in WGS84 frame in 1e7 * degrees
         /// OriginName: lat_int, Units: degE7, IsExtended: false
         /// </summary>
         public int LatInt { get; set; }
         /// <summary>
-        /// Y Position in WGS84 frame
+        /// Y Position in WGS84 frame in 1e7 * degrees
         /// OriginName: lon_int, Units: degE7, IsExtended: false
         /// </summary>
         public int LonInt { get; set; }
         /// <summary>
-        /// Altitude (AMSL) if absolute or relative, above terrain if GLOBAL_TERRAIN_ALT_INT
+        /// Altitude in meters in AMSL altitude, not WGS84 if absolute or relative, above terrain if GLOBAL_TERRAIN_ALT_INT
         /// OriginName: alt, Units: m, IsExtended: false
         /// </summary>
         public float Alt { get; set; }
         /// <summary>
-        /// X velocity in NED frame
+        /// X velocity in NED frame in meter / s
         /// OriginName: vx, Units: m/s, IsExtended: false
         /// </summary>
         public float Vx { get; set; }
         /// <summary>
-        /// Y velocity in NED frame
+        /// Y velocity in NED frame in meter / s
         /// OriginName: vy, Units: m/s, IsExtended: false
         /// </summary>
         public float Vy { get; set; }
         /// <summary>
-        /// Z velocity in NED frame
+        /// Z velocity in NED frame in meter / s
         /// OriginName: vz, Units: m/s, IsExtended: false
         /// </summary>
         public float Vz { get; set; }
@@ -11220,17 +10414,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Afz { get; set; }
         /// <summary>
-        /// yaw setpoint
+        /// yaw setpoint in rad
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
         /// <summary>
-        /// yaw rate setpoint
+        /// yaw rate setpoint in rad/s
         /// OriginName: yaw_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float YawRate { get; set; }
         /// <summary>
-        /// Bitmap to indicate which dimensions should be ignored by the vehicle: a value of 0b0000000000000000 or 0b0000001000000000 indicates that none of the setpoint dimensions should be ignored. If bit 10 is set the floats afx afy afz should be interpreted as force instead of acceleration. Mapping: bit 1: x, bit 2: y, bit 3: z, bit 4: vx, bit 5: vy, bit 6: vz, bit 7: ax, bit 8: ay, bit 9: az, bit 10: is force setpoint, bit 11: yaw, bit 12: yaw rate
+        /// Bitmask to indicate which dimensions should be ignored by the vehicle: a value of 0b0000000000000000 or 0b0000001000000000 indicates that none of the setpoint dimensions should be ignored. If bit 10 is set the floats afx afy afz should be interpreted as force instead of acceleration. Mapping: bit 1: x, bit 2: y, bit 3: z, bit 4: vx, bit 5: vy, bit 6: vz, bit 7: ax, bit 8: ay, bit 9: az, bit 10: is force setpoint, bit 11: yaw, bit 12: yaw rate
         /// OriginName: type_mask, Units: , IsExtended: false
         /// </summary>
         public ushort TypeMask { get; set; }
@@ -11258,24 +10452,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 87;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 150;
+        public override byte GetCrcEtra() => 150;
 
         public override PositionTargetGlobalIntPayload Payload { get; } = new PositionTargetGlobalIntPayload();
 
         public override string Name => "POSITION_TARGET_GLOBAL_INT";
-        public override string ToString()
-        {
-            var name = "POSITION_TARGET_GLOBAL_INT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -11283,7 +10464,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class PositionTargetGlobalIntPayload : IPayload
     {
-        public byte MaxByteSize => 51;
+        public byte GetMaxByteSize() => 51;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -11322,41 +10503,41 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(YawRate).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TypeMask).CopyTo(buffer, index);index+=2;
             buffer[index] = (byte)CoordinateFrame;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/51;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot). The rationale for the timestamp in the setpoint is to allow the system to compensate for the transport delay of the setpoint. This allows the system to compensate processing latency.
+        /// Timestamp in milliseconds since system boot. The rationale for the timestamp in the setpoint is to allow the system to compensate for the transport delay of the setpoint. This allows the system to compensate processing latency.
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// X Position in WGS84 frame
+        /// X Position in WGS84 frame in 1e7 * degrees
         /// OriginName: lat_int, Units: degE7, IsExtended: false
         /// </summary>
         public int LatInt { get; set; }
         /// <summary>
-        /// Y Position in WGS84 frame
+        /// Y Position in WGS84 frame in 1e7 * degrees
         /// OriginName: lon_int, Units: degE7, IsExtended: false
         /// </summary>
         public int LonInt { get; set; }
         /// <summary>
-        /// Altitude (AMSL) if absolute or relative, above terrain if GLOBAL_TERRAIN_ALT_INT
+        /// Altitude in meters in AMSL altitude, not WGS84 if absolute or relative, above terrain if GLOBAL_TERRAIN_ALT_INT
         /// OriginName: alt, Units: m, IsExtended: false
         /// </summary>
         public float Alt { get; set; }
         /// <summary>
-        /// X velocity in NED frame
+        /// X velocity in NED frame in meter / s
         /// OriginName: vx, Units: m/s, IsExtended: false
         /// </summary>
         public float Vx { get; set; }
         /// <summary>
-        /// Y velocity in NED frame
+        /// Y velocity in NED frame in meter / s
         /// OriginName: vy, Units: m/s, IsExtended: false
         /// </summary>
         public float Vy { get; set; }
         /// <summary>
-        /// Z velocity in NED frame
+        /// Z velocity in NED frame in meter / s
         /// OriginName: vz, Units: m/s, IsExtended: false
         /// </summary>
         public float Vz { get; set; }
@@ -11376,17 +10557,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Afz { get; set; }
         /// <summary>
-        /// yaw setpoint
+        /// yaw setpoint in rad
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
         /// <summary>
-        /// yaw rate setpoint
+        /// yaw rate setpoint in rad/s
         /// OriginName: yaw_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float YawRate { get; set; }
         /// <summary>
-        /// Bitmap to indicate which dimensions should be ignored by the vehicle: a value of 0b0000000000000000 or 0b0000001000000000 indicates that none of the setpoint dimensions should be ignored. If bit 10 is set the floats afx afy afz should be interpreted as force instead of acceleration. Mapping: bit 1: x, bit 2: y, bit 3: z, bit 4: vx, bit 5: vy, bit 6: vz, bit 7: ax, bit 8: ay, bit 9: az, bit 10: is force setpoint, bit 11: yaw, bit 12: yaw rate
+        /// Bitmask to indicate which dimensions should be ignored by the vehicle: a value of 0b0000000000000000 or 0b0000001000000000 indicates that none of the setpoint dimensions should be ignored. If bit 10 is set the floats afx afy afz should be interpreted as force instead of acceleration. Mapping: bit 1: x, bit 2: y, bit 3: z, bit 4: vx, bit 5: vy, bit 6: vz, bit 7: ax, bit 8: ay, bit 9: az, bit 10: is force setpoint, bit 11: yaw, bit 12: yaw rate
         /// OriginName: type_mask, Units: , IsExtended: false
         /// </summary>
         public ushort TypeMask { get; set; }
@@ -11404,24 +10585,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 89;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 231;
+        public override byte GetCrcEtra() => 231;
 
         public override LocalPositionNedSystemGlobalOffsetPayload Payload { get; } = new LocalPositionNedSystemGlobalOffsetPayload();
 
         public override string Name => "LOCAL_POSITION_NED_SYSTEM_GLOBAL_OFFSET";
-        public override string ToString()
-        {
-            var name = "LOCAL_POSITION_NED_SYSTEM_GLOBAL_OFFSET".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -11429,7 +10597,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class LocalPositionNedSystemGlobalOffsetPayload : IPayload
     {
-        public byte MaxByteSize => 28;
+        public byte GetMaxByteSize() => 28;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -11454,11 +10622,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Roll).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Pitch).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Yaw).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/28;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -11494,31 +10662,18 @@ namespace Asv.Mavlink.V2.Common
         public float Yaw { get; set; }
     }
     /// <summary>
-    /// Sent from simulation to autopilot. This packet is useful for high throughput applications such as hardware in the loop simulations.
+    /// DEPRECATED PACKET! Suffers from missing airspeed fields and singularities due to Euler angles. Please use HIL_STATE_QUATERNION instead. Sent from simulation to autopilot. This packet is useful for high throughput applications such as hardware in the loop simulations.
     ///  HIL_STATE
     /// </summary>
     public class HilStatePacket: PacketV2<HilStatePayload>
     {
 	public const int PacketMessageId = 90;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 183;
+        public override byte GetCrcEtra() => 183;
 
         public override HilStatePayload Payload { get; } = new HilStatePayload();
 
         public override string Name => "HIL_STATE";
-        public override string ToString()
-        {
-            var name = "HIL_STATE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -11526,7 +10681,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class HilStatePayload : IPayload
     {
-        public byte MaxByteSize => 56;
+        public byte GetMaxByteSize() => 56;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -11569,86 +10724,86 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Xacc).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Yacc).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Zacc).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/56;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Roll angle
+        /// Roll angle (rad)
         /// OriginName: roll, Units: rad, IsExtended: false
         /// </summary>
         public float Roll { get; set; }
         /// <summary>
-        /// Pitch angle
+        /// Pitch angle (rad)
         /// OriginName: pitch, Units: rad, IsExtended: false
         /// </summary>
         public float Pitch { get; set; }
         /// <summary>
-        /// Yaw angle
+        /// Yaw angle (rad)
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
         /// <summary>
-        /// Body frame roll / phi angular speed
+        /// Body frame roll / phi angular speed (rad/s)
         /// OriginName: rollspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Rollspeed { get; set; }
         /// <summary>
-        /// Body frame pitch / theta angular speed
+        /// Body frame pitch / theta angular speed (rad/s)
         /// OriginName: pitchspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Pitchspeed { get; set; }
         /// <summary>
-        /// Body frame yaw / psi angular speed
+        /// Body frame yaw / psi angular speed (rad/s)
         /// OriginName: yawspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Yawspeed { get; set; }
         /// <summary>
-        /// Latitude
+        /// Latitude, expressed as degrees * 1E7
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude
+        /// Longitude, expressed as degrees * 1E7
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude
+        /// Altitude in meters, expressed as * 1000 (millimeters)
         /// OriginName: alt, Units: mm, IsExtended: false
         /// </summary>
         public int Alt { get; set; }
         /// <summary>
-        /// Ground X Speed (Latitude)
+        /// Ground X Speed (Latitude), expressed as m/s * 100
         /// OriginName: vx, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vx { get; set; }
         /// <summary>
-        /// Ground Y Speed (Longitude)
+        /// Ground Y Speed (Longitude), expressed as m/s * 100
         /// OriginName: vy, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vy { get; set; }
         /// <summary>
-        /// Ground Z Speed (Altitude)
+        /// Ground Z Speed (Altitude), expressed as m/s * 100
         /// OriginName: vz, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vz { get; set; }
         /// <summary>
-        /// X acceleration
+        /// X acceleration (mg)
         /// OriginName: xacc, Units: mG, IsExtended: false
         /// </summary>
         public short Xacc { get; set; }
         /// <summary>
-        /// Y acceleration
+        /// Y acceleration (mg)
         /// OriginName: yacc, Units: mG, IsExtended: false
         /// </summary>
         public short Yacc { get; set; }
         /// <summary>
-        /// Z acceleration
+        /// Z acceleration (mg)
         /// OriginName: zacc, Units: mG, IsExtended: false
         /// </summary>
         public short Zacc { get; set; }
@@ -11661,24 +10816,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 91;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 63;
+        public override byte GetCrcEtra() => 63;
 
         public override HilControlsPayload Payload { get; } = new HilControlsPayload();
 
         public override string Name => "HIL_CONTROLS";
-        public override string ToString()
-        {
-            var name = "HIL_CONTROLS".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -11686,7 +10828,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class HilControlsPayload : IPayload
     {
-        public byte MaxByteSize => 42;
+        public byte GetMaxByteSize() => 42;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -11719,11 +10861,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Aux4).CopyTo(buffer, index);index+=4;
             buffer[index] = (byte)Mode;index+=1;
             BitConverter.GetBytes(NavMode).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/42;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -11768,7 +10910,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Aux4 { get; set; }
         /// <summary>
-        /// System mode.
+        /// System mode (MAV_MODE)
         /// OriginName: mode, Units: , IsExtended: false
         /// </summary>
         public MavMode Mode { get; set; }
@@ -11786,24 +10928,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 92;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 54;
+        public override byte GetCrcEtra() => 54;
 
         public override HilRcInputsRawPayload Payload { get; } = new HilRcInputsRawPayload();
 
         public override string Name => "HIL_RC_INPUTS_RAW";
-        public override string ToString()
-        {
-            var name = "HIL_RC_INPUTS_RAW".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -11811,7 +10940,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class HilRcInputsRawPayload : IPayload
     {
-        public byte MaxByteSize => 33;
+        public byte GetMaxByteSize() => 33;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -11850,76 +10979,76 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Chan11Raw).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Chan12Raw).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Rssi).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/33;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// RC channel 1 value
+        /// RC channel 1 value, in microseconds
         /// OriginName: chan1_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan1Raw { get; set; }
         /// <summary>
-        /// RC channel 2 value
+        /// RC channel 2 value, in microseconds
         /// OriginName: chan2_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan2Raw { get; set; }
         /// <summary>
-        /// RC channel 3 value
+        /// RC channel 3 value, in microseconds
         /// OriginName: chan3_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan3Raw { get; set; }
         /// <summary>
-        /// RC channel 4 value
+        /// RC channel 4 value, in microseconds
         /// OriginName: chan4_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan4Raw { get; set; }
         /// <summary>
-        /// RC channel 5 value
+        /// RC channel 5 value, in microseconds
         /// OriginName: chan5_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan5Raw { get; set; }
         /// <summary>
-        /// RC channel 6 value
+        /// RC channel 6 value, in microseconds
         /// OriginName: chan6_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan6Raw { get; set; }
         /// <summary>
-        /// RC channel 7 value
+        /// RC channel 7 value, in microseconds
         /// OriginName: chan7_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan7Raw { get; set; }
         /// <summary>
-        /// RC channel 8 value
+        /// RC channel 8 value, in microseconds
         /// OriginName: chan8_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan8Raw { get; set; }
         /// <summary>
-        /// RC channel 9 value
+        /// RC channel 9 value, in microseconds
         /// OriginName: chan9_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan9Raw { get; set; }
         /// <summary>
-        /// RC channel 10 value
+        /// RC channel 10 value, in microseconds
         /// OriginName: chan10_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan10Raw { get; set; }
         /// <summary>
-        /// RC channel 11 value
+        /// RC channel 11 value, in microseconds
         /// OriginName: chan11_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan11Raw { get; set; }
         /// <summary>
-        /// RC channel 12 value
+        /// RC channel 12 value, in microseconds
         /// OriginName: chan12_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan12Raw { get; set; }
         /// <summary>
-        /// Receive signal strength indicator. Values: [0-100], 255: invalid/unknown.
+        /// Receive signal strength indicator, 0: 0%, 255: 100%
         /// OriginName: rssi, Units: , IsExtended: false
         /// </summary>
         public byte Rssi { get; set; }
@@ -11932,24 +11061,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 93;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 47;
+        public override byte GetCrcEtra() => 47;
 
         public override HilActuatorControlsPayload Payload { get; } = new HilActuatorControlsPayload();
 
         public override string Name => "HIL_ACTUATOR_CONTROLS";
-        public override string ToString()
-        {
-            var name = "HIL_ACTUATOR_CONTROLS".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -11957,7 +11073,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class HilActuatorControlsPayload : IPayload
     {
-        public byte MaxByteSize => 81;
+        public byte GetMaxByteSize() => 81;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -11966,7 +11082,7 @@ namespace Asv.Mavlink.V2.Common
             var arraySize = 0;
             TimeUsec = BitConverter.ToUInt64(buffer,index);index+=8;
             Flags = BitConverter.ToUInt64(buffer,index);index+=8;
-            arraySize = /*ArrayLength*/16 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/16 - Math.Max(0,((/*PayloadByteSize*/81 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<16;i++)
             {
                 Controls[i] = default(float);
@@ -11987,11 +11103,11 @@ namespace Asv.Mavlink.V2.Common
                 BitConverter.GetBytes(Controls[i]).CopyTo(buffer, index);index+=4;
             }
             buffer[index] = (byte)Mode;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/81;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -12006,7 +11122,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float[] Controls { get; } = new float[16];
         /// <summary>
-        /// System mode. Includes arming state.
+        /// System mode (MAV_MODE), includes arming state.
         /// OriginName: mode, Units: , IsExtended: false
         /// </summary>
         public MavMode Mode { get; set; }
@@ -12019,24 +11135,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 100;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 175;
+        public override byte GetCrcEtra() => 175;
 
         public override OpticalFlowPayload Payload { get; } = new OpticalFlowPayload();
 
         public override string Name => "OPTICAL_FLOW";
-        public override string ToString()
-        {
-            var name = "OPTICAL_FLOW".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -12044,7 +11147,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class OpticalFlowPayload : IPayload
     {
-        public byte MaxByteSize => 34;
+        public byte GetMaxByteSize() => 34;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -12079,37 +11182,37 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Quality).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(FlowRateX).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(FlowRateY).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/34;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (UNIX)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Flow in x-sensor direction, angular-speed compensated
+        /// Flow in meters in x-sensor direction, angular-speed compensated
         /// OriginName: flow_comp_m_x, Units: m, IsExtended: false
         /// </summary>
         public float FlowCompMX { get; set; }
         /// <summary>
-        /// Flow in y-sensor direction, angular-speed compensated
+        /// Flow in meters in y-sensor direction, angular-speed compensated
         /// OriginName: flow_comp_m_y, Units: m, IsExtended: false
         /// </summary>
         public float FlowCompMY { get; set; }
         /// <summary>
-        /// Ground distance. Positive value: distance known. Negative value: Unknown distance
+        /// Ground distance in meters. Positive value: distance known. Negative value: Unknown distance
         /// OriginName: ground_distance, Units: m, IsExtended: false
         /// </summary>
         public float GroundDistance { get; set; }
         /// <summary>
-        /// Flow in x-sensor direction
-        /// OriginName: flow_x, Units: dpix, IsExtended: false
+        /// Flow in pixels * 10 in x-sensor direction (dezi-pixels)
+        /// OriginName: flow_x, Units: dpixels, IsExtended: false
         /// </summary>
         public short FlowX { get; set; }
         /// <summary>
-        /// Flow in y-sensor direction
-        /// OriginName: flow_y, Units: dpix, IsExtended: false
+        /// Flow in pixels * 10 in y-sensor direction (dezi-pixels)
+        /// OriginName: flow_y, Units: dpixels, IsExtended: false
         /// </summary>
         public short FlowY { get; set; }
         /// <summary>
@@ -12123,12 +11226,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Quality { get; set; }
         /// <summary>
-        /// Flow rate about X axis
+        /// Flow rate in radians/second about X axis
         /// OriginName: flow_rate_x, Units: rad/s, IsExtended: true
         /// </summary>
         public float FlowRateX { get; set; }
         /// <summary>
-        /// Flow rate about Y axis
+        /// Flow rate in radians/second about Y axis
         /// OriginName: flow_rate_y, Units: rad/s, IsExtended: true
         /// </summary>
         public float FlowRateY { get; set; }
@@ -12140,24 +11243,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 101;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 102;
+        public override byte GetCrcEtra() => 102;
 
         public override GlobalVisionPositionEstimatePayload Payload { get; } = new GlobalVisionPositionEstimatePayload();
 
         public override string Name => "GLOBAL_VISION_POSITION_ESTIMATE";
-        public override string ToString()
-        {
-            var name = "GLOBAL_VISION_POSITION_ESTIMATE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -12165,7 +11255,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class GlobalVisionPositionEstimatePayload : IPayload
     {
-        public byte MaxByteSize => 116;
+        public byte GetMaxByteSize() => 116;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -12201,11 +11291,11 @@ namespace Asv.Mavlink.V2.Common
             {
                 BitConverter.GetBytes(Covariance[i]).CopyTo(buffer, index);index+=4;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/116;
         }
 
         /// <summary>
-        /// Timestamp (UNIX time or since system boot)
+        /// Timestamp (microseconds, synced to UNIX time or since system boot)
         /// OriginName: usec, Units: us, IsExtended: false
         /// </summary>
         public ulong Usec { get; set; }
@@ -12225,17 +11315,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Z { get; set; }
         /// <summary>
-        /// Roll angle
+        /// Roll angle in rad
         /// OriginName: roll, Units: rad, IsExtended: false
         /// </summary>
         public float Roll { get; set; }
         /// <summary>
-        /// Pitch angle
+        /// Pitch angle in rad
         /// OriginName: pitch, Units: rad, IsExtended: false
         /// </summary>
         public float Pitch { get; set; }
         /// <summary>
-        /// Yaw angle
+        /// Yaw angle in rad
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
@@ -12252,24 +11342,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 102;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 158;
+        public override byte GetCrcEtra() => 158;
 
         public override VisionPositionEstimatePayload Payload { get; } = new VisionPositionEstimatePayload();
 
         public override string Name => "VISION_POSITION_ESTIMATE";
-        public override string ToString()
-        {
-            var name = "VISION_POSITION_ESTIMATE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -12277,7 +11354,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class VisionPositionEstimatePayload : IPayload
     {
-        public byte MaxByteSize => 116;
+        public byte GetMaxByteSize() => 116;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -12313,11 +11390,11 @@ namespace Asv.Mavlink.V2.Common
             {
                 BitConverter.GetBytes(Covariance[i]).CopyTo(buffer, index);index+=4;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/116;
         }
 
         /// <summary>
-        /// Timestamp (UNIX time or time since system boot)
+        /// Timestamp (microseconds, synced to UNIX time or since system boot)
         /// OriginName: usec, Units: us, IsExtended: false
         /// </summary>
         public ulong Usec { get; set; }
@@ -12337,17 +11414,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Z { get; set; }
         /// <summary>
-        /// Roll angle
+        /// Roll angle in rad
         /// OriginName: roll, Units: rad, IsExtended: false
         /// </summary>
         public float Roll { get; set; }
         /// <summary>
-        /// Pitch angle
+        /// Pitch angle in rad
         /// OriginName: pitch, Units: rad, IsExtended: false
         /// </summary>
         public float Pitch { get; set; }
         /// <summary>
-        /// Yaw angle
+        /// Yaw angle in rad
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
@@ -12364,24 +11441,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 103;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 208;
+        public override byte GetCrcEtra() => 208;
 
         public override VisionSpeedEstimatePayload Payload { get; } = new VisionSpeedEstimatePayload();
 
         public override string Name => "VISION_SPEED_ESTIMATE";
-        public override string ToString()
-        {
-            var name = "VISION_SPEED_ESTIMATE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -12389,7 +11453,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class VisionSpeedEstimatePayload : IPayload
     {
-        public byte MaxByteSize => 56;
+        public byte GetMaxByteSize() => 56;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -12419,11 +11483,11 @@ namespace Asv.Mavlink.V2.Common
             {
                 BitConverter.GetBytes(Covariance[i]).CopyTo(buffer, index);index+=4;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/56;
         }
 
         /// <summary>
-        /// Timestamp (UNIX time or time since system boot)
+        /// Timestamp (microseconds, synced to UNIX time or since system boot)
         /// OriginName: usec, Units: us, IsExtended: false
         /// </summary>
         public ulong Usec { get; set; }
@@ -12455,24 +11519,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 104;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 56;
+        public override byte GetCrcEtra() => 56;
 
         public override ViconPositionEstimatePayload Payload { get; } = new ViconPositionEstimatePayload();
 
         public override string Name => "VICON_POSITION_ESTIMATE";
-        public override string ToString()
-        {
-            var name = "VICON_POSITION_ESTIMATE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -12480,7 +11531,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ViconPositionEstimatePayload : IPayload
     {
-        public byte MaxByteSize => 116;
+        public byte GetMaxByteSize() => 116;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -12516,11 +11567,11 @@ namespace Asv.Mavlink.V2.Common
             {
                 BitConverter.GetBytes(Covariance[i]).CopyTo(buffer, index);index+=4;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/116;
         }
 
         /// <summary>
-        /// Timestamp (UNIX time or time since system boot)
+        /// Timestamp (microseconds, synced to UNIX time or since system boot)
         /// OriginName: usec, Units: us, IsExtended: false
         /// </summary>
         public ulong Usec { get; set; }
@@ -12540,17 +11591,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Z { get; set; }
         /// <summary>
-        /// Roll angle
+        /// Roll angle in rad
         /// OriginName: roll, Units: rad, IsExtended: false
         /// </summary>
         public float Roll { get; set; }
         /// <summary>
-        /// Pitch angle
+        /// Pitch angle in rad
         /// OriginName: pitch, Units: rad, IsExtended: false
         /// </summary>
         public float Pitch { get; set; }
         /// <summary>
-        /// Yaw angle
+        /// Yaw angle in rad
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
@@ -12568,24 +11619,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 105;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 93;
+        public override byte GetCrcEtra() => 93;
 
         public override HighresImuPayload Payload { get; } = new HighresImuPayload();
 
         public override string Name => "HIGHRES_IMU";
-        public override string ToString()
-        {
-            var name = "HIGHRES_IMU".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -12593,7 +11631,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class HighresImuPayload : IPayload
     {
-        public byte MaxByteSize => 62;
+        public byte GetMaxByteSize() => 62;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -12634,66 +11672,66 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(PressureAlt).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Temperature).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(FieldsUpdated).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/62;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds, synced to UNIX time or since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// X acceleration
+        /// X acceleration (m/s^2)
         /// OriginName: xacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Xacc { get; set; }
         /// <summary>
-        /// Y acceleration
+        /// Y acceleration (m/s^2)
         /// OriginName: yacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Yacc { get; set; }
         /// <summary>
-        /// Z acceleration
+        /// Z acceleration (m/s^2)
         /// OriginName: zacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Zacc { get; set; }
         /// <summary>
-        /// Angular speed around X axis
+        /// Angular speed around X axis (rad / sec)
         /// OriginName: xgyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Xgyro { get; set; }
         /// <summary>
-        /// Angular speed around Y axis
+        /// Angular speed around Y axis (rad / sec)
         /// OriginName: ygyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Ygyro { get; set; }
         /// <summary>
-        /// Angular speed around Z axis
+        /// Angular speed around Z axis (rad / sec)
         /// OriginName: zgyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Zgyro { get; set; }
         /// <summary>
-        /// X Magnetic field
+        /// X Magnetic field (Gauss)
         /// OriginName: xmag, Units: gauss, IsExtended: false
         /// </summary>
         public float Xmag { get; set; }
         /// <summary>
-        /// Y Magnetic field
+        /// Y Magnetic field (Gauss)
         /// OriginName: ymag, Units: gauss, IsExtended: false
         /// </summary>
         public float Ymag { get; set; }
         /// <summary>
-        /// Z Magnetic field
+        /// Z Magnetic field (Gauss)
         /// OriginName: zmag, Units: gauss, IsExtended: false
         /// </summary>
         public float Zmag { get; set; }
         /// <summary>
-        /// Absolute pressure
+        /// Absolute pressure in millibar
         /// OriginName: abs_pressure, Units: mbar, IsExtended: false
         /// </summary>
         public float AbsPressure { get; set; }
         /// <summary>
-        /// Differential pressure
+        /// Differential pressure in millibar
         /// OriginName: diff_pressure, Units: mbar, IsExtended: false
         /// </summary>
         public float DiffPressure { get; set; }
@@ -12703,12 +11741,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float PressureAlt { get; set; }
         /// <summary>
-        /// Temperature
+        /// Temperature in degrees celsius
         /// OriginName: temperature, Units: degC, IsExtended: false
         /// </summary>
         public float Temperature { get; set; }
         /// <summary>
-        /// Bitmap for fields that have updated since last message, bit 0 = xacc, bit 12: temperature
+        /// Bitmask for fields that have updated since last message, bit 0 = xacc, bit 12: temperature
         /// OriginName: fields_updated, Units: , IsExtended: false
         /// </summary>
         public ushort FieldsUpdated { get; set; }
@@ -12721,24 +11759,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 106;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 138;
+        public override byte GetCrcEtra() => 138;
 
         public override OpticalFlowRadPayload Payload { get; } = new OpticalFlowRadPayload();
 
         public override string Name => "OPTICAL_FLOW_RAD";
-        public override string ToString()
-        {
-            var name = "OPTICAL_FLOW_RAD".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -12746,7 +11771,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class OpticalFlowRadPayload : IPayload
     {
-        public byte MaxByteSize => 44;
+        public byte GetMaxByteSize() => 44;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -12781,56 +11806,56 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Temperature).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(SensorId).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Quality).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/44;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds, synced to UNIX time or since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Integration time. Divide integrated_x and integrated_y by the integration time to obtain average flow. The integration time also indicates the.
+        /// Integration time in microseconds. Divide integrated_x and integrated_y by the integration time to obtain average flow. The integration time also indicates the.
         /// OriginName: integration_time_us, Units: us, IsExtended: false
         /// </summary>
         public uint IntegrationTimeUs { get; set; }
         /// <summary>
-        /// Flow around X axis (Sensor RH rotation about the X axis induces a positive flow. Sensor linear motion along the positive Y axis induces a negative flow.)
+        /// Flow in radians around X axis (Sensor RH rotation about the X axis induces a positive flow. Sensor linear motion along the positive Y axis induces a negative flow.)
         /// OriginName: integrated_x, Units: rad, IsExtended: false
         /// </summary>
         public float IntegratedX { get; set; }
         /// <summary>
-        /// Flow around Y axis (Sensor RH rotation about the Y axis induces a positive flow. Sensor linear motion along the positive X axis induces a positive flow.)
+        /// Flow in radians around Y axis (Sensor RH rotation about the Y axis induces a positive flow. Sensor linear motion along the positive X axis induces a positive flow.)
         /// OriginName: integrated_y, Units: rad, IsExtended: false
         /// </summary>
         public float IntegratedY { get; set; }
         /// <summary>
-        /// RH rotation around X axis
+        /// RH rotation around X axis (rad)
         /// OriginName: integrated_xgyro, Units: rad, IsExtended: false
         /// </summary>
         public float IntegratedXgyro { get; set; }
         /// <summary>
-        /// RH rotation around Y axis
+        /// RH rotation around Y axis (rad)
         /// OriginName: integrated_ygyro, Units: rad, IsExtended: false
         /// </summary>
         public float IntegratedYgyro { get; set; }
         /// <summary>
-        /// RH rotation around Z axis
+        /// RH rotation around Z axis (rad)
         /// OriginName: integrated_zgyro, Units: rad, IsExtended: false
         /// </summary>
         public float IntegratedZgyro { get; set; }
         /// <summary>
-        /// Time since the distance was sampled.
+        /// Time in microseconds since the distance was sampled.
         /// OriginName: time_delta_distance_us, Units: us, IsExtended: false
         /// </summary>
         public uint TimeDeltaDistanceUs { get; set; }
         /// <summary>
-        /// Distance to the center of the flow field. Positive value (including zero): distance known. Negative value: Unknown distance.
+        /// Distance to the center of the flow field in meters. Positive value (including zero): distance known. Negative value: Unknown distance.
         /// OriginName: distance, Units: m, IsExtended: false
         /// </summary>
         public float Distance { get; set; }
         /// <summary>
-        /// Temperature
+        /// Temperature * 100 in centi-degrees Celsius
         /// OriginName: temperature, Units: cdegC, IsExtended: false
         /// </summary>
         public short Temperature { get; set; }
@@ -12853,24 +11878,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 107;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 108;
+        public override byte GetCrcEtra() => 108;
 
         public override HilSensorPayload Payload { get; } = new HilSensorPayload();
 
         public override string Name => "HIL_SENSOR";
-        public override string ToString()
-        {
-            var name = "HIL_SENSOR".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -12878,7 +11890,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class HilSensorPayload : IPayload
     {
-        public byte MaxByteSize => 64;
+        public byte GetMaxByteSize() => 64;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -12919,66 +11931,66 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(PressureAlt).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Temperature).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(FieldsUpdated).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/64;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds, synced to UNIX time or since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// X acceleration
+        /// X acceleration (m/s^2)
         /// OriginName: xacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Xacc { get; set; }
         /// <summary>
-        /// Y acceleration
+        /// Y acceleration (m/s^2)
         /// OriginName: yacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Yacc { get; set; }
         /// <summary>
-        /// Z acceleration
+        /// Z acceleration (m/s^2)
         /// OriginName: zacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Zacc { get; set; }
         /// <summary>
-        /// Angular speed around X axis in body frame
+        /// Angular speed around X axis in body frame (rad / sec)
         /// OriginName: xgyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Xgyro { get; set; }
         /// <summary>
-        /// Angular speed around Y axis in body frame
+        /// Angular speed around Y axis in body frame (rad / sec)
         /// OriginName: ygyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Ygyro { get; set; }
         /// <summary>
-        /// Angular speed around Z axis in body frame
+        /// Angular speed around Z axis in body frame (rad / sec)
         /// OriginName: zgyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Zgyro { get; set; }
         /// <summary>
-        /// X Magnetic field
+        /// X Magnetic field (Gauss)
         /// OriginName: xmag, Units: gauss, IsExtended: false
         /// </summary>
         public float Xmag { get; set; }
         /// <summary>
-        /// Y Magnetic field
+        /// Y Magnetic field (Gauss)
         /// OriginName: ymag, Units: gauss, IsExtended: false
         /// </summary>
         public float Ymag { get; set; }
         /// <summary>
-        /// Z Magnetic field
+        /// Z Magnetic field (Gauss)
         /// OriginName: zmag, Units: gauss, IsExtended: false
         /// </summary>
         public float Zmag { get; set; }
         /// <summary>
-        /// Absolute pressure
+        /// Absolute pressure in millibar
         /// OriginName: abs_pressure, Units: mbar, IsExtended: false
         /// </summary>
         public float AbsPressure { get; set; }
         /// <summary>
-        /// Differential pressure (airspeed)
+        /// Differential pressure (airspeed) in millibar
         /// OriginName: diff_pressure, Units: mbar, IsExtended: false
         /// </summary>
         public float DiffPressure { get; set; }
@@ -12988,12 +12000,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float PressureAlt { get; set; }
         /// <summary>
-        /// Temperature
+        /// Temperature in degrees celsius
         /// OriginName: temperature, Units: degC, IsExtended: false
         /// </summary>
         public float Temperature { get; set; }
         /// <summary>
-        /// Bitmap for fields that have updated since last message, bit 0 = xacc, bit 12: temperature, bit 31: full reset of attitude/position/velocities/etc was performed in sim.
+        /// Bitmask for fields that have updated since last message, bit 0 = xacc, bit 12: temperature, bit 31: full reset of attitude/position/velocities/etc was performed in sim.
         /// OriginName: fields_updated, Units: , IsExtended: false
         /// </summary>
         public uint FieldsUpdated { get; set; }
@@ -13006,24 +12018,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 108;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 32;
+        public override byte GetCrcEtra() => 32;
 
         public override SimStatePayload Payload { get; } = new SimStatePayload();
 
         public override string Name => "SIM_STATE";
-        public override string ToString()
-        {
-            var name = "SIM_STATE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -13031,7 +12030,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SimStatePayload : IPayload
     {
-        public byte MaxByteSize => 84;
+        public byte GetMaxByteSize() => 84;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -13084,7 +12083,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Vn).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Ve).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Vd).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/84;
         }
 
         /// <summary>
@@ -13123,47 +12122,47 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Yaw { get; set; }
         /// <summary>
-        /// X acceleration
+        /// X acceleration m/s/s
         /// OriginName: xacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Xacc { get; set; }
         /// <summary>
-        /// Y acceleration
+        /// Y acceleration m/s/s
         /// OriginName: yacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Yacc { get; set; }
         /// <summary>
-        /// Z acceleration
+        /// Z acceleration m/s/s
         /// OriginName: zacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Zacc { get; set; }
         /// <summary>
-        /// Angular speed around X axis
+        /// Angular speed around X axis rad/s
         /// OriginName: xgyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Xgyro { get; set; }
         /// <summary>
-        /// Angular speed around Y axis
+        /// Angular speed around Y axis rad/s
         /// OriginName: ygyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Ygyro { get; set; }
         /// <summary>
-        /// Angular speed around Z axis
+        /// Angular speed around Z axis rad/s
         /// OriginName: zgyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Zgyro { get; set; }
         /// <summary>
-        /// Latitude
+        /// Latitude in degrees
         /// OriginName: lat, Units: deg, IsExtended: false
         /// </summary>
         public float Lat { get; set; }
         /// <summary>
-        /// Longitude
+        /// Longitude in degrees
         /// OriginName: lon, Units: deg, IsExtended: false
         /// </summary>
         public float Lon { get; set; }
         /// <summary>
-        /// Altitude
+        /// Altitude in meters
         /// OriginName: alt, Units: m, IsExtended: false
         /// </summary>
         public float Alt { get; set; }
@@ -13178,17 +12177,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float StdDevVert { get; set; }
         /// <summary>
-        /// True velocity in NORTH direction in earth-fixed NED frame
+        /// True velocity in m/s in NORTH direction in earth-fixed NED frame
         /// OriginName: vn, Units: m/s, IsExtended: false
         /// </summary>
         public float Vn { get; set; }
         /// <summary>
-        /// True velocity in EAST direction in earth-fixed NED frame
+        /// True velocity in m/s in EAST direction in earth-fixed NED frame
         /// OriginName: ve, Units: m/s, IsExtended: false
         /// </summary>
         public float Ve { get; set; }
         /// <summary>
-        /// True velocity in DOWN direction in earth-fixed NED frame
+        /// True velocity in m/s in DOWN direction in earth-fixed NED frame
         /// OriginName: vd, Units: m/s, IsExtended: false
         /// </summary>
         public float Vd { get; set; }
@@ -13201,24 +12200,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 109;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 185;
+        public override byte GetCrcEtra() => 185;
 
         public override RadioStatusPayload Payload { get; } = new RadioStatusPayload();
 
         public override string Name => "RADIO_STATUS";
-        public override string ToString()
-        {
-            var name = "RADIO_STATUS".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -13226,7 +12212,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class RadioStatusPayload : IPayload
     {
-        public byte MaxByteSize => 9;
+        public byte GetMaxByteSize() => 9;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -13251,7 +12237,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Txbuf).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Noise).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Remnoise).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/9;
         }
 
         /// <summary>
@@ -13275,7 +12261,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Remrssi { get; set; }
         /// <summary>
-        /// Remaining free buffer space.
+        /// Remaining free buffer space in percent.
         /// OriginName: txbuf, Units: %, IsExtended: false
         /// </summary>
         public byte Txbuf { get; set; }
@@ -13298,24 +12284,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 110;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 84;
+        public override byte GetCrcEtra() => 84;
 
         public override FileTransferProtocolPayload Payload { get; } = new FileTransferProtocolPayload();
 
         public override string Name => "FILE_TRANSFER_PROTOCOL";
-        public override string ToString()
-        {
-            var name = "FILE_TRANSFER_PROTOCOL".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -13323,7 +12296,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class FileTransferProtocolPayload : IPayload
     {
-        public byte MaxByteSize => 254;
+        public byte GetMaxByteSize() => 254;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -13333,7 +12306,7 @@ namespace Asv.Mavlink.V2.Common
             TargetNetwork = (byte)buffer[index++];
             TargetSystem = (byte)buffer[index++];
             TargetComponent = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/251 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/251 - Math.Max(0,((/*PayloadByteSize*/254 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<251;i++)
             {
                 Payload[i] = default(byte);
@@ -13353,7 +12326,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 buffer[index] = (byte)Payload[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/254;
         }
 
         /// <summary>
@@ -13385,24 +12358,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 111;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 34;
+        public override byte GetCrcEtra() => 34;
 
         public override TimesyncPayload Payload { get; } = new TimesyncPayload();
 
         public override string Name => "TIMESYNC";
-        public override string ToString()
-        {
-            var name = "TIMESYNC".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -13410,7 +12370,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class TimesyncPayload : IPayload
     {
-        public byte MaxByteSize => 16;
+        public byte GetMaxByteSize() => 16;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -13425,7 +12385,7 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(Tc1).CopyTo(buffer, index);index+=8;
             BitConverter.GetBytes(Ts1).CopyTo(buffer, index);index+=8;
-            return MaxByteSize;
+            return /*PayloadByteSize*/16;
         }
 
         /// <summary>
@@ -13447,24 +12407,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 112;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 174;
+        public override byte GetCrcEtra() => 174;
 
         public override CameraTriggerPayload Payload { get; } = new CameraTriggerPayload();
 
         public override string Name => "CAMERA_TRIGGER";
-        public override string ToString()
-        {
-            var name = "CAMERA_TRIGGER".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -13472,7 +12419,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class CameraTriggerPayload : IPayload
     {
-        public byte MaxByteSize => 12;
+        public byte GetMaxByteSize() => 12;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -13487,11 +12434,11 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
             BitConverter.GetBytes(Seq).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/12;
         }
 
         /// <summary>
-        /// Timestamp for image frame (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp for the image frame in microseconds
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -13510,24 +12457,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 113;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 124;
+        public override byte GetCrcEtra() => 124;
 
         public override HilGpsPayload Payload { get; } = new HilGpsPayload();
 
         public override string Name => "HIL_GPS";
-        public override string ToString()
-        {
-            var name = "HIL_GPS".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -13535,7 +12469,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class HilGpsPayload : IPayload
     {
-        public byte MaxByteSize => 36;
+        public byte GetMaxByteSize() => 36;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -13572,61 +12506,61 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Cog).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(FixType).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(SatellitesVisible).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/36;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Latitude (WGS84)
+        /// Latitude (WGS84), in degrees * 1E7
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude (WGS84)
+        /// Longitude (WGS84), in degrees * 1E7
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude (AMSL). Positive for up.
+        /// Altitude (AMSL, not WGS84), in meters * 1000 (positive for up)
         /// OriginName: alt, Units: mm, IsExtended: false
         /// </summary>
         public int Alt { get; set; }
         /// <summary>
-        /// GPS HDOP horizontal dilution of position. If unknown, set to: 65535
-        /// OriginName: eph, Units: cm, IsExtended: false
+        /// GPS HDOP horizontal dilution of position in cm (m*100). If unknown, set to: 65535
+        /// OriginName: eph, Units: , IsExtended: false
         /// </summary>
         public ushort Eph { get; set; }
         /// <summary>
-        /// GPS VDOP vertical dilution of position. If unknown, set to: 65535
-        /// OriginName: epv, Units: cm, IsExtended: false
+        /// GPS VDOP vertical dilution of position in cm (m*100). If unknown, set to: 65535
+        /// OriginName: epv, Units: , IsExtended: false
         /// </summary>
         public ushort Epv { get; set; }
         /// <summary>
-        /// GPS ground speed. If unknown, set to: 65535
+        /// GPS ground speed in cm/s. If unknown, set to: 65535
         /// OriginName: vel, Units: cm/s, IsExtended: false
         /// </summary>
         public ushort Vel { get; set; }
         /// <summary>
-        /// GPS velocity in NORTH direction in earth-fixed NED frame
+        /// GPS velocity in cm/s in NORTH direction in earth-fixed NED frame
         /// OriginName: vn, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vn { get; set; }
         /// <summary>
-        /// GPS velocity in EAST direction in earth-fixed NED frame
+        /// GPS velocity in cm/s in EAST direction in earth-fixed NED frame
         /// OriginName: ve, Units: cm/s, IsExtended: false
         /// </summary>
         public short Ve { get; set; }
         /// <summary>
-        /// GPS velocity in DOWN direction in earth-fixed NED frame
+        /// GPS velocity in cm/s in DOWN direction in earth-fixed NED frame
         /// OriginName: vd, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vd { get; set; }
         /// <summary>
-        /// Course over ground (NOT heading, but direction of movement), 0.0..359.99 degrees. If unknown, set to: 65535
+        /// Course over ground (NOT heading, but direction of movement) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: 65535
         /// OriginName: cog, Units: cdeg, IsExtended: false
         /// </summary>
         public ushort Cog { get; set; }
@@ -13649,24 +12583,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 114;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 237;
+        public override byte GetCrcEtra() => 237;
 
         public override HilOpticalFlowPayload Payload { get; } = new HilOpticalFlowPayload();
 
         public override string Name => "HIL_OPTICAL_FLOW";
-        public override string ToString()
-        {
-            var name = "HIL_OPTICAL_FLOW".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -13674,7 +12595,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class HilOpticalFlowPayload : IPayload
     {
-        public byte MaxByteSize => 44;
+        public byte GetMaxByteSize() => 44;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -13709,16 +12630,16 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Temperature).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(SensorId).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Quality).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/44;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds, synced to UNIX time or since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Integration time. Divide integrated_x and integrated_y by the integration time to obtain average flow. The integration time also indicates the.
+        /// Integration time in microseconds. Divide integrated_x and integrated_y by the integration time to obtain average flow. The integration time also indicates the.
         /// OriginName: integration_time_us, Units: us, IsExtended: false
         /// </summary>
         public uint IntegrationTimeUs { get; set; }
@@ -13733,32 +12654,32 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float IntegratedY { get; set; }
         /// <summary>
-        /// RH rotation around X axis
+        /// RH rotation around X axis (rad)
         /// OriginName: integrated_xgyro, Units: rad, IsExtended: false
         /// </summary>
         public float IntegratedXgyro { get; set; }
         /// <summary>
-        /// RH rotation around Y axis
+        /// RH rotation around Y axis (rad)
         /// OriginName: integrated_ygyro, Units: rad, IsExtended: false
         /// </summary>
         public float IntegratedYgyro { get; set; }
         /// <summary>
-        /// RH rotation around Z axis
+        /// RH rotation around Z axis (rad)
         /// OriginName: integrated_zgyro, Units: rad, IsExtended: false
         /// </summary>
         public float IntegratedZgyro { get; set; }
         /// <summary>
-        /// Time since the distance was sampled.
+        /// Time in microseconds since the distance was sampled.
         /// OriginName: time_delta_distance_us, Units: us, IsExtended: false
         /// </summary>
         public uint TimeDeltaDistanceUs { get; set; }
         /// <summary>
-        /// Distance to the center of the flow field. Positive value (including zero): distance known. Negative value: Unknown distance.
+        /// Distance to the center of the flow field in meters. Positive value (including zero): distance known. Negative value: Unknown distance.
         /// OriginName: distance, Units: m, IsExtended: false
         /// </summary>
         public float Distance { get; set; }
         /// <summary>
-        /// Temperature
+        /// Temperature * 100 in centi-degrees Celsius
         /// OriginName: temperature, Units: cdegC, IsExtended: false
         /// </summary>
         public short Temperature { get; set; }
@@ -13781,24 +12702,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 115;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 4;
+        public override byte GetCrcEtra() => 4;
 
         public override HilStateQuaternionPayload Payload { get; } = new HilStateQuaternionPayload();
 
         public override string Name => "HIL_STATE_QUATERNION";
-        public override string ToString()
-        {
-            var name = "HIL_STATE_QUATERNION".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -13806,7 +12714,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class HilStateQuaternionPayload : IPayload
     {
-        public byte MaxByteSize => 64;
+        public byte GetMaxByteSize() => 64;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -13814,7 +12722,7 @@ namespace Asv.Mavlink.V2.Common
             var endIndex = offset + payloadSize;
             var arraySize = 0;
             TimeUsec = BitConverter.ToUInt64(buffer,index);index+=8;
-            arraySize = /*ArrayLength*/4 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/4 - Math.Max(0,((/*PayloadByteSize*/64 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<4;i++)
             {
                 AttitudeQuaternion[i] = default(float);
@@ -13860,11 +12768,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Xacc).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Yacc).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Zacc).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/64;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -13874,72 +12782,72 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float[] AttitudeQuaternion { get; } = new float[4];
         /// <summary>
-        /// Body frame roll / phi angular speed
+        /// Body frame roll / phi angular speed (rad/s)
         /// OriginName: rollspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Rollspeed { get; set; }
         /// <summary>
-        /// Body frame pitch / theta angular speed
+        /// Body frame pitch / theta angular speed (rad/s)
         /// OriginName: pitchspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Pitchspeed { get; set; }
         /// <summary>
-        /// Body frame yaw / psi angular speed
+        /// Body frame yaw / psi angular speed (rad/s)
         /// OriginName: yawspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Yawspeed { get; set; }
         /// <summary>
-        /// Latitude
+        /// Latitude, expressed as degrees * 1E7
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude
+        /// Longitude, expressed as degrees * 1E7
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude
+        /// Altitude in meters, expressed as * 1000 (millimeters)
         /// OriginName: alt, Units: mm, IsExtended: false
         /// </summary>
         public int Alt { get; set; }
         /// <summary>
-        /// Ground X Speed (Latitude)
+        /// Ground X Speed (Latitude), expressed as cm/s
         /// OriginName: vx, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vx { get; set; }
         /// <summary>
-        /// Ground Y Speed (Longitude)
+        /// Ground Y Speed (Longitude), expressed as cm/s
         /// OriginName: vy, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vy { get; set; }
         /// <summary>
-        /// Ground Z Speed (Altitude)
+        /// Ground Z Speed (Altitude), expressed as cm/s
         /// OriginName: vz, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vz { get; set; }
         /// <summary>
-        /// Indicated airspeed
+        /// Indicated airspeed, expressed as cm/s
         /// OriginName: ind_airspeed, Units: cm/s, IsExtended: false
         /// </summary>
         public ushort IndAirspeed { get; set; }
         /// <summary>
-        /// True airspeed
+        /// True airspeed, expressed as cm/s
         /// OriginName: true_airspeed, Units: cm/s, IsExtended: false
         /// </summary>
         public ushort TrueAirspeed { get; set; }
         /// <summary>
-        /// X acceleration
+        /// X acceleration (mg)
         /// OriginName: xacc, Units: mG, IsExtended: false
         /// </summary>
         public short Xacc { get; set; }
         /// <summary>
-        /// Y acceleration
+        /// Y acceleration (mg)
         /// OriginName: yacc, Units: mG, IsExtended: false
         /// </summary>
         public short Yacc { get; set; }
         /// <summary>
-        /// Z acceleration
+        /// Z acceleration (mg)
         /// OriginName: zacc, Units: mG, IsExtended: false
         /// </summary>
         public short Zacc { get; set; }
@@ -13952,24 +12860,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 116;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 76;
+        public override byte GetCrcEtra() => 76;
 
         public override ScaledImu2Payload Payload { get; } = new ScaledImu2Payload();
 
         public override string Name => "SCALED_IMU2";
-        public override string ToString()
-        {
-            var name = "SCALED_IMU2".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -13977,7 +12872,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ScaledImu2Payload : IPayload
     {
-        public byte MaxByteSize => 22;
+        public byte GetMaxByteSize() => 22;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -14008,56 +12903,56 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Xmag).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Ymag).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Zmag).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/22;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// X acceleration
+        /// X acceleration (mg)
         /// OriginName: xacc, Units: mG, IsExtended: false
         /// </summary>
         public short Xacc { get; set; }
         /// <summary>
-        /// Y acceleration
+        /// Y acceleration (mg)
         /// OriginName: yacc, Units: mG, IsExtended: false
         /// </summary>
         public short Yacc { get; set; }
         /// <summary>
-        /// Z acceleration
+        /// Z acceleration (mg)
         /// OriginName: zacc, Units: mG, IsExtended: false
         /// </summary>
         public short Zacc { get; set; }
         /// <summary>
-        /// Angular speed around X axis
+        /// Angular speed around X axis (millirad /sec)
         /// OriginName: xgyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Xgyro { get; set; }
         /// <summary>
-        /// Angular speed around Y axis
+        /// Angular speed around Y axis (millirad /sec)
         /// OriginName: ygyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Ygyro { get; set; }
         /// <summary>
-        /// Angular speed around Z axis
+        /// Angular speed around Z axis (millirad /sec)
         /// OriginName: zgyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Zgyro { get; set; }
         /// <summary>
-        /// X Magnetic field
+        /// X Magnetic field (milli tesla)
         /// OriginName: xmag, Units: mT, IsExtended: false
         /// </summary>
         public short Xmag { get; set; }
         /// <summary>
-        /// Y Magnetic field
+        /// Y Magnetic field (milli tesla)
         /// OriginName: ymag, Units: mT, IsExtended: false
         /// </summary>
         public short Ymag { get; set; }
         /// <summary>
-        /// Z Magnetic field
+        /// Z Magnetic field (milli tesla)
         /// OriginName: zmag, Units: mT, IsExtended: false
         /// </summary>
         public short Zmag { get; set; }
@@ -14070,24 +12965,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 117;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 128;
+        public override byte GetCrcEtra() => 128;
 
         public override LogRequestListPayload Payload { get; } = new LogRequestListPayload();
 
         public override string Name => "LOG_REQUEST_LIST";
-        public override string ToString()
-        {
-            var name = "LOG_REQUEST_LIST".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -14095,7 +12977,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class LogRequestListPayload : IPayload
     {
-        public byte MaxByteSize => 6;
+        public byte GetMaxByteSize() => 6;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -14114,7 +12996,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(End).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/6;
         }
 
         /// <summary>
@@ -14146,24 +13028,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 118;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 56;
+        public override byte GetCrcEtra() => 56;
 
         public override LogEntryPayload Payload { get; } = new LogEntryPayload();
 
         public override string Name => "LOG_ENTRY";
-        public override string ToString()
-        {
-            var name = "LOG_ENTRY".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -14171,7 +13040,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class LogEntryPayload : IPayload
     {
-        public byte MaxByteSize => 14;
+        public byte GetMaxByteSize() => 14;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -14192,16 +13061,16 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Id).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(NumLogs).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(LastLogNum).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/14;
         }
 
         /// <summary>
-        /// UTC timestamp of log since 1970, or 0 if not available
+        /// UTC timestamp of log in seconds since 1970, or 0 if not available
         /// OriginName: time_utc, Units: s, IsExtended: false
         /// </summary>
         public uint TimeUtc { get; set; }
         /// <summary>
-        /// Size of the log (may be approximate)
+        /// Size of the log (may be approximate) in bytes
         /// OriginName: size, Units: bytes, IsExtended: false
         /// </summary>
         public uint Size { get; set; }
@@ -14229,24 +13098,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 119;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 116;
+        public override byte GetCrcEtra() => 116;
 
         public override LogRequestDataPayload Payload { get; } = new LogRequestDataPayload();
 
         public override string Name => "LOG_REQUEST_DATA";
-        public override string ToString()
-        {
-            var name = "LOG_REQUEST_DATA".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -14254,7 +13110,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class LogRequestDataPayload : IPayload
     {
-        public byte MaxByteSize => 12;
+        public byte GetMaxByteSize() => 12;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -14275,7 +13131,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Id).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/12;
         }
 
         /// <summary>
@@ -14312,24 +13168,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 120;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 134;
+        public override byte GetCrcEtra() => 134;
 
         public override LogDataPayload Payload { get; } = new LogDataPayload();
 
         public override string Name => "LOG_DATA";
-        public override string ToString()
-        {
-            var name = "LOG_DATA".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -14337,7 +13180,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class LogDataPayload : IPayload
     {
-        public byte MaxByteSize => 97;
+        public byte GetMaxByteSize() => 97;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -14347,7 +13190,7 @@ namespace Asv.Mavlink.V2.Common
             Ofs = BitConverter.ToUInt32(buffer,index);index+=4;
             Id = BitConverter.ToUInt16(buffer,index);index+=2;
             Count = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/90 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/90 - Math.Max(0,((/*PayloadByteSize*/97 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<90;i++)
             {
                 Data[i] = default(byte);
@@ -14367,7 +13210,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 buffer[index] = (byte)Data[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/97;
         }
 
         /// <summary>
@@ -14399,24 +13242,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 121;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 237;
+        public override byte GetCrcEtra() => 237;
 
         public override LogErasePayload Payload { get; } = new LogErasePayload();
 
         public override string Name => "LOG_ERASE";
-        public override string ToString()
-        {
-            var name = "LOG_ERASE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -14424,7 +13254,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class LogErasePayload : IPayload
     {
-        public byte MaxByteSize => 2;
+        public byte GetMaxByteSize() => 2;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -14439,7 +13269,7 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/2;
         }
 
         /// <summary>
@@ -14461,24 +13291,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 122;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 203;
+        public override byte GetCrcEtra() => 203;
 
         public override LogRequestEndPayload Payload { get; } = new LogRequestEndPayload();
 
         public override string Name => "LOG_REQUEST_END";
-        public override string ToString()
-        {
-            var name = "LOG_REQUEST_END".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -14486,7 +13303,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class LogRequestEndPayload : IPayload
     {
-        public byte MaxByteSize => 2;
+        public byte GetMaxByteSize() => 2;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -14501,7 +13318,7 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/2;
         }
 
         /// <summary>
@@ -14523,24 +13340,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 123;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 250;
+        public override byte GetCrcEtra() => 250;
 
         public override GpsInjectDataPayload Payload { get; } = new GpsInjectDataPayload();
 
         public override string Name => "GPS_INJECT_DATA";
-        public override string ToString()
-        {
-            var name = "GPS_INJECT_DATA".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -14548,7 +13352,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class GpsInjectDataPayload : IPayload
     {
-        public byte MaxByteSize => 113;
+        public byte GetMaxByteSize() => 113;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -14558,7 +13362,7 @@ namespace Asv.Mavlink.V2.Common
             TargetSystem = (byte)buffer[index++];
             TargetComponent = (byte)buffer[index++];
             Len = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/110 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/110 - Math.Max(0,((/*PayloadByteSize*/113 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<110;i++)
             {
                 Data[i] = default(byte);
@@ -14578,7 +13382,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 buffer[index] = (byte)Data[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/113;
         }
 
         /// <summary>
@@ -14610,24 +13414,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 124;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 87;
+        public override byte GetCrcEtra() => 87;
 
         public override Gps2RawPayload Payload { get; } = new Gps2RawPayload();
 
         public override string Name => "GPS2_RAW";
-        public override string ToString()
-        {
-            var name = "GPS2_RAW".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -14635,7 +13426,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class Gps2RawPayload : IPayload
     {
-        public byte MaxByteSize => 35;
+        public byte GetMaxByteSize() => 35;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -14670,26 +13461,26 @@ namespace Asv.Mavlink.V2.Common
             buffer[index] = (byte)FixType;index+=1;
             BitConverter.GetBytes(SatellitesVisible).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(DgpsNumch).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/35;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Latitude (WGS84)
+        /// Latitude (WGS84), in degrees * 1E7
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude (WGS84)
+        /// Longitude (WGS84), in degrees * 1E7
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude (AMSL). Positive for up.
+        /// Altitude (AMSL, not WGS84), in meters * 1000 (positive for up)
         /// OriginName: alt, Units: mm, IsExtended: false
         /// </summary>
         public int Alt { get; set; }
@@ -14699,27 +13490,27 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint DgpsAge { get; set; }
         /// <summary>
-        /// GPS HDOP horizontal dilution of position. If unknown, set to: UINT16_MAX
+        /// GPS HDOP horizontal dilution of position in cm (m*100). If unknown, set to: UINT16_MAX
         /// OriginName: eph, Units: cm, IsExtended: false
         /// </summary>
         public ushort Eph { get; set; }
         /// <summary>
-        /// GPS VDOP vertical dilution of position. If unknown, set to: UINT16_MAX
+        /// GPS VDOP vertical dilution of position in cm (m*100). If unknown, set to: UINT16_MAX
         /// OriginName: epv, Units: cm, IsExtended: false
         /// </summary>
         public ushort Epv { get; set; }
         /// <summary>
-        /// GPS ground speed. If unknown, set to: UINT16_MAX
+        /// GPS ground speed (m/s * 100). If unknown, set to: UINT16_MAX
         /// OriginName: vel, Units: cm/s, IsExtended: false
         /// </summary>
         public ushort Vel { get; set; }
         /// <summary>
-        /// Course over ground (NOT heading, but direction of movement): 0.0..359.99 degrees. If unknown, set to: UINT16_MAX
+        /// Course over ground (NOT heading, but direction of movement) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: UINT16_MAX
         /// OriginName: cog, Units: cdeg, IsExtended: false
         /// </summary>
         public ushort Cog { get; set; }
         /// <summary>
-        /// GPS fix type.
+        /// See the GPS_FIX_TYPE enum.
         /// OriginName: fix_type, Units: , IsExtended: false
         /// </summary>
         public GpsFixType FixType { get; set; }
@@ -14742,24 +13533,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 125;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 203;
+        public override byte GetCrcEtra() => 203;
 
         public override PowerStatusPayload Payload { get; } = new PowerStatusPayload();
 
         public override string Name => "POWER_STATUS";
-        public override string ToString()
-        {
-            var name = "POWER_STATUS".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -14767,7 +13545,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class PowerStatusPayload : IPayload
     {
-        public byte MaxByteSize => 6;
+        public byte GetMaxByteSize() => 6;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -14784,21 +13562,21 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Vcc).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Vservo).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes((ushort)Flags).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/6;
         }
 
         /// <summary>
-        /// 5V rail voltage.
+        /// 5V rail voltage in millivolts
         /// OriginName: Vcc, Units: mV, IsExtended: false
         /// </summary>
         public ushort Vcc { get; set; }
         /// <summary>
-        /// Servo rail voltage.
+        /// servo rail voltage in millivolts
         /// OriginName: Vservo, Units: mV, IsExtended: false
         /// </summary>
         public ushort Vservo { get; set; }
         /// <summary>
-        /// Bitmap of power supply status flags.
+        /// power supply status flags (see MAV_POWER_STATUS enum)
         /// OriginName: flags, Units: , IsExtended: false
         /// </summary>
         public MavPowerStatus Flags { get; set; }
@@ -14811,24 +13589,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 126;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 220;
+        public override byte GetCrcEtra() => 220;
 
         public override SerialControlPayload Payload { get; } = new SerialControlPayload();
 
         public override string Name => "SERIAL_CONTROL";
-        public override string ToString()
-        {
-            var name = "SERIAL_CONTROL".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -14836,7 +13601,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SerialControlPayload : IPayload
     {
-        public byte MaxByteSize => 79;
+        public byte GetMaxByteSize() => 79;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -14848,7 +13613,7 @@ namespace Asv.Mavlink.V2.Common
             Device = (SerialControlDev)buffer[index++];
             Flags = (SerialControlFlag)buffer[index++];
             Count = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/70 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/70 - Math.Max(0,((/*PayloadByteSize*/79 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<70;i++)
             {
                 Data[i] = default(byte);
@@ -14870,7 +13635,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 buffer[index] = (byte)Data[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/79;
         }
 
         /// <summary>
@@ -14879,17 +13644,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint Baudrate { get; set; }
         /// <summary>
-        /// Timeout for reply data
+        /// Timeout for reply data in milliseconds
         /// OriginName: timeout, Units: ms, IsExtended: false
         /// </summary>
         public ushort Timeout { get; set; }
         /// <summary>
-        /// Serial control device type.
+        /// See SERIAL_CONTROL_DEV enum
         /// OriginName: device, Units: , IsExtended: false
         /// </summary>
         public SerialControlDev Device { get; set; }
         /// <summary>
-        /// Bitmap of serial control flags.
+        /// See SERIAL_CONTROL_FLAG enum
         /// OriginName: flags, Units: , IsExtended: false
         /// </summary>
         public SerialControlFlag Flags { get; set; }
@@ -14912,24 +13677,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 127;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 25;
+        public override byte GetCrcEtra() => 25;
 
         public override GpsRtkPayload Payload { get; } = new GpsRtkPayload();
 
         public override string Name => "GPS_RTK";
-        public override string ToString()
-        {
-            var name = "GPS_RTK".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -14937,7 +13689,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class GpsRtkPayload : IPayload
     {
-        public byte MaxByteSize => 35;
+        public byte GetMaxByteSize() => 35;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -14974,11 +13726,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(RtkRate).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Nsats).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)BaselineCoordsType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/35;
         }
 
         /// <summary>
-        /// Time since boot of last baseline message received.
+        /// Time since boot of last baseline message received in ms.
         /// OriginName: time_last_baseline_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeLastBaselineMs { get; set; }
@@ -14988,17 +13740,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint Tow { get; set; }
         /// <summary>
-        /// Current baseline in ECEF x or NED north component.
+        /// Current baseline in ECEF x or NED north component in mm.
         /// OriginName: baseline_a_mm, Units: mm, IsExtended: false
         /// </summary>
         public int BaselineAMm { get; set; }
         /// <summary>
-        /// Current baseline in ECEF y or NED east component.
+        /// Current baseline in ECEF y or NED east component in mm.
         /// OriginName: baseline_b_mm, Units: mm, IsExtended: false
         /// </summary>
         public int BaselineBMm { get; set; }
         /// <summary>
-        /// Current baseline in ECEF z or NED down component.
+        /// Current baseline in ECEF z or NED down component in mm.
         /// OriginName: baseline_c_mm, Units: mm, IsExtended: false
         /// </summary>
         public int BaselineCMm { get; set; }
@@ -15028,7 +13780,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte RtkHealth { get; set; }
         /// <summary>
-        /// Rate of baseline messages being received by GPS
+        /// Rate of baseline messages being received by GPS, in HZ
         /// OriginName: rtk_rate, Units: Hz, IsExtended: false
         /// </summary>
         public byte RtkRate { get; set; }
@@ -15051,24 +13803,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 128;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 226;
+        public override byte GetCrcEtra() => 226;
 
         public override Gps2RtkPayload Payload { get; } = new Gps2RtkPayload();
 
         public override string Name => "GPS2_RTK";
-        public override string ToString()
-        {
-            var name = "GPS2_RTK".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -15076,7 +13815,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class Gps2RtkPayload : IPayload
     {
-        public byte MaxByteSize => 35;
+        public byte GetMaxByteSize() => 35;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -15113,11 +13852,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(RtkRate).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Nsats).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)BaselineCoordsType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/35;
         }
 
         /// <summary>
-        /// Time since boot of last baseline message received.
+        /// Time since boot of last baseline message received in ms.
         /// OriginName: time_last_baseline_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeLastBaselineMs { get; set; }
@@ -15127,17 +13866,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint Tow { get; set; }
         /// <summary>
-        /// Current baseline in ECEF x or NED north component.
+        /// Current baseline in ECEF x or NED north component in mm.
         /// OriginName: baseline_a_mm, Units: mm, IsExtended: false
         /// </summary>
         public int BaselineAMm { get; set; }
         /// <summary>
-        /// Current baseline in ECEF y or NED east component.
+        /// Current baseline in ECEF y or NED east component in mm.
         /// OriginName: baseline_b_mm, Units: mm, IsExtended: false
         /// </summary>
         public int BaselineBMm { get; set; }
         /// <summary>
-        /// Current baseline in ECEF z or NED down component.
+        /// Current baseline in ECEF z or NED down component in mm.
         /// OriginName: baseline_c_mm, Units: mm, IsExtended: false
         /// </summary>
         public int BaselineCMm { get; set; }
@@ -15167,7 +13906,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte RtkHealth { get; set; }
         /// <summary>
-        /// Rate of baseline messages being received by GPS
+        /// Rate of baseline messages being received by GPS, in HZ
         /// OriginName: rtk_rate, Units: Hz, IsExtended: false
         /// </summary>
         public byte RtkRate { get; set; }
@@ -15190,24 +13929,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 129;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 46;
+        public override byte GetCrcEtra() => 46;
 
         public override ScaledImu3Payload Payload { get; } = new ScaledImu3Payload();
 
         public override string Name => "SCALED_IMU3";
-        public override string ToString()
-        {
-            var name = "SCALED_IMU3".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -15215,7 +13941,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ScaledImu3Payload : IPayload
     {
-        public byte MaxByteSize => 22;
+        public byte GetMaxByteSize() => 22;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -15246,56 +13972,56 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Xmag).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Ymag).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Zmag).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/22;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// X acceleration
+        /// X acceleration (mg)
         /// OriginName: xacc, Units: mG, IsExtended: false
         /// </summary>
         public short Xacc { get; set; }
         /// <summary>
-        /// Y acceleration
+        /// Y acceleration (mg)
         /// OriginName: yacc, Units: mG, IsExtended: false
         /// </summary>
         public short Yacc { get; set; }
         /// <summary>
-        /// Z acceleration
+        /// Z acceleration (mg)
         /// OriginName: zacc, Units: mG, IsExtended: false
         /// </summary>
         public short Zacc { get; set; }
         /// <summary>
-        /// Angular speed around X axis
+        /// Angular speed around X axis (millirad /sec)
         /// OriginName: xgyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Xgyro { get; set; }
         /// <summary>
-        /// Angular speed around Y axis
+        /// Angular speed around Y axis (millirad /sec)
         /// OriginName: ygyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Ygyro { get; set; }
         /// <summary>
-        /// Angular speed around Z axis
+        /// Angular speed around Z axis (millirad /sec)
         /// OriginName: zgyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Zgyro { get; set; }
         /// <summary>
-        /// X Magnetic field
+        /// X Magnetic field (milli tesla)
         /// OriginName: xmag, Units: mT, IsExtended: false
         /// </summary>
         public short Xmag { get; set; }
         /// <summary>
-        /// Y Magnetic field
+        /// Y Magnetic field (milli tesla)
         /// OriginName: ymag, Units: mT, IsExtended: false
         /// </summary>
         public short Ymag { get; set; }
         /// <summary>
-        /// Z Magnetic field
+        /// Z Magnetic field (milli tesla)
         /// OriginName: zmag, Units: mT, IsExtended: false
         /// </summary>
         public short Zmag { get; set; }
@@ -15307,24 +14033,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 130;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 29;
+        public override byte GetCrcEtra() => 29;
 
         public override DataTransmissionHandshakePayload Payload { get; } = new DataTransmissionHandshakePayload();
 
         public override string Name => "DATA_TRANSMISSION_HANDSHAKE";
-        public override string ToString()
-        {
-            var name = "DATA_TRANSMISSION_HANDSHAKE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -15332,7 +14045,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class DataTransmissionHandshakePayload : IPayload
     {
-        public byte MaxByteSize => 13;
+        public byte GetMaxByteSize() => 13;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -15343,7 +14056,7 @@ namespace Asv.Mavlink.V2.Common
             Width = BitConverter.ToUInt16(buffer,index);index+=2;
             Height = BitConverter.ToUInt16(buffer,index);index+=2;
             Packets = BitConverter.ToUInt16(buffer,index);index+=2;
-            Type = (DataTypes)buffer[index++];
+            Type = (byte)buffer[index++];
             Payload = (byte)buffer[index++];
             JpgQuality = (byte)buffer[index++];
         }
@@ -15354,44 +14067,44 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Width).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Height).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Packets).CopyTo(buffer, index);index+=2;
-            buffer[index] = (byte)Type;index+=1;
+            BitConverter.GetBytes(Type).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Payload).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(JpgQuality).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/13;
         }
 
         /// <summary>
-        /// total data size (set on ACK only).
+        /// total data size in bytes (set on ACK only)
         /// OriginName: size, Units: bytes, IsExtended: false
         /// </summary>
         public uint Size { get; set; }
         /// <summary>
-        /// Width of a matrix or image.
+        /// Width of a matrix or image
         /// OriginName: width, Units: , IsExtended: false
         /// </summary>
         public ushort Width { get; set; }
         /// <summary>
-        /// Height of a matrix or image.
+        /// Height of a matrix or image
         /// OriginName: height, Units: , IsExtended: false
         /// </summary>
         public ushort Height { get; set; }
         /// <summary>
-        /// Number of packets being sent (set on ACK only).
+        /// number of packets beeing sent (set on ACK only)
         /// OriginName: packets, Units: , IsExtended: false
         /// </summary>
         public ushort Packets { get; set; }
         /// <summary>
-        /// Type of requested/acknowledged data.
+        /// type of requested/acknowledged data (as defined in ENUM DATA_TYPES in mavlink/include/mavlink_types.h)
         /// OriginName: type, Units: , IsExtended: false
         /// </summary>
-        public DataTypes Type { get; set; }
+        public byte Type { get; set; }
         /// <summary>
-        /// Payload size per packet (normally 253 byte, see DATA field size in message ENCAPSULATED_DATA) (set on ACK only).
+        /// payload size per packet (normally 253 byte, see DATA field size in message ENCAPSULATED_DATA) (set on ACK only)
         /// OriginName: payload, Units: bytes, IsExtended: false
         /// </summary>
         public byte Payload { get; set; }
         /// <summary>
-        /// JPEG quality. Values: [1-100].
+        /// JPEG quality out of [1,100]
         /// OriginName: jpg_quality, Units: %, IsExtended: false
         /// </summary>
         public byte JpgQuality { get; set; }
@@ -15403,24 +14116,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 131;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 223;
+        public override byte GetCrcEtra() => 223;
 
         public override EncapsulatedDataPayload Payload { get; } = new EncapsulatedDataPayload();
 
         public override string Name => "ENCAPSULATED_DATA";
-        public override string ToString()
-        {
-            var name = "ENCAPSULATED_DATA".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -15428,7 +14128,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class EncapsulatedDataPayload : IPayload
     {
-        public byte MaxByteSize => 255;
+        public byte GetMaxByteSize() => 255;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -15436,7 +14136,7 @@ namespace Asv.Mavlink.V2.Common
             var endIndex = offset + payloadSize;
             var arraySize = 0;
             Seqnr = BitConverter.ToUInt16(buffer,index);index+=2;
-            arraySize = /*ArrayLength*/253 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/253 - Math.Max(0,((/*PayloadByteSize*/255 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<253;i++)
             {
                 Data[i] = default(byte);
@@ -15454,7 +14154,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 buffer[index] = (byte)Data[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/255;
         }
 
         /// <summary>
@@ -15475,24 +14175,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 132;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 85;
+        public override byte GetCrcEtra() => 85;
 
         public override DistanceSensorPayload Payload { get; } = new DistanceSensorPayload();
 
         public override string Name => "DISTANCE_SENSOR";
-        public override string ToString()
-        {
-            var name = "DISTANCE_SENSOR".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -15500,7 +14187,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class DistanceSensorPayload : IPayload
     {
-        public byte MaxByteSize => 14;
+        public byte GetMaxByteSize() => 14;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -15527,21 +14214,21 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Id).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)Orientation;index+=1;
             BitConverter.GetBytes(Covariance).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/14;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Time since system boot
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Minimum distance the sensor can measure
+        /// Minimum distance the sensor can measure in centimeters
         /// OriginName: min_distance, Units: cm, IsExtended: false
         /// </summary>
         public ushort MinDistance { get; set; }
         /// <summary>
-        /// Maximum distance the sensor can measure
+        /// Maximum distance the sensor can measure in centimeters
         /// OriginName: max_distance, Units: cm, IsExtended: false
         /// </summary>
         public ushort MaxDistance { get; set; }
@@ -15551,7 +14238,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort CurrentDistance { get; set; }
         /// <summary>
-        /// Type of distance sensor.
+        /// Type from MAV_DISTANCE_SENSOR enum.
         /// OriginName: type, Units: , IsExtended: false
         /// </summary>
         public MavDistanceSensor Type { get; set; }
@@ -15561,12 +14248,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Id { get; set; }
         /// <summary>
-        /// Direction the sensor faces. downward-facing: ROTATION_PITCH_270, upward-facing: ROTATION_PITCH_90, backward-facing: ROTATION_PITCH_180, forward-facing: ROTATION_NONE, left-facing: ROTATION_YAW_90, right-facing: ROTATION_YAW_270
+        /// Direction the sensor faces from MAV_SENSOR_ORIENTATION enum. downward-facing: ROTATION_PITCH_270, upward-facing: ROTATION_PITCH_90, backward-facing: ROTATION_PITCH_180, forward-facing: ROTATION_NONE, left-facing: ROTATION_YAW_90, right-facing: ROTATION_YAW_270
         /// OriginName: orientation, Units: , IsExtended: false
         /// </summary>
         public MavSensorOrientation Orientation { get; set; }
         /// <summary>
-        /// Measurement covariance, 0 for unknown / invalid readings
+        /// Measurement covariance in centimeters, 0 for unknown / invalid readings
         /// OriginName: covariance, Units: cm, IsExtended: false
         /// </summary>
         public byte Covariance { get; set; }
@@ -15579,24 +14266,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 133;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 6;
+        public override byte GetCrcEtra() => 6;
 
         public override TerrainRequestPayload Payload { get; } = new TerrainRequestPayload();
 
         public override string Name => "TERRAIN_REQUEST";
-        public override string ToString()
-        {
-            var name = "TERRAIN_REQUEST".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -15604,7 +14278,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class TerrainRequestPayload : IPayload
     {
-        public byte MaxByteSize => 18;
+        public byte GetMaxByteSize() => 18;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -15623,7 +14297,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Lat).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Lon).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(GridSpacing).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/18;
         }
 
         /// <summary>
@@ -15632,17 +14306,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ulong Mask { get; set; }
         /// <summary>
-        /// Latitude of SW corner of first grid
+        /// Latitude of SW corner of first grid (degrees *10^7)
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude of SW corner of first grid
+        /// Longitude of SW corner of first grid (in degrees *10^7)
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Grid spacing
+        /// Grid spacing in meters
         /// OriginName: grid_spacing, Units: m, IsExtended: false
         /// </summary>
         public ushort GridSpacing { get; set; }
@@ -15655,24 +14329,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 134;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 229;
+        public override byte GetCrcEtra() => 229;
 
         public override TerrainDataPayload Payload { get; } = new TerrainDataPayload();
 
         public override string Name => "TERRAIN_DATA";
-        public override string ToString()
-        {
-            var name = "TERRAIN_DATA".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -15680,7 +14341,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class TerrainDataPayload : IPayload
     {
-        public byte MaxByteSize => 43;
+        public byte GetMaxByteSize() => 43;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -15690,7 +14351,7 @@ namespace Asv.Mavlink.V2.Common
             Lat = BitConverter.ToInt32(buffer,index);index+=4;
             Lon = BitConverter.ToInt32(buffer,index);index+=4;
             GridSpacing = BitConverter.ToUInt16(buffer,index);index+=2;
-            arraySize = /*ArrayLength*/16 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/2 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/16 - Math.Max(0,((/*PayloadByteSize*/43 - payloadSize - /*ExtendedFieldsLength*/0)/2 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<16;i++)
             {
                 Data[i] = default(short);
@@ -15712,26 +14373,26 @@ namespace Asv.Mavlink.V2.Common
                 BitConverter.GetBytes(Data[i]).CopyTo(buffer, index);index+=2;
             }
             BitConverter.GetBytes(Gridbit).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/43;
         }
 
         /// <summary>
-        /// Latitude of SW corner of first grid
+        /// Latitude of SW corner of first grid (degrees *10^7)
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude of SW corner of first grid
+        /// Longitude of SW corner of first grid (in degrees *10^7)
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Grid spacing
+        /// Grid spacing in meters
         /// OriginName: grid_spacing, Units: m, IsExtended: false
         /// </summary>
         public ushort GridSpacing { get; set; }
         /// <summary>
-        /// Terrain data AMSL
+        /// Terrain data in meters AMSL
         /// OriginName: data, Units: m, IsExtended: false
         /// </summary>
         public short[] Data { get; } = new short[16];
@@ -15749,24 +14410,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 135;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 203;
+        public override byte GetCrcEtra() => 203;
 
         public override TerrainCheckPayload Payload { get; } = new TerrainCheckPayload();
 
         public override string Name => "TERRAIN_CHECK";
-        public override string ToString()
-        {
-            var name = "TERRAIN_CHECK".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -15774,7 +14422,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class TerrainCheckPayload : IPayload
     {
-        public byte MaxByteSize => 8;
+        public byte GetMaxByteSize() => 8;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -15789,16 +14437,16 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(Lat).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Lon).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/8;
         }
 
         /// <summary>
-        /// Latitude
+        /// Latitude (degrees *10^7)
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude
+        /// Longitude (degrees *10^7)
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
@@ -15811,24 +14459,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 136;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 1;
+        public override byte GetCrcEtra() => 1;
 
         public override TerrainReportPayload Payload { get; } = new TerrainReportPayload();
 
         public override string Name => "TERRAIN_REPORT";
-        public override string ToString()
-        {
-            var name = "TERRAIN_REPORT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -15836,7 +14471,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class TerrainReportPayload : IPayload
     {
-        public byte MaxByteSize => 22;
+        public byte GetMaxByteSize() => 22;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -15861,26 +14496,26 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Spacing).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Pending).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Loaded).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/22;
         }
 
         /// <summary>
-        /// Latitude
+        /// Latitude (degrees *10^7)
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude
+        /// Longitude (degrees *10^7)
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Terrain height AMSL
+        /// Terrain height in meters AMSL
         /// OriginName: terrain_height, Units: m, IsExtended: false
         /// </summary>
         public float TerrainHeight { get; set; }
         /// <summary>
-        /// Current vehicle height above lat/lon terrain height
+        /// Current vehicle height above lat/lon terrain height (meters)
         /// OriginName: current_height, Units: m, IsExtended: false
         /// </summary>
         public float CurrentHeight { get; set; }
@@ -15908,24 +14543,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 137;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 195;
+        public override byte GetCrcEtra() => 195;
 
         public override ScaledPressure2Payload Payload { get; } = new ScaledPressure2Payload();
 
         public override string Name => "SCALED_PRESSURE2";
-        public override string ToString()
-        {
-            var name = "SCALED_PRESSURE2".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -15933,7 +14555,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ScaledPressure2Payload : IPayload
     {
-        public byte MaxByteSize => 14;
+        public byte GetMaxByteSize() => 14;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -15952,26 +14574,26 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(PressAbs).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(PressDiff).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Temperature).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/14;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Absolute pressure
+        /// Absolute pressure (hectopascal)
         /// OriginName: press_abs, Units: hPa, IsExtended: false
         /// </summary>
         public float PressAbs { get; set; }
         /// <summary>
-        /// Differential pressure
+        /// Differential pressure 1 (hectopascal)
         /// OriginName: press_diff, Units: hPa, IsExtended: false
         /// </summary>
         public float PressDiff { get; set; }
         /// <summary>
-        /// Temperature measurement
+        /// Temperature measurement (0.01 degrees celsius)
         /// OriginName: temperature, Units: cdegC, IsExtended: false
         /// </summary>
         public short Temperature { get; set; }
@@ -15984,24 +14606,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 138;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 109;
+        public override byte GetCrcEtra() => 109;
 
         public override AttPosMocapPayload Payload { get; } = new AttPosMocapPayload();
 
         public override string Name => "ATT_POS_MOCAP";
-        public override string ToString()
-        {
-            var name = "ATT_POS_MOCAP".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -16009,7 +14618,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class AttPosMocapPayload : IPayload
     {
-        public byte MaxByteSize => 120;
+        public byte GetMaxByteSize() => 120;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -16017,7 +14626,7 @@ namespace Asv.Mavlink.V2.Common
             var endIndex = offset + payloadSize;
             var arraySize = 0;
             TimeUsec = BitConverter.ToUInt64(buffer,index);index+=8;
-            arraySize = /*ArrayLength*/4 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/84)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/4 - Math.Max(0,((/*PayloadByteSize*/120 - payloadSize - /*ExtendedFieldsLength*/84)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<4;i++)
             {
                 Q[i] = default(float);
@@ -16052,11 +14661,11 @@ namespace Asv.Mavlink.V2.Common
             {
                 BitConverter.GetBytes(Covariance[i]).CopyTo(buffer, index);index+=4;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/120;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (micros since boot or Unix epoch)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -16066,17 +14675,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float[] Q { get; } = new float[4];
         /// <summary>
-        /// X position (NED)
+        /// X position in meters (NED)
         /// OriginName: x, Units: m, IsExtended: false
         /// </summary>
         public float X { get; set; }
         /// <summary>
-        /// Y position (NED)
+        /// Y position in meters (NED)
         /// OriginName: y, Units: m, IsExtended: false
         /// </summary>
         public float Y { get; set; }
         /// <summary>
-        /// Z position (NED)
+        /// Z position in meters (NED)
         /// OriginName: z, Units: m, IsExtended: false
         /// </summary>
         public float Z { get; set; }
@@ -16094,24 +14703,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 139;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 168;
+        public override byte GetCrcEtra() => 168;
 
         public override SetActuatorControlTargetPayload Payload { get; } = new SetActuatorControlTargetPayload();
 
         public override string Name => "SET_ACTUATOR_CONTROL_TARGET";
-        public override string ToString()
-        {
-            var name = "SET_ACTUATOR_CONTROL_TARGET".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -16119,7 +14715,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SetActuatorControlTargetPayload : IPayload
     {
-        public byte MaxByteSize => 43;
+        public byte GetMaxByteSize() => 43;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -16127,7 +14723,7 @@ namespace Asv.Mavlink.V2.Common
             var endIndex = offset + payloadSize;
             var arraySize = 0;
             TimeUsec = BitConverter.ToUInt64(buffer,index);index+=8;
-            arraySize = /*ArrayLength*/8 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/8 - Math.Max(0,((/*PayloadByteSize*/43 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<8;i++)
             {
                 Controls[i] = default(float);
@@ -16151,11 +14747,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(GroupMlx).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/43;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (micros since boot or Unix epoch)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -16188,24 +14784,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 140;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 181;
+        public override byte GetCrcEtra() => 181;
 
         public override ActuatorControlTargetPayload Payload { get; } = new ActuatorControlTargetPayload();
 
         public override string Name => "ACTUATOR_CONTROL_TARGET";
-        public override string ToString()
-        {
-            var name = "ACTUATOR_CONTROL_TARGET".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -16213,7 +14796,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ActuatorControlTargetPayload : IPayload
     {
-        public byte MaxByteSize => 41;
+        public byte GetMaxByteSize() => 41;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -16221,7 +14804,7 @@ namespace Asv.Mavlink.V2.Common
             var endIndex = offset + payloadSize;
             var arraySize = 0;
             TimeUsec = BitConverter.ToUInt64(buffer,index);index+=8;
-            arraySize = /*ArrayLength*/8 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/8 - Math.Max(0,((/*PayloadByteSize*/41 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<8;i++)
             {
                 Controls[i] = default(float);
@@ -16241,11 +14824,11 @@ namespace Asv.Mavlink.V2.Common
                 BitConverter.GetBytes(Controls[i]).CopyTo(buffer, index);index+=4;
             }
             BitConverter.GetBytes(GroupMlx).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/41;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (micros since boot or Unix epoch)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -16268,24 +14851,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 141;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 47;
+        public override byte GetCrcEtra() => 47;
 
         public override AltitudePayload Payload { get; } = new AltitudePayload();
 
         public override string Name => "ALTITUDE";
-        public override string ToString()
-        {
-            var name = "ALTITUDE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -16293,7 +14863,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class AltitudePayload : IPayload
     {
-        public byte MaxByteSize => 32;
+        public byte GetMaxByteSize() => 32;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -16318,11 +14888,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(AltitudeRelative).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(AltitudeTerrain).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(BottomClearance).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/32;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (micros since boot or Unix epoch)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -16365,24 +14935,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 142;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 72;
+        public override byte GetCrcEtra() => 72;
 
         public override ResourceRequestPayload Payload { get; } = new ResourceRequestPayload();
 
         public override string Name => "RESOURCE_REQUEST";
-        public override string ToString()
-        {
-            var name = "RESOURCE_REQUEST".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -16390,7 +14947,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ResourceRequestPayload : IPayload
     {
-        public byte MaxByteSize => 243;
+        public byte GetMaxByteSize() => 243;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -16399,7 +14956,7 @@ namespace Asv.Mavlink.V2.Common
             var arraySize = 0;
             RequestId = (byte)buffer[index++];
             UriType = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/120 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/120 - Math.Max(0,((/*PayloadByteSize*/243 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<120;i++)
             {
                 Uri[i] = default(byte);
@@ -16429,7 +14986,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 buffer[index] = (byte)Storage[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/243;
         }
 
         /// <summary>
@@ -16466,24 +15023,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 143;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 131;
+        public override byte GetCrcEtra() => 131;
 
         public override ScaledPressure3Payload Payload { get; } = new ScaledPressure3Payload();
 
         public override string Name => "SCALED_PRESSURE3";
-        public override string ToString()
-        {
-            var name = "SCALED_PRESSURE3".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -16491,7 +15035,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ScaledPressure3Payload : IPayload
     {
-        public byte MaxByteSize => 14;
+        public byte GetMaxByteSize() => 14;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -16510,26 +15054,26 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(PressAbs).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(PressDiff).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Temperature).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/14;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Absolute pressure
+        /// Absolute pressure (hectopascal)
         /// OriginName: press_abs, Units: hPa, IsExtended: false
         /// </summary>
         public float PressAbs { get; set; }
         /// <summary>
-        /// Differential pressure
+        /// Differential pressure 1 (hectopascal)
         /// OriginName: press_diff, Units: hPa, IsExtended: false
         /// </summary>
         public float PressDiff { get; set; }
         /// <summary>
-        /// Temperature measurement
+        /// Temperature measurement (0.01 degrees celsius)
         /// OriginName: temperature, Units: cdegC, IsExtended: false
         /// </summary>
         public short Temperature { get; set; }
@@ -16542,24 +15086,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 144;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 127;
+        public override byte GetCrcEtra() => 127;
 
         public override FollowTargetPayload Payload { get; } = new FollowTargetPayload();
 
         public override string Name => "FOLLOW_TARGET";
-        public override string ToString()
-        {
-            var name = "FOLLOW_TARGET".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -16567,7 +15098,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class FollowTargetPayload : IPayload
     {
-        public byte MaxByteSize => 93;
+        public byte GetMaxByteSize() => 93;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -16589,7 +15120,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 Acc[i] = BitConverter.ToSingle(buffer, index);index+=4;
             }
-            arraySize = /*ArrayLength*/4 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/4 - Math.Max(0,((/*PayloadByteSize*/93 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<4;i++)
             {
                 AttitudeQ[i] = default(float);
@@ -16639,11 +15170,11 @@ namespace Asv.Mavlink.V2.Common
                 BitConverter.GetBytes(PositionCov[i]).CopyTo(buffer, index);index+=4;
             }
             BitConverter.GetBytes(EstCapabilities).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/93;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp in milliseconds since system boot
         /// OriginName: timestamp, Units: ms, IsExtended: false
         /// </summary>
         public ulong Timestamp { get; set; }
@@ -16653,17 +15184,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ulong CustomState { get; set; }
         /// <summary>
-        /// Latitude (WGS84)
+        /// Latitude (WGS84), in degrees * 1E7
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude (WGS84)
+        /// Longitude (WGS84), in degrees * 1E7
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude (AMSL)
+        /// AMSL, in meters
         /// OriginName: alt, Units: m, IsExtended: false
         /// </summary>
         public float Alt { get; set; }
@@ -16706,24 +15237,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 146;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 103;
+        public override byte GetCrcEtra() => 103;
 
         public override ControlSystemStatePayload Payload { get; } = new ControlSystemStatePayload();
 
         public override string Name => "CONTROL_SYSTEM_STATE";
-        public override string ToString()
-        {
-            var name = "CONTROL_SYSTEM_STATE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -16731,7 +15249,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ControlSystemStatePayload : IPayload
     {
-        public byte MaxByteSize => 100;
+        public byte GetMaxByteSize() => 100;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -16759,7 +15277,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 PosVariance[i] = BitConverter.ToSingle(buffer, index);index+=4;
             }
-            arraySize = /*ArrayLength*/4 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/4 - Math.Max(0,((/*PayloadByteSize*/100 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<4;i++)
             {
                 Q[i] = default(float);
@@ -16801,11 +15319,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(RollRate).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(PitchRate).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(YawRate).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/100;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (micros since boot or Unix epoch)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -16898,24 +15416,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 147;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 154;
+        public override byte GetCrcEtra() => 154;
 
         public override BatteryStatusPayload Payload { get; } = new BatteryStatusPayload();
 
         public override string Name => "BATTERY_STATUS";
-        public override string ToString()
-        {
-            var name = "BATTERY_STATUS".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -16923,7 +15428,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class BatteryStatusPayload : IPayload
     {
-        public byte MaxByteSize => 41;
+        public byte GetMaxByteSize() => 41;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -16933,7 +15438,7 @@ namespace Asv.Mavlink.V2.Common
             CurrentConsumed = BitConverter.ToInt32(buffer,index);index+=4;
             EnergyConsumed = BitConverter.ToInt32(buffer,index);index+=4;
             Temperature = BitConverter.ToInt16(buffer,index);index+=2;
-            arraySize = /*ArrayLength*/10 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/5)/2 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/10 - Math.Max(0,((/*PayloadByteSize*/41 - payloadSize - /*ExtendedFieldsLength*/5)/2 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<10;i++)
             {
                 Voltages[i] = default(ushort);
@@ -16971,31 +15476,31 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(BatteryRemaining).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TimeRemaining).CopyTo(buffer, index);index+=4;
             buffer[index] = (byte)ChargeState;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/41;
         }
 
         /// <summary>
-        /// Consumed charge, -1: autopilot does not provide consumption estimate
+        /// Consumed charge, in milliampere hours (1 = 1 mAh), -1: autopilot does not provide mAh consumption estimate
         /// OriginName: current_consumed, Units: mAh, IsExtended: false
         /// </summary>
         public int CurrentConsumed { get; set; }
         /// <summary>
-        /// Consumed energy, -1: autopilot does not provide energy consumption estimate
+        /// Consumed energy, in HectoJoules (intergrated U*I*dt)  (1 = 100 Joule), -1: autopilot does not provide energy consumption estimate
         /// OriginName: energy_consumed, Units: hJ, IsExtended: false
         /// </summary>
         public int EnergyConsumed { get; set; }
         /// <summary>
-        /// Temperature of the battery. INT16_MAX for unknown temperature.
+        /// Temperature of the battery in centi-degrees celsius. INT16_MAX for unknown temperature.
         /// OriginName: temperature, Units: cdegC, IsExtended: false
         /// </summary>
         public short Temperature { get; set; }
         /// <summary>
-        /// Battery voltage of cells. Cells above the valid cell count for this battery should have the UINT16_MAX value.
+        /// Battery voltage of cells, in millivolts (1 = 1 millivolt). Cells above the valid cell count for this battery should have the UINT16_MAX value.
         /// OriginName: voltages, Units: mV, IsExtended: false
         /// </summary>
         public ushort[] Voltages { get; } = new ushort[10];
         /// <summary>
-        /// Battery current, -1: autopilot does not measure the current
+        /// Battery current, in 10*milliamperes (1 = 10 milliampere), -1: autopilot does not measure the current
         /// OriginName: current_battery, Units: cA, IsExtended: false
         /// </summary>
         public short CurrentBattery { get; set; }
@@ -17015,12 +15520,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public MavBatteryType Type { get; set; }
         /// <summary>
-        /// Remaining battery energy. Values: [0-100], -1: autopilot does not estimate the remaining battery.
+        /// Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot does not estimate the remaining battery
         /// OriginName: battery_remaining, Units: %, IsExtended: false
         /// </summary>
         public sbyte BatteryRemaining { get; set; }
         /// <summary>
-        /// Remaining battery time, 0: autopilot does not provide remaining battery time estimate
+        /// Remaining battery time, in seconds (1 = 1s = 0% energy left), 0: autopilot does not provide remaining battery time estimate
         /// OriginName: time_remaining, Units: s, IsExtended: true
         /// </summary>
         public int TimeRemaining { get; set; }
@@ -17038,24 +15543,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 148;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 178;
+        public override byte GetCrcEtra() => 178;
 
         public override AutopilotVersionPayload Payload { get; } = new AutopilotVersionPayload();
 
         public override string Name => "AUTOPILOT_VERSION";
-        public override string ToString()
-        {
-            var name = "AUTOPILOT_VERSION".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -17063,7 +15555,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class AutopilotVersionPayload : IPayload
     {
-        public byte MaxByteSize => 78;
+        public byte GetMaxByteSize() => 78;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -17078,7 +15570,7 @@ namespace Asv.Mavlink.V2.Common
             BoardVersion = BitConverter.ToUInt32(buffer,index);index+=4;
             VendorId = BitConverter.ToUInt16(buffer,index);index+=2;
             ProductId = BitConverter.ToUInt16(buffer,index);index+=2;
-            arraySize = /*ArrayLength*/8 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/18)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/8 - Math.Max(0,((/*PayloadByteSize*/78 - payloadSize - /*ExtendedFieldsLength*/18)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<8;i++)
             {
                 FlightCustomVersion[i] = default(byte);
@@ -17132,11 +15624,11 @@ namespace Asv.Mavlink.V2.Common
             {
                 buffer[index] = (byte)Uid2[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/78;
         }
 
         /// <summary>
-        /// Bitmap of capabilities
+        /// bitmask of capabilities (see MAV_PROTOCOL_CAPABILITY enum)
         /// OriginName: capabilities, Units: , IsExtended: false
         /// </summary>
         public MavProtocolCapability Capabilities { get; set; }
@@ -17204,24 +15696,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 149;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 200;
+        public override byte GetCrcEtra() => 200;
 
         public override LandingTargetPayload Payload { get; } = new LandingTargetPayload();
 
         public override string Name => "LANDING_TARGET";
-        public override string ToString()
-        {
-            var name = "LANDING_TARGET".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -17229,7 +15708,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class LandingTargetPayload : IPayload
     {
-        public byte MaxByteSize => 60;
+        public byte GetMaxByteSize() => 60;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -17287,36 +15766,36 @@ namespace Asv.Mavlink.V2.Common
             }
             buffer[index] = (byte)Type;index+=1;
             BitConverter.GetBytes(PositionValid).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/60;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (micros since boot or Unix epoch)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// X-axis angular offset of the target from the center of the image
+        /// X-axis angular offset (in radians) of the target from the center of the image
         /// OriginName: angle_x, Units: rad, IsExtended: false
         /// </summary>
         public float AngleX { get; set; }
         /// <summary>
-        /// Y-axis angular offset of the target from the center of the image
+        /// Y-axis angular offset (in radians) of the target from the center of the image
         /// OriginName: angle_y, Units: rad, IsExtended: false
         /// </summary>
         public float AngleY { get; set; }
         /// <summary>
-        /// Distance to the target from the vehicle
+        /// Distance to the target from the vehicle in meters
         /// OriginName: distance, Units: m, IsExtended: false
         /// </summary>
         public float Distance { get; set; }
         /// <summary>
-        /// Size of target along x-axis
+        /// Size in radians of target along x-axis
         /// OriginName: size_x, Units: rad, IsExtended: false
         /// </summary>
         public float SizeX { get; set; }
         /// <summary>
-        /// Size of target along y-axis
+        /// Size in radians of target along y-axis
         /// OriginName: size_y, Units: rad, IsExtended: false
         /// </summary>
         public float SizeY { get; set; }
@@ -17326,7 +15805,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetNum { get; set; }
         /// <summary>
-        /// Coordinate frame used for following fields.
+        /// MAV_FRAME enum specifying the whether the following feilds are earth-frame, body-frame, etc.
         /// OriginName: frame, Units: , IsExtended: false
         /// </summary>
         public MavFrame Frame { get; set; }
@@ -17351,42 +15830,29 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float[] Q { get; } = new float[4];
         /// <summary>
-        /// Type of landing target
+        /// LANDING_TARGET_TYPE enum specifying the type of landing target
         /// OriginName: type, Units: , IsExtended: true
         /// </summary>
         public LandingTargetType Type { get; set; }
         /// <summary>
-        /// Boolean indicating known position (1) or default unknown position (0), for validation of positioning of the landing target
+        /// Boolean indicating known position (1) or default unkown position (0), for validation of positioning of the landing target
         /// OriginName: position_valid, Units: , IsExtended: true
         /// </summary>
         public byte PositionValid { get; set; }
     }
     /// <summary>
-    /// Estimator status message including flags, innovation test ratios and estimated accuracies. The flags message is an integer bitmask containing information on which EKF outputs are valid. See the ESTIMATOR_STATUS_FLAGS enum definition for further information. The innovation test ratios show the magnitude of the sensor innovation divided by the innovation check threshold. Under normal operation the innovation test ratios should be below 0.5 with occasional values up to 1.0. Values greater than 1.0 should be rare under normal operation and indicate that a measurement has been rejected by the filter. The user should be notified if an innovation test ratio greater than 1.0 is recorded. Notifications for values in the range between 0.5 and 1.0 should be optional and controllable by the user.
+    /// Estimator status message including flags, innovation test ratios and estimated accuracies. The flags message is an integer bitmask containing information on which EKF outputs are valid. See the ESTIMATOR_STATUS_FLAGS enum definition for further information. The innovaton test ratios show the magnitude of the sensor innovation divided by the innovation check threshold. Under normal operation the innovaton test ratios should be below 0.5 with occasional values up to 1.0. Values greater than 1.0 should be rare under normal operation and indicate that a measurement has been rejected by the filter. The user should be notified if an innovation test ratio greater than 1.0 is recorded. Notifications for values in the range between 0.5 and 1.0 should be optional and controllable by the user.
     ///  ESTIMATOR_STATUS
     /// </summary>
     public class EstimatorStatusPacket: PacketV2<EstimatorStatusPayload>
     {
 	public const int PacketMessageId = 230;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 163;
+        public override byte GetCrcEtra() => 163;
 
         public override EstimatorStatusPayload Payload { get; } = new EstimatorStatusPayload();
 
         public override string Name => "ESTIMATOR_STATUS";
-        public override string ToString()
-        {
-            var name = "ESTIMATOR_STATUS".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -17394,7 +15860,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class EstimatorStatusPayload : IPayload
     {
-        public byte MaxByteSize => 42;
+        public byte GetMaxByteSize() => 42;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -17425,11 +15891,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(PosHorizAccuracy).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(PosVertAccuracy).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes((ushort)Flags).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/42;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (micros since boot or Unix epoch)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -17464,17 +15930,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float TasRatio { get; set; }
         /// <summary>
-        /// Horizontal position 1-STD accuracy relative to the EKF local origin
+        /// Horizontal position 1-STD accuracy relative to the EKF local origin (m)
         /// OriginName: pos_horiz_accuracy, Units: m, IsExtended: false
         /// </summary>
         public float PosHorizAccuracy { get; set; }
         /// <summary>
-        /// Vertical position 1-STD accuracy relative to the EKF local origin
+        /// Vertical position 1-STD accuracy relative to the EKF local origin (m)
         /// OriginName: pos_vert_accuracy, Units: m, IsExtended: false
         /// </summary>
         public float PosVertAccuracy { get; set; }
         /// <summary>
-        /// Bitmap indicating which EKF outputs are valid.
+        /// Integer bitmask indicating which EKF outputs are valid. See definition for ESTIMATOR_STATUS_FLAGS.
         /// OriginName: flags, Units: , IsExtended: false
         /// </summary>
         public EstimatorStatusFlags Flags { get; set; }
@@ -17486,24 +15952,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 231;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 105;
+        public override byte GetCrcEtra() => 105;
 
         public override WindCovPayload Payload { get; } = new WindCovPayload();
 
         public override string Name => "WIND_COV";
-        public override string ToString()
-        {
-            var name = "WIND_COV".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -17511,7 +15964,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class WindCovPayload : IPayload
     {
-        public byte MaxByteSize => 40;
+        public byte GetMaxByteSize() => 40;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -17540,26 +15993,26 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(WindAlt).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(HorizAccuracy).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(VertAccuracy).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/40;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (micros since boot or Unix epoch)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Wind in X (NED) direction
+        /// Wind in X (NED) direction in m/s
         /// OriginName: wind_x, Units: m/s, IsExtended: false
         /// </summary>
         public float WindX { get; set; }
         /// <summary>
-        /// Wind in Y (NED) direction
+        /// Wind in Y (NED) direction in m/s
         /// OriginName: wind_y, Units: m/s, IsExtended: false
         /// </summary>
         public float WindY { get; set; }
         /// <summary>
-        /// Wind in Z (NED) direction
+        /// Wind in Z (NED) direction in m/s
         /// OriginName: wind_z, Units: m/s, IsExtended: false
         /// </summary>
         public float WindZ { get; set; }
@@ -17574,7 +16027,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float VarVert { get; set; }
         /// <summary>
-        /// Altitude (AMSL) that this measurement was taken at
+        /// AMSL altitude (m) this measurement was taken at
         /// OriginName: wind_alt, Units: m, IsExtended: false
         /// </summary>
         public float WindAlt { get; set; }
@@ -17590,31 +16043,18 @@ namespace Asv.Mavlink.V2.Common
         public float VertAccuracy { get; set; }
     }
     /// <summary>
-    /// GPS sensor input message.  This is a raw sensor value sent by the GPS. This is NOT the global position estimate of the system.
+    /// GPS sensor input message.  This is a raw sensor value sent by the GPS. This is NOT the global position estimate of the sytem.
     ///  GPS_INPUT
     /// </summary>
     public class GpsInputPacket: PacketV2<GpsInputPayload>
     {
 	public const int PacketMessageId = 232;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 151;
+        public override byte GetCrcEtra() => 151;
 
         public override GpsInputPayload Payload { get; } = new GpsInputPayload();
 
         public override string Name => "GPS_INPUT";
-        public override string ToString()
-        {
-            var name = "GPS_INPUT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -17622,7 +16062,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class GpsInputPayload : IPayload
     {
-        public byte MaxByteSize => 63;
+        public byte GetMaxByteSize() => 63;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -17669,76 +16109,76 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(GpsId).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(FixType).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(SatellitesVisible).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/63;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (micros since boot or Unix epoch)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// GPS time (from start of GPS week)
+        /// GPS time (milliseconds from start of GPS week)
         /// OriginName: time_week_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeWeekMs { get; set; }
         /// <summary>
-        /// Latitude (WGS84)
+        /// Latitude (WGS84), in degrees * 1E7
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude (WGS84)
+        /// Longitude (WGS84), in degrees * 1E7
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude (AMSL). Positive for up.
+        /// Altitude (AMSL, not WGS84), in m (positive for up)
         /// OriginName: alt, Units: m, IsExtended: false
         /// </summary>
         public float Alt { get; set; }
         /// <summary>
-        /// GPS HDOP horizontal dilution of position
+        /// GPS HDOP horizontal dilution of position in m
         /// OriginName: hdop, Units: m, IsExtended: false
         /// </summary>
         public float Hdop { get; set; }
         /// <summary>
-        /// GPS VDOP vertical dilution of position
+        /// GPS VDOP vertical dilution of position in m
         /// OriginName: vdop, Units: m, IsExtended: false
         /// </summary>
         public float Vdop { get; set; }
         /// <summary>
-        /// GPS velocity in NORTH direction in earth-fixed NED frame
+        /// GPS velocity in m/s in NORTH direction in earth-fixed NED frame
         /// OriginName: vn, Units: m/s, IsExtended: false
         /// </summary>
         public float Vn { get; set; }
         /// <summary>
-        /// GPS velocity in EAST direction in earth-fixed NED frame
+        /// GPS velocity in m/s in EAST direction in earth-fixed NED frame
         /// OriginName: ve, Units: m/s, IsExtended: false
         /// </summary>
         public float Ve { get; set; }
         /// <summary>
-        /// GPS velocity in DOWN direction in earth-fixed NED frame
+        /// GPS velocity in m/s in DOWN direction in earth-fixed NED frame
         /// OriginName: vd, Units: m/s, IsExtended: false
         /// </summary>
         public float Vd { get; set; }
         /// <summary>
-        /// GPS speed accuracy
+        /// GPS speed accuracy in m/s
         /// OriginName: speed_accuracy, Units: m/s, IsExtended: false
         /// </summary>
         public float SpeedAccuracy { get; set; }
         /// <summary>
-        /// GPS horizontal accuracy
+        /// GPS horizontal accuracy in m
         /// OriginName: horiz_accuracy, Units: m, IsExtended: false
         /// </summary>
         public float HorizAccuracy { get; set; }
         /// <summary>
-        /// GPS vertical accuracy
+        /// GPS vertical accuracy in m
         /// OriginName: vert_accuracy, Units: m, IsExtended: false
         /// </summary>
         public float VertAccuracy { get; set; }
         /// <summary>
-        /// Bitmap indicating which GPS input flags fields to ignore.  All other fields must be provided.
+        /// Flags indicating which fields to ignore (see GPS_INPUT_IGNORE_FLAGS enum).  All other fields must be provided.
         /// OriginName: ignore_flags, Units: , IsExtended: false
         /// </summary>
         public GpsInputIgnoreFlags IgnoreFlags { get; set; }
@@ -17771,24 +16211,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 233;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 35;
+        public override byte GetCrcEtra() => 35;
 
         public override GpsRtcmDataPayload Payload { get; } = new GpsRtcmDataPayload();
 
         public override string Name => "GPS_RTCM_DATA";
-        public override string ToString()
-        {
-            var name = "GPS_RTCM_DATA".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -17796,7 +16223,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class GpsRtcmDataPayload : IPayload
     {
-        public byte MaxByteSize => 182;
+        public byte GetMaxByteSize() => 182;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -17805,7 +16232,7 @@ namespace Asv.Mavlink.V2.Common
             var arraySize = 0;
             Flags = (byte)buffer[index++];
             Len = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/180 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/180 - Math.Max(0,((/*PayloadByteSize*/182 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<180;i++)
             {
                 Data[i] = default(byte);
@@ -17824,7 +16251,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 buffer[index] = (byte)Data[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/182;
         }
 
         /// <summary>
@@ -17851,24 +16278,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 234;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 150;
+        public override byte GetCrcEtra() => 150;
 
         public override HighLatencyPayload Payload { get; } = new HighLatencyPayload();
 
         public override string Name => "HIGH_LATENCY";
-        public override string ToString()
-        {
-            var name = "HIGH_LATENCY".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -17876,7 +16290,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class HighLatencyPayload : IPayload
     {
-        public byte MaxByteSize => 40;
+        public byte GetMaxByteSize() => 40;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -17935,7 +16349,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TemperatureAir).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Failsafe).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(WpNum).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/40;
         }
 
         /// <summary>
@@ -17944,52 +16358,52 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint CustomMode { get; set; }
         /// <summary>
-        /// Latitude
+        /// Latitude, expressed as degrees * 1E7
         /// OriginName: latitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Latitude { get; set; }
         /// <summary>
-        /// Longitude
+        /// Longitude, expressed as degrees * 1E7
         /// OriginName: longitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Longitude { get; set; }
         /// <summary>
-        /// roll
+        /// roll (centidegrees)
         /// OriginName: roll, Units: cdeg, IsExtended: false
         /// </summary>
         public short Roll { get; set; }
         /// <summary>
-        /// pitch
+        /// pitch (centidegrees)
         /// OriginName: pitch, Units: cdeg, IsExtended: false
         /// </summary>
         public short Pitch { get; set; }
         /// <summary>
-        /// heading
+        /// heading (centidegrees)
         /// OriginName: heading, Units: cdeg, IsExtended: false
         /// </summary>
         public ushort Heading { get; set; }
         /// <summary>
-        /// heading setpoint
+        /// heading setpoint (centidegrees)
         /// OriginName: heading_sp, Units: cdeg, IsExtended: false
         /// </summary>
         public short HeadingSp { get; set; }
         /// <summary>
-        /// Altitude above mean sea level
+        /// Altitude above mean sea level (meters)
         /// OriginName: altitude_amsl, Units: m, IsExtended: false
         /// </summary>
         public short AltitudeAmsl { get; set; }
         /// <summary>
-        /// Altitude setpoint relative to the home position
+        /// Altitude setpoint relative to the home position (meters)
         /// OriginName: altitude_sp, Units: m, IsExtended: false
         /// </summary>
         public short AltitudeSp { get; set; }
         /// <summary>
-        /// distance to target
+        /// distance to target (meters)
         /// OriginName: wp_distance, Units: m, IsExtended: false
         /// </summary>
         public ushort WpDistance { get; set; }
         /// <summary>
-        /// Bitmap of enabled system modes.
+        /// System mode bitfield, as defined by MAV_MODE_FLAG enum.
         /// OriginName: base_mode, Units: , IsExtended: false
         /// </summary>
         public MavModeFlag BaseMode { get; set; }
@@ -18004,22 +16418,22 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public sbyte Throttle { get; set; }
         /// <summary>
-        /// airspeed
+        /// airspeed (m/s)
         /// OriginName: airspeed, Units: m/s, IsExtended: false
         /// </summary>
         public byte Airspeed { get; set; }
         /// <summary>
-        /// airspeed setpoint
+        /// airspeed setpoint (m/s)
         /// OriginName: airspeed_sp, Units: m/s, IsExtended: false
         /// </summary>
         public byte AirspeedSp { get; set; }
         /// <summary>
-        /// groundspeed
+        /// groundspeed (m/s)
         /// OriginName: groundspeed, Units: m/s, IsExtended: false
         /// </summary>
         public byte Groundspeed { get; set; }
         /// <summary>
-        /// climb rate
+        /// climb rate (m/s)
         /// OriginName: climb_rate, Units: m/s, IsExtended: false
         /// </summary>
         public sbyte ClimbRate { get; set; }
@@ -18029,7 +16443,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte GpsNsat { get; set; }
         /// <summary>
-        /// GPS Fix type.
+        /// See the GPS_FIX_TYPE enum.
         /// OriginName: gps_fix_type, Units: , IsExtended: false
         /// </summary>
         public GpsFixType GpsFixType { get; set; }
@@ -18060,31 +16474,18 @@ namespace Asv.Mavlink.V2.Common
         public byte WpNum { get; set; }
     }
     /// <summary>
-    /// Message appropriate for high latency connections like Iridium (version 2)
+    /// WIP: Message appropriate for high latency connections like Iridium (version 2)
     ///  HIGH_LATENCY2
     /// </summary>
     public class HighLatency2Packet: PacketV2<HighLatency2Payload>
     {
 	public const int PacketMessageId = 235;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 179;
+        public override byte GetCrcEtra() => 179;
 
         public override HighLatency2Payload Payload { get; } = new HighLatency2Payload();
 
         public override string Name => "HIGH_LATENCY2";
-        public override string ToString()
-        {
-            var name = "HIGH_LATENCY2".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -18092,7 +16493,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class HighLatency2Payload : IPayload
     {
-        public byte MaxByteSize => 42;
+        public byte GetMaxByteSize() => 42;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -18157,7 +16558,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Custom0).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Custom1).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Custom2).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/42;
         }
 
         /// <summary>
@@ -18166,12 +16567,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint Timestamp { get; set; }
         /// <summary>
-        /// Latitude
+        /// Latitude, expressed as degrees * 1E7
         /// OriginName: latitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Latitude { get; set; }
         /// <summary>
-        /// Longitude
+        /// Longitude, expressed as degrees * 1E7
         /// OriginName: longitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Longitude { get; set; }
@@ -18191,7 +16592,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public short TargetAltitude { get; set; }
         /// <summary>
-        /// Distance to target waypoint or position
+        /// Distance to target waypoint or position (meters / 10)
         /// OriginName: target_distance, Units: dam, IsExtended: false
         /// </summary>
         public ushort TargetDistance { get; set; }
@@ -18201,77 +16602,77 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort WpNum { get; set; }
         /// <summary>
-        /// Bitmap of failure flags.
+        /// Indicates failures as defined in HL_FAILURE_FLAG ENUM. 
         /// OriginName: failure_flags, Units: , IsExtended: false
         /// </summary>
         public HlFailureFlag FailureFlags { get; set; }
         /// <summary>
-        /// Type of the MAV (quadrotor, helicopter, etc.)
+        /// Type of the MAV (quadrotor, helicopter, etc., up to 15 types, defined in MAV_TYPE ENUM)
         /// OriginName: type, Units: , IsExtended: false
         /// </summary>
         public MavType Type { get; set; }
         /// <summary>
-        /// Autopilot type / class.
+        /// Autopilot type / class. defined in MAV_AUTOPILOT ENUM
         /// OriginName: autopilot, Units: , IsExtended: false
         /// </summary>
         public MavAutopilot Autopilot { get; set; }
         /// <summary>
-        /// Heading
+        /// Heading (degrees / 2)
         /// OriginName: heading, Units: deg/2, IsExtended: false
         /// </summary>
         public byte Heading { get; set; }
         /// <summary>
-        /// Heading setpoint
+        /// Heading setpoint (degrees / 2)
         /// OriginName: target_heading, Units: deg/2, IsExtended: false
         /// </summary>
         public byte TargetHeading { get; set; }
         /// <summary>
-        /// Throttle
+        /// Throttle (percentage)
         /// OriginName: throttle, Units: %, IsExtended: false
         /// </summary>
         public byte Throttle { get; set; }
         /// <summary>
-        /// Airspeed
+        /// Airspeed (m/s * 5)
         /// OriginName: airspeed, Units: m/s*5, IsExtended: false
         /// </summary>
         public byte Airspeed { get; set; }
         /// <summary>
-        /// Airspeed setpoint
+        /// Airspeed setpoint (m/s * 5)
         /// OriginName: airspeed_sp, Units: m/s*5, IsExtended: false
         /// </summary>
         public byte AirspeedSp { get; set; }
         /// <summary>
-        /// Groundspeed
+        /// Groundspeed (m/s * 5)
         /// OriginName: groundspeed, Units: m/s*5, IsExtended: false
         /// </summary>
         public byte Groundspeed { get; set; }
         /// <summary>
-        /// Windspeed
+        /// Windspeed (m/s * 5)
         /// OriginName: windspeed, Units: m/s*5, IsExtended: false
         /// </summary>
         public byte Windspeed { get; set; }
         /// <summary>
-        /// Wind heading
+        /// Wind heading (deg / 2)
         /// OriginName: wind_heading, Units: deg/2, IsExtended: false
         /// </summary>
         public byte WindHeading { get; set; }
         /// <summary>
-        /// Maximum error horizontal position since last message
+        /// Maximum error horizontal position since last message (m * 10)
         /// OriginName: eph, Units: dm, IsExtended: false
         /// </summary>
         public byte Eph { get; set; }
         /// <summary>
-        /// Maximum error vertical position since last message
+        /// Maximum error vertical position since last message (m * 10)
         /// OriginName: epv, Units: dm, IsExtended: false
         /// </summary>
         public byte Epv { get; set; }
         /// <summary>
-        /// Air temperature from airspeed sensor
+        /// Air temperature (degrees C) from airspeed sensor
         /// OriginName: temperature_air, Units: degC, IsExtended: false
         /// </summary>
         public sbyte TemperatureAir { get; set; }
         /// <summary>
-        /// Maximum climb rate magnitude since last message
+        /// Maximum climb rate magnitude since last message (m/s * 10)
         /// OriginName: climb_rate, Units: dm/s, IsExtended: false
         /// </summary>
         public sbyte ClimbRate { get; set; }
@@ -18304,24 +16705,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 241;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 90;
+        public override byte GetCrcEtra() => 90;
 
         public override VibrationPayload Payload { get; } = new VibrationPayload();
 
         public override string Name => "VIBRATION";
-        public override string ToString()
-        {
-            var name = "VIBRATION".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -18329,7 +16717,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class VibrationPayload : IPayload
     {
-        public byte MaxByteSize => 32;
+        public byte GetMaxByteSize() => 32;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -18354,11 +16742,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Clipping0).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Clipping1).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Clipping2).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/32;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (micros since boot or Unix epoch)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -18394,31 +16782,18 @@ namespace Asv.Mavlink.V2.Common
         public uint Clipping2 { get; set; }
     }
     /// <summary>
-    /// This message can be requested by sending the MAV_CMD_GET_HOME_POSITION command. The position the system will return to and land on. The position is set automatically by the system during the takeoff in case it was not explicitly set by the operator before or after. The position the system will return to and land on. The global and local positions encode the position in the respective coordinate frames, while the q parameter encodes the orientation of the surface. Under normal conditions it describes the heading and terrain slope, which can be used by the aircraft to adjust the approach. The approach 3D vector describes the point to which the system should fly in normal flight mode and then perform a landing sequence along the vector.
+    /// This message can be requested by sending the MAV_CMD_GET_HOME_POSITION command. The position the system will return to and land on. The position is set automatically by the system during the takeoff in case it was not explicitely set by the operator before or after. The position the system will return to and land on. The global and local positions encode the position in the respective coordinate frames, while the q parameter encodes the orientation of the surface. Under normal conditions it describes the heading and terrain slope, which can be used by the aircraft to adjust the approach. The approach 3D vector describes the point to which the system should fly in normal flight mode and then perform a landing sequence along the vector.
     ///  HOME_POSITION
     /// </summary>
     public class HomePositionPacket: PacketV2<HomePositionPayload>
     {
 	public const int PacketMessageId = 242;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 104;
+        public override byte GetCrcEtra() => 104;
 
         public override HomePositionPayload Payload { get; } = new HomePositionPayload();
 
         public override string Name => "HOME_POSITION";
-        public override string ToString()
-        {
-            var name = "HOME_POSITION".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -18426,7 +16801,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class HomePositionPayload : IPayload
     {
-        public byte MaxByteSize => 60;
+        public byte GetMaxByteSize() => 60;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -18439,7 +16814,7 @@ namespace Asv.Mavlink.V2.Common
             X = BitConverter.ToSingle(buffer, index);index+=4;
             Y = BitConverter.ToSingle(buffer, index);index+=4;
             Z = BitConverter.ToSingle(buffer, index);index+=4;
-            arraySize = /*ArrayLength*/4 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/8)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/4 - Math.Max(0,((/*PayloadByteSize*/60 - payloadSize - /*ExtendedFieldsLength*/8)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<4;i++)
             {
                 Q[i] = default(float);
@@ -18472,21 +16847,21 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(ApproachY).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(ApproachZ).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
-            return MaxByteSize;
+            return /*PayloadByteSize*/60;
         }
 
         /// <summary>
-        /// Latitude (WGS84)
+        /// Latitude (WGS84), in degrees * 1E7
         /// OriginName: latitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Latitude { get; set; }
         /// <summary>
-        /// Longitude (WGS84)
+        /// Longitude (WGS84, in degrees * 1E7
         /// OriginName: longitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Longitude { get; set; }
         /// <summary>
-        /// Altitude (AMSL). Positive for up.
+        /// Altitude (AMSL), in meters * 1000 (positive for up)
         /// OriginName: altitude, Units: mm, IsExtended: false
         /// </summary>
         public int Altitude { get; set; }
@@ -18526,37 +16901,24 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float ApproachZ { get; set; }
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: true
         /// </summary>
         public ulong TimeUsec { get; set; }
     }
     /// <summary>
-    /// The position the system will return to and land on. The position is set automatically by the system during the takeoff in case it was not explicitly set by the operator before or after. The global and local positions encode the position in the respective coordinate frames, while the q parameter encodes the orientation of the surface. Under normal conditions it describes the heading and terrain slope, which can be used by the aircraft to adjust the approach. The approach 3D vector describes the point to which the system should fly in normal flight mode and then perform a landing sequence along the vector.
+    /// The position the system will return to and land on. The position is set automatically by the system during the takeoff in case it was not explicitely set by the operator before or after. The global and local positions encode the position in the respective coordinate frames, while the q parameter encodes the orientation of the surface. Under normal conditions it describes the heading and terrain slope, which can be used by the aircraft to adjust the approach. The approach 3D vector describes the point to which the system should fly in normal flight mode and then perform a landing sequence along the vector.
     ///  SET_HOME_POSITION
     /// </summary>
     public class SetHomePositionPacket: PacketV2<SetHomePositionPayload>
     {
 	public const int PacketMessageId = 243;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 85;
+        public override byte GetCrcEtra() => 85;
 
         public override SetHomePositionPayload Payload { get; } = new SetHomePositionPayload();
 
         public override string Name => "SET_HOME_POSITION";
-        public override string ToString()
-        {
-            var name = "SET_HOME_POSITION".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -18564,7 +16926,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SetHomePositionPayload : IPayload
     {
-        public byte MaxByteSize => 61;
+        public byte GetMaxByteSize() => 61;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -18577,7 +16939,7 @@ namespace Asv.Mavlink.V2.Common
             X = BitConverter.ToSingle(buffer, index);index+=4;
             Y = BitConverter.ToSingle(buffer, index);index+=4;
             Z = BitConverter.ToSingle(buffer, index);index+=4;
-            arraySize = /*ArrayLength*/4 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/8)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/4 - Math.Max(0,((/*PayloadByteSize*/61 - payloadSize - /*ExtendedFieldsLength*/8)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<4;i++)
             {
                 Q[i] = default(float);
@@ -18612,21 +16974,21 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(ApproachZ).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
-            return MaxByteSize;
+            return /*PayloadByteSize*/61;
         }
 
         /// <summary>
-        /// Latitude (WGS84)
+        /// Latitude (WGS84), in degrees * 1E7
         /// OriginName: latitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Latitude { get; set; }
         /// <summary>
-        /// Longitude (WGS84)
+        /// Longitude (WGS84, in degrees * 1E7
         /// OriginName: longitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Longitude { get; set; }
         /// <summary>
-        /// Altitude (AMSL). Positive for up.
+        /// Altitude (AMSL), in meters * 1000 (positive for up)
         /// OriginName: altitude, Units: mm, IsExtended: false
         /// </summary>
         public int Altitude { get; set; }
@@ -18671,7 +17033,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetSystem { get; set; }
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: true
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -18684,24 +17046,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 244;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 95;
+        public override byte GetCrcEtra() => 95;
 
         public override MessageIntervalPayload Payload { get; } = new MessageIntervalPayload();
 
         public override string Name => "MESSAGE_INTERVAL";
-        public override string ToString()
-        {
-            var name = "MESSAGE_INTERVAL".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -18709,7 +17058,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MessageIntervalPayload : IPayload
     {
-        public byte MaxByteSize => 6;
+        public byte GetMaxByteSize() => 6;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -18724,11 +17073,11 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(IntervalUs).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(MessageId).CopyTo(buffer, index);index+=2;
-            return MaxByteSize;
+            return /*PayloadByteSize*/6;
         }
 
         /// <summary>
-        /// The interval between two messages. A value of -1 indicates this stream is disabled, 0 indicates it is not available, > 0 indicates the interval at which it is sent.
+        /// The interval between two messages, in microseconds. A value of -1 indicates this stream is disabled, 0 indicates it is not available, > 0 indicates the interval at which it is sent.
         /// OriginName: interval_us, Units: us, IsExtended: false
         /// </summary>
         public int IntervalUs { get; set; }
@@ -18746,24 +17095,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 245;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 130;
+        public override byte GetCrcEtra() => 130;
 
         public override ExtendedSysStatePayload Payload { get; } = new ExtendedSysStatePayload();
 
         public override string Name => "EXTENDED_SYS_STATE";
-        public override string ToString()
-        {
-            var name = "EXTENDED_SYS_STATE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -18771,7 +17107,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ExtendedSysStatePayload : IPayload
     {
-        public byte MaxByteSize => 2;
+        public byte GetMaxByteSize() => 2;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -18786,7 +17122,7 @@ namespace Asv.Mavlink.V2.Common
         {
             buffer[index] = (byte)VtolState;index+=1;
             buffer[index] = (byte)LandedState;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/2;
         }
 
         /// <summary>
@@ -18808,24 +17144,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 246;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 184;
+        public override byte GetCrcEtra() => 184;
 
         public override AdsbVehiclePayload Payload { get; } = new AdsbVehiclePayload();
 
         public override string Name => "ADSB_VEHICLE";
-        public override string ToString()
-        {
-            var name = "ADSB_VEHICLE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -18833,7 +17156,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class AdsbVehiclePayload : IPayload
     {
-        public byte MaxByteSize => 38;
+        public byte GetMaxByteSize() => 38;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -18850,7 +17173,7 @@ namespace Asv.Mavlink.V2.Common
             Flags = (AdsbFlags)BitConverter.ToUInt16(buffer,index);index+=2;
             Squawk = BitConverter.ToUInt16(buffer,index);index+=2;
             AltitudeType = (AdsbAltitudeType)buffer[index++];
-            arraySize = /*ArrayLength*/9 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/9 - Math.Max(0,((/*PayloadByteSize*/38 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<9;i++)
             {
                 Callsign[i] = default(char);
@@ -18876,7 +17199,7 @@ namespace Asv.Mavlink.V2.Common
             Encoding.ASCII.GetBytes(Callsign,0,9,buffer,index);index+=9;
             buffer[index] = (byte)EmitterType;index+=1;
             BitConverter.GetBytes(Tslc).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/38;
         }
 
         /// <summary>
@@ -18885,37 +17208,37 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint IcaoAddress { get; set; }
         /// <summary>
-        /// Latitude
+        /// Latitude, expressed as degrees * 1E7
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude
+        /// Longitude, expressed as degrees * 1E7
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude(ASL)
+        /// Altitude(ASL) in millimeters
         /// OriginName: altitude, Units: mm, IsExtended: false
         /// </summary>
         public int Altitude { get; set; }
         /// <summary>
-        /// Course over ground
+        /// Course over ground in centidegrees
         /// OriginName: heading, Units: cdeg, IsExtended: false
         /// </summary>
         public ushort Heading { get; set; }
         /// <summary>
-        /// The horizontal velocity
+        /// The horizontal velocity in centimeters/second
         /// OriginName: hor_velocity, Units: cm/s, IsExtended: false
         /// </summary>
         public ushort HorVelocity { get; set; }
         /// <summary>
-        /// The vertical velocity. Positive is up
+        /// The vertical velocity in centimeters/second, positive is up
         /// OriginName: ver_velocity, Units: cm/s, IsExtended: false
         /// </summary>
         public short VerVelocity { get; set; }
         /// <summary>
-        /// Bitmap to indicate various statuses including valid data fields
+        /// Flags to indicate various statuses including valid data fields
         /// OriginName: flags, Units: , IsExtended: false
         /// </summary>
         public AdsbFlags Flags { get; set; }
@@ -18925,7 +17248,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort Squawk { get; set; }
         /// <summary>
-        /// ADSB altitude type.
+        /// Type from ADSB_ALTITUDE_TYPE enum
         /// OriginName: altitude_type, Units: , IsExtended: false
         /// </summary>
         public AdsbAltitudeType AltitudeType { get; set; }
@@ -18935,7 +17258,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public char[] Callsign { get; } = new char[9];
         /// <summary>
-        /// ADSB emitter type.
+        /// Type from ADSB_EMITTER_TYPE enum
         /// OriginName: emitter_type, Units: , IsExtended: false
         /// </summary>
         public AdsbEmitterType EmitterType { get; set; }
@@ -18953,24 +17276,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 247;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 81;
+        public override byte GetCrcEtra() => 81;
 
         public override CollisionPayload Payload { get; } = new CollisionPayload();
 
         public override string Name => "COLLISION";
-        public override string ToString()
-        {
-            var name = "COLLISION".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -18978,7 +17288,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class CollisionPayload : IPayload
     {
-        public byte MaxByteSize => 19;
+        public byte GetMaxByteSize() => 19;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -19003,7 +17313,7 @@ namespace Asv.Mavlink.V2.Common
             buffer[index] = (byte)Src;index+=1;
             buffer[index] = (byte)Action;index+=1;
             buffer[index] = (byte)ThreatLevel;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/19;
         }
 
         /// <summary>
@@ -19012,17 +17322,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint Id { get; set; }
         /// <summary>
-        /// Estimated time until collision occurs
+        /// Estimated time until collision occurs (seconds)
         /// OriginName: time_to_minimum_delta, Units: s, IsExtended: false
         /// </summary>
         public float TimeToMinimumDelta { get; set; }
         /// <summary>
-        /// Closest vertical distance between vehicle and object
+        /// Closest vertical distance in meters between vehicle and object
         /// OriginName: altitude_minimum_delta, Units: m, IsExtended: false
         /// </summary>
         public float AltitudeMinimumDelta { get; set; }
         /// <summary>
-        /// Closest horizontal distance between vehicle and object
+        /// Closest horizontal distance in meteres between vehicle and object
         /// OriginName: horizontal_minimum_delta, Units: m, IsExtended: false
         /// </summary>
         public float HorizontalMinimumDelta { get; set; }
@@ -19050,24 +17360,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 248;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 8;
+        public override byte GetCrcEtra() => 8;
 
         public override V2ExtensionPayload Payload { get; } = new V2ExtensionPayload();
 
         public override string Name => "V2_EXTENSION";
-        public override string ToString()
-        {
-            var name = "V2_EXTENSION".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -19075,7 +17372,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class V2ExtensionPayload : IPayload
     {
-        public byte MaxByteSize => 254;
+        public byte GetMaxByteSize() => 254;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -19086,7 +17383,7 @@ namespace Asv.Mavlink.V2.Common
             TargetNetwork = (byte)buffer[index++];
             TargetSystem = (byte)buffer[index++];
             TargetComponent = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/249 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/249 - Math.Max(0,((/*PayloadByteSize*/254 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<249;i++)
             {
                 Payload[i] = default(byte);
@@ -19107,11 +17404,11 @@ namespace Asv.Mavlink.V2.Common
             {
                 buffer[index] = (byte)Payload[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/254;
         }
 
         /// <summary>
-        /// A code that identifies the software component that understands this message (analogous to USB device classes or mime type strings).  If this code is less than 32768, it is considered a 'registered' protocol extension and the corresponding entry should be added to https://github.com/mavlink/mavlink/extension-message-ids.xml.  Software creators can register blocks of message IDs as needed (useful for GCS specific metadata, etc...). Message_types greater than 32767 are considered local experiments and should not be checked in to any widely distributed codebase.
+        /// A code that identifies the software component that understands this message (analogous to usb device classes or mime type strings).  If this code is less than 32768, it is considered a 'registered' protocol extension and the corresponding entry should be added to https://github.com/mavlink/mavlink/extension-message-ids.xml.  Software creators can register blocks of message IDs as needed (useful for GCS specific metadata, etc...). Message_types greater than 32767 are considered local experiments and should not be checked in to any widely distributed codebase.
         /// OriginName: message_type, Units: , IsExtended: false
         /// </summary>
         public ushort MessageType { get; set; }
@@ -19144,24 +17441,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 249;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 204;
+        public override byte GetCrcEtra() => 204;
 
         public override MemoryVectPayload Payload { get; } = new MemoryVectPayload();
 
         public override string Name => "MEMORY_VECT";
-        public override string ToString()
-        {
-            var name = "MEMORY_VECT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -19169,7 +17453,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MemoryVectPayload : IPayload
     {
-        public byte MaxByteSize => 36;
+        public byte GetMaxByteSize() => 36;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -19179,7 +17463,7 @@ namespace Asv.Mavlink.V2.Common
             Address = BitConverter.ToUInt16(buffer,index);index+=2;
             Ver = (byte)buffer[index++];
             Type = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/32 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/32 - Math.Max(0,((/*PayloadByteSize*/36 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<32;i++)
             {
                 Value[i] = default(sbyte);
@@ -19199,7 +17483,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 buffer[index] = (byte)Value[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/36;
         }
 
         /// <summary>
@@ -19224,31 +17508,17 @@ namespace Asv.Mavlink.V2.Common
         public sbyte[] Value { get; } = new sbyte[32];
     }
     /// <summary>
-    /// To debug something using a named 3D vector.
     ///  DEBUG_VECT
     /// </summary>
     public class DebugVectPacket: PacketV2<DebugVectPayload>
     {
 	public const int PacketMessageId = 250;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 49;
+        public override byte GetCrcEtra() => 49;
 
         public override DebugVectPayload Payload { get; } = new DebugVectPayload();
 
         public override string Name => "DEBUG_VECT";
-        public override string ToString()
-        {
-            var name = "DEBUG_VECT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -19256,7 +17526,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class DebugVectPayload : IPayload
     {
-        public byte MaxByteSize => 30;
+        public byte GetMaxByteSize() => 30;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -19267,7 +17537,7 @@ namespace Asv.Mavlink.V2.Common
             X = BitConverter.ToSingle(buffer, index);index+=4;
             Y = BitConverter.ToSingle(buffer, index);index+=4;
             Z = BitConverter.ToSingle(buffer, index);index+=4;
-            arraySize = /*ArrayLength*/10 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/10 - Math.Max(0,((/*PayloadByteSize*/30 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<10;i++)
             {
                 Name[i] = default(char);
@@ -19283,11 +17553,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Y).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Z).CopyTo(buffer, index);index+=4;
             Encoding.ASCII.GetBytes(Name,0,10,buffer,index);index+=10;
-            return MaxByteSize;
+            return /*PayloadByteSize*/30;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -19320,24 +17590,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 251;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 170;
+        public override byte GetCrcEtra() => 170;
 
         public override NamedValueFloatPayload Payload { get; } = new NamedValueFloatPayload();
 
         public override string Name => "NAMED_VALUE_FLOAT";
-        public override string ToString()
-        {
-            var name = "NAMED_VALUE_FLOAT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -19345,7 +17602,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class NamedValueFloatPayload : IPayload
     {
-        public byte MaxByteSize => 18;
+        public byte GetMaxByteSize() => 18;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -19354,7 +17611,7 @@ namespace Asv.Mavlink.V2.Common
             var arraySize = 0;
             TimeBootMs = BitConverter.ToUInt32(buffer,index);index+=4;
             Value = BitConverter.ToSingle(buffer, index);index+=4;
-            arraySize = /*ArrayLength*/10 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/10 - Math.Max(0,((/*PayloadByteSize*/18 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<10;i++)
             {
                 Name[i] = default(char);
@@ -19368,11 +17625,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TimeBootMs).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Value).CopyTo(buffer, index);index+=4;
             Encoding.ASCII.GetBytes(Name,0,10,buffer,index);index+=10;
-            return MaxByteSize;
+            return /*PayloadByteSize*/18;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -19395,24 +17652,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 252;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 44;
+        public override byte GetCrcEtra() => 44;
 
         public override NamedValueIntPayload Payload { get; } = new NamedValueIntPayload();
 
         public override string Name => "NAMED_VALUE_INT";
-        public override string ToString()
-        {
-            var name = "NAMED_VALUE_INT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -19420,7 +17664,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class NamedValueIntPayload : IPayload
     {
-        public byte MaxByteSize => 18;
+        public byte GetMaxByteSize() => 18;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -19429,7 +17673,7 @@ namespace Asv.Mavlink.V2.Common
             var arraySize = 0;
             TimeBootMs = BitConverter.ToUInt32(buffer,index);index+=4;
             Value = BitConverter.ToInt32(buffer,index);index+=4;
-            arraySize = /*ArrayLength*/10 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/10 - Math.Max(0,((/*PayloadByteSize*/18 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<10;i++)
             {
                 Name[i] = default(char);
@@ -19443,11 +17687,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TimeBootMs).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Value).CopyTo(buffer, index);index+=4;
             Encoding.ASCII.GetBytes(Name,0,10,buffer,index);index+=10;
-            return MaxByteSize;
+            return /*PayloadByteSize*/18;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -19470,24 +17714,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 253;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 83;
+        public override byte GetCrcEtra() => 83;
 
         public override StatustextPayload Payload { get; } = new StatustextPayload();
 
         public override string Name => "STATUSTEXT";
-        public override string ToString()
-        {
-            var name = "STATUSTEXT".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -19495,7 +17726,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class StatustextPayload : IPayload
     {
-        public byte MaxByteSize => 51;
+        public byte GetMaxByteSize() => 51;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -19503,7 +17734,7 @@ namespace Asv.Mavlink.V2.Common
             var endIndex = offset + payloadSize;
             var arraySize = 0;
             Severity = (MavSeverity)buffer[index++];
-            arraySize = /*ArrayLength*/50 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/50 - Math.Max(0,((/*PayloadByteSize*/51 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<50;i++)
             {
                 Text[i] = default(char);
@@ -19516,11 +17747,11 @@ namespace Asv.Mavlink.V2.Common
         {
             buffer[index] = (byte)Severity;index+=1;
             Encoding.ASCII.GetBytes(Text,0,50,buffer,index);index+=50;
-            return MaxByteSize;
+            return /*PayloadByteSize*/51;
         }
 
         /// <summary>
-        /// Severity of status. Relies on the definitions within RFC-5424.
+        /// Severity of status. Relies on the definitions within RFC-5424. See enum MAV_SEVERITY.
         /// OriginName: severity, Units: , IsExtended: false
         /// </summary>
         public MavSeverity Severity { get; set; }
@@ -19538,24 +17769,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 254;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 46;
+        public override byte GetCrcEtra() => 46;
 
         public override DebugPayload Payload { get; } = new DebugPayload();
 
         public override string Name => "DEBUG";
-        public override string ToString()
-        {
-            var name = "DEBUG".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -19563,7 +17781,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class DebugPayload : IPayload
     {
-        public byte MaxByteSize => 9;
+        public byte GetMaxByteSize() => 9;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -19580,11 +17798,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TimeBootMs).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Value).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Ind).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/9;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -19607,24 +17825,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 256;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 71;
+        public override byte GetCrcEtra() => 71;
 
         public override SetupSigningPayload Payload { get; } = new SetupSigningPayload();
 
         public override string Name => "SETUP_SIGNING";
-        public override string ToString()
-        {
-            var name = "SETUP_SIGNING".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -19632,7 +17837,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SetupSigningPayload : IPayload
     {
-        public byte MaxByteSize => 42;
+        public byte GetMaxByteSize() => 42;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -19642,7 +17847,7 @@ namespace Asv.Mavlink.V2.Common
             InitialTimestamp = BitConverter.ToUInt64(buffer,index);index+=8;
             TargetSystem = (byte)buffer[index++];
             TargetComponent = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/32 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/32 - Math.Max(0,((/*PayloadByteSize*/42 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<32;i++)
             {
                 SecretKey[i] = default(byte);
@@ -19662,7 +17867,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 buffer[index] = (byte)SecretKey[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/42;
         }
 
         /// <summary>
@@ -19687,31 +17892,18 @@ namespace Asv.Mavlink.V2.Common
         public byte[] SecretKey { get; } = new byte[32];
     }
     /// <summary>
-    /// Report button state change.
+    /// Report button state change
     ///  BUTTON_CHANGE
     /// </summary>
     public class ButtonChangePacket: PacketV2<ButtonChangePayload>
     {
 	public const int PacketMessageId = 257;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 131;
+        public override byte GetCrcEtra() => 131;
 
         public override ButtonChangePayload Payload { get; } = new ButtonChangePayload();
 
         public override string Name => "BUTTON_CHANGE";
-        public override string ToString()
-        {
-            var name = "BUTTON_CHANGE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -19719,7 +17911,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ButtonChangePayload : IPayload
     {
-        public byte MaxByteSize => 9;
+        public byte GetMaxByteSize() => 9;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -19736,21 +17928,21 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TimeBootMs).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(LastChangeMs).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(State).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/9;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Time of last change of button state.
+        /// Time of last change of button state
         /// OriginName: last_change_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint LastChangeMs { get; set; }
         /// <summary>
-        /// Bitmap for state of buttons.
+        /// Bitmap state of buttons
         /// OriginName: state, Units: , IsExtended: false
         /// </summary>
         public byte State { get; set; }
@@ -19763,24 +17955,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 258;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 187;
+        public override byte GetCrcEtra() => 187;
 
         public override PlayTunePayload Payload { get; } = new PlayTunePayload();
 
         public override string Name => "PLAY_TUNE";
-        public override string ToString()
-        {
-            var name = "PLAY_TUNE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -19788,7 +17967,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class PlayTunePayload : IPayload
     {
-        public byte MaxByteSize => 232;
+        public byte GetMaxByteSize() => 32;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -19797,18 +17976,13 @@ namespace Asv.Mavlink.V2.Common
             var arraySize = 0;
             TargetSystem = (byte)buffer[index++];
             TargetComponent = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/30 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/200)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/30 - Math.Max(0,((/*PayloadByteSize*/32 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<30;i++)
             {
                 Tune[i] = default(char);
             }
                 Encoding.ASCII.GetChars(buffer, index,arraySize,Tune,0);
                 index+=30;
-            // extended field 'Tune2' can be empty
-            if (index >= endIndex) return;
-            arraySize = 200;
-                Encoding.ASCII.GetChars(buffer, index,arraySize,Tune2,0);
-                index+=200;
         }
 
         public int Serialize(byte[] buffer, int index)
@@ -19816,8 +17990,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             Encoding.ASCII.GetBytes(Tune,0,30,buffer,index);index+=30;
-            Encoding.ASCII.GetBytes(Tune2,0,200,buffer,index);index+=200;
-            return MaxByteSize;
+            return /*PayloadByteSize*/32;
         }
 
         /// <summary>
@@ -19835,11 +18008,6 @@ namespace Asv.Mavlink.V2.Common
         /// OriginName: tune, Units: , IsExtended: false
         /// </summary>
         public char[] Tune { get; } = new char[30];
-        /// <summary>
-        /// tune extension (appended to tune)
-        /// OriginName: tune2, Units: , IsExtended: true
-        /// </summary>
-        public char[] Tune2 { get; } = new char[200];
     }
     /// <summary>
     /// Information about a camera
@@ -19849,24 +18017,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 259;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 92;
+        public override byte GetCrcEtra() => 92;
 
         public override CameraInformationPayload Payload { get; } = new CameraInformationPayload();
 
         public override string Name => "CAMERA_INFORMATION";
-        public override string ToString()
-        {
-            var name = "CAMERA_INFORMATION".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -19874,7 +18029,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class CameraInformationPayload : IPayload
     {
-        public byte MaxByteSize => 235;
+        public byte GetMaxByteSize() => 235;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -19901,7 +18056,7 @@ namespace Asv.Mavlink.V2.Common
                 ModelName[i] = (byte)buffer[index++];
             }
             LensId = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/140 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/140 - Math.Max(0,((/*PayloadByteSize*/235 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<140;i++)
             {
                 CamDefinitionUri[i] = default(char);
@@ -19931,11 +18086,11 @@ namespace Asv.Mavlink.V2.Common
             }
             BitConverter.GetBytes(LensId).CopyTo(buffer, index);index+=1;
             Encoding.ASCII.GetBytes(CamDefinitionUri,0,140,buffer,index);index+=140;
-            return MaxByteSize;
+            return /*PayloadByteSize*/235;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -19945,32 +18100,32 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint FirmwareVersion { get; set; }
         /// <summary>
-        /// Focal length
+        /// Focal length in mm
         /// OriginName: focal_length, Units: mm, IsExtended: false
         /// </summary>
         public float FocalLength { get; set; }
         /// <summary>
-        /// Image sensor size horizontal
+        /// Image sensor size horizontal in mm
         /// OriginName: sensor_size_h, Units: mm, IsExtended: false
         /// </summary>
         public float SensorSizeH { get; set; }
         /// <summary>
-        /// Image sensor size vertical
+        /// Image sensor size vertical in mm
         /// OriginName: sensor_size_v, Units: mm, IsExtended: false
         /// </summary>
         public float SensorSizeV { get; set; }
         /// <summary>
-        /// Bitmap of camera capability flags.
+        /// CAMERA_CAP_FLAGS enum flags (bitmap) describing camera capabilities.
         /// OriginName: flags, Units: , IsExtended: false
         /// </summary>
         public CameraCapFlags Flags { get; set; }
         /// <summary>
-        /// Horizontal image resolution
+        /// Image resolution in pixels horizontal
         /// OriginName: resolution_h, Units: pix, IsExtended: false
         /// </summary>
         public ushort ResolutionH { get; set; }
         /// <summary>
-        /// Vertical image resolution
+        /// Image resolution in pixels vertical
         /// OriginName: resolution_v, Units: pix, IsExtended: false
         /// </summary>
         public ushort ResolutionV { get; set; }
@@ -20008,24 +18163,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 260;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 146;
+        public override byte GetCrcEtra() => 146;
 
         public override CameraSettingsPayload Payload { get; } = new CameraSettingsPayload();
 
         public override string Name => "CAMERA_SETTINGS";
-        public override string ToString()
-        {
-            var name = "CAMERA_SETTINGS".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -20033,7 +18175,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class CameraSettingsPayload : IPayload
     {
-        public byte MaxByteSize => 5;
+        public byte GetMaxByteSize() => 5;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -20048,46 +18190,33 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(TimeBootMs).CopyTo(buffer, index);index+=4;
             buffer[index] = (byte)ModeId;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/5;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Camera mode
+        /// Camera mode (CAMERA_MODE)
         /// OriginName: mode_id, Units: , IsExtended: false
         /// </summary>
         public CameraMode ModeId { get; set; }
     }
     /// <summary>
-    /// Information about a storage medium.
+    /// WIP: Information about a storage medium.
     ///  STORAGE_INFORMATION
     /// </summary>
     public class StorageInformationPacket: PacketV2<StorageInformationPayload>
     {
 	public const int PacketMessageId = 261;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 179;
+        public override byte GetCrcEtra() => 179;
 
         public override StorageInformationPayload Payload { get; } = new StorageInformationPayload();
 
         public override string Name => "STORAGE_INFORMATION";
-        public override string ToString()
-        {
-            var name = "STORAGE_INFORMATION".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -20095,7 +18224,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class StorageInformationPayload : IPayload
     {
-        public byte MaxByteSize => 27;
+        public byte GetMaxByteSize() => 27;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -20124,37 +18253,37 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(StorageId).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(StorageCount).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Status).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/27;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Total capacity.
-        /// OriginName: total_capacity, Units: MiB, IsExtended: false
+        /// Total capacity in MiB
+        /// OriginName: total_capacity, Units: Mibytes, IsExtended: false
         /// </summary>
         public float TotalCapacity { get; set; }
         /// <summary>
-        /// Used capacity.
-        /// OriginName: used_capacity, Units: MiB, IsExtended: false
+        /// Used capacity in MiB
+        /// OriginName: used_capacity, Units: Mibytes, IsExtended: false
         /// </summary>
         public float UsedCapacity { get; set; }
         /// <summary>
-        /// Available storage capacity.
-        /// OriginName: available_capacity, Units: MiB, IsExtended: false
+        /// Available capacity in MiB
+        /// OriginName: available_capacity, Units: Mibytes, IsExtended: false
         /// </summary>
         public float AvailableCapacity { get; set; }
         /// <summary>
-        /// Read speed.
-        /// OriginName: read_speed, Units: MiB/s, IsExtended: false
+        /// Read speed in MiB/s
+        /// OriginName: read_speed, Units: Mibytes/s, IsExtended: false
         /// </summary>
         public float ReadSpeed { get; set; }
         /// <summary>
-        /// Write speed.
-        /// OriginName: write_speed, Units: MiB/s, IsExtended: false
+        /// Write speed in MiB/s
+        /// OriginName: write_speed, Units: Mibytes/s, IsExtended: false
         /// </summary>
         public float WriteSpeed { get; set; }
         /// <summary>
@@ -20174,31 +18303,18 @@ namespace Asv.Mavlink.V2.Common
         public byte Status { get; set; }
     }
     /// <summary>
-    /// Information about the status of a capture.
+    /// Information about the status of a capture
     ///  CAMERA_CAPTURE_STATUS
     /// </summary>
     public class CameraCaptureStatusPacket: PacketV2<CameraCaptureStatusPayload>
     {
 	public const int PacketMessageId = 262;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 12;
+        public override byte GetCrcEtra() => 12;
 
         public override CameraCaptureStatusPayload Payload { get; } = new CameraCaptureStatusPayload();
 
         public override string Name => "CAMERA_CAPTURE_STATUS";
-        public override string ToString()
-        {
-            var name = "CAMERA_CAPTURE_STATUS".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -20206,7 +18322,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class CameraCaptureStatusPayload : IPayload
     {
-        public byte MaxByteSize => 18;
+        public byte GetMaxByteSize() => 18;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -20229,27 +18345,27 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(AvailableCapacity).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(ImageStatus).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(VideoStatus).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/18;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Image capture interval
+        /// Image capture interval in seconds
         /// OriginName: image_interval, Units: s, IsExtended: false
         /// </summary>
         public float ImageInterval { get; set; }
         /// <summary>
-        /// Time since recording started
+        /// Time in milliseconds since recording started
         /// OriginName: recording_time_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint RecordingTimeMs { get; set; }
         /// <summary>
-        /// Available storage capacity.
-        /// OriginName: available_capacity, Units: MiB, IsExtended: false
+        /// Available storage capacity in MiB
+        /// OriginName: available_capacity, Units: Mibytes, IsExtended: false
         /// </summary>
         public float AvailableCapacity { get; set; }
         /// <summary>
@@ -20271,24 +18387,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 263;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 133;
+        public override byte GetCrcEtra() => 133;
 
         public override CameraImageCapturedPayload Payload { get; } = new CameraImageCapturedPayload();
 
         public override string Name => "CAMERA_IMAGE_CAPTURED";
-        public override string ToString()
-        {
-            var name = "CAMERA_IMAGE_CAPTURED".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -20296,7 +18399,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class CameraImageCapturedPayload : IPayload
     {
-        public byte MaxByteSize => 255;
+        public byte GetMaxByteSize() => 255;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -20317,7 +18420,7 @@ namespace Asv.Mavlink.V2.Common
             ImageIndex = BitConverter.ToInt32(buffer,index);index+=4;
             CameraId = (byte)buffer[index++];
             CaptureResult = (sbyte)buffer[index++];
-            arraySize = /*ArrayLength*/205 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/205 - Math.Max(0,((/*PayloadByteSize*/255 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<205;i++)
             {
                 FileUrl[i] = default(char);
@@ -20342,37 +18445,37 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(CameraId).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(CaptureResult).CopyTo(buffer, index);index+=1;
             Encoding.ASCII.GetBytes(FileUrl,0,205,buffer,index);index+=205;
-            return MaxByteSize;
+            return /*PayloadByteSize*/255;
         }
 
         /// <summary>
-        /// Timestamp (time since UNIX epoch) in UTC. 0 for unknown.
+        /// Timestamp (microseconds since UNIX epoch) in UTC. 0 for unknown.
         /// OriginName: time_utc, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUtc { get; set; }
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Latitude where image was taken
+        /// Latitude, expressed as degrees * 1E7 where image was taken
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude where capture was taken
+        /// Longitude, expressed as degrees * 1E7 where capture was taken
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude (AMSL) where image was taken
-        /// OriginName: alt, Units: mm, IsExtended: false
+        /// Altitude in meters, expressed as * 1E3 (AMSL, not WGS84) where image was taken
+        /// OriginName: alt, Units: m, IsExtended: false
         /// </summary>
         public int Alt { get; set; }
         /// <summary>
-        /// Altitude above ground
-        /// OriginName: relative_alt, Units: mm, IsExtended: false
+        /// Altitude above ground in meters, expressed as * 1E3 where image was taken
+        /// OriginName: relative_alt, Units: m, IsExtended: false
         /// </summary>
         public int RelativeAlt { get; set; }
         /// <summary>
@@ -20402,31 +18505,18 @@ namespace Asv.Mavlink.V2.Common
         public char[] FileUrl { get; } = new char[205];
     }
     /// <summary>
-    /// Information about flight since last arming.
+    /// WIP: Information about flight since last arming
     ///  FLIGHT_INFORMATION
     /// </summary>
     public class FlightInformationPacket: PacketV2<FlightInformationPayload>
     {
 	public const int PacketMessageId = 264;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 49;
+        public override byte GetCrcEtra() => 49;
 
         public override FlightInformationPayload Payload { get; } = new FlightInformationPayload();
 
         public override string Name => "FLIGHT_INFORMATION";
-        public override string ToString()
-        {
-            var name = "FLIGHT_INFORMATION".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -20434,7 +18524,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class FlightInformationPayload : IPayload
     {
-        public byte MaxByteSize => 28;
+        public byte GetMaxByteSize() => 28;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -20453,26 +18543,26 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TakeoffTimeUtc).CopyTo(buffer, index);index+=8;
             BitConverter.GetBytes(FlightUuid).CopyTo(buffer, index);index+=8;
             BitConverter.GetBytes(TimeBootMs).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/28;
         }
 
         /// <summary>
-        /// Timestamp at arming (time since UNIX epoch) in UTC, 0 for unknown
+        /// Timestamp at arming (microseconds since UNIX epoch) in UTC, 0 for unknown
         /// OriginName: arming_time_utc, Units: us, IsExtended: false
         /// </summary>
         public ulong ArmingTimeUtc { get; set; }
         /// <summary>
-        /// Timestamp at takeoff (time since UNIX epoch) in UTC, 0 for unknown
+        /// Timestamp at takeoff (microseconds since UNIX epoch) in UTC, 0 for unknown
         /// OriginName: takeoff_time_utc, Units: us, IsExtended: false
         /// </summary>
         public ulong TakeoffTimeUtc { get; set; }
         /// <summary>
-        /// Universally unique identifier (UUID) of flight, should correspond to name of log files
+        /// Universally unique identifier (UUID) of flight, should correspond to name of logfiles
         /// OriginName: flight_uuid, Units: , IsExtended: false
         /// </summary>
         public ulong FlightUuid { get; set; }
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -20485,24 +18575,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 265;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 26;
+        public override byte GetCrcEtra() => 26;
 
         public override MountOrientationPayload Payload { get; } = new MountOrientationPayload();
 
         public override string Name => "MOUNT_ORIENTATION";
-        public override string ToString()
-        {
-            var name = "MOUNT_ORIENTATION".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -20510,7 +18587,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class MountOrientationPayload : IPayload
     {
-        public byte MaxByteSize => 20;
+        public byte GetMaxByteSize() => 20;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -20533,31 +18610,31 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Pitch).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Yaw).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(YawAbsolute).CopyTo(buffer, index);index+=4;
-            return MaxByteSize;
+            return /*PayloadByteSize*/20;
         }
 
         /// <summary>
-        /// Timestamp (time since system boot).
+        /// Timestamp (milliseconds since system boot)
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Roll in global frame (set to NaN for invalid).
+        /// Roll in global frame in degrees (set to NaN for invalid).
         /// OriginName: roll, Units: deg, IsExtended: false
         /// </summary>
         public float Roll { get; set; }
         /// <summary>
-        /// Pitch in global frame (set to NaN for invalid).
+        /// Pitch in global frame in degrees (set to NaN for invalid).
         /// OriginName: pitch, Units: deg, IsExtended: false
         /// </summary>
         public float Pitch { get; set; }
         /// <summary>
-        /// Yaw relative to vehicle(set to NaN for invalid).
+        /// Yaw relative to vehicle in degrees (set to NaN for invalid).
         /// OriginName: yaw, Units: deg, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
         /// <summary>
-        /// Yaw in absolute frame, North is 0 (set to NaN for invalid).
+        /// Yaw in absolute frame in degrees, North is 0 (set to NaN for invalid).
         /// OriginName: yaw_absolute, Units: deg, IsExtended: true
         /// </summary>
         public float YawAbsolute { get; set; }
@@ -20570,24 +18647,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 266;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 193;
+        public override byte GetCrcEtra() => 193;
 
         public override LoggingDataPayload Payload { get; } = new LoggingDataPayload();
 
         public override string Name => "LOGGING_DATA";
-        public override string ToString()
-        {
-            var name = "LOGGING_DATA".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -20595,7 +18659,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class LoggingDataPayload : IPayload
     {
-        public byte MaxByteSize => 255;
+        public byte GetMaxByteSize() => 255;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -20607,7 +18671,7 @@ namespace Asv.Mavlink.V2.Common
             TargetComponent = (byte)buffer[index++];
             Length = (byte)buffer[index++];
             FirstMessageOffset = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/249 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/249 - Math.Max(0,((/*PayloadByteSize*/255 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<249;i++)
             {
                 Data[i] = default(byte);
@@ -20629,7 +18693,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 buffer[index] = (byte)Data[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/255;
         }
 
         /// <summary>
@@ -20671,24 +18735,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 267;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 35;
+        public override byte GetCrcEtra() => 35;
 
         public override LoggingDataAckedPayload Payload { get; } = new LoggingDataAckedPayload();
 
         public override string Name => "LOGGING_DATA_ACKED";
-        public override string ToString()
-        {
-            var name = "LOGGING_DATA_ACKED".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -20696,7 +18747,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class LoggingDataAckedPayload : IPayload
     {
-        public byte MaxByteSize => 255;
+        public byte GetMaxByteSize() => 255;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -20708,7 +18759,7 @@ namespace Asv.Mavlink.V2.Common
             TargetComponent = (byte)buffer[index++];
             Length = (byte)buffer[index++];
             FirstMessageOffset = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/249 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/249 - Math.Max(0,((/*PayloadByteSize*/255 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<249;i++)
             {
                 Data[i] = default(byte);
@@ -20730,7 +18781,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 buffer[index] = (byte)Data[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/255;
         }
 
         /// <summary>
@@ -20772,24 +18823,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 268;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 14;
+        public override byte GetCrcEtra() => 14;
 
         public override LoggingAckPayload Payload { get; } = new LoggingAckPayload();
 
         public override string Name => "LOGGING_ACK";
-        public override string ToString()
-        {
-            var name = "LOGGING_ACK".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -20797,7 +18835,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class LoggingAckPayload : IPayload
     {
-        public byte MaxByteSize => 4;
+        public byte GetMaxByteSize() => 4;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -20814,7 +18852,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Sequence).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/4;
         }
 
         /// <summary>
@@ -20834,31 +18872,18 @@ namespace Asv.Mavlink.V2.Common
         public byte TargetComponent { get; set; }
     }
     /// <summary>
-    /// Information about video stream
+    /// WIP: Information about video stream
     ///  VIDEO_STREAM_INFORMATION
     /// </summary>
     public class VideoStreamInformationPacket: PacketV2<VideoStreamInformationPayload>
     {
 	public const int PacketMessageId = 269;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 58;
+        public override byte GetCrcEtra() => 58;
 
         public override VideoStreamInformationPayload Payload { get; } = new VideoStreamInformationPayload();
 
         public override string Name => "VIDEO_STREAM_INFORMATION";
-        public override string ToString()
-        {
-            var name = "VIDEO_STREAM_INFORMATION".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -20866,7 +18891,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class VideoStreamInformationPayload : IPayload
     {
-        public byte MaxByteSize => 246;
+        public byte GetMaxByteSize() => 246;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -20880,7 +18905,7 @@ namespace Asv.Mavlink.V2.Common
             Rotation = BitConverter.ToUInt16(buffer,index);index+=2;
             CameraId = (byte)buffer[index++];
             Status = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/230 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/230 - Math.Max(0,((/*PayloadByteSize*/246 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<230;i++)
             {
                 Uri[i] = default(char);
@@ -20899,11 +18924,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(CameraId).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Status).CopyTo(buffer, index);index+=1;
             Encoding.ASCII.GetBytes(Uri,0,230,buffer,index);index+=230;
-            return MaxByteSize;
+            return /*PayloadByteSize*/246;
         }
 
         /// <summary>
-        /// Frame rate
+        /// Frames per second
         /// OriginName: framerate, Units: Hz, IsExtended: false
         /// </summary>
         public float Framerate { get; set; }
@@ -20913,12 +18938,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint Bitrate { get; set; }
         /// <summary>
-        /// Horizontal resolution
+        /// Resolution horizontal in pixels
         /// OriginName: resolution_h, Units: pix, IsExtended: false
         /// </summary>
         public ushort ResolutionH { get; set; }
         /// <summary>
-        /// Vertical resolution
+        /// Resolution vertical in pixels
         /// OriginName: resolution_v, Units: pix, IsExtended: false
         /// </summary>
         public ushort ResolutionV { get; set; }
@@ -20944,31 +18969,18 @@ namespace Asv.Mavlink.V2.Common
         public char[] Uri { get; } = new char[230];
     }
     /// <summary>
-    /// Message that sets video stream settings
+    /// WIP: Message that sets video stream settings
     ///  SET_VIDEO_STREAM_SETTINGS
     /// </summary>
     public class SetVideoStreamSettingsPacket: PacketV2<SetVideoStreamSettingsPayload>
     {
 	public const int PacketMessageId = 270;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 232;
+        public override byte GetCrcEtra() => 232;
 
         public override SetVideoStreamSettingsPayload Payload { get; } = new SetVideoStreamSettingsPayload();
 
         public override string Name => "SET_VIDEO_STREAM_SETTINGS";
-        public override string ToString()
-        {
-            var name = "SET_VIDEO_STREAM_SETTINGS".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -20976,7 +18988,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class SetVideoStreamSettingsPayload : IPayload
     {
-        public byte MaxByteSize => 247;
+        public byte GetMaxByteSize() => 247;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -20991,7 +19003,7 @@ namespace Asv.Mavlink.V2.Common
             TargetSystem = (byte)buffer[index++];
             TargetComponent = (byte)buffer[index++];
             CameraId = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/230 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/230 - Math.Max(0,((/*PayloadByteSize*/247 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<230;i++)
             {
                 Uri[i] = default(char);
@@ -21011,26 +19023,26 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(CameraId).CopyTo(buffer, index);index+=1;
             Encoding.ASCII.GetBytes(Uri,0,230,buffer,index);index+=230;
-            return MaxByteSize;
+            return /*PayloadByteSize*/247;
         }
 
         /// <summary>
-        /// Frame rate (set to -1 for highest framerate possible)
+        /// Frames per second (set to -1 for highest framerate possible)
         /// OriginName: framerate, Units: Hz, IsExtended: false
         /// </summary>
         public float Framerate { get; set; }
         /// <summary>
-        /// Bit rate (set to -1 for auto)
+        /// Bit rate in bits per second (set to -1 for auto)
         /// OriginName: bitrate, Units: bits/s, IsExtended: false
         /// </summary>
         public uint Bitrate { get; set; }
         /// <summary>
-        /// Horizontal resolution (set to -1 for highest resolution possible)
+        /// Resolution horizontal in pixels (set to -1 for highest resolution possible)
         /// OriginName: resolution_h, Units: pix, IsExtended: false
         /// </summary>
         public ushort ResolutionH { get; set; }
         /// <summary>
-        /// Vertical resolution (set to -1 for highest resolution possible)
+        /// Resolution vertical in pixels (set to -1 for highest resolution possible)
         /// OriginName: resolution_v, Units: pix, IsExtended: false
         /// </summary>
         public ushort ResolutionV { get; set; }
@@ -21068,24 +19080,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 299;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 19;
+        public override byte GetCrcEtra() => 19;
 
         public override WifiConfigApPayload Payload { get; } = new WifiConfigApPayload();
 
         public override string Name => "WIFI_CONFIG_AP";
-        public override string ToString()
-        {
-            var name = "WIFI_CONFIG_AP".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -21093,7 +19092,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class WifiConfigApPayload : IPayload
     {
-        public byte MaxByteSize => 96;
+        public byte GetMaxByteSize() => 96;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -21103,7 +19102,7 @@ namespace Asv.Mavlink.V2.Common
             arraySize = 32;
                 Encoding.ASCII.GetChars(buffer, index,arraySize,Ssid,0);
                 index+=32;
-            arraySize = /*ArrayLength*/64 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/64 - Math.Max(0,((/*PayloadByteSize*/96 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<64;i++)
             {
                 Password[i] = default(char);
@@ -21116,7 +19115,7 @@ namespace Asv.Mavlink.V2.Common
         {
             Encoding.ASCII.GetBytes(Ssid,0,32,buffer,index);index+=32;
             Encoding.ASCII.GetBytes(Password,0,64,buffer,index);index+=64;
-            return MaxByteSize;
+            return /*PayloadByteSize*/96;
         }
 
         /// <summary>
@@ -21131,31 +19130,18 @@ namespace Asv.Mavlink.V2.Common
         public char[] Password { get; } = new char[64];
     }
     /// <summary>
-    /// Version and capability of protocol version. This message is the response to REQUEST_PROTOCOL_VERSION and is used as part of the handshaking to establish which MAVLink version should be used on the network. Every node should respond to REQUEST_PROTOCOL_VERSION to enable the handshaking. Library implementers should consider adding this into the default decoding state machine to allow the protocol core to respond directly.
+    /// WIP: Version and capability of protocol version. This message is the response to REQUEST_PROTOCOL_VERSION and is used as part of the handshaking to establish which MAVLink version should be used on the network. Every node should respond to REQUEST_PROTOCOL_VERSION to enable the handshaking. Library implementers should consider adding this into the default decoding state machine to allow the protocol core to respond directly.
     ///  PROTOCOL_VERSION
     /// </summary>
     public class ProtocolVersionPacket: PacketV2<ProtocolVersionPayload>
     {
 	public const int PacketMessageId = 300;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 217;
+        public override byte GetCrcEtra() => 217;
 
         public override ProtocolVersionPayload Payload { get; } = new ProtocolVersionPayload();
 
         public override string Name => "PROTOCOL_VERSION";
-        public override string ToString()
-        {
-            var name = "PROTOCOL_VERSION".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -21163,7 +19149,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ProtocolVersionPayload : IPayload
     {
-        public byte MaxByteSize => 22;
+        public byte GetMaxByteSize() => 22;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -21173,7 +19159,7 @@ namespace Asv.Mavlink.V2.Common
             Version = BitConverter.ToUInt16(buffer,index);index+=2;
             MinVersion = BitConverter.ToUInt16(buffer,index);index+=2;
             MaxVersion = BitConverter.ToUInt16(buffer,index);index+=2;
-            arraySize = /*ArrayLength*/8 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/8 - Math.Max(0,((/*PayloadByteSize*/22 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<8;i++)
             {
                 SpecVersionHash[i] = default(byte);
@@ -21202,7 +19188,7 @@ namespace Asv.Mavlink.V2.Common
             {
                 buffer[index] = (byte)LibraryVersionHash[i];index+=1;
             }
-            return MaxByteSize;
+            return /*PayloadByteSize*/22;
         }
 
         /// <summary>
@@ -21239,24 +19225,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 310;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 28;
+        public override byte GetCrcEtra() => 28;
 
         public override UavcanNodeStatusPayload Payload { get; } = new UavcanNodeStatusPayload();
 
         public override string Name => "UAVCAN_NODE_STATUS";
-        public override string ToString()
-        {
-            var name = "UAVCAN_NODE_STATUS".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -21264,7 +19237,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class UavcanNodeStatusPayload : IPayload
     {
-        public byte MaxByteSize => 17;
+        public byte GetMaxByteSize() => 17;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -21287,16 +19260,16 @@ namespace Asv.Mavlink.V2.Common
             buffer[index] = (byte)Health;index+=1;
             buffer[index] = (byte)Mode;index+=1;
             BitConverter.GetBytes(SubMode).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/17;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Time since the start-up of the node.
+        /// The number of seconds since the start-up of the node.
         /// OriginName: uptime_sec, Units: s, IsExtended: false
         /// </summary>
         public uint UptimeSec { get; set; }
@@ -21329,24 +19302,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 311;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 95;
+        public override byte GetCrcEtra() => 95;
 
         public override UavcanNodeInfoPayload Payload { get; } = new UavcanNodeInfoPayload();
 
         public override string Name => "UAVCAN_NODE_INFO";
-        public override string ToString()
-        {
-            var name = "UAVCAN_NODE_INFO".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -21354,7 +19314,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class UavcanNodeInfoPayload : IPayload
     {
-        public byte MaxByteSize => 116;
+        public byte GetMaxByteSize() => 116;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -21364,7 +19324,7 @@ namespace Asv.Mavlink.V2.Common
             TimeUsec = BitConverter.ToUInt64(buffer,index);index+=8;
             UptimeSec = BitConverter.ToUInt32(buffer,index);index+=4;
             SwVcsCommit = BitConverter.ToUInt32(buffer,index);index+=4;
-            arraySize = /*ArrayLength*/80 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/80 - Math.Max(0,((/*PayloadByteSize*/116 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<80;i++)
             {
                 Name[i] = default(char);
@@ -21396,16 +19356,16 @@ namespace Asv.Mavlink.V2.Common
             }
             BitConverter.GetBytes(SwVersionMajor).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(SwVersionMinor).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/116;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Time since the start-up of the node.
+        /// The number of seconds since the start-up of the node.
         /// OriginName: uptime_sec, Units: s, IsExtended: false
         /// </summary>
         public uint UptimeSec { get; set; }
@@ -21453,24 +19413,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 320;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 243;
+        public override byte GetCrcEtra() => 243;
 
         public override ParamExtRequestReadPayload Payload { get; } = new ParamExtRequestReadPayload();
 
         public override string Name => "PARAM_EXT_REQUEST_READ";
-        public override string ToString()
-        {
-            var name = "PARAM_EXT_REQUEST_READ".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -21478,7 +19425,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ParamExtRequestReadPayload : IPayload
     {
-        public byte MaxByteSize => 20;
+        public byte GetMaxByteSize() => 20;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -21488,7 +19435,7 @@ namespace Asv.Mavlink.V2.Common
             ParamIndex = BitConverter.ToInt16(buffer,index);index+=2;
             TargetSystem = (byte)buffer[index++];
             TargetComponent = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/16 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/16 - Math.Max(0,((/*PayloadByteSize*/20 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<16;i++)
             {
                 ParamId[i] = default(char);
@@ -21503,7 +19450,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);index+=16;
-            return MaxByteSize;
+            return /*PayloadByteSize*/20;
         }
 
         /// <summary>
@@ -21535,24 +19482,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 321;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 88;
+        public override byte GetCrcEtra() => 88;
 
         public override ParamExtRequestListPayload Payload { get; } = new ParamExtRequestListPayload();
 
         public override string Name => "PARAM_EXT_REQUEST_LIST";
-        public override string ToString()
-        {
-            var name = "PARAM_EXT_REQUEST_LIST".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -21560,7 +19494,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ParamExtRequestListPayload : IPayload
     {
-        public byte MaxByteSize => 2;
+        public byte GetMaxByteSize() => 2;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -21575,7 +19509,7 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/2;
         }
 
         /// <summary>
@@ -21597,24 +19531,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 322;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 243;
+        public override byte GetCrcEtra() => 243;
 
         public override ParamExtValuePayload Payload { get; } = new ParamExtValuePayload();
 
         public override string Name => "PARAM_EXT_VALUE";
-        public override string ToString()
-        {
-            var name = "PARAM_EXT_VALUE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -21622,7 +19543,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ParamExtValuePayload : IPayload
     {
-        public byte MaxByteSize => 149;
+        public byte GetMaxByteSize() => 149;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -21634,7 +19555,7 @@ namespace Asv.Mavlink.V2.Common
             arraySize = 16;
                 Encoding.ASCII.GetChars(buffer, index,arraySize,ParamId,0);
                 index+=16;
-            arraySize = /*ArrayLength*/128 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/128 - Math.Max(0,((/*PayloadByteSize*/149 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<128;i++)
             {
                 ParamValue[i] = default(char);
@@ -21651,7 +19572,7 @@ namespace Asv.Mavlink.V2.Common
             Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);index+=16;
             Encoding.ASCII.GetBytes(ParamValue,0,128,buffer,index);index+=128;
             buffer[index] = (byte)ParamType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/149;
         }
 
         /// <summary>
@@ -21675,7 +19596,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public char[] ParamValue { get; } = new char[128];
         /// <summary>
-        /// Parameter type.
+        /// Parameter type: see the MAV_PARAM_EXT_TYPE enum for supported data types.
         /// OriginName: param_type, Units: , IsExtended: false
         /// </summary>
         public MavParamExtType ParamType { get; set; }
@@ -21688,24 +19609,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 323;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 78;
+        public override byte GetCrcEtra() => 78;
 
         public override ParamExtSetPayload Payload { get; } = new ParamExtSetPayload();
 
         public override string Name => "PARAM_EXT_SET";
-        public override string ToString()
-        {
-            var name = "PARAM_EXT_SET".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -21713,7 +19621,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ParamExtSetPayload : IPayload
     {
-        public byte MaxByteSize => 147;
+        public byte GetMaxByteSize() => 147;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -21725,7 +19633,7 @@ namespace Asv.Mavlink.V2.Common
             arraySize = 16;
                 Encoding.ASCII.GetChars(buffer, index,arraySize,ParamId,0);
                 index+=16;
-            arraySize = /*ArrayLength*/128 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/128 - Math.Max(0,((/*PayloadByteSize*/147 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<128;i++)
             {
                 ParamValue[i] = default(char);
@@ -21742,7 +19650,7 @@ namespace Asv.Mavlink.V2.Common
             Encoding.ASCII.GetBytes(ParamId,0,16,buffer,index);index+=16;
             Encoding.ASCII.GetBytes(ParamValue,0,128,buffer,index);index+=128;
             buffer[index] = (byte)ParamType;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/147;
         }
 
         /// <summary>
@@ -21766,7 +19674,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public char[] ParamValue { get; } = new char[128];
         /// <summary>
-        /// Parameter type.
+        /// Parameter type: see the MAV_PARAM_EXT_TYPE enum for supported data types.
         /// OriginName: param_type, Units: , IsExtended: false
         /// </summary>
         public MavParamExtType ParamType { get; set; }
@@ -21779,24 +19687,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 324;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 132;
+        public override byte GetCrcEtra() => 132;
 
         public override ParamExtAckPayload Payload { get; } = new ParamExtAckPayload();
 
         public override string Name => "PARAM_EXT_ACK";
-        public override string ToString()
-        {
-            var name = "PARAM_EXT_ACK".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -21804,7 +19699,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ParamExtAckPayload : IPayload
     {
-        public byte MaxByteSize => 146;
+        public byte GetMaxByteSize() => 146;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -21814,7 +19709,7 @@ namespace Asv.Mavlink.V2.Common
             arraySize = 16;
                 Encoding.ASCII.GetChars(buffer, index,arraySize,ParamId,0);
                 index+=16;
-            arraySize = /*ArrayLength*/128 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/128 - Math.Max(0,((/*PayloadByteSize*/146 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<128;i++)
             {
                 ParamValue[i] = default(char);
@@ -21831,7 +19726,7 @@ namespace Asv.Mavlink.V2.Common
             Encoding.ASCII.GetBytes(ParamValue,0,128,buffer,index);index+=128;
             buffer[index] = (byte)ParamType;index+=1;
             buffer[index] = (byte)ParamResult;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/146;
         }
 
         /// <summary>
@@ -21845,12 +19740,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public char[] ParamValue { get; } = new char[128];
         /// <summary>
-        /// Parameter type.
+        /// Parameter type: see the MAV_PARAM_EXT_TYPE enum for supported data types.
         /// OriginName: param_type, Units: , IsExtended: false
         /// </summary>
         public MavParamExtType ParamType { get; set; }
         /// <summary>
-        /// Result code.
+        /// Result code: see the PARAM_ACK enum for possible codes.
         /// OriginName: param_result, Units: , IsExtended: false
         /// </summary>
         public ParamAck ParamResult { get; set; }
@@ -21863,24 +19758,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 330;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 23;
+        public override byte GetCrcEtra() => 23;
 
         public override ObstacleDistancePayload Payload { get; } = new ObstacleDistancePayload();
 
         public override string Name => "OBSTACLE_DISTANCE";
-        public override string ToString()
-        {
-            var name = "OBSTACLE_DISTANCE".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -21888,7 +19770,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ObstacleDistancePayload : IPayload
     {
-        public byte MaxByteSize => 158;
+        public byte GetMaxByteSize() => 158;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -21896,7 +19778,7 @@ namespace Asv.Mavlink.V2.Common
             var endIndex = offset + payloadSize;
             var arraySize = 0;
             TimeUsec = BitConverter.ToUInt64(buffer,index);index+=8;
-            arraySize = /*ArrayLength*/72 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/2 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/72 - Math.Max(0,((/*PayloadByteSize*/158 - payloadSize - /*ExtendedFieldsLength*/0)/2 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<72;i++)
             {
                 Distances[i] = default(ushort);
@@ -21922,11 +19804,11 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(MaxDistance).CopyTo(buffer, index);index+=2;
             buffer[index] = (byte)SensorType;index+=1;
             BitConverter.GetBytes(Increment).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/158;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since system boot or since UNIX epoch).
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -21936,12 +19818,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort[] Distances { get; } = new ushort[72];
         /// <summary>
-        /// Minimum distance the sensor can measure.
+        /// Minimum distance the sensor can measure in centimeters.
         /// OriginName: min_distance, Units: cm, IsExtended: false
         /// </summary>
         public ushort MinDistance { get; set; }
         /// <summary>
-        /// Maximum distance the sensor can measure.
+        /// Maximum distance the sensor can measure in centimeters.
         /// OriginName: max_distance, Units: cm, IsExtended: false
         /// </summary>
         public ushort MaxDistance { get; set; }
@@ -21964,24 +19846,11 @@ namespace Asv.Mavlink.V2.Common
     {
 	public const int PacketMessageId = 331;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 58;
+        public override byte GetCrcEtra() => 58;
 
         public override OdometryPayload Payload { get; } = new OdometryPayload();
 
         public override string Name => "ODOMETRY";
-        public override string ToString()
-        {
-            var name = "ODOMETRY".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -21989,7 +19858,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class OdometryPayload : IPayload
     {
-        public byte MaxByteSize => 230;
+        public byte GetMaxByteSize() => 230;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -22011,7 +19880,7 @@ namespace Asv.Mavlink.V2.Common
             Rollspeed = BitConverter.ToSingle(buffer, index);index+=4;
             Pitchspeed = BitConverter.ToSingle(buffer, index);index+=4;
             Yawspeed = BitConverter.ToSingle(buffer, index);index+=4;
-            arraySize = /*ArrayLength*/21 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/21 - Math.Max(0,((/*PayloadByteSize*/230 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
             for(var i=arraySize;i<21;i++)
             {
                 PoseCovariance[i] = default(float);
@@ -22055,11 +19924,11 @@ namespace Asv.Mavlink.V2.Common
             }
             buffer[index] = (byte)FrameId;index+=1;
             buffer[index] = (byte)ChildFrameId;index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/230;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since system boot or since UNIX epoch).
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -22124,50 +19993,37 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float[] TwistCovariance { get; } = new float[21];
         /// <summary>
-        /// Coordinate frame of reference for the pose data.
+        /// Coordinate frame of reference for the pose data, as defined by MAV_FRAME enum.
         /// OriginName: frame_id, Units: , IsExtended: false
         /// </summary>
         public MavFrame FrameId { get; set; }
         /// <summary>
-        /// Coordinate frame of reference for the velocity in free space (twist) data.
+        /// Coordinate frame of reference for the velocity in free space (twist) data, as defined by MAV_FRAME enum.
         /// OriginName: child_frame_id, Units: , IsExtended: false
         /// </summary>
         public MavFrame ChildFrameId { get; set; }
     }
     /// <summary>
-    /// Describe a trajectory using an array of up-to 5 waypoints in the local frame.
-    ///  TRAJECTORY_REPRESENTATION_WAYPOINTS
+    /// WORK IN PROGRESS! DO NOT DEPLOY! Message to describe a trajectory in the local frame. Supported trajectory types are enumerated in MAV_TRAJECTORY_REPRESENTATION
+    ///  TRAJECTORY
     /// </summary>
-    public class TrajectoryRepresentationWaypointsPacket: PacketV2<TrajectoryRepresentationWaypointsPayload>
+    public class TrajectoryPacket: PacketV2<TrajectoryPayload>
     {
 	public const int PacketMessageId = 332;
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 91;
+        public override byte GetCrcEtra() => 131;
 
-        public override TrajectoryRepresentationWaypointsPayload Payload { get; } = new TrajectoryRepresentationWaypointsPayload();
+        public override TrajectoryPayload Payload { get; } = new TrajectoryPayload();
 
-        public override string Name => "TRAJECTORY_REPRESENTATION_WAYPOINTS";
-        public override string ToString()
-        {
-            var name = "TRAJECTORY_REPRESENTATION_WAYPOINTS".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
+        public override string Name => "TRAJECTORY";
     }
 
     /// <summary>
-    ///  TRAJECTORY_REPRESENTATION_WAYPOINTS
+    ///  TRAJECTORY
     /// </summary>
-    public class TrajectoryRepresentationWaypointsPayload : IPayload
+    public class TrajectoryPayload : IPayload
     {
-        public byte MaxByteSize => 229;
+        public byte GetMaxByteSize() => 234;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -22175,320 +20031,114 @@ namespace Asv.Mavlink.V2.Common
             var endIndex = offset + payloadSize;
             var arraySize = 0;
             TimeUsec = BitConverter.ToUInt64(buffer,index);index+=8;
-            arraySize = /*ArrayLength*/5 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
-            for(var i=arraySize;i<5;i++)
+            arraySize = /*ArrayLength*/11 - Math.Max(0,((/*PayloadByteSize*/234 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            for(var i=arraySize;i<11;i++)
             {
-                PosX[i] = default(float);
+                Point1[i] = default(float);
             }
             for(var i=0;i<arraySize;i++)
             {
-                PosX[i] = BitConverter.ToSingle(buffer, index);index+=4;
+                Point1[i] = BitConverter.ToSingle(buffer, index);index+=4;
             }
+            arraySize = 11;
+            for(var i=0;i<arraySize;i++)
+            {
+                Point2[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            arraySize = 11;
+            for(var i=0;i<arraySize;i++)
+            {
+                Point3[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            arraySize = 11;
+            for(var i=0;i<arraySize;i++)
+            {
+                Point4[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            arraySize = 11;
+            for(var i=0;i<arraySize;i++)
+            {
+                Point5[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            Type = (MavTrajectoryRepresentation)buffer[index++];
             arraySize = 5;
             for(var i=0;i<arraySize;i++)
             {
-                PosY[i] = BitConverter.ToSingle(buffer, index);index+=4;
+                PointValid[i] = (byte)buffer[index++];
             }
-            arraySize = 5;
-            for(var i=0;i<arraySize;i++)
-            {
-                PosZ[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            arraySize = 5;
-            for(var i=0;i<arraySize;i++)
-            {
-                VelX[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            arraySize = 5;
-            for(var i=0;i<arraySize;i++)
-            {
-                VelY[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            arraySize = 5;
-            for(var i=0;i<arraySize;i++)
-            {
-                VelZ[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            arraySize = 5;
-            for(var i=0;i<arraySize;i++)
-            {
-                AccX[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            arraySize = 5;
-            for(var i=0;i<arraySize;i++)
-            {
-                AccY[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            arraySize = 5;
-            for(var i=0;i<arraySize;i++)
-            {
-                AccZ[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            arraySize = 5;
-            for(var i=0;i<arraySize;i++)
-            {
-                PosYaw[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            arraySize = 5;
-            for(var i=0;i<arraySize;i++)
-            {
-                VelYaw[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            ValidPoints = (byte)buffer[index++];
         }
 
         public int Serialize(byte[] buffer, int index)
         {
             BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
+            for(var i=0;i<11;i++)
+            {
+                BitConverter.GetBytes(Point1[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<11;i++)
+            {
+                BitConverter.GetBytes(Point2[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<11;i++)
+            {
+                BitConverter.GetBytes(Point3[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<11;i++)
+            {
+                BitConverter.GetBytes(Point4[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<11;i++)
+            {
+                BitConverter.GetBytes(Point5[i]).CopyTo(buffer, index);index+=4;
+            }
+            buffer[index] = (byte)Type;index+=1;
             for(var i=0;i<5;i++)
             {
-                BitConverter.GetBytes(PosX[i]).CopyTo(buffer, index);index+=4;
+                buffer[index] = (byte)PointValid[i];index+=1;
             }
-            for(var i=0;i<5;i++)
-            {
-                BitConverter.GetBytes(PosY[i]).CopyTo(buffer, index);index+=4;
-            }
-            for(var i=0;i<5;i++)
-            {
-                BitConverter.GetBytes(PosZ[i]).CopyTo(buffer, index);index+=4;
-            }
-            for(var i=0;i<5;i++)
-            {
-                BitConverter.GetBytes(VelX[i]).CopyTo(buffer, index);index+=4;
-            }
-            for(var i=0;i<5;i++)
-            {
-                BitConverter.GetBytes(VelY[i]).CopyTo(buffer, index);index+=4;
-            }
-            for(var i=0;i<5;i++)
-            {
-                BitConverter.GetBytes(VelZ[i]).CopyTo(buffer, index);index+=4;
-            }
-            for(var i=0;i<5;i++)
-            {
-                BitConverter.GetBytes(AccX[i]).CopyTo(buffer, index);index+=4;
-            }
-            for(var i=0;i<5;i++)
-            {
-                BitConverter.GetBytes(AccY[i]).CopyTo(buffer, index);index+=4;
-            }
-            for(var i=0;i<5;i++)
-            {
-                BitConverter.GetBytes(AccZ[i]).CopyTo(buffer, index);index+=4;
-            }
-            for(var i=0;i<5;i++)
-            {
-                BitConverter.GetBytes(PosYaw[i]).CopyTo(buffer, index);index+=4;
-            }
-            for(var i=0;i<5;i++)
-            {
-                BitConverter.GetBytes(VelYaw[i]).CopyTo(buffer, index);index+=4;
-            }
-            BitConverter.GetBytes(ValidPoints).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
+            return /*PayloadByteSize*/234;
         }
 
         /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// Timestamp (microseconds since system boot or since UNIX epoch).
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// X-coordinate of waypoint, set to NaN if not being used
-        /// OriginName: pos_x, Units: m, IsExtended: false
+        /// Depending on the type (see MAV_TRAJECTORY_REPRESENTATION)
+        /// OriginName: point_1, Units: , IsExtended: false
         /// </summary>
-        public float[] PosX { get; } = new float[5];
+        public float[] Point1 { get; } = new float[11];
         /// <summary>
-        /// Y-coordinate of waypoint, set to NaN if not being used
-        /// OriginName: pos_y, Units: m, IsExtended: false
+        /// Depending on the type (see MAV_TRAJECTORY_REPRESENTATION)
+        /// OriginName: point_2, Units: , IsExtended: false
         /// </summary>
-        public float[] PosY { get; } = new float[5];
+        public float[] Point2 { get; } = new float[11];
         /// <summary>
-        /// Z-coordinate of waypoint, set to NaN if not being used
-        /// OriginName: pos_z, Units: m, IsExtended: false
+        /// Depending on the type (see MAV_TRAJECTORY_REPRESENTATION)
+        /// OriginName: point_3, Units: , IsExtended: false
         /// </summary>
-        public float[] PosZ { get; } = new float[5];
+        public float[] Point3 { get; } = new float[11];
         /// <summary>
-        /// X-velocity of waypoint, set to NaN if not being used
-        /// OriginName: vel_x, Units: m/s, IsExtended: false
+        /// Depending on the type (see MAV_TRAJECTORY_REPRESENTATION)
+        /// OriginName: point_4, Units: , IsExtended: false
         /// </summary>
-        public float[] VelX { get; } = new float[5];
+        public float[] Point4 { get; } = new float[11];
         /// <summary>
-        /// Y-velocity of waypoint, set to NaN if not being used
-        /// OriginName: vel_y, Units: m/s, IsExtended: false
+        /// Depending on the type (see MAV_TRAJECTORY_REPRESENTATION)
+        /// OriginName: point_5, Units: , IsExtended: false
         /// </summary>
-        public float[] VelY { get; } = new float[5];
+        public float[] Point5 { get; } = new float[11];
         /// <summary>
-        /// Z-velocity of waypoint, set to NaN if not being used
-        /// OriginName: vel_z, Units: m/s, IsExtended: false
+        /// Waypoints, Bezier etc. see MAV_TRAJECTORY_REPRESENTATION
+        /// OriginName: type, Units: , IsExtended: false
         /// </summary>
-        public float[] VelZ { get; } = new float[5];
+        public MavTrajectoryRepresentation Type { get; set; }
         /// <summary>
-        /// X-acceleration of waypoint, set to NaN if not being used
-        /// OriginName: acc_x, Units: m/s/s, IsExtended: false
+        /// States if respective point is valid (boolean)
+        /// OriginName: point_valid, Units: , IsExtended: false
         /// </summary>
-        public float[] AccX { get; } = new float[5];
-        /// <summary>
-        /// Y-acceleration of waypoint, set to NaN if not being used
-        /// OriginName: acc_y, Units: m/s/s, IsExtended: false
-        /// </summary>
-        public float[] AccY { get; } = new float[5];
-        /// <summary>
-        /// Z-acceleration of waypoint, set to NaN if not being used
-        /// OriginName: acc_z, Units: m/s/s, IsExtended: false
-        /// </summary>
-        public float[] AccZ { get; } = new float[5];
-        /// <summary>
-        /// Yaw angle, set to NaN if not being used
-        /// OriginName: pos_yaw, Units: rad, IsExtended: false
-        /// </summary>
-        public float[] PosYaw { get; } = new float[5];
-        /// <summary>
-        /// Yaw rate, set to NaN if not being used
-        /// OriginName: vel_yaw, Units: rad/s, IsExtended: false
-        /// </summary>
-        public float[] VelYaw { get; } = new float[5];
-        /// <summary>
-        /// Number of valid points (up-to 5 waypoints are possible)
-        /// OriginName: valid_points, Units: , IsExtended: false
-        /// </summary>
-        public byte ValidPoints { get; set; }
-    }
-    /// <summary>
-    /// Describe a trajectory using an array of up-to 5 bezier points in the local frame.
-    ///  TRAJECTORY_REPRESENTATION_BEZIER
-    /// </summary>
-    public class TrajectoryRepresentationBezierPacket: PacketV2<TrajectoryRepresentationBezierPayload>
-    {
-	public const int PacketMessageId = 333;
-        public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => 231;
-
-        public override TrajectoryRepresentationBezierPayload Payload { get; } = new TrajectoryRepresentationBezierPayload();
-
-        public override string Name => "TRAJECTORY_REPRESENTATION_BEZIER";
-        public override string ToString()
-        {
-            var name = "TRAJECTORY_REPRESENTATION_BEZIER".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
-    }
-
-    /// <summary>
-    ///  TRAJECTORY_REPRESENTATION_BEZIER
-    /// </summary>
-    public class TrajectoryRepresentationBezierPayload : IPayload
-    {
-        public byte MaxByteSize => 109;
-
-        public void Deserialize(byte[] buffer, int offset, int payloadSize)
-        {
-            var index = offset;
-            var endIndex = offset + payloadSize;
-            var arraySize = 0;
-            TimeUsec = BitConverter.ToUInt64(buffer,index);index+=8;
-            arraySize = /*ArrayLength*/5 - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
-            for(var i=arraySize;i<5;i++)
-            {
-                PosX[i] = default(float);
-            }
-            for(var i=0;i<arraySize;i++)
-            {
-                PosX[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            arraySize = 5;
-            for(var i=0;i<arraySize;i++)
-            {
-                PosY[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            arraySize = 5;
-            for(var i=0;i<arraySize;i++)
-            {
-                PosZ[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            arraySize = 5;
-            for(var i=0;i<arraySize;i++)
-            {
-                Delta[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            arraySize = 5;
-            for(var i=0;i<arraySize;i++)
-            {
-                PosYaw[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            ValidPoints = (byte)buffer[index++];
-        }
-
-        public int Serialize(byte[] buffer, int index)
-        {
-            BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
-            for(var i=0;i<5;i++)
-            {
-                BitConverter.GetBytes(PosX[i]).CopyTo(buffer, index);index+=4;
-            }
-            for(var i=0;i<5;i++)
-            {
-                BitConverter.GetBytes(PosY[i]).CopyTo(buffer, index);index+=4;
-            }
-            for(var i=0;i<5;i++)
-            {
-                BitConverter.GetBytes(PosZ[i]).CopyTo(buffer, index);index+=4;
-            }
-            for(var i=0;i<5;i++)
-            {
-                BitConverter.GetBytes(Delta[i]).CopyTo(buffer, index);index+=4;
-            }
-            for(var i=0;i<5;i++)
-            {
-                BitConverter.GetBytes(PosYaw[i]).CopyTo(buffer, index);index+=4;
-            }
-            BitConverter.GetBytes(ValidPoints).CopyTo(buffer, index);index+=1;
-            return MaxByteSize;
-        }
-
-        /// <summary>
-        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
-        /// OriginName: time_usec, Units: us, IsExtended: false
-        /// </summary>
-        public ulong TimeUsec { get; set; }
-        /// <summary>
-        /// X-coordinate of starting bezier point, set to NaN if not being used
-        /// OriginName: pos_x, Units: m, IsExtended: false
-        /// </summary>
-        public float[] PosX { get; } = new float[5];
-        /// <summary>
-        /// Y-coordinate of starting bezier point, set to NaN if not being used
-        /// OriginName: pos_y, Units: m, IsExtended: false
-        /// </summary>
-        public float[] PosY { get; } = new float[5];
-        /// <summary>
-        /// Z-coordinate of starting bezier point, set to NaN if not being used
-        /// OriginName: pos_z, Units: m, IsExtended: false
-        /// </summary>
-        public float[] PosZ { get; } = new float[5];
-        /// <summary>
-        /// Bezier time horizon, set to NaN if velocity/acceleration should not be incorporated
-        /// OriginName: delta, Units: s, IsExtended: false
-        /// </summary>
-        public float[] Delta { get; } = new float[5];
-        /// <summary>
-        /// Yaw, set to NaN for unchanged
-        /// OriginName: pos_yaw, Units: rad, IsExtended: false
-        /// </summary>
-        public float[] PosYaw { get; } = new float[5];
-        /// <summary>
-        /// Number of valid points (up-to 5 waypoints are possible)
-        /// OriginName: valid_points, Units: , IsExtended: false
-        /// </summary>
-        public byte ValidPoints { get; set; }
+        public byte[] PointValid { get; } = new byte[5];
     }
 
 

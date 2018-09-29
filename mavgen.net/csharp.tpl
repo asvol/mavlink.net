@@ -78,26 +78,13 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
     /// </summary>
     public class {{ msg.CamelCaseName }}Packet: PacketV2<{{ msg.CamelCaseName }}Payload>
     {
-	public const int PacketMessageId = {{ msg.Id }};
+	    public const int PacketMessageId = {{ msg.Id }};
         public override int MessageId => PacketMessageId;
-        public override byte CrcEtra => {{ msg.CrcExtra }};
+        public override byte GetCrcEtra() => {{ msg.CrcExtra }};
 
         public override {{ msg.CamelCaseName }}Payload Payload { get; } = new {{ msg.CamelCaseName }}Payload();
 
         public override string Name => "{{ msg.Name }}";
-        public override string ToString()
-        {
-            var name = "{{ msg.Name }}".PadRight(30);
-
-            return $"{name}(" +
-                   $"INC:{Convert.ToString(IncompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"COM:{Convert.ToString(CompatFlags, 2).PadLeft(8, '0')}|" +
-                   $"SEQ:{Sequence:000}|" +
-                   $"SYS:{SystemId:000}|" +
-                   $"COM:{ComponenId:000}|" +
-                   $"MSG:{MessageId:000000}|" +
-                   $"{Payload.ToString()})";
-        }
     }
 
     /// <summary>
@@ -105,7 +92,7 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
     /// </summary>
     public class {{ msg.CamelCaseName }}Payload : IPayload
     {
-        public byte MaxByteSize => {{ msg.PayloadByteSize }};
+        public byte GetMaxByteSize() => {{ msg.PayloadByteSize }};
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -120,7 +107,7 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
     {%- if field.IsEnum -%}
         {%- if field.IsArray -%}
             {%- if field.IsTheLargestArrayInMessage -%}
-            arraySize = /*ArrayLength*/{{ field.ArrayLength }} - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/{{ msg.ExtendedFieldsLength }})//*FieldTypeByteSize*/{{ field.FieldTypeByteSize }}));
+            arraySize = /*ArrayLength*/{{ field.ArrayLength }} - Math.Max(0,((/*PayloadByteSize*/{{ msg.PayloadByteSize }} - payloadSize - /*ExtendedFieldsLength*/{{ msg.ExtendedFieldsLength }})//*FieldTypeByteSize*/{{ field.FieldTypeByteSize }}));
             for(var i=arraySize;i<{{ field.ArrayLength }};i++)
             {
                 {{ field.CamelCaseName }}[i] = ({{ field.EnumCamelCaseName }})default({{ field.Type }})
@@ -169,7 +156,7 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
     {%- else -%}
         {%- if field.IsArray -%}
             {%- if field.IsTheLargestArrayInMessage -%}
-            arraySize = /*ArrayLength*/{{ field.ArrayLength }} - Math.Max(0,((MaxByteSize - payloadSize - /*ExtendedFieldsLength*/{{ msg.ExtendedFieldsLength }})/{{ field.FieldTypeByteSize }} /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/{{ field.ArrayLength }} - Math.Max(0,((/*PayloadByteSize*/{{ msg.PayloadByteSize }} - payloadSize - /*ExtendedFieldsLength*/{{ msg.ExtendedFieldsLength }})/{{ field.FieldTypeByteSize }} /*FieldTypeByteSize*/));
             for(var i=arraySize;i<{{ field.ArrayLength }};i++)
             {
                 {{ field.CamelCaseName }}[i] = default({{ field.Type }});
@@ -283,7 +270,7 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
         {%- endif -%}
     {%- endif -%}
 {%- endfor -%}
-            return MaxByteSize;
+            return /*PayloadByteSize*/{{ msg.PayloadByteSize }};
         }
 
     {%- for field in msg.Fields -%}

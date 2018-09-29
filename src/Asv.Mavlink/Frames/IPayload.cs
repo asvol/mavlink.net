@@ -5,7 +5,7 @@
         /// <summary>
         /// Maximum size of payload
         /// </summary>
-        byte MaxByteSize { get; }
+        byte GetMaxByteSize();
         /// <summary>
         /// Serialize payload to buffer
         /// </summary>

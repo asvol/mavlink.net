@@ -9,7 +9,8 @@ namespace Asv.Mavlink
 
         public VehiclePx4(VehicleConfig config) : base(config)
         {
-            MavlinkConnection.Where(FilterVehicle).Where(_ => _.MessageId == HeartbeatPacket.PacketMessageId)
+            InputPackets
+                .Where(_ => _.MessageId == HeartbeatPacket.PacketMessageId)
                 .Cast<HeartbeatPacket>()
                 .Select(_ => new Px4VehicleMode(_.Payload))
                 .Subscribe(_px4Mode);
