@@ -3,6 +3,10 @@
     public interface IPayload
     {
         /// <summary>
+        /// Maximum size of payload
+        /// </summary>
+        byte MaxByteSize { get; }
+        /// <summary>
         /// Serialize payload to buffer
         /// </summary>
         /// <param name="buffer"></param>

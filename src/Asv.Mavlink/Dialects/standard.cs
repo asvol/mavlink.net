@@ -22,9 +22,6 @@
 
 // This code was generate by tool Asv.Mavlink.Gen version v0.1.0-6-g9101a23
 
-using System;
-using System.Text;
-
 namespace Asv.Mavlink.V2.Standard
 {
 

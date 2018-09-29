@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.V2.Common;
@@ -14,13 +13,11 @@ namespace Asv.Mavlink
 
     public class MavlinkCommandProtocol : IMavlinkCommandProtocol
     {
-        private readonly IObservable<IPacketV2<IPayload>> _inputPackets;
-        private readonly IObserver<IPacketV2<IPayload>> _outputPackets;
+        private readonly IMavlinkV2Connection _conn;
 
-        public MavlinkCommandProtocol(IObservable<IPacketV2<IPayload>> inputPackets, IObserver<IPacketV2<IPayload>> outputPackets)
+        public MavlinkCommandProtocol(IMavlinkV2Connection conn)
         {
-            _inputPackets = inputPackets;
-            _outputPackets = outputPackets;
+            _conn = conn;
         }
 
         public Task Execute(byte sequence, byte systemId, byte componentId,MavCmd command, byte targetComponent, CancellationToken cancel, float param1, float param2, float param3, float param4, float param5, float param6)
@@ -44,15 +41,15 @@ namespace Asv.Mavlink
                 packet.Payload.Param5 = param5;
                 packet.Payload.Param6 = param6;
                 CommandAckPacket pck;
-                _inputPackets
+                _conn
                     .Where(_ => _.MessageId == CommandAckPacket.PacketMessageId)
                     .Cast<CommandAckPacket>()
                     .Where(_ => _.Payload.Command == command).Subscribe(_ =>
                     {
                         pck = _;
                         c.Set();
-                    });
-                _outputPackets.OnNext(packet);
+                    },cancel);
+                _conn.Send(packet, cancel);
                 c.Wait(cancel);
                 
             }, cancel);

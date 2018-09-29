@@ -4,7 +4,7 @@ using System.Web;
 
 namespace Asv.Mavlink
 {
-    public class SerialRemoteStreamConfig
+    public class SerialPortConfig
     {
 
         public int DataBits { get; set; } = 8;
@@ -13,7 +13,7 @@ namespace Asv.Mavlink
         public StopBits StopBits { get; set; } = StopBits.One;
         public string PortName { get; set; }
 
-        public static bool TryGetOptions(Uri uri, out SerialRemoteStreamConfig opt)
+        public static bool TryParseFromUri(Uri uri, out SerialPortConfig opt)
         {
             if (!"serial".Equals(uri.Scheme, StringComparison.InvariantCultureIgnoreCase))
             {
@@ -22,7 +22,7 @@ namespace Asv.Mavlink
             }
 
             var coll = HttpUtility.ParseQueryString(uri.Query);
-            opt = new SerialRemoteStreamConfig
+            opt = new SerialPortConfig
             {
                 PortName = uri.LocalPath,
                 BoundRate = int.Parse(coll["boundRate"]),

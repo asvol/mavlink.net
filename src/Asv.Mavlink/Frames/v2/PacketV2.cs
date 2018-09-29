@@ -14,6 +14,8 @@
         public abstract string Name { get; }
         public ISignature Signature { get; } = new Signature();
 
+        public int MaxByteSize => Payload.MaxByteSize + Signature.MaxByteSize + PacketV2Helper.PacketV2FrameSize;
+
         public int Serialize(byte[] buffer, int offset)
         {
             PacketV2Helper.SetStx(buffer, offset);
