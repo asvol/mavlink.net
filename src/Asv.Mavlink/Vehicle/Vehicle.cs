@@ -43,6 +43,8 @@ namespace Asv.Mavlink
         private readonly RxValue<BatteryStatusPayload> _batteryStatus = new RxValue<BatteryStatusPayload>();
         private readonly RxValue<AltitudePayload> _altitude = new RxValue<AltitudePayload>();
         private readonly RxValue<ExtendedSysStatePayload> _extendedSysState = new RxValue<ExtendedSysStatePayload>();
+        private readonly RxValue<GeoPoint> _gps = new RxValue<GeoPoint>();
+        private readonly RxValue<HomePositionPayload> _home = new RxValue<HomePositionPayload>();
 
         public Vehicle(VehicleConfig config)
         {
@@ -130,13 +132,17 @@ namespace Asv.Mavlink
 
         private void HandleGps()
         {
-            InputPackets
+            var s =InputPackets
                 .Where(_ => _.MessageId == GpsRawIntPacket.PacketMessageId)
                 .Cast<GpsRawIntPacket>()
-                .Select(_ => _.Payload)
-                .Subscribe(_gpsRawInt, DisposeCancel.Token);
+                .Select(_ => _.Payload);
+            s.Subscribe(_gpsRawInt, DisposeCancel.Token);
+
+            s.Select(_ => new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, _.Alt / 1000D)).Subscribe(_gps,DisposeCancel.Token);
 
             DisposeCancel.Token.Register(() => _gpsRawInt.Dispose());
+            DisposeCancel.Token.Register(() => _gps.Dispose());
+            
         }
 
         private void HandleSystemStatus()
@@ -203,6 +209,8 @@ namespace Asv.Mavlink
         public IRxValue<BatteryStatusPayload> BatteryStatus => _batteryStatus;
         public IRxValue<AttitudePayload> Attitude => _attitude;
         public IRxValue<VfrHudPayload> VfrHud => _vfrHud;
+        public IRxValue<GeoPoint> Gps => _gps;
+        public IRxValue<HomePositionPayload> Home => _home;
 
         public async Task<CommandAckPayload> SendCommand(MavCmd command, float param1, float param2, float param3, float param4, float param5, float param6, float param7, int atteptCount, CancellationToken cancel)
         {
