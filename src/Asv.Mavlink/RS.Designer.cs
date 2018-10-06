@@ -106,6 +106,33 @@ namespace Asv.Mavlink {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Integer value not assigned for param &apos;{0}&apos; with type {1}.
+        /// </summary>
+        internal static string Vehicle_ConvertToMavlinkUnionToParamValue_Integer_value_not_assigned_for_param {
+            get {
+                return ResourceManager.GetString("Vehicle_ConvertToMavlinkUnionToParamValue_Integer_value_not_assigned_for_param", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Author of this library doesn&apos;t know, how how to read 8 byte from float (4 byte) field.
+        /// </summary>
+        internal static string Vehicle_ConvertToMavlinkUnionToParamValue_NeedMoreByte {
+            get {
+                return ResourceManager.GetString("Vehicle_ConvertToMavlinkUnionToParamValue_NeedMoreByte", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Real value not assigned for param &apos;{0}&apos; with type {1}.
+        /// </summary>
+        internal static string Vehicle_ConvertToMavlinkUnionToParamValue_Real_value_not_assigned_for_param {
+            get {
+                return ResourceManager.GetString("Vehicle_ConvertToMavlinkUnionToParamValue_Real_value_not_assigned_for_param", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Timeout ({0} ms) to read all params from Vehicle..
         /// </summary>
         internal static string Vehicle_ReadAllParams_Timeout_to_read_all_params_from_Vehicle {

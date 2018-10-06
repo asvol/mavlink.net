@@ -119,4 +119,13 @@
     <data name="Vehicle_ReadAllParams_Timeout_to_read_all_params_from_Vehicle" xml:space="preserve">
     <value>Timeout ({0} ms) to read all params from Vehicle.</value>
   </data>
+    <data name="Vehicle_ConvertToMavlinkUnionToParamValue_Integer_value_not_assigned_for_param" xml:space="preserve">
+    <value>Integer value not assigned for param '{0}' with type {1}</value>
+  </data>
+    <data name="Vehicle_ConvertToMavlinkUnionToParamValue_Real_value_not_assigned_for_param" xml:space="preserve">
+    <value>Real value not assigned for param '{0}' with type {1}</value>
+  </data>
+    <data name="Vehicle_ConvertToMavlinkUnionToParamValue_NeedMoreByte" xml:space="preserve">
+    <value>Author of this library doesn't know, how how to read 8 byte from float (4 byte) field</value>
+  </data>
 </root>

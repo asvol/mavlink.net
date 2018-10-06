@@ -21,12 +21,14 @@ namespace Asv.Mavlink
         public byte ComponentId { get; set; } = 254;
         public byte TargetSystemId { get; } = 1;
         public byte TargetComponenId { get; } = 1;
-        public int CommandTimeoutMs { get; set; } = 30000;
-        public int TimeoutToReadAllParamsMs { get; set; } = 30000;
+        public int CommandTimeoutMs { get; set; } = 10000;
+        public int TimeoutToReadAllParamsMs { get; set; } = 10000;
+        public int ReadParamTimeoutMs { get; set; } = 10000;
     }
 
     public class Vehicle : IVehicle
     {
+        private const int TaskStartDelayMs = 30;
         private readonly VehicleConfig _config;
         private readonly SingleThreadTaskScheduler _ts;
         
@@ -80,6 +82,23 @@ namespace Asv.Mavlink
             HandleParams();
         }
 
+        public IRxValue<LinkState> Link => _link;
+        public IRxValue<int> PacketRateHz => _packetRate;
+        public IRxValue<HeartbeatPayload> Heartbeat => _heartBeat;
+        public IRxValue<SysStatusPayload> SysStatus => _sysStatus;
+        public IRxValue<GpsRawIntPayload> GpsRawInt => _gpsRawInt;
+        public IRxValue<HighresImuPayload> HighresImu => _highresImu;
+        public IRxValue<ExtendedSysStatePayload> ExtendedSysState => _extendedSysState;
+        public IRxValue<AltitudePayload> Altitude => _altitude;
+        public IRxValue<BatteryStatusPayload> BatteryStatus => _batteryStatus;
+        public IRxValue<AttitudePayload> Attitude => _attitude;
+        public IRxValue<VfrHudPayload> VfrHud => _vfrHud;
+        public IRxValue<GeoPoint> Gps => _gps;
+        public IRxValue<HomePositionPayload> Home => _home;
+        public IReadOnlyDictionary<string, MavParam> Params => _params;
+        public IRxValue<int?> ParamsCount => _paramsCount;
+        public IObservable<MavParam> OnParamUpdated => _paramUpdated;
+
         private void HandleParams()
         {
             InputPackets
@@ -93,20 +112,78 @@ namespace Asv.Mavlink
         private void UpdateParam(ParamValuePacket p)
         {
             var name = GetParamName(p.Payload);
-            var mavParam = new MavParam
-            {
-                Index = p.Payload.ParamIndex,
-                Name = name,
-                Type = p.Payload.ParamType,
-            };
-            ConvertValue(mavParam, p.Payload.ParamValue, p.Payload.ParamType);
+
+            float? floatVal;
+            long? longVal;
+            ConvertFromMavlinkUnionToParamValue(p.Payload.ParamValue, p.Payload.ParamType, out floatVal, out longVal);
+            var mavParam = new MavParam(p.Payload.ParamIndex, name, p.Payload.ParamType,floatVal,longVal);
             _params.AddOrUpdate(name, mavParam, (s, param) => mavParam);
             _paramUpdated.OnNext(mavParam);
             _paramsCount.OnNext(p.Payload.ParamCount);
         }
 
-        private void ConvertValue(MavParam mavParam, float payloadParamValue, MavParamType payloadParamType)
+        private float ConvertToMavlinkUnionToParamValue(MavParam param)
         {
+            var arr = BitConverter.GetBytes(0.0F);
+            switch (param.Type)
+            {
+                case MavParamType.MavParamTypeUint8:
+                    if (!param.IntegerValue.HasValue)
+                        throw new Exception(string.Format(RS.Vehicle_ConvertToMavlinkUnionToParamValue_Integer_value_not_assigned_for_param, param.Name, param.Type));
+                    arr[0] = (byte)(param.IntegerValue & 0xFF);
+                    break;
+                case MavParamType.MavParamTypeInt8:
+                    if (!param.IntegerValue.HasValue)
+                        throw new Exception(string.Format(RS.Vehicle_ConvertToMavlinkUnionToParamValue_Integer_value_not_assigned_for_param, param.Name, param.Type));
+                    arr[0] = (byte)(param.IntegerValue & 0xFF);
+                    break;
+                case MavParamType.MavParamTypeUint16:
+                    if (!param.IntegerValue.HasValue)
+                        throw new Exception(string.Format(RS.Vehicle_ConvertToMavlinkUnionToParamValue_Integer_value_not_assigned_for_param, param.Name, param.Type));
+                    arr[0] = (byte)(param.IntegerValue & 0xFF);
+                    arr[1] = (byte)((param.IntegerValue >> 8) & 0xFF);
+                    break;
+                case MavParamType.MavParamTypeInt16:
+                    if (!param.IntegerValue.HasValue)
+                        throw new Exception(string.Format(RS.Vehicle_ConvertToMavlinkUnionToParamValue_Integer_value_not_assigned_for_param, param.Name, param.Type));
+                    arr[0] = (byte)(param.IntegerValue & 0xFF);
+                    arr[1] = (byte)((param.IntegerValue >> 8) & 0xFF);
+                    break;
+                case MavParamType.MavParamTypeUint32:
+                    if (!param.IntegerValue.HasValue)
+                        throw new Exception(string.Format(RS.Vehicle_ConvertToMavlinkUnionToParamValue_Integer_value_not_assigned_for_param, param.Name, param.Type));
+                    arr[0] = (byte)(param.IntegerValue & 0xFF);
+                    arr[1] = (byte)((param.IntegerValue >> 8) & 0xFF);
+                    arr[2] = (byte)((param.IntegerValue >> 16) & 0xFF);
+                    arr[3] = (byte)((param.IntegerValue >> 24) & 0xFF);
+                    break;
+                case MavParamType.MavParamTypeInt32:
+                    if (!param.IntegerValue.HasValue)
+                        throw new Exception(string.Format(RS.Vehicle_ConvertToMavlinkUnionToParamValue_Integer_value_not_assigned_for_param, param.Name, param.Type));
+                    arr[0] = (byte)(param.IntegerValue & 0xFF);
+                    arr[1] = (byte)((param.IntegerValue >> 8) & 0xFF);
+                    arr[2] = (byte)((param.IntegerValue >> 16) & 0xFF);
+                    arr[3] = (byte)((param.IntegerValue >> 24) & 0xFF);
+                    break;
+                case MavParamType.MavParamTypeUint64:
+                    throw new MavlinkException(RS.Vehicle_ConvertToMavlinkUnionToParamValue_NeedMoreByte);
+                case MavParamType.MavParamTypeInt64:
+                    throw new MavlinkException(RS.Vehicle_ConvertToMavlinkUnionToParamValue_NeedMoreByte);
+                case MavParamType.MavParamTypeReal32:
+                    if (!param.RealValue.HasValue)
+                        throw new Exception(string.Format(RS.Vehicle_ConvertToMavlinkUnionToParamValue_Real_value_not_assigned_for_param, param.Name, param.Type));
+                    return param.RealValue.Value;
+                case MavParamType.MavParamTypeReal64:
+                    throw new MavlinkException(RS.Vehicle_ConvertToMavlinkUnionToParamValue_NeedMoreByte);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(param.Type), param.Type, null);
+            }
+            return BitConverter.ToSingle(arr, 0);
+        }
+
+        private void ConvertFromMavlinkUnionToParamValue(float payloadParamValue, MavParamType payloadParamType, out float? floatVal,out long? longVal)
+        {
+
             // MAVLink (v1.0, v2.0) supports these data types:
             // uint32_t - 32bit unsigned integer(use the ENUM value MAV_PARAM_TYPE_UINT32)
             // int32_t - 32bit signed integer(use the ENUM value MAV_PARAM_TYPE_INT32)
@@ -120,32 +197,39 @@ namespace Asv.Mavlink
             switch (payloadParamType)
             {
                 case MavParamType.MavParamTypeUint8:
-                    mavParam.IntegerValue = BitConverter.GetBytes(payloadParamValue)[0];
+                    longVal = BitConverter.GetBytes(payloadParamValue)[0];
+                    floatVal = null;
                     break;
                 case MavParamType.MavParamTypeInt8:
-                    mavParam.IntegerValue = (sbyte)BitConverter.GetBytes(payloadParamValue)[0];
+                    longVal = (sbyte)BitConverter.GetBytes(payloadParamValue)[0];
+                    floatVal = null;
                     break;
                 case MavParamType.MavParamTypeUint16:
-                    mavParam.IntegerValue = BitConverter.ToUInt16(BitConverter.GetBytes(payloadParamValue),0);
+                    longVal = BitConverter.ToUInt16(BitConverter.GetBytes(payloadParamValue),0);
+                    floatVal = null;
                     break;
                 case MavParamType.MavParamTypeInt16:
-                    mavParam.IntegerValue = BitConverter.ToInt16(BitConverter.GetBytes(payloadParamValue), 0);
+                    longVal = BitConverter.ToInt16(BitConverter.GetBytes(payloadParamValue), 0);
+                    floatVal = null;
                     break;
                 case MavParamType.MavParamTypeUint32:
-                    mavParam.IntegerValue = BitConverter.ToUInt32(BitConverter.GetBytes(payloadParamValue), 0);
+                    longVal = BitConverter.ToUInt32(BitConverter.GetBytes(payloadParamValue), 0);
+                    floatVal = null;
                     break;
                 case MavParamType.MavParamTypeInt32:
-                    mavParam.IntegerValue = BitConverter.ToInt32(BitConverter.GetBytes(payloadParamValue), 0);
+                    longVal = BitConverter.ToInt32(BitConverter.GetBytes(payloadParamValue), 0);
+                    floatVal = null;
                     break;
                 case MavParamType.MavParamTypeUint64:
-                    throw new MavlinkException("Author of this library doesn't know, how how to read 8 byte from float (4 byte) field");
+                    throw new MavlinkException(RS.Vehicle_ConvertToMavlinkUnionToParamValue_NeedMoreByte);
                 case MavParamType.MavParamTypeInt64:
-                    throw new MavlinkException("Author of this library doesn't know, how how to read 8 byte from float (4 byte) field");
+                    throw new MavlinkException(RS.Vehicle_ConvertToMavlinkUnionToParamValue_NeedMoreByte);
                 case MavParamType.MavParamTypeReal32:
-                    mavParam.RealValue = payloadParamValue;
+                    floatVal = payloadParamValue;
+                    longVal = null;
                     break;
                 case MavParamType.MavParamTypeReal64:
-                    throw new MavlinkException("Author of this library doesn't know, how how to read 8 byte from float (4 byte) field");
+                    throw new MavlinkException(RS.Vehicle_ConvertToMavlinkUnionToParamValue_NeedMoreByte);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(payloadParamType), payloadParamType, null);
             }
@@ -278,25 +362,7 @@ namespace Asv.Mavlink
             _heartBeat.OnNext(heartbeatPacket.Payload);
         }
 
-        public IRxValue<LinkState> Link => _link;
-        public IRxValue<int> PacketRateHz => _packetRate;
-        public IRxValue<HeartbeatPayload> Heartbeat => _heartBeat;
-        public IRxValue<SysStatusPayload> SysStatus => _sysStatus;
-        public IRxValue<GpsRawIntPayload> GpsRawInt => _gpsRawInt;
-        public IRxValue<HighresImuPayload> HighresImu => _highresImu;
-        public IRxValue<ExtendedSysStatePayload> ExtendedSysState => _extendedSysState;
-        public IRxValue<AltitudePayload> Altitude => _altitude;
-        public IRxValue<BatteryStatusPayload> BatteryStatus => _batteryStatus;
-        public IRxValue<AttitudePayload> Attitude => _attitude;
-        public IRxValue<VfrHudPayload> VfrHud => _vfrHud;
-        public IRxValue<GeoPoint> Gps => _gps;
-        public IRxValue<HomePositionPayload> Home => _home;
-        public IReadOnlyDictionary<string, MavParam> Params => _params;
-        public IRxValue<int?> ParamsCount => _paramsCount;
-
-        public IObservable<MavParam> OnParamUpdated => _paramUpdated;
-
-        public async Task UpdateAllParams(CancellationToken cancel, IProgress<double> progress = null)
+        public async Task ReadAllParams(CancellationToken cancel, IProgress<double> progress = null)
         {
             progress = progress ?? new Progress<double>();
             var packet = new ParamRequestListPacket
@@ -311,17 +377,18 @@ namespace Asv.Mavlink
             };
 
             var t = Task.Factory.StartNew(_=>InternalReadParams(progress) , cancel, TaskCreationOptions.LongRunning);
+            // we need start listen before send request
             while (t.Status != TaskStatus.Running)
             {
-                await Task.Delay(100, cancel).ConfigureAwait(false);
+                await Task.Delay(TaskStartDelayMs, cancel).ConfigureAwait(false);
             }
             await _mavlinkConnection.Send(packet, cancel).ConfigureAwait(false);
             await t.ConfigureAwait(false);
         }
 
-        public Task<MavParam> UpdateParam(string name, CancellationToken cancel)
+        public async Task<MavParam> ReadParam(string name, CancellationToken cancel)
         {
-            var arg =new ParamRequestReadPacket
+            var packet = new ParamRequestReadPacket
             {
                 ComponenId = _config.ComponentId,
                 SystemId = _config.SystemId,
@@ -329,16 +396,65 @@ namespace Asv.Mavlink
                 {
                     TargetComponent = _config.TargetComponenId,
                     TargetSystem = _config.TargetSystemId,
-                    ParamId = name.ToCharArray(),
-                    
+                    ParamId = SetParamName(name),
+                    ParamIndex = -1,
                 }
             };
-            return null;
+            var t = OnParamUpdated.FirstAsync(_ => _.Name == name).ToTask(cancel);
+            await _mavlinkConnection.Send(packet, cancel).ConfigureAwait(false);
+            await t.ConfigureAwait(false);
+            return t.Result;
         }
 
-        public Task<MavParam> UpdateParam(int index, CancellationToken cancel)
+        public async Task<MavParam> ReadParam(short index, CancellationToken cancel)
         {
-            throw new NotImplementedException();
+            var packet = new ParamRequestReadPacket
+            {
+                ComponenId = _config.ComponentId,
+                SystemId = _config.SystemId,
+                Payload =
+                {
+                    TargetComponent = _config.TargetComponenId,
+                    TargetSystem = _config.TargetSystemId,
+                    ParamId = SetParamName(string.Empty),
+                    ParamIndex = index,
+                }
+            };
+
+            using (var timeoutCancel = new CancellationTokenSource(_config.ReadParamTimeoutMs))
+            using (var linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, timeoutCancel.Token))
+            {
+                var t = OnParamUpdated.FirstAsync(_ => _.Index == index).ToTask(linkedCancel.Token);
+                await _mavlinkConnection.Send(packet, linkedCancel.Token).ConfigureAwait(false);
+                await t.ConfigureAwait(false);
+                return t.Result;
+            }
+        }
+
+        public async Task<MavParam> WriteParam(MavParam param, CancellationToken cancel)
+        {
+            var packet = new ParamSetPacket()
+            {
+                ComponenId = _config.ComponentId,
+                SystemId = _config.SystemId,
+                Payload =
+                {
+                    TargetComponent = _config.TargetComponenId,
+                    TargetSystem = _config.TargetSystemId,
+                    ParamId = SetParamName(param.Name),
+                    ParamType = param.Type,
+                    ParamValue = ConvertToMavlinkUnionToParamValue(param)
+                }
+            };
+
+            using (var timeoutCancel = new CancellationTokenSource(_config.ReadParamTimeoutMs))
+            using (var linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, timeoutCancel.Token))
+            {
+                var t = OnParamUpdated.Where(_ => _.Name == param.Name).Take(1).ToTask(linkedCancel.Token);
+                await _mavlinkConnection.Send(packet, linkedCancel.Token).ConfigureAwait(false);
+                await t.ConfigureAwait(false);
+                return t.Result;
+            }
         }
 
         private void InternalReadParams(IProgress<double> progress)
@@ -370,11 +486,15 @@ namespace Asv.Mavlink
             progress.Report(1);
         }
 
+        private char[] SetParamName(string name)
+        {
+            return name.PadRight(16, '\0').ToCharArray();
+        }
+
         private string GetParamName(ParamValuePayload payload)
         {
             return new string(payload.ParamId.Where(_ => _ != '\0').ToArray());
         }
-        
 
         public async Task<CommandAckPayload> SendCommand(MavCmd command, float param1, float param2, float param3, float param4, float param5, float param6, float param7, int atteptCount, CancellationToken cancel)
         {
@@ -403,27 +523,29 @@ namespace Asv.Mavlink
             {
                 packet.Payload.Confirmation = currentAttept;
                 ++currentAttept;
-                
-                var timeoutCancel = new CancellationTokenSource(_config.CommandTimeoutMs);
-                var linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, timeoutCancel.Token);
-                try
+
+                using (var timeoutCancel = new CancellationTokenSource(_config.CommandTimeoutMs))
+                using (var linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, timeoutCancel.Token))
                 {
-                    var resultTask = InputPackets
-                        .Where(_ => _.MessageId == CommandAckPacket.PacketMessageId)
-                        .Cast<CommandAckPacket>()
-                        .Where(_ => _.Payload.TargetComponent == _config.ComponentId)
-                        .Where(_ => _.Payload.TargetSystem == _config.SystemId)
-                        .Take(1)
-                        .ToTask(linkedCancel.Token);
-                    await _mavlinkConnection.Send(packet, cancel).ConfigureAwait(false);
-                    result = await resultTask.ConfigureAwait(false);
-                    break;
-                }
-                catch (TaskCanceledException)
-                {
-                    if (!timeoutCancel.IsCancellationRequested)
+                    try
                     {
-                        throw;
+                        var resultTask = InputPackets
+                            .Where(_ => _.MessageId == CommandAckPacket.PacketMessageId)
+                            .Cast<CommandAckPacket>()
+                            .Where(_ => _.Payload.TargetComponent == _config.ComponentId)
+                            .Where(_ => _.Payload.TargetSystem == _config.SystemId)
+                            .Take(1)
+                            .ToTask(linkedCancel.Token);
+                        await _mavlinkConnection.Send(packet, cancel).ConfigureAwait(false);
+                        result = await resultTask.ConfigureAwait(false);
+                        break;
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        if (!timeoutCancel.IsCancellationRequested)
+                        {
+                            throw;
+                        }
                     }
                 }
             }

@@ -7,13 +7,54 @@ using Asv.Mavlink.V2.Common;
 namespace Asv.Mavlink
 {
   
-    public class MavParam
+    public class MavParam:ICloneable
     {
-        public ushort Index { get; set; }
-        public string Name { get; set; }
-        public MavParamType Type { get; set; }
-        public float? RealValue { get; set; }
-        public long? IntegerValue { get; set; }
+        public MavParam(ushort index, string name, MavParamType type, float? realValue, long? integerValue)
+        {
+            Index = index;
+            Name = name;
+            Type = type;
+            RealValue = realValue;
+            IntegerValue = integerValue;
+        }
+
+        public MavParam(MavParam param)
+        {
+            Index = param.Index;
+            Name = param.Name;
+            Type = param.Type;
+            RealValue = param.RealValue;
+            IntegerValue = param.IntegerValue;
+        }
+
+        public MavParam(MavParam param, float newValue)
+        {
+            Index = param.Index;
+            Name = param.Name;
+            Type = param.Type;
+            RealValue = newValue;
+            IntegerValue = null;
+        }
+
+        public MavParam(MavParam param, long newValue)
+        {
+            Index = param.Index;
+            Name = param.Name;
+            Type = param.Type;
+            RealValue = null;
+            IntegerValue = newValue;
+        }
+
+        public ushort Index { get; private set; }
+        public string Name { get; private set; }
+        public MavParamType Type { get; private set; }
+        public float? RealValue { get; private set; }
+        public long? IntegerValue { get; private set; }
+
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
     }
 
     public interface IVehicle:IDisposable
@@ -36,14 +77,36 @@ namespace Asv.Mavlink
         IReadOnlyDictionary<string,MavParam> Params { get; }
         IRxValue<int?> ParamsCount { get; }
         IObservable<MavParam> OnParamUpdated { get; }
-        Task UpdateAllParams(CancellationToken cancel,IProgress<double> progress = null);
-        Task<MavParam> UpdateParam(string name, CancellationToken cancel);
-        Task<MavParam> UpdateParam(int index, CancellationToken cancel);
-       
+        Task ReadAllParams(CancellationToken cancel,IProgress<double> progress = null);
+        Task<MavParam> ReadParam(string name, CancellationToken cancel);
+        Task<MavParam> ReadParam(short index, CancellationToken cancel);
+        Task<MavParam> WriteParam(MavParam param, CancellationToken cancel);
+
     }
 
     public static class VehicleHelper
     {
+        public static async Task<MavParam> WriteParam(this IVehicle src, string name, float value, CancellationToken cancel)
+        {
+            MavParam param;
+            if (!src.Params.TryGetValue(name, out param))
+            {
+                param = await src.ReadParam(name, cancel).ConfigureAwait(false);
+            }
+
+            return await src.WriteParam(new MavParam(param, value), cancel).ConfigureAwait(false);
+        }
+
+        public static async Task<MavParam> WriteParam(this IVehicle src, string name, long value, CancellationToken cancel)
+        {
+            MavParam param;
+            if (!src.Params.TryGetValue(name, out param))
+            {
+                param = await src.ReadParam(name, cancel).ConfigureAwait(false);
+            }
+
+            return await src.WriteParam(new MavParam(param, value), cancel).ConfigureAwait(false);
+        }
         /// <summary>
         /// Takeoff from ground / hand
         /// </summary>
