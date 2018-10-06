@@ -106,6 +106,15 @@ namespace Asv.Mavlink {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Timeout ({0} ms) to read all params from Vehicle..
+        /// </summary>
+        internal static string Vehicle_ReadAllParams_Timeout_to_read_all_params_from_Vehicle {
+            get {
+                return ResourceManager.GetString("Vehicle_ReadAllParams_Timeout_to_read_all_params_from_Vehicle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unknown STX value. Need {0}. Get {1}.
         /// </summary>
         internal static string WheelKnownConstant_VerifyStx_Unknown_STX_value {

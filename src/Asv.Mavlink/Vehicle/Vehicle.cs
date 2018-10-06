@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +22,7 @@ namespace Asv.Mavlink
         public byte TargetSystemId { get; } = 1;
         public byte TargetComponenId { get; } = 1;
         public int CommandTimeoutMs { get; set; } = 30000;
+        public int TimeoutToReadAllParamsMs { get; set; } = 30000;
     }
 
     public class Vehicle : IVehicle
@@ -43,10 +48,15 @@ namespace Asv.Mavlink
         private readonly RxValue<BatteryStatusPayload> _batteryStatus = new RxValue<BatteryStatusPayload>();
         private readonly RxValue<AltitudePayload> _altitude = new RxValue<AltitudePayload>();
         private readonly RxValue<ExtendedSysStatePayload> _extendedSysState = new RxValue<ExtendedSysStatePayload>();
+        private readonly RxValue<GeoPoint> _gps = new RxValue<GeoPoint>();
+        private readonly ConcurrentDictionary<string, MavParam> _params = new ConcurrentDictionary<string, MavParam>();
+        private readonly Subject<MavParam> _paramUpdated = new Subject<MavParam>();
+        private readonly RxValue<int?> _paramsCount = new RxValue<int?>();
 
         public Vehicle(VehicleConfig config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
+
             _config = config;
             _ts = new SingleThreadTaskScheduler("vehicle");
             TaskFactory = new TaskFactory(_ts);
@@ -66,6 +76,68 @@ namespace Asv.Mavlink
             HandleBatteryStatus();
             HandleAltitude();
             HandleExtendedSysState();
+            HandleParams();
+        }
+
+        private void HandleParams()
+        {
+            InputPackets
+                .Where(_ => _.MessageId == ParamValuePacket.PacketMessageId)
+                .Cast<ParamValuePacket>().Subscribe(UpdateParam,DisposeCancel.Token);
+
+            DisposeCancel.Token.Register(() => _paramUpdated.Dispose());
+            DisposeCancel.Token.Register(() => _paramsCount.Dispose());
+        }
+
+        private void UpdateParam(ParamValuePacket p)
+        {
+            var name = GetParamName(p.Payload);
+            var mavParam = new MavParam
+            {
+                Index = p.Payload.ParamIndex,
+                Name = name,
+                Type = p.Payload.ParamType,
+            };
+            ConvertValue(mavParam, p.Payload.ParamValue, p.Payload.ParamType);
+            _params.AddOrUpdate(name, mavParam, (s, param) => mavParam);
+            _paramUpdated.OnNext(mavParam);
+            _paramsCount.OnNext(p.Payload.ParamCount);
+        }
+
+        private void ConvertValue(MavParam mavParam, float payloadParamValue, MavParamType payloadParamType)
+        {
+            switch (payloadParamType)
+            {
+                case MavParamType.MavParamTypeUint8:
+                    mavParam.IntegerValue = BitConverter.GetBytes(payloadParamValue)[0];
+                    break;
+                case MavParamType.MavParamTypeInt8:
+                    mavParam.IntegerValue = (sbyte)BitConverter.GetBytes(payloadParamValue)[0];
+                    break;
+                case MavParamType.MavParamTypeUint16:
+                    mavParam.IntegerValue = BitConverter.ToUInt16(BitConverter.GetBytes(payloadParamValue),0);
+                    break;
+                case MavParamType.MavParamTypeInt16:
+                    mavParam.IntegerValue = BitConverter.ToInt16(BitConverter.GetBytes(payloadParamValue), 0);
+                    break;
+                case MavParamType.MavParamTypeUint32:
+                    mavParam.IntegerValue = BitConverter.ToUInt32(BitConverter.GetBytes(payloadParamValue), 0);
+                    break;
+                case MavParamType.MavParamTypeInt32:
+                    mavParam.IntegerValue = BitConverter.ToInt32(BitConverter.GetBytes(payloadParamValue), 0);
+                    break;
+                case MavParamType.MavParamTypeUint64:
+                    throw new MavlinkException("Author of this library doesn't know, how how to read 8 byte from float (4 byte) field");
+                case MavParamType.MavParamTypeInt64:
+                    throw new MavlinkException("Author of this library doesn't know, how how to read 8 byte from float (4 byte) field");
+                case MavParamType.MavParamTypeReal32:
+                    mavParam.RealValue = payloadParamValue;
+                    break;
+                case MavParamType.MavParamTypeReal64:
+                    throw new MavlinkException("Author of this library doesn't know, how how to read 8 byte from float (4 byte) field");
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(payloadParamType), payloadParamType, null);
+            }
         }
 
         private void HandleExtendedSysState()
@@ -130,13 +202,17 @@ namespace Asv.Mavlink
 
         private void HandleGps()
         {
-            InputPackets
+            var s =InputPackets
                 .Where(_ => _.MessageId == GpsRawIntPacket.PacketMessageId)
                 .Cast<GpsRawIntPacket>()
-                .Select(_ => _.Payload)
-                .Subscribe(_gpsRawInt, DisposeCancel.Token);
+                .Select(_ => _.Payload);
+            s.Subscribe(_gpsRawInt, DisposeCancel.Token);
+            
+            
 
             DisposeCancel.Token.Register(() => _gpsRawInt.Dispose());
+            DisposeCancel.Token.Register(() => _gps.Dispose());
+            
         }
 
         private void HandleSystemStatus()
@@ -203,6 +279,69 @@ namespace Asv.Mavlink
         public IRxValue<BatteryStatusPayload> BatteryStatus => _batteryStatus;
         public IRxValue<AttitudePayload> Attitude => _attitude;
         public IRxValue<VfrHudPayload> VfrHud => _vfrHud;
+        public IRxValue<GeoPoint> Gps => _gps;
+        public IReadOnlyDictionary<string, MavParam> Params => _params;
+
+        public IRxValue<int?> ParamsCount => _paramsCount;
+
+        public IObservable<MavParam> OnParamUpdated => _paramUpdated;
+
+        public async Task ReadAllParams(CancellationToken cancel, IProgress<double> progress = null)
+        {
+            progress = progress ?? new Progress<double>();
+            var packet = new ParamRequestListPacket
+            {
+                ComponenId = _config.ComponentId,
+                SystemId = _config.SystemId,
+                Payload =
+                {
+                    TargetComponent = _config.TargetComponenId,
+                    TargetSystem = _config.TargetSystemId,
+                }
+            };
+
+            var t = Task.Factory.StartNew(_=>InternalReadParams(progress) , cancel, TaskCreationOptions.LongRunning);
+            while (t.Status != TaskStatus.Running)
+            {
+                await Task.Delay(100, cancel).ConfigureAwait(false);
+            }
+            await _mavlinkConnection.Send(packet, cancel).ConfigureAwait(false);
+            await t.ConfigureAwait(false);
+        }
+
+        private void InternalReadParams(IProgress<double> progress)
+        {
+            var samplesBySecond = InputPackets
+                .Where(_ => _.MessageId == ParamValuePacket.PacketMessageId)
+                .Cast<ParamValuePacket>().Buffer(TimeSpan.FromSeconds(1)).Next();
+
+            var timeout = DateTime.Now + TimeSpan.FromMilliseconds(_config.TimeoutToReadAllParamsMs);
+
+            int? totlaCount = null;
+            progress.Report(0);
+            var paramsNames = new HashSet<string>();
+            foreach (var paramsPart in samplesBySecond)
+            {
+                if (DateTime.Now >= timeout)
+                {
+                    throw new TimeoutException(string.Format(RS.Vehicle_ReadAllParams_Timeout_to_read_all_params_from_Vehicle, _config.TimeoutToReadAllParamsMs));
+                }
+                foreach (var p in paramsPart)
+                {
+                    totlaCount = totlaCount ?? p.Payload.ParamCount;
+                    var name = GetParamName(p.Payload);
+                    paramsNames.Add(name);
+                }
+                if (totlaCount.HasValue && totlaCount.Value <= paramsNames.Count) break;
+                progress.Report(totlaCount == null ? 0 : Math.Min(1d,paramsNames.Count/(double)totlaCount));
+            }
+            progress.Report(1);
+        }
+
+        private string GetParamName(ParamValuePayload payload)
+        {
+            return new string(payload.ParamId.Where(_ => _ != '\0').ToArray());
+        }
 
         public async Task<CommandAckPayload> SendCommand(MavCmd command, float param1, float param2, float param3, float param4, float param5, float param6, float param7, int atteptCount, CancellationToken cancel)
         {
@@ -238,10 +377,6 @@ namespace Asv.Mavlink
                 {
                     var resultTask = InputPackets
                         .Where(_ => _.MessageId == CommandAckPacket.PacketMessageId)
-                        .Where(_ => _config.TargetComponenId == 0 ||
-                                    _config.TargetComponenId == _.ComponenId)
-                        .Where(_=> _config.TargetSystemId == 0 ||
-                                   _config.TargetSystemId == _.SystemId)
                         .Cast<CommandAckPacket>()
                         .Where(_ => _.Payload.TargetComponent == _config.ComponentId)
                         .Where(_ => _.Payload.TargetSystem == _config.SystemId)

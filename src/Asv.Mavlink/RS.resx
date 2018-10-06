@@ -116,5 +116,7 @@
     <data name="RemoteStreamFactory_CreateStream_Connection_string_is_invalid" xml:space="preserve">
     <value>Connection string '{0}' is invalid</value>
   </data>
-    
+    <data name="Vehicle_ReadAllParams_Timeout_to_read_all_params_from_Vehicle" xml:space="preserve">
+    <value>Timeout ({0} ms) to read all params from Vehicle.</value>
+  </data>
 </root>
