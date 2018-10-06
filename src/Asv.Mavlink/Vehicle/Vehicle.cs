@@ -52,6 +52,7 @@ namespace Asv.Mavlink
         private readonly ConcurrentDictionary<string, MavParam> _params = new ConcurrentDictionary<string, MavParam>();
         private readonly Subject<MavParam> _paramUpdated = new Subject<MavParam>();
         private readonly RxValue<int?> _paramsCount = new RxValue<int?>();
+        private readonly RxValue<HomePositionPayload> _home = new RxValue<HomePositionPayload>();
 
         public Vehicle(VehicleConfig config)
         {
@@ -207,8 +208,7 @@ namespace Asv.Mavlink
                 .Cast<GpsRawIntPacket>()
                 .Select(_ => _.Payload);
             s.Subscribe(_gpsRawInt, DisposeCancel.Token);
-            
-            
+            s.Select(_ => new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, _.Alt / 1000D)).Subscribe(_gps,DisposeCancel.Token);
 
             DisposeCancel.Token.Register(() => _gpsRawInt.Dispose());
             DisposeCancel.Token.Register(() => _gps.Dispose());
@@ -280,8 +280,8 @@ namespace Asv.Mavlink
         public IRxValue<AttitudePayload> Attitude => _attitude;
         public IRxValue<VfrHudPayload> VfrHud => _vfrHud;
         public IRxValue<GeoPoint> Gps => _gps;
+        public IRxValue<HomePositionPayload> Home => _home;
         public IReadOnlyDictionary<string, MavParam> Params => _params;
-
         public IRxValue<int?> ParamsCount => _paramsCount;
 
         public IObservable<MavParam> OnParamUpdated => _paramUpdated;
@@ -342,6 +342,7 @@ namespace Asv.Mavlink
         {
             return new string(payload.ParamId.Where(_ => _ != '\0').ToArray());
         }
+        
 
         public async Task<CommandAckPayload> SendCommand(MavCmd command, float param1, float param2, float param3, float param4, float param5, float param6, float param7, int atteptCount, CancellationToken cancel)
         {
