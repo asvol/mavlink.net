@@ -6,72 +6,28 @@ using Asv.Mavlink.V2.Common;
 
 namespace Asv.Mavlink
 {
-  
-    public class MavParam:ICloneable
-    {
-        public MavParam(ushort index, string name, MavParamType type, float? realValue, long? integerValue)
-        {
-            Index = index;
-            Name = name;
-            Type = type;
-            RealValue = realValue;
-            IntegerValue = integerValue;
-        }
-
-        public MavParam(MavParam param)
-        {
-            Index = param.Index;
-            Name = param.Name;
-            Type = param.Type;
-            RealValue = param.RealValue;
-            IntegerValue = param.IntegerValue;
-        }
-
-        public MavParam(MavParam param, float newValue)
-        {
-            Index = param.Index;
-            Name = param.Name;
-            Type = param.Type;
-            RealValue = newValue;
-            IntegerValue = null;
-        }
-
-        public MavParam(MavParam param, long newValue)
-        {
-            Index = param.Index;
-            Name = param.Name;
-            Type = param.Type;
-            RealValue = null;
-            IntegerValue = newValue;
-        }
-
-        public ushort Index { get; private set; }
-        public string Name { get; private set; }
-        public MavParamType Type { get; private set; }
-        public float? RealValue { get; private set; }
-        public long? IntegerValue { get; private set; }
-
-        public object Clone()
-        {
-            return MemberwiseClone();
-        }
-    }
-
     public interface IVehicle:IDisposable
     {
         IRxValue<LinkState> Link { get; }
         IRxValue<int> PacketRateHz { get; }
-        IRxValue<HeartbeatPayload> Heartbeat { get; }
-        IRxValue<SysStatusPayload> SysStatus { get; }
-        IRxValue<GpsRawIntPayload> GpsRawInt { get; }
-        IRxValue<HighresImuPayload> HighresImu { get; }
-        IRxValue<ExtendedSysStatePayload> ExtendedSysState { get; }
-        IRxValue<AltitudePayload> Altitude { get; }
-        IRxValue<BatteryStatusPayload> BatteryStatus { get; }
-        IRxValue<AttitudePayload> Attitude { get; }
-        IRxValue<VfrHudPayload> VfrHud { get; }
         IRxValue<GeoPoint> Gps { get; }
-        IRxValue<HomePositionPayload> Home { get; }
+        IRxValue<GeoPoint> Home { get; }
+
+        #region Raw data
+
+        IRxValue<HeartbeatPayload> RawHeartbeat { get; }
+        IRxValue<SysStatusPayload> RawSysStatus { get; }
+        IRxValue<GpsRawIntPayload> RawGpsRawInt { get; }
+        IRxValue<HighresImuPayload> RawHighresImu { get; }
+        IRxValue<ExtendedSysStatePayload> RawExtendedSysState { get; }
+        IRxValue<AltitudePayload> RawAltitude { get; }
+        IRxValue<BatteryStatusPayload> RawBatteryStatus { get; }
+        IRxValue<AttitudePayload> RawAttitude { get; }
+        IRxValue<VfrHudPayload> RawVfrHud { get; }
+        IRxValue<HomePositionPayload> RawHome { get; }
+
+        #endregion
+
         Task<CommandAckPayload> SendCommand(MavCmd command, float param1, float param2, float param3, float param4, float param5, float param6, float param7, int atteptCount, CancellationToken cancel);
 
         IReadOnlyDictionary<string,MavParam> Params { get; }
@@ -151,5 +107,16 @@ namespace Asv.Mavlink
         {
             return src.ArmDisarm(false, cancel);
         }
+
+
+        /// <summary>
+        /// Reposition the vehicle to a specific WGS84 global position.
+        /// </summary>
+        /// <returns></returns>
+        public static Task<CommandAckPayload> DoReposition(this IVehicle src, float groundSpeed,bool switchToGuided, float yaw, float lat,float lon,float alt, CancellationToken cancel)
+        {
+            return src.SendCommand(MavCmd.MavCmdDoReposition, groundSpeed, switchToGuided ? (float)MavDoRepositionFlags.MavDoRepositionFlagsChangeMode : 0,float.NaN,yaw,lat,lon,alt,1,cancel);
+        }
+
     }
 }

@@ -31,30 +31,34 @@ namespace Asv.Mavlink
         private const int TaskStartDelayMs = 30;
         private readonly VehicleConfig _config;
         private readonly SingleThreadTaskScheduler _ts;
-        
-        private DateTime _lastHearteat;
-        private readonly IPort _port;
-        private readonly LinkIndicator _link = new LinkIndicator();
-        private readonly RxValue<int> _packetRate = new RxValue<int>();
-        private readonly RxValue<HeartbeatPayload> _heartBeat = new RxValue<HeartbeatPayload>();
-        private readonly RxValue<SysStatusPayload> _sysStatus = new RxValue<SysStatusPayload>();
-        private readonly RxValue<GpsRawIntPayload> _gpsRawInt = new RxValue<GpsRawIntPayload>();
-        private readonly RxValue<HighresImuPayload> _highresImu = new RxValue<HighresImuPayload>();
 
         private readonly MavlinkV2Connection _mavlinkConnection;
         protected readonly IObservable<IPacketV2<IPayload>> InputPackets;
         protected readonly TaskFactory TaskFactory;
         protected readonly CancellationTokenSource DisposeCancel = new CancellationTokenSource();
+
+        private DateTime _lastHearteat;
+        private readonly IPort _port;
+        private readonly LinkIndicator _link = new LinkIndicator();
+        private readonly RxValue<int> _packetRate = new RxValue<int>();
+        private readonly RxValue<GeoPoint> _gps = new RxValue<GeoPoint>();
+
+        private readonly RxValue<HeartbeatPayload> _heartBeat = new RxValue<HeartbeatPayload>();
+        private readonly RxValue<SysStatusPayload> _sysStatus = new RxValue<SysStatusPayload>();
+        private readonly RxValue<GpsRawIntPayload> _gpsRawInt = new RxValue<GpsRawIntPayload>();
+        private readonly RxValue<HighresImuPayload> _highresImu = new RxValue<HighresImuPayload>();
         private readonly RxValue<VfrHudPayload> _vfrHud = new RxValue<VfrHudPayload>();
         private readonly RxValue<AttitudePayload> _attitude = new RxValue<AttitudePayload>();
         private readonly RxValue<BatteryStatusPayload> _batteryStatus = new RxValue<BatteryStatusPayload>();
         private readonly RxValue<AltitudePayload> _altitude = new RxValue<AltitudePayload>();
         private readonly RxValue<ExtendedSysStatePayload> _extendedSysState = new RxValue<ExtendedSysStatePayload>();
-        private readonly RxValue<GeoPoint> _gps = new RxValue<GeoPoint>();
+        private readonly RxValue<HomePositionPayload> _home = new RxValue<HomePositionPayload>();
+        private readonly RxValue<GeoPoint> _homePos = new RxValue<GeoPoint>();
+
         private readonly ConcurrentDictionary<string, MavParam> _params = new ConcurrentDictionary<string, MavParam>();
         private readonly Subject<MavParam> _paramUpdated = new Subject<MavParam>();
         private readonly RxValue<int?> _paramsCount = new RxValue<int?>();
-        private readonly RxValue<HomePositionPayload> _home = new RxValue<HomePositionPayload>();
+        
 
         public Vehicle(VehicleConfig config)
         {
@@ -80,21 +84,25 @@ namespace Asv.Mavlink
             HandleAltitude();
             HandleExtendedSysState();
             HandleParams();
+            HandleHome();
         }
+
+        
 
         public IRxValue<LinkState> Link => _link;
         public IRxValue<int> PacketRateHz => _packetRate;
-        public IRxValue<HeartbeatPayload> Heartbeat => _heartBeat;
-        public IRxValue<SysStatusPayload> SysStatus => _sysStatus;
-        public IRxValue<GpsRawIntPayload> GpsRawInt => _gpsRawInt;
-        public IRxValue<HighresImuPayload> HighresImu => _highresImu;
-        public IRxValue<ExtendedSysStatePayload> ExtendedSysState => _extendedSysState;
-        public IRxValue<AltitudePayload> Altitude => _altitude;
-        public IRxValue<BatteryStatusPayload> BatteryStatus => _batteryStatus;
-        public IRxValue<AttitudePayload> Attitude => _attitude;
-        public IRxValue<VfrHudPayload> VfrHud => _vfrHud;
+        public IRxValue<GeoPoint> Home => _homePos;
+        public IRxValue<HeartbeatPayload> RawHeartbeat => _heartBeat;
+        public IRxValue<SysStatusPayload> RawSysStatus => _sysStatus;
+        public IRxValue<GpsRawIntPayload> RawGpsRawInt => _gpsRawInt;
+        public IRxValue<HighresImuPayload> RawHighresImu => _highresImu;
+        public IRxValue<ExtendedSysStatePayload> RawExtendedSysState => _extendedSysState;
+        public IRxValue<AltitudePayload> RawAltitude => _altitude;
+        public IRxValue<BatteryStatusPayload> RawBatteryStatus => _batteryStatus;
+        public IRxValue<AttitudePayload> RawAttitude => _attitude;
+        public IRxValue<VfrHudPayload> RawVfrHud => _vfrHud;
         public IRxValue<GeoPoint> Gps => _gps;
-        public IRxValue<HomePositionPayload> Home => _home;
+        public IRxValue<HomePositionPayload> RawHome => _home;
         public IReadOnlyDictionary<string, MavParam> Params => _params;
         public IRxValue<int?> ParamsCount => _paramsCount;
         public IObservable<MavParam> OnParamUpdated => _paramUpdated;
@@ -233,6 +241,20 @@ namespace Asv.Mavlink
                 default:
                     throw new ArgumentOutOfRangeException(nameof(payloadParamType), payloadParamType, null);
             }
+        }
+
+        private void HandleHome()
+        {
+            InputPackets
+                .Where(_ => _.MessageId == HomePositionPacket.PacketMessageId)
+                .Cast<HomePositionPacket>()
+                .Select(_ => _.Payload)
+                .Subscribe(_home, DisposeCancel.Token);
+            _home
+                .Select(_ => new GeoPoint(_.Latitude / 10000000D, _.Longitude / 10000000D, _.Altitude / 1000D))
+                .Subscribe(_homePos, DisposeCancel.Token);
+            DisposeCancel.Token.Register(() => _homePos.Dispose());
+            DisposeCancel.Token.Register(() => _home.Dispose());
         }
 
         private void HandleExtendedSysState()

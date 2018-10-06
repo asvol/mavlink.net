@@ -80,6 +80,7 @@
     <Compile Include="Tools\StringExtensions.cs" />
     <Compile Include="VehiclePx4\VehiclePx4.cs" />
     <Compile Include="Vehicle\Connection\IMavlinkV2Connection.cs" />
+    <Compile Include="Vehicle\MavParam.cs" />
     <Compile Include="Vehicle\Port\IPort.cs" />
     <Compile Include="Vehicle\Commands\IMavlinkCommandProtocol.cs" />
     <Compile Include="Vehicle\IVehicle.cs" />
