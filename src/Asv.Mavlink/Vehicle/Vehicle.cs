@@ -107,6 +107,16 @@ namespace Asv.Mavlink
 
         private void ConvertValue(MavParam mavParam, float payloadParamValue, MavParamType payloadParamType)
         {
+            // MAVLink (v1.0, v2.0) supports these data types:
+            // uint32_t - 32bit unsigned integer(use the ENUM value MAV_PARAM_TYPE_UINT32)
+            // int32_t - 32bit signed integer(use the ENUM value MAV_PARAM_TYPE_INT32)
+            // float - IEEE754 single precision floating point number(use the ENUM value MAV_PARAM_TYPE_FLOAT)
+            // All parameters are send as the float value of mavlink_param_union_t, which means that a parameter 
+            // should be byte-wise converted with this union to a byte-wise float (no type conversion). 
+            // This is necessary in order to not limit the maximum precision for scaled integer params. 
+            // E.g. GPS coordinates can only be expressed with single float precision up to a few meters, while GPS coordinates in 1E7 scaled integers 
+            // provide very high accuracy.
+
             switch (payloadParamType)
             {
                 case MavParamType.MavParamTypeUint8:
@@ -286,7 +296,7 @@ namespace Asv.Mavlink
 
         public IObservable<MavParam> OnParamUpdated => _paramUpdated;
 
-        public async Task ReadAllParams(CancellationToken cancel, IProgress<double> progress = null)
+        public async Task UpdateAllParams(CancellationToken cancel, IProgress<double> progress = null)
         {
             progress = progress ?? new Progress<double>();
             var packet = new ParamRequestListPacket
@@ -307,6 +317,28 @@ namespace Asv.Mavlink
             }
             await _mavlinkConnection.Send(packet, cancel).ConfigureAwait(false);
             await t.ConfigureAwait(false);
+        }
+
+        public Task<MavParam> UpdateParam(string name, CancellationToken cancel)
+        {
+            var arg =new ParamRequestReadPacket
+            {
+                ComponenId = _config.ComponentId,
+                SystemId = _config.SystemId,
+                Payload =
+                {
+                    TargetComponent = _config.TargetComponenId,
+                    TargetSystem = _config.TargetSystemId,
+                    ParamId = name.ToCharArray(),
+                    
+                }
+            };
+            return null;
+        }
+
+        public Task<MavParam> UpdateParam(int index, CancellationToken cancel)
+        {
+            throw new NotImplementedException();
         }
 
         private void InternalReadParams(IProgress<double> progress)

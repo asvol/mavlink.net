@@ -108,10 +108,7 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
         {%- if field.IsArray -%}
             {%- if field.IsTheLargestArrayInMessage -%}
             arraySize = /*ArrayLength*/{{ field.ArrayLength }} - Math.Max(0,((/*PayloadByteSize*/{{ msg.PayloadByteSize }} - payloadSize - /*ExtendedFieldsLength*/{{ msg.ExtendedFieldsLength }})//*FieldTypeByteSize*/{{ field.FieldTypeByteSize }}));
-            for(var i=arraySize;i<{{ field.ArrayLength }};i++)
-            {
-                {{ field.CamelCaseName }}[i] = ({{ field.EnumCamelCaseName }})default({{ field.Type }})
-            }
+            {{ field.CamelCaseName }} = new {{ field.Type }}[arraySize];
             {%- else -%}
             arraySize = {{ field.ArrayLength }};
             {%- endif -%}
@@ -157,16 +154,13 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
         {%- if field.IsArray -%}
             {%- if field.IsTheLargestArrayInMessage -%}
             arraySize = /*ArrayLength*/{{ field.ArrayLength }} - Math.Max(0,((/*PayloadByteSize*/{{ msg.PayloadByteSize }} - payloadSize - /*ExtendedFieldsLength*/{{ msg.ExtendedFieldsLength }})/{{ field.FieldTypeByteSize }} /*FieldTypeByteSize*/));
-            for(var i=arraySize;i<{{ field.ArrayLength }};i++)
-            {
-                {{ field.CamelCaseName }}[i] = default({{ field.Type }});
-            }
+            {{ field.CamelCaseName }} = new {{ field.Type }}[arraySize];
             {%- else -%}
             arraySize = {{ field.ArrayLength }};
             {%- endif -%}
             {%- if field.Type == 'char' -%}
-                Encoding.ASCII.GetChars(buffer, index,arraySize,{{ field.CamelCaseName }},0);
-                index+={{ field.ArrayLength }};
+            Encoding.ASCII.GetChars(buffer, index,arraySize,{{ field.CamelCaseName }},0);
+            index+=arraySize;
             {%- else -%}
             for(var i=0;i<arraySize;i++)
             {
@@ -228,7 +222,7 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
 {%- for field in msg.Fields -%}
     {%- if field.IsEnum -%}
         {%- if field.IsArray -%}
-            for(var i=0;i<{{ field.ArrayLength }};i++)
+            for(var i=0;i<{{ field.CamelCaseName }}.Length;i++)
             {
                 {%- case field.Type -%}
                 {%- when 'char' or 'double' or 'float'-%}
@@ -253,14 +247,14 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
         {%- if field.IsArray -%}
             {%- case field.Type -%}
             {%- when 'char' -%}
-            Encoding.ASCII.GetBytes({{ field.CamelCaseName }},0,{{ field.ArrayLength }},buffer,index);index+={{ field.ArrayLength }};
+            Encoding.ASCII.GetBytes({{ field.CamelCaseName }},0,{{ field.CamelCaseName }}.Length,buffer,index);index+={{ field.ArrayLength }};
             {%- when 'sbyte' or 'byte' -%}
-            for(var i=0;i<{{ field.ArrayLength }};i++)
+            for(var i=0;i<{{ field.CamelCaseName }}.Length;i++)
             {
                 buffer[index] = (byte){{ field.CamelCaseName }}[i];index+={{ field.FieldTypeByteSize }};
             }
             {%- when 'double' or 'float' or 'ulong' or 'long' or 'uint' or 'int' or 'ushort' or 'short'  -%}
-            for(var i=0;i<{{ field.ArrayLength }};i++)
+            for(var i=0;i<{{ field.CamelCaseName }}.Length;i++)
             {
                 BitConverter.GetBytes({{ field.CamelCaseName }}[i]).CopyTo(buffer, index);index+={{ field.FieldTypeByteSize }};
             }
@@ -270,7 +264,7 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
         {%- endif -%}
     {%- endif -%}
 {%- endfor -%}
-            return /*PayloadByteSize*/{{ msg.PayloadByteSize }};
+            return index; // /*PayloadByteSize*/{{ msg.PayloadByteSize }};
         }
 
     {%- for field in msg.Fields -%}
@@ -282,13 +276,22 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
         /// </summary>
     {%- if field.IsEnum -%}
         {%- if field.IsArray -%}
+            {%- if field.IsTheLargestArrayInMessage -%}
+        public {{ field.EnumCamelCaseName }}[] {{ field.CamelCaseName }} { get; set; } = new {{ field.Type }}[{{ field.ArrayLength }}];
+            {%- else -%}
         public {{ field.EnumCamelCaseName }}[] {{ field.CamelCaseName }} { get; } = new {{ field.Type }}[{{ field.ArrayLength }}];
+            {%- endif -%}
         {%- else -%}
         public {{ field.EnumCamelCaseName }} {{ field.CamelCaseName }} { get; set; }
        {%- endif -%}
     {%- else -%}
         {%- if field.IsArray -%}
+            {%- if field.IsTheLargestArrayInMessage -%}
+        public {{ field.Type }}[] {{ field.CamelCaseName }} { get; set; } = new {{ field.Type }}[{{ field.ArrayLength }}];
+        public byte Get{{ field.CamelCaseName }}MaxItemsCount() => {{ field.ArrayLength }};
+            {%- else -%}
         public {{ field.Type }}[] {{ field.CamelCaseName }} { get; } = new {{ field.Type }}[{{ field.ArrayLength }}];
+            {%- endif -%}
         {%- else -%}
         public {{ field.Type }} {{ field.CamelCaseName }} { get; set; }
         {%- endif -%}

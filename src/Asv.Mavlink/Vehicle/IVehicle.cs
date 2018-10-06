@@ -6,6 +6,7 @@ using Asv.Mavlink.V2.Common;
 
 namespace Asv.Mavlink
 {
+  
     public class MavParam
     {
         public ushort Index { get; set; }
@@ -29,12 +30,16 @@ namespace Asv.Mavlink
         IRxValue<AttitudePayload> Attitude { get; }
         IRxValue<VfrHudPayload> VfrHud { get; }
         IRxValue<GeoPoint> Gps { get; }
+        IRxValue<HomePositionPayload> Home { get; }
+        Task<CommandAckPayload> SendCommand(MavCmd command, float param1, float param2, float param3, float param4, float param5, float param6, float param7, int atteptCount, CancellationToken cancel);
+
         IReadOnlyDictionary<string,MavParam> Params { get; }
         IRxValue<int?> ParamsCount { get; }
         IObservable<MavParam> OnParamUpdated { get; }
-        Task ReadAllParams(CancellationToken cancel,IProgress<double> progress = null);
-        IRxValue<HomePositionPayload> Home { get; }
-        Task<CommandAckPayload> SendCommand(MavCmd command, float param1, float param2, float param3, float param4, float param5, float param6, float param7, int atteptCount, CancellationToken cancel);
+        Task UpdateAllParams(CancellationToken cancel,IProgress<double> progress = null);
+        Task<MavParam> UpdateParam(string name, CancellationToken cancel);
+        Task<MavParam> UpdateParam(int index, CancellationToken cancel);
+       
     }
 
     public static class VehicleHelper

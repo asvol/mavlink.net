@@ -49,7 +49,7 @@ namespace Asv.Mavlink.V2.Test
     /// </summary>
     public class TestTypesPacket: PacketV2<TestTypesPayload>
     {
-	public const int PacketMessageId = 0;
+	    public const int PacketMessageId = 0;
         public override int MessageId => PacketMessageId;
         public override byte GetCrcEtra() => 103;
 
@@ -74,10 +74,7 @@ namespace Asv.Mavlink.V2.Test
             S64 = BitConverter.ToInt64(buffer,index);index+=8;
             D = BitConverter.ToDouble(buffer, index);index+=8;
             arraySize = /*ArrayLength*/3 - Math.Max(0,((/*PayloadByteSize*/179 - payloadSize - /*ExtendedFieldsLength*/0)/8 /*FieldTypeByteSize*/));
-            for(var i=arraySize;i<3;i++)
-            {
-                U64Array[i] = default(ulong);
-            }
+            U64Array = new ulong[arraySize];
             for(var i=0;i<arraySize;i++)
             {
                 U64Array[i] = BitConverter.ToUInt64(buffer,index);index+=8;
@@ -125,8 +122,8 @@ namespace Asv.Mavlink.V2.Test
             C = Encoding.ASCII.GetChars(buffer,index,1)[0];
             index+=1;
             arraySize = 10;
-                Encoding.ASCII.GetChars(buffer, index,arraySize,S,0);
-                index+=10;
+            Encoding.ASCII.GetChars(buffer, index,arraySize,S,0);
+            index+=arraySize;
             U8 = (byte)buffer[index++];
             S8 = (sbyte)buffer[index++];
             arraySize = 3;
@@ -146,56 +143,56 @@ namespace Asv.Mavlink.V2.Test
             BitConverter.GetBytes(U64).CopyTo(buffer, index);index+=8;
             BitConverter.GetBytes(S64).CopyTo(buffer, index);index+=8;
             BitConverter.GetBytes(D).CopyTo(buffer, index);index+=8;
-            for(var i=0;i<3;i++)
+            for(var i=0;i<U64Array.Length;i++)
             {
                 BitConverter.GetBytes(U64Array[i]).CopyTo(buffer, index);index+=8;
             }
-            for(var i=0;i<3;i++)
+            for(var i=0;i<S64Array.Length;i++)
             {
                 BitConverter.GetBytes(S64Array[i]).CopyTo(buffer, index);index+=8;
             }
-            for(var i=0;i<3;i++)
+            for(var i=0;i<DArray.Length;i++)
             {
                 BitConverter.GetBytes(DArray[i]).CopyTo(buffer, index);index+=8;
             }
             BitConverter.GetBytes(U32).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(S32).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(F).CopyTo(buffer, index);index+=4;
-            for(var i=0;i<3;i++)
+            for(var i=0;i<U32Array.Length;i++)
             {
                 BitConverter.GetBytes(U32Array[i]).CopyTo(buffer, index);index+=4;
             }
-            for(var i=0;i<3;i++)
+            for(var i=0;i<S32Array.Length;i++)
             {
                 BitConverter.GetBytes(S32Array[i]).CopyTo(buffer, index);index+=4;
             }
-            for(var i=0;i<3;i++)
+            for(var i=0;i<FArray.Length;i++)
             {
                 BitConverter.GetBytes(FArray[i]).CopyTo(buffer, index);index+=4;
             }
             BitConverter.GetBytes(U16).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(S16).CopyTo(buffer, index);index+=2;
-            for(var i=0;i<3;i++)
+            for(var i=0;i<U16Array.Length;i++)
             {
                 BitConverter.GetBytes(U16Array[i]).CopyTo(buffer, index);index+=2;
             }
-            for(var i=0;i<3;i++)
+            for(var i=0;i<S16Array.Length;i++)
             {
                 BitConverter.GetBytes(S16Array[i]).CopyTo(buffer, index);index+=2;
             }
             BitConverter.GetBytes(C).CopyTo(buffer, index);index+=1;
-            Encoding.ASCII.GetBytes(S,0,10,buffer,index);index+=10;
+            Encoding.ASCII.GetBytes(S,0,S.Length,buffer,index);index+=10;
             BitConverter.GetBytes(U8).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(S8).CopyTo(buffer, index);index+=1;
-            for(var i=0;i<3;i++)
+            for(var i=0;i<U8Array.Length;i++)
             {
                 buffer[index] = (byte)U8Array[i];index+=1;
             }
-            for(var i=0;i<3;i++)
+            for(var i=0;i<S8Array.Length;i++)
             {
                 buffer[index] = (byte)S8Array[i];index+=1;
             }
-            return /*PayloadByteSize*/179;
+            return index; // /*PayloadByteSize*/179;
         }
 
         /// <summary>
@@ -217,7 +214,8 @@ namespace Asv.Mavlink.V2.Test
         /// uint64_t_array
         /// OriginName: u64_array, Units: , IsExtended: false
         /// </summary>
-        public ulong[] U64Array { get; } = new ulong[3];
+        public ulong[] U64Array { get; set; } = new ulong[3];
+        public byte GetU64ArrayMaxItemsCount() => 3;
         /// <summary>
         /// int64_t_array
         /// OriginName: s64_array, Units: , IsExtended: false
