@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.V2.Common;
+using NLog;
 
 namespace Asv.Mavlink
 {
@@ -43,6 +46,8 @@ namespace Asv.Mavlink
 
     public static class VehicleHelper
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         public static async Task<MavParam> WriteParam(this IVehicle src, string name, float value, CancellationToken cancel)
         {
             MavParam param;
@@ -77,7 +82,7 @@ namespace Asv.Mavlink
         /// <returns></returns>
         public static Task<CommandAckPayload> TakeOff(this IVehicle src, float minimumPitch, float yawAngle, float latitude, float longitude, float altitude, CancellationToken cancel)
         {
-            return src.SendCommand(MavCmd.MavCmdNavTakeoff, minimumPitch, float.NaN, float.NaN, yawAngle, latitude,longitude,altitude,1,cancel);
+            return src.SendCommand(MavCmd.MavCmdNavTakeoff, minimumPitch, float.NaN, float.NaN, yawAngle, latitude,longitude,altitude,3,cancel);
         }
 
         /// <summary>
@@ -109,15 +114,160 @@ namespace Asv.Mavlink
             return src.ArmDisarm(false, cancel);
         }
 
+        /// <summary>
+        /// Reposition the vehicle to a specific WGS84 global position.
+        /// </summary>
+        /// <returns></returns>
+        public static Task<CommandAckPayload> GoTo(this IVehicle src, float groundSpeed, GeoPoint newPosition , CancellationToken cancel)
+        {
+            return src.GoTo(groundSpeed,true,-1,(float) newPosition.Latitude,(float) newPosition.Longitude,(float) newPosition.Altitude.Value,cancel);
+        }
+
+        public static async Task GoToAndWait(this IVehicle vehicle, GeoPoint geoPoint, double velocity, double precisionMet, int checkTimeMs, CancellationToken cancel, IProgress<double> progress)
+        {
+            progress = progress ?? new Progress<double>();
+            var startLocation = vehicle.Gps.Value;
+            var startDistance = GeoMath.Distance(geoPoint, startLocation);
+
+            Logger.Info("GoToAndWait {0} with V={1:F1} m/sec and precision {2:F1} m. Distance to target {3:F1}", geoPoint, velocity, precisionMet, startDistance);
+            progress.Report(0);
+            if (startDistance <= precisionMet)
+            {
+                Logger.Debug("Already in target, nothing to do", startLocation);
+                progress.Report(1);
+                return;
+            }
+
+            var sw = new Stopwatch();
+            sw.Start();
+            Logger.Debug("Send command GoTo to vehicle", startLocation);
+            await vehicle.GoTo((float) velocity, geoPoint, cancel).ConfigureAwait(false);
+            double dist = 0;
+            while (!cancel.IsCancellationRequested)
+            {
+                var loc = vehicle.Gps.Value;
+                dist = Math.Abs(GeoMath.Distance(geoPoint, loc));
+                var prog = 1 - dist / startDistance;
+                Logger.Trace("Distance to target {0:F1}, location: {1}, progress {2:P2}", dist, loc, prog);
+                progress.Report(prog);
+                if (dist <= precisionMet) break;
+                await Task.Delay(checkTimeMs, cancel).ConfigureAwait(false);
+            }
+            sw.Stop();
+            Logger.Info($"Complete {sw.Elapsed:hh\\:mm\\:ss} location error {dist:F1} m");
+            progress.Report(1);
+        }
 
         /// <summary>
         /// Reposition the vehicle to a specific WGS84 global position.
         /// </summary>
         /// <returns></returns>
-        public static Task<CommandAckPayload> DoReposition(this IVehicle src, float groundSpeed,bool switchToGuided, float yaw, float lat,float lon,float alt, CancellationToken cancel)
+        public static Task<CommandAckPayload> GoTo(this IVehicle src, float groundSpeed,bool switchToGuided, float yaw, float lat,float lon,float alt, CancellationToken cancel)
         {
             return src.SendCommand(MavCmd.MavCmdDoReposition, groundSpeed, switchToGuided ? (float)MavDoRepositionFlags.MavDoRepositionFlagsChangeMode : 0,float.NaN,yaw,lat,lon,alt,1,cancel);
         }
 
+        public static async Task MoveUp(this IVehicle vehicle, double moveDistance, double moveVelocity, CancellationToken cancel)
+        {
+            var loc = vehicle.Gps.Value;
+            loc = loc.AddAltitude(moveDistance);
+            await vehicle.GoTo((float) moveVelocity,loc, cancel);
+        }
+
+        public static async Task MoveDown(this IVehicle vehicle, double moveDistance, double moveVelocity, CancellationToken cancel)
+        {
+            var loc = vehicle.Gps.Value;
+            loc = loc.AddAltitude(-moveDistance);
+            await vehicle.GoTo((float) moveVelocity,loc, cancel);
+        }
+
+        public static Task MoveN(this IVehicle vehicle, double moveDistance, double moveVelocity, CancellationToken cancel)
+        {
+            return MoveRadial(vehicle, moveDistance, moveVelocity, 0, cancel);
+        }
+
+        public static Task MoveE(this IVehicle vehicle, double moveDistance, double moveVelocity, CancellationToken cancel)
+        {
+            return MoveRadial(vehicle, moveDistance, moveVelocity, 90, cancel);
+        }
+
+        public static Task MoveW(this IVehicle vehicle, double moveDistance, double moveVelocity, CancellationToken cancel)
+        {
+            return MoveRadial(vehicle, moveDistance, moveVelocity, 270, cancel);
+        }
+
+        public static Task MoveS(this IVehicle vehicle, double moveDistance, double moveVelocity, CancellationToken cancel)
+        {
+            return MoveRadial(vehicle, moveDistance, moveVelocity, 180, cancel);
+        }
+
+        private static async Task MoveRadial(IVehicle vehicle, double moveDistance, double moveVelocity, int radial, CancellationToken cancel)
+        {
+            var loc = vehicle.Gps.Value;
+            var alt = loc.Altitude ?? 0;
+            loc = GeoMath.RadialPoint(loc.Latitude, loc.Longitude, moveDistance, radial);
+            loc = loc.AddAltitude(alt);
+            await vehicle.GoTo((float) moveVelocity, loc, cancel).ConfigureAwait(false);
+        }
+
+        public static async Task GoToSmooth(this IVehicle drone,  GeoPoint geoPoint, double velocity, double precisionMet, int checkTimeMs, CancellationToken cancel, IProgress<double> progress)
+        {
+            const double Magic1 = 4;
+            const double Magic2 = 3;
+
+            progress = progress ?? new Progress<double>();
+            var startLocation = drone.Gps.Value;
+            var startDistance = GeoMath.Distance(geoPoint, startLocation);
+
+            Logger.Info("GoToSmooth: '({0}) with V={1:F1} m/sec and precision {2:F2} m. Distance to target {3:F1}",  geoPoint, velocity, precisionMet, startDistance);
+
+            progress.Report(0);
+            if (startDistance <= precisionMet)
+            {
+                Logger.Debug("Already in target, nothing to do", startLocation);
+                progress.Report(1);
+                return;
+            }
+
+            var stepCount = (int)(startDistance / (velocity * Magic1));
+            var path = GeoMath.SplitIntoGeoPoints(startLocation, geoPoint, stepCount).ToArray();
+
+
+            if (path.Length == 1)
+            {
+                Logger.Debug($"GoToSmooth: split path into '{path.Length}' points => just going to target point");
+                await drone.GoTo((float) velocity, geoPoint, cancel).ConfigureAwait(false);
+            }
+            else
+            {
+                Logger.Debug($"GoToSmooth: split path into '{path.Length}' points => start point to point moving");
+
+                // skip first point, it's start point
+                for (int i = 1; i < path.Length; i++)
+                {
+                    Logger.Debug($"GoToSmooth: move to {i} from {path.Length} point: {path[i]}");
+                    await drone.GoTo((float) velocity, path[i], cancel).ConfigureAwait(false);
+
+                    while (true)
+                    {
+                        var loc = drone.Gps.Value;
+                        var groundVel = drone.RawVfrHud.Value.Groundspeed;
+                        var localDist = GeoMath.Distance(path[i], loc);
+                        var globalDist = GeoMath.Distance(geoPoint, loc);
+                        var prog = Math.Abs(1 - globalDist / startDistance);
+                        Logger.Trace("GoToSmooth: distance to target {0:F1}, location: {1}, progress {2:P2}", globalDist, loc, prog);
+                        progress.Report(prog);
+                        var maxDistanceToNextPoint = groundVel * Magic2;
+                        if (localDist <= maxDistanceToNextPoint)
+                        {
+                            Logger.Debug($"GoToSmooth: local distance to current '{i}' point '{localDist} m' <= '{maxDistanceToNextPoint:F1} m'");
+                            break;
+                        }
+                        await Task.Delay(checkTimeMs, cancel).ConfigureAwait(false);
+                    }
+
+                }
+            }
+        }
     }
 }

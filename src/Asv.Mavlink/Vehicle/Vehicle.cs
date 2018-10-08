@@ -342,7 +342,8 @@ namespace Asv.Mavlink
                 .Subscribe(_sysStatus, DisposeCancel.Token);
             InputPackets
                 .Where(_ => _.MessageId == StatustextPacket.PacketMessageId)
-                .Cast<StatustextPayload>()
+                .Cast<StatustextPacket>()
+                .Select(_ => _.Payload)
                 .Subscribe(_statusText, DisposeCancel.Token);
 
             DisposeCancel.Token.Register(() => _sysStatus.Dispose());
@@ -355,6 +356,7 @@ namespace Asv.Mavlink
                 .Select(_ => 1)
                 .Buffer(TimeSpan.FromSeconds(1))
                 .Select(_ => _.Sum()).Subscribe(_packetRate, DisposeCancel.Token);
+            DisposeCancel.Token.Register(() => _packetRate.Dispose());
         }
 
         private void HandleHeartbeat(VehicleConfig config)
@@ -390,6 +392,7 @@ namespace Asv.Mavlink
             _lastHearteat = DateTime.Now;
             _link.Upgrade();
             _heartBeat.OnNext(heartbeatPacket.Payload);
+            DisposeCancel.Token.Register(() => _heartBeat.Dispose());
         }
 
         public async Task ReadAllParams(CancellationToken cancel, IProgress<double> progress = null)
@@ -430,10 +433,15 @@ namespace Asv.Mavlink
                     ParamIndex = -1,
                 }
             };
-            var t = OnParamUpdated.FirstAsync(_ => _.Name == name).RunAsync(cancel);
+            var t = Task.Run(() => OnParamUpdated.FirstAsync(_ => _.Name == name).Wait(), cancel);
+            // we need start listen before send request
+            while (t.Status == TaskStatus.WaitingForActivation)
+            {
+                await Task.Delay(TaskStartDelayMs, cancel);
+            }
             await _mavlinkConnection.Send(packet, cancel).ConfigureAwait(false);
-            await t.GetAwaiter();
-            return t.GetResult();
+            await t.ConfigureAwait(false);
+            return t.Result;
         }
 
         public async Task<MavParam> ReadParam(short index, CancellationToken cancel)
@@ -454,10 +462,15 @@ namespace Asv.Mavlink
             using (var timeoutCancel = new CancellationTokenSource(_config.ReadParamTimeoutMs))
             using (var linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, timeoutCancel.Token))
             {
-                var t = OnParamUpdated.FirstAsync(_ => _.Index == index).RunAsync(linkedCancel.Token);
+                var t = Task.Run(()=>OnParamUpdated.FirstAsync(_ => _.Index == index).Wait(),linkedCancel.Token);
                 await _mavlinkConnection.Send(packet, linkedCancel.Token).ConfigureAwait(false);
-                await t.GetAwaiter();
-                return t.GetResult();
+                // we need start listen before send request
+                while (t.Status == TaskStatus.WaitingForActivation)
+                {
+                    await Task.Delay(TaskStartDelayMs, linkedCancel.Token);
+                }
+                await t.ConfigureAwait(false);
+                return t.Result;
             }
         }
 
@@ -480,7 +493,12 @@ namespace Asv.Mavlink
             using (var timeoutCancel = new CancellationTokenSource(_config.ReadParamTimeoutMs))
             using (var linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, timeoutCancel.Token))
             {
-                var t = OnParamUpdated.Where(_ => _.Name == param.Name).Take(1).ToTask(linkedCancel.Token);
+                var t = Task.Run(() => OnParamUpdated.FirstAsync(_ => _.Name == param.Name).Wait(), linkedCancel.Token);
+                // we need start listen before send request
+                while (t.Status == TaskStatus.WaitingForActivation)
+                {
+                    await Task.Delay(TaskStartDelayMs, linkedCancel.Token);
+                }
                 await _mavlinkConnection.Send(packet, linkedCancel.Token).ConfigureAwait(false);
                 await t.ConfigureAwait(false);
                 return t.Result;
@@ -559,14 +577,17 @@ namespace Asv.Mavlink
                 {
                     try
                     {
-                        var resultTask = InputPackets
-                            .Where(_ => _.MessageId == CommandAckPacket.PacketMessageId)
-                            .Cast<CommandAckPacket>()
-                            .Where(_ => _.Payload.TargetComponent == _config.ComponentId)
-                            .Where(_ => _.Payload.TargetSystem == _config.SystemId)
-                            .Take(1).RunAsync(linkedCancel.Token);
+                        var t = Task.Run(() => InputPackets                                     .Where(_ => _.MessageId == CommandAckPacket.PacketMessageId)
+                                     .Cast<CommandAckPacket>()
+                                     .FirstAsync(_ => _.Payload.TargetComponent == _config.ComponentId &&
+                                                      _.Payload.TargetSystem == _config.SystemId).Wait(),linkedCancel.Token);
+                        // we need start listen before send request
+                        while (t.Status == TaskStatus.WaitingForActivation)
+                        {
+                            await Task.Delay(TaskStartDelayMs, linkedCancel.Token);
+                        }
                         await _mavlinkConnection.Send(packet, cancel).ConfigureAwait(false);
-                        result = await resultTask.GetAwaiter();
+                        result = await t;
                         break;
                     }
                     catch (TaskCanceledException)
@@ -579,14 +600,11 @@ namespace Asv.Mavlink
                 }
             }
             if (result == null) throw new TimeoutException(string.Format("Timeout to execute command '{0:G}' with '{1}' attempts (timeout {1} times by {2:g} )", command, currentAttept,TimeSpan.FromMilliseconds(_config.CommandTimeoutMs)));
-            return result?.Payload;
+            return result.Payload;
         }
 
         public void Dispose()
         {
-            
-            _heartBeat.Dispose();
-            _packetRate.Dispose();
             _link.Dispose();
             _port?.Dispose();
             _ts?.Dispose();
