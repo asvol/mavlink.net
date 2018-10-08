@@ -54,6 +54,7 @@ namespace Asv.Mavlink
         private readonly RxValue<ExtendedSysStatePayload> _extendedSysState = new RxValue<ExtendedSysStatePayload>();
         private readonly RxValue<HomePositionPayload> _home = new RxValue<HomePositionPayload>();
         private readonly RxValue<GeoPoint> _homePos = new RxValue<GeoPoint>();
+        private readonly RxValue<StatustextPayload> _statusText = new RxValue<StatustextPayload>();
 
         private readonly ConcurrentDictionary<string, MavParam> _params = new ConcurrentDictionary<string, MavParam>();
         private readonly Subject<MavParam> _paramUpdated = new Subject<MavParam>();
@@ -103,6 +104,7 @@ namespace Asv.Mavlink
         public IRxValue<VfrHudPayload> RawVfrHud => _vfrHud;
         public IRxValue<GeoPoint> Gps => _gps;
         public IRxValue<HomePositionPayload> RawHome => _home;
+        public IRxValue<StatustextPayload> RawStatusText => _statusText;
         public IReadOnlyDictionary<string, MavParam> Params => _params;
         public IRxValue<int?> ParamsCount => _paramsCount;
         public IObservable<MavParam> OnParamUpdated => _paramUpdated;
@@ -338,7 +340,13 @@ namespace Asv.Mavlink
                 .Cast<SysStatusPacket>()
                 .Select(_ => _.Payload)
                 .Subscribe(_sysStatus, DisposeCancel.Token);
+            InputPackets
+                .Where(_ => _.MessageId == StatustextPacket.PacketMessageId)
+                .Cast<StatustextPayload>()
+                .Subscribe(_statusText, DisposeCancel.Token);
+
             DisposeCancel.Token.Register(() => _sysStatus.Dispose());
+            DisposeCancel.Token.Register(() => _statusText.Dispose());
         }
 
         private void HandleStatistic()
@@ -422,10 +430,10 @@ namespace Asv.Mavlink
                     ParamIndex = -1,
                 }
             };
-            var t = OnParamUpdated.FirstAsync(_ => _.Name == name).ToTask(cancel);
+            var t = OnParamUpdated.FirstAsync(_ => _.Name == name).RunAsync(cancel);
             await _mavlinkConnection.Send(packet, cancel).ConfigureAwait(false);
-            await t.ConfigureAwait(false);
-            return t.Result;
+            await t.GetAwaiter();
+            return t.GetResult();
         }
 
         public async Task<MavParam> ReadParam(short index, CancellationToken cancel)
@@ -446,10 +454,10 @@ namespace Asv.Mavlink
             using (var timeoutCancel = new CancellationTokenSource(_config.ReadParamTimeoutMs))
             using (var linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, timeoutCancel.Token))
             {
-                var t = OnParamUpdated.FirstAsync(_ => _.Index == index).ToTask(linkedCancel.Token);
+                var t = OnParamUpdated.FirstAsync(_ => _.Index == index).RunAsync(linkedCancel.Token);
                 await _mavlinkConnection.Send(packet, linkedCancel.Token).ConfigureAwait(false);
-                await t.ConfigureAwait(false);
-                return t.Result;
+                await t.GetAwaiter();
+                return t.GetResult();
             }
         }
 
@@ -556,10 +564,9 @@ namespace Asv.Mavlink
                             .Cast<CommandAckPacket>()
                             .Where(_ => _.Payload.TargetComponent == _config.ComponentId)
                             .Where(_ => _.Payload.TargetSystem == _config.SystemId)
-                            .Take(1)
-                            .ToTask(linkedCancel.Token);
+                            .Take(1).RunAsync(linkedCancel.Token);
                         await _mavlinkConnection.Send(packet, cancel).ConfigureAwait(false);
-                        result = await resultTask.ConfigureAwait(false);
+                        result = await resultTask.GetAwaiter();
                         break;
                     }
                     catch (TaskCanceledException)
@@ -571,6 +578,7 @@ namespace Asv.Mavlink
                     }
                 }
             }
+            if (result == null) throw new TimeoutException(string.Format("Timeout to execute command '{0:G}' with '{1}' attempts (timeout {1} times by {2:g} )", command, currentAttept,TimeSpan.FromMilliseconds(_config.CommandTimeoutMs)));
             return result?.Payload;
         }
 

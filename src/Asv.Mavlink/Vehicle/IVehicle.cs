@@ -25,6 +25,7 @@ namespace Asv.Mavlink
         IRxValue<AttitudePayload> RawAttitude { get; }
         IRxValue<VfrHudPayload> RawVfrHud { get; }
         IRxValue<HomePositionPayload> RawHome { get; }
+        IRxValue<StatustextPayload> RawStatusText { get; }
 
         #endregion
 
