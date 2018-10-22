@@ -70,9 +70,12 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dialects\ardupilotmega.cs" />
     <Compile Include="Dialects\DataTypes.cs" />
+    <Compile Include="Dialects\icarous.cs" />
     <Compile Include="Dialects\python_array_test.cs" />
     <Compile Include="Dialects\test.cs" />
+    <Compile Include="Dialects\uAvionix.cs" />
     <Compile Include="Frames\ISerializable.cs" />
     <Compile Include="Tools\GeoMath\Extension.cs" />
     <Compile Include="Tools\GeoMath\GeoMath.cs" />
