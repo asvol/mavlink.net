@@ -66,7 +66,7 @@ namespace Asv.Mavlink.Port
                 while (true)
                 {
                     var bytes = _udp.Receive(ref anyEp);
-                    if (Equals(_endPoint.Address, IPAddress.Any))
+                    if (!Equals(_endPoint.Address, IPAddress.Any) && _lastRecvEndpoint == null)
                     {
                         _lastRecvEndpoint = anyEp;
                         _udp.Connect(_lastRecvEndpoint);

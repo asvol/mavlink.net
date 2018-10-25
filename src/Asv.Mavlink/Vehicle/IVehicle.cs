@@ -210,7 +210,8 @@ namespace Asv.Mavlink
             await vehicle.GoTo((float) moveVelocity, loc, cancel).ConfigureAwait(false);
         }
 
-        public static async Task GoToSmooth(this IVehicle drone,  GeoPoint geoPoint, double velocity, double precisionMet, int checkTimeMs, CancellationToken cancel, IProgress<double> progress)
+        public static async Task GoToSmooth(this IVehicle drone, GeoPoint geoPoint, double velocity,
+            double precisionMet, int checkTimeMs, CancellationToken cancel, IProgress<double> progress)
         {
             const double Magic1 = 4;
             const double Magic2 = 3;
@@ -219,7 +220,8 @@ namespace Asv.Mavlink
             var startLocation = drone.Gps.Value;
             var startDistance = GeoMath.Distance(geoPoint, startLocation);
 
-            Logger.Info("GoToSmooth: '({0}) with V={1:F1} m/sec and precision {2:F2} m. Distance to target {3:F1}",  geoPoint, velocity, precisionMet, startDistance);
+            Logger.Info("GoToSmooth: '({0}) with V={1:F1} m/sec and precision {2:F2} m. Distance to target {3:F1}",
+                geoPoint, velocity, precisionMet, startDistance);
 
             progress.Report(0);
             if (startDistance <= precisionMet)
@@ -229,45 +231,42 @@ namespace Asv.Mavlink
                 return;
             }
 
-            var stepCount = (int)(startDistance / (velocity * Magic1));
+            var stepCount = (int) (startDistance / (velocity * Magic1));
             var path = GeoMath.SplitIntoGeoPoints(startLocation, geoPoint, stepCount).ToArray();
 
 
-            if (path.Length == 1)
-            {
-                Logger.Debug($"GoToSmooth: split path into '{path.Length}' points => just going to target point");
-                await drone.GoTo((float) velocity, geoPoint, cancel).ConfigureAwait(false);
-            }
-            else
-            {
-                Logger.Debug($"GoToSmooth: split path into '{path.Length}' points => start point to point moving");
 
-                // skip first point, it's start point
-                for (int i = 1; i < path.Length; i++)
+
+            Logger.Debug($"GoToSmooth: split path into '{path.Length}' points => start point to point moving");
+
+            // skip first point, it's start point
+            for (int i = 1; i < path.Length; i++)
+            {
+                Logger.Debug($"GoToSmooth: move to {i} from {path.Length} point: {path[i]}");
+                await drone.GoTo((float) velocity, path[i], cancel).ConfigureAwait(false);
+
+                while (true)
                 {
-                    Logger.Debug($"GoToSmooth: move to {i} from {path.Length} point: {path[i]}");
-                    await drone.GoTo((float) velocity, path[i], cancel).ConfigureAwait(false);
-
-                    while (true)
+                    var loc = drone.Gps.Value;
+                    var groundVel = drone.RawVfrHud.Value.Groundspeed;
+                    var localDist = GeoMath.Distance(path[i], loc);
+                    var globalDist = GeoMath.Distance(geoPoint, loc);
+                    var prog = Math.Abs(1 - globalDist / startDistance);
+                    Logger.Trace("GoToSmooth: distance to target {0:F1}, location: {1}, progress {2:P2}", globalDist,
+                        loc, prog);
+                    progress.Report(prog);
+                    var maxDistanceToNextPoint = groundVel * Magic2;
+                    if (localDist <= maxDistanceToNextPoint)
                     {
-                        var loc = drone.Gps.Value;
-                        var groundVel = drone.RawVfrHud.Value.Groundspeed;
-                        var localDist = GeoMath.Distance(path[i], loc);
-                        var globalDist = GeoMath.Distance(geoPoint, loc);
-                        var prog = Math.Abs(1 - globalDist / startDistance);
-                        Logger.Trace("GoToSmooth: distance to target {0:F1}, location: {1}, progress {2:P2}", globalDist, loc, prog);
-                        progress.Report(prog);
-                        var maxDistanceToNextPoint = groundVel * Magic2;
-                        if (localDist <= maxDistanceToNextPoint)
-                        {
-                            Logger.Debug($"GoToSmooth: local distance to current '{i}' point '{localDist} m' <= '{maxDistanceToNextPoint:F1} m'");
-                            break;
-                        }
-                        await Task.Delay(checkTimeMs, cancel).ConfigureAwait(false);
+                        Logger.Debug(
+                            $"GoToSmooth: local distance to current '{i}' point '{localDist} m' <= '{maxDistanceToNextPoint:F1} m'");
+                        break;
                     }
-
+                    await Task.Delay(checkTimeMs, cancel).ConfigureAwait(false);
                 }
+
             }
+
         }
     }
 }

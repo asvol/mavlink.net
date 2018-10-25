@@ -277,7 +277,7 @@ namespace Asv.Mavlink
             
             vAlt /= stepCount;
 
-            for (var i = 1; i < stepCount; i++)
+            for (var i = 0; i <= stepCount; i++)
             {
                 yield return RadialPoint(startLocation,i* dist, a).AddAltitude(vAlt*i);
             }
