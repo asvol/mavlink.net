@@ -6,4 +6,9 @@ namespace Asv.Mavlink
     {
         TValue Value { get; }
     }
+
+    public interface IRxEditableValue<TValue> : IObservable<TValue>
+    {
+        TValue Value { get; set; }
+    }
 }

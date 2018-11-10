@@ -4,12 +4,23 @@ using System.Reactive.Subjects;
 
 namespace Asv.Mavlink
 {
-    public class RxValue<TValue> :IObserver<TValue>, IRxValue<TValue>,IDisposable
+    public class RxValue<TValue> :IObserver<TValue>, IRxEditableValue<TValue>, IRxValue<TValue>,IDisposable
     {
         private readonly Subject<TValue> _subject = new Subject<TValue>();
         private TValue _value;
 
-        public TValue Value => _value;
+        public TValue Value 
+        {
+            get
+            {
+                return _value;
+            }
+            set
+            {
+                _value = value;
+                OnNext(value);
+            }
+        }
 
         public void Dispose()
         {
@@ -41,5 +52,6 @@ namespace Asv.Mavlink
         {
             return Value?.ToString() ?? string.Empty;
         }
+
     }
 }
