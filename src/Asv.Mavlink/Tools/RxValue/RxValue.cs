@@ -30,7 +30,10 @@ namespace Asv.Mavlink
         public void OnNext(TValue value)
         {
             _value = value;
-            _subject.OnNext(value);
+            if (_subject.HasObservers && !_subject.IsDisposed)
+            {
+                _subject.OnNext(value);
+            }
         }
 
         public void OnError(Exception error)
