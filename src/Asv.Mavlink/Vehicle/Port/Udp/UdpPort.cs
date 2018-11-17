@@ -71,8 +71,14 @@ namespace Asv.Mavlink.Port
                         _lastRecvEndpoint = anyEp;
                         _udp.Connect(_lastRecvEndpoint);
                     }
+
                     InternalOnData(bytes);
                 }
+            }
+            catch (SocketException ex)
+            {
+                if (ex.SocketErrorCode == SocketError.Interrupted) return;
+                InternalOnError(ex);
             }
             catch (Exception e)
             {

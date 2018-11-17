@@ -11,6 +11,10 @@ namespace Asv.Mavlink
 {
     public interface IVehicle:IDisposable
     {
+        IRxValue<Exception> PortError {get; }
+        IObservable<DeserizliaePackageException> OnPacketErrors { get; }
+    
+
         IRxValue<LinkState> Link { get; }
         IRxValue<int> PacketRateHz { get; }
         IRxValue<GeoPoint> Gps { get; }

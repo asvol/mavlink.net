@@ -72,8 +72,6 @@ namespace Asv.Mavlink
             _mavlinkConnection = new MavlinkV2Connection(_port, _ => _.RegisterCommonDialect());
             _mavlinkConnection.Port.Enable();
             InputPackets = _mavlinkConnection.Where(FilterVehicle);
-
-
             HandleStatistic();
             HandleHeartbeat(config);
             HandleSystemStatus();
@@ -88,7 +86,8 @@ namespace Asv.Mavlink
             HandleHome();
         }
 
-        
+        public IRxValue<Exception> PortError => _port.Error;
+        public IObservable<DeserizliaePackageException> OnPacketErrors => _mavlinkConnection.DeserizliaePackageErrors;
 
         public IRxValue<LinkState> Link => _link;
         public IRxValue<int> PacketRateHz => _packetRate;
@@ -607,9 +606,10 @@ namespace Asv.Mavlink
         {
             _link.Dispose();
             _port?.Dispose();
-            _ts?.Dispose();
             _mavlinkConnection?.Dispose();
             DisposeCancel.Cancel(false);
+            DisposeCancel.Dispose();
+            _ts?.Dispose();
         }
     }
 }
