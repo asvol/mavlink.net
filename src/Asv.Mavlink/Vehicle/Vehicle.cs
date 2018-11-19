@@ -59,7 +59,8 @@ namespace Asv.Mavlink
         private readonly ConcurrentDictionary<string, MavParam> _params = new ConcurrentDictionary<string, MavParam>();
         private readonly Subject<MavParam> _paramUpdated = new Subject<MavParam>();
         private readonly RxValue<int?> _paramsCount = new RxValue<int?>();
-        
+        private readonly RxValue<bool> _armed = new RxValue<bool>();
+
 
         public Vehicle(VehicleConfig config)
         {
@@ -92,6 +93,7 @@ namespace Asv.Mavlink
         public IRxValue<LinkState> Link => _link;
         public IRxValue<int> PacketRateHz => _packetRate;
         public IRxValue<GeoPoint> Home => _homePos;
+        public IRxValue<bool> Armed => _armed;
         public IRxValue<HeartbeatPayload> RawHeartbeat => _heartBeat;
         public IRxValue<SysStatusPayload> RawSysStatus => _sysStatus;
         public IRxValue<GpsRawIntPayload> RawGpsRawInt => _gpsRawInt;
@@ -391,6 +393,9 @@ namespace Asv.Mavlink
             _lastHearteat = DateTime.Now;
             _link.Upgrade();
             _heartBeat.OnNext(heartbeatPacket.Payload);
+            _armed.OnNext(heartbeatPacket.Payload.BaseMode.HasFlag(MavModeFlag.MavModeFlagSafetyArmed));
+
+            DisposeCancel.Token.Register(() => _armed.Dispose());
             DisposeCancel.Token.Register(() => _heartBeat.Dispose());
         }
 

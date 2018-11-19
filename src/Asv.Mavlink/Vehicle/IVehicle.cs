@@ -19,7 +19,7 @@ namespace Asv.Mavlink
         IRxValue<int> PacketRateHz { get; }
         IRxValue<GeoPoint> Gps { get; }
         IRxValue<GeoPoint> Home { get; }
-
+        IRxValue<bool> Armed { get; }
         #region Raw data
 
         IRxValue<HeartbeatPayload> RawHeartbeat { get; }
