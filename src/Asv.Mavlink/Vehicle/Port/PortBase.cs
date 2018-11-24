@@ -93,7 +93,7 @@ namespace Asv.Mavlink.Port
             {
                 _outputData.OnNext(data);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 
             }

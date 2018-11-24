@@ -151,8 +151,7 @@ namespace Asv.Mavlink
         }
 
         /// <summary>
-        /// Calculates the absolute height between the ground point and the
-        /// point directly under the end of the specified vector.
+        /// Высота точки, при заданном угле подъема и удалении
         /// </summary>
         /// <param name="range">The distance in meters.</param>
         /// <param name="elevation">
@@ -165,8 +164,7 @@ namespace Asv.Mavlink
         }
 
         /// <summary>
-        /// Calculates the absolute height between the ground point and the
-        /// point directly under the end of the specified vector.
+        /// Высота точки, при заданном угле подъема и удалении(по земле)
         /// </summary>
         /// <param name="groundRange">The distance in meters on the ground.</param>
         /// <param name="elevation">
@@ -176,6 +174,29 @@ namespace Asv.Mavlink
         public static double HeightFromGroundRange(double groundRange, double elevation)
         {
             return Math.Abs(Math.Tan(DegreesToRadians(elevation)) * groundRange);
+        }
+
+        /// <summary>
+        /// Находит точку на заданной линии, являющуюся пересечением перпендикуляра опущенного из заданной точки к прямой (высота не учитывается)
+        /// Работает на малых расстояниях (считается, что поверхность плоская)
+        /// </summary>
+        public static GeoPoint IntersectionLineAndPerpendicularFromPoint(GeoPoint lineX, GeoPoint lineY, GeoPoint p)
+        {
+            var azimuth = Azimuth(lineX, lineY) - Azimuth(lineX, p);
+            var d = Distance(lineX, p);
+            var h = Math.Abs(d * Math.Cos(azimuth * Math.PI / 180));
+            return RadialPoint(lineX, h, Azimuth(lineX, lineY));
+        }
+
+        /// <summary>
+        /// Находит кратчайшее расстояние (длина перпендикуляра) между точкой и заданной линией  (высота не учитывается)
+        /// Работает на малых расстояниях (считается, что поверхность плоская)
+        /// </summary>
+        public static double PerpendicularLength(GeoPoint lineX, GeoPoint lineY, GeoPoint p)
+        {
+            var azimuth = Azimuth(lineX, lineY) - Azimuth(lineX, p);
+            var d = Distance(lineX, p);
+            return Math.Abs(d * Math.Sin(azimuth * Math.PI / 180));
         }
 
         /// <summary>

@@ -116,9 +116,14 @@ namespace Asv.Mavlink
             return string.Concat(Latitude, CultureInfo.InvariantCulture.NumberFormat.NumberGroupSeparator, Longitude);
         }
 
-        public GeoPoint AddAltitude(double velocityAlt)
+        public GeoPoint AddAltitude(double alt)
         {
-            return new GeoPoint(Latitude,Longitude,(Altitude ?? 0) + velocityAlt);
+            return new GeoPoint(Latitude,Longitude,(Altitude ?? 0) + alt);
+        }
+
+        public GeoPoint SetAltitude(double alt)
+        {
+            return new GeoPoint(Latitude, Longitude, alt);
         }
 
         public static GeoPoint Parse(string src)
