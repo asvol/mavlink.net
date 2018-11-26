@@ -73,6 +73,21 @@ namespace Asv.Mavlink
 
             return await src.WriteParam(new MavParam(param, value), cancel).ConfigureAwait(false);
         }
+
+        /// <summary>
+        /// Takeoff from ground / hand
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="minimumPitch">Minimum pitch (if airspeed sensor present), desired pitch without sensor</param>
+        /// <param name="yawAngle">Yaw angle (if magnetometer present), ignored without magnetometer. NaN for unchanged.</param>
+        /// <param name="cancel"></param>
+        /// <param name="cancel"></param>
+        /// <returns></returns>
+        public static Task<CommandAckPayload> TakeOff(this IVehicle src, float minimumPitch, float yawAngle, GeoPoint point, CancellationToken cancel)
+        {
+            return src.TakeOff(minimumPitch, yawAngle, (float) point.Latitude, (float) point.Longitude, (float) point.Altitude, cancel);
+        }
+
         /// <summary>
         /// Takeoff from ground / hand
         /// </summary>
@@ -127,6 +142,15 @@ namespace Asv.Mavlink
             return src.GoTo(groundSpeed,true,-1,(float) newPosition.Latitude,(float) newPosition.Longitude,(float) newPosition.Altitude.Value,cancel);
         }
 
+        /// <summary>
+        /// Reposition the vehicle to a specific WGS84 global position. Altitude - relative from home altitude.
+        /// </summary>
+        /// <returns></returns>
+        public static Task<CommandAckPayload> GoToRelative(this IVehicle src, float groundSpeed, GeoPoint newPosition, CancellationToken cancel)
+        {
+            return src.GoTo(groundSpeed, true, -1, (float)newPosition.Latitude, (float)newPosition.Longitude, (float)newPosition.Altitude.Value + (float)src.Home.Value.Altitude, cancel);
+        }
+        
         public static async Task GoToAndWait(this IVehicle vehicle, GeoPoint geoPoint, double velocity, double precisionMet, int checkTimeMs, CancellationToken cancel, IProgress<double> progress)
         {
             progress = progress ?? new Progress<double>();
