@@ -327,7 +327,7 @@ namespace Asv.Mavlink
                 .Cast<GpsRawIntPacket>()
                 .Select(_ => _.Payload);
             s.Subscribe(_gpsRawInt, DisposeCancel.Token);
-            s.Select(_ => new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, _.Alt / 1000D)).Subscribe(_gps,DisposeCancel.Token);
+            s.Select(_ => new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, (_.Alt / 1000D) - Home.Value.Altitude ?? 0)).Subscribe(_gps,DisposeCancel.Token);
 
             DisposeCancel.Token.Register(() => _gpsRawInt.Dispose());
             DisposeCancel.Token.Register(() => _gps.Dispose());
