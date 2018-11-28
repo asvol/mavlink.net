@@ -146,9 +146,9 @@ namespace Asv.Mavlink
         /// Reposition the vehicle to a specific WGS84 global position. Altitude - relative from home altitude.
         /// </summary>
         /// <returns></returns>
-        public static Task<CommandAckPayload> GoToRelative(this IVehicle src, float groundSpeed, GeoPoint newPosition, CancellationToken cancel)
+        public static Task<CommandAckPayload> GoToRelative(this IVehicle src, float groundSpeed, GeoPoint newRelativePosition, CancellationToken cancel)
         {
-            return src.GoTo(groundSpeed, true, -1, (float)newPosition.Latitude, (float)newPosition.Longitude, (float)newPosition.Altitude.Value + (float)src.Home.Value.Altitude, cancel);
+            return src.GoTo(groundSpeed, true, -1, (float)newRelativePosition.Latitude, (float)newRelativePosition.Longitude, (float)newRelativePosition.Altitude.Value + (float)src.Home.Value.Altitude, cancel);
         }
         
         public static async Task GoToAndWait(this IVehicle vehicle, GeoPoint geoPoint, double velocity, double precisionMet, int checkTimeMs, CancellationToken cancel, IProgress<double> progress)
