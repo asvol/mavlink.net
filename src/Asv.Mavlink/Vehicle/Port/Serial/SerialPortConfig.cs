@@ -25,7 +25,7 @@ namespace Asv.Mavlink
             opt = new SerialPortConfig
             {
                 PortName = uri.LocalPath,
-                BoundRate = int.Parse(coll["boundRate"]),
+                BoundRate = int.Parse(coll["br"] ?? "57600"),
                 Parity = (Parity)Enum.Parse(typeof(Parity), coll["parity"] ?? Parity.None.ToString()),
                 DataBits = int.Parse(coll["dataBits"] ?? "8"),
                 StopBits = (StopBits)Enum.Parse(typeof(StopBits), coll["stopBits"] ?? StopBits.One.ToString()),

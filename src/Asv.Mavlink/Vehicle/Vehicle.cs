@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.Port;
 using Asv.Mavlink.V2.Common;
+using NLog;
 
 namespace Asv.Mavlink
 {
@@ -60,7 +61,7 @@ namespace Asv.Mavlink
         private readonly Subject<MavParam> _paramUpdated = new Subject<MavParam>();
         private readonly RxValue<int?> _paramsCount = new RxValue<int?>();
         private readonly RxValue<bool> _armed = new RxValue<bool>();
-
+        protected static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public Vehicle(VehicleConfig config)
         {
@@ -607,14 +608,27 @@ namespace Asv.Mavlink
             return result.Payload;
         }
 
+        public bool IsDisposed { get; private set; }
+
         public void Dispose()
         {
-            _link.Dispose();
-            _port?.Dispose();
-            _mavlinkConnection?.Dispose();
-            DisposeCancel.Cancel(false);
-            DisposeCancel.Dispose();
-            _ts?.Dispose();
+            if (IsDisposed) return;
+            IsDisposed = true;
+            try
+            {
+                _link.Dispose();
+                _port?.Dispose();
+                _mavlinkConnection?.Dispose();
+                DisposeCancel?.Cancel(false);
+                DisposeCancel?.Dispose();
+                _ts?.Dispose();
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e, $"Exeption occured disposing vehicle:{e.Message}");
+            }   
         }
+
+        
     }
 }
