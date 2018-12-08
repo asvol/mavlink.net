@@ -17,7 +17,8 @@ namespace Asv.Mavlink
 
         IRxValue<LinkState> Link { get; }
         IRxValue<int> PacketRateHz { get; }
-        IRxValue<GeoPoint> Gps { get; }
+        IRxValue<GeoPoint> RelGps { get; }
+        IRxValue<GeoPoint> GlobGps { get; }
         IRxValue<GeoPoint> Home { get; }
         IRxValue<bool> Armed { get; }
         #region Raw data
@@ -154,7 +155,7 @@ namespace Asv.Mavlink
         public static async Task GoToAndWait(this IVehicle vehicle, GeoPoint geoPoint, double velocity, double precisionMet, int checkTimeMs, CancellationToken cancel, IProgress<double> progress)
         {
             progress = progress ?? new Progress<double>();
-            var startLocation = vehicle.Gps.Value;
+            var startLocation = vehicle.RelGps.Value;
             var startDistance = GeoMath.Distance(geoPoint, startLocation);
 
             Logger.Info("GoToAndWait {0} with V={1:F1} m/sec and precision {2:F1} m. Distance to target {3:F1}", geoPoint, velocity, precisionMet, startDistance);
@@ -173,7 +174,7 @@ namespace Asv.Mavlink
             double dist = 0;
             while (!cancel.IsCancellationRequested)
             {
-                var loc = vehicle.Gps.Value;
+                var loc = vehicle.RelGps.Value;
                 dist = Math.Abs(GeoMath.Distance(geoPoint, loc));
                 var prog = 1 - dist / startDistance;
                 Logger.Trace("Distance to target {0:F1}, location: {1}, progress {2:P2}", dist, loc, prog);
@@ -192,19 +193,19 @@ namespace Asv.Mavlink
         /// <returns></returns>
         public static Task<CommandAckPayload> GoTo(this IVehicle src, float groundSpeed,bool switchToGuided, float yaw, float lat,float lon,float alt, CancellationToken cancel)
         {
-            return src.SendCommand(MavCmd.MavCmdDoReposition, groundSpeed, switchToGuided ? (float)MavDoRepositionFlags.MavDoRepositionFlagsChangeMode : 0,float.NaN,yaw,lat,lon,alt,1,cancel);
+            return src.SendCommand(MavCmd.MavCmdDoReposition, groundSpeed, switchToGuided ? (float)MavDoRepositionFlags.MavDoRepositionFlagsChangeMode : 0,float.NaN,yaw,lat,lon,alt,3,cancel);
         }
 
         public static async Task MoveUp(this IVehicle vehicle, double moveDistance, double moveVelocity, CancellationToken cancel)
         {
-            var loc = vehicle.Gps.Value;
+            var loc = vehicle.RelGps.Value;
             loc = loc.AddAltitude(moveDistance);
             await vehicle.GoTo((float) moveVelocity,loc, cancel);
         }
 
         public static async Task MoveDown(this IVehicle vehicle, double moveDistance, double moveVelocity, CancellationToken cancel)
         {
-            var loc = vehicle.Gps.Value;
+            var loc = vehicle.RelGps.Value;
             loc = loc.AddAltitude(-moveDistance);
             await vehicle.GoTo((float) moveVelocity,loc, cancel);
         }
@@ -231,7 +232,7 @@ namespace Asv.Mavlink
 
         private static async Task MoveRadial(IVehicle vehicle, double moveDistance, double moveVelocity, int radial, CancellationToken cancel)
         {
-            var loc = vehicle.Gps.Value;
+            var loc = vehicle.RelGps.Value;
             var alt = loc.Altitude ?? 0;
             loc = GeoMath.RadialPoint(loc.Latitude, loc.Longitude, moveDistance, radial);
             loc = loc.AddAltitude(alt);
@@ -245,7 +246,7 @@ namespace Asv.Mavlink
             const double Magic2 = 3;
 
             progress = progress ?? new Progress<double>();
-            var startLocation = drone.Gps.Value;
+            var startLocation = drone.RelGps.Value;
             var startDistance = GeoMath.Distance(geoPoint, startLocation);
 
             Logger.Info("GoToSmooth: '({0}) with V={1:F1} m/sec and precision {2:F2} m. Distance to target {3:F1}",
@@ -275,7 +276,7 @@ namespace Asv.Mavlink
 
                 while (true)
                 {
-                    var loc = drone.Gps.Value;
+                    var loc = drone.RelGps.Value;
                     var groundVel = drone.RawVfrHud.Value.Groundspeed;
                     var localDist = GeoMath.Distance(path[i], loc);
                     var globalDist = GeoMath.Distance(geoPoint, loc);

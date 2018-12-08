@@ -42,7 +42,6 @@ namespace Asv.Mavlink
         private readonly IPort _port;
         private readonly LinkIndicator _link = new LinkIndicator();
         private readonly RxValue<int> _packetRate = new RxValue<int>();
-        private readonly RxValue<GeoPoint> _gps = new RxValue<GeoPoint>();
 
         private readonly RxValue<HeartbeatPayload> _heartBeat = new RxValue<HeartbeatPayload>();
         private readonly RxValue<SysStatusPayload> _sysStatus = new RxValue<SysStatusPayload>();
@@ -62,6 +61,8 @@ namespace Asv.Mavlink
         private readonly RxValue<int?> _paramsCount = new RxValue<int?>();
         private readonly RxValue<bool> _armed = new RxValue<bool>();
         protected static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private readonly RxValue<GeoPoint> _relGps = new RxValue<GeoPoint>();
+        private readonly RxValue<GeoPoint> _globGps = new RxValue<GeoPoint>();
 
         public Vehicle(VehicleConfig config)
         {
@@ -104,7 +105,8 @@ namespace Asv.Mavlink
         public IRxValue<BatteryStatusPayload> RawBatteryStatus => _batteryStatus;
         public IRxValue<AttitudePayload> RawAttitude => _attitude;
         public IRxValue<VfrHudPayload> RawVfrHud => _vfrHud;
-        public IRxValue<GeoPoint> Gps => _gps;
+        public IRxValue<GeoPoint> RelGps => _relGps;
+        public IRxValue<GeoPoint> GlobGps => _globGps;
         public IRxValue<HomePositionPayload> RawHome => _home;
         public IRxValue<StatustextPayload> RawStatusText => _statusText;
         public IReadOnlyDictionary<string, MavParam> Params => _params;
@@ -328,11 +330,13 @@ namespace Asv.Mavlink
                 .Cast<GpsRawIntPacket>()
                 .Select(_ => _.Payload);
             s.Subscribe(_gpsRawInt, DisposeCancel.Token);
-            s.Select(_ => new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, (_.Alt / 1000D) - Home.Value.Altitude ?? 0)).Subscribe(_gps,DisposeCancel.Token);
+            s.Select(_ => new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, (_.Alt / 1000D) - Home.Value.Altitude ?? 0)).Subscribe(_relGps,DisposeCancel.Token);
+            s.Select(_ => new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, _.Alt / 1000D)).Subscribe(_globGps, DisposeCancel.Token);
 
             DisposeCancel.Token.Register(() => _gpsRawInt.Dispose());
-            DisposeCancel.Token.Register(() => _gps.Dispose());
-            
+            DisposeCancel.Token.Register(() => _relGps.Dispose());
+            DisposeCancel.Token.Register(() => _globGps.Dispose());
+
         }
 
         private void HandleSystemStatus()
