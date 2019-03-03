@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.Port;
 using Asv.Mavlink.V2.Common;
+using Nito.AsyncEx;
 using NLog;
 
 namespace Asv.Mavlink
@@ -22,7 +23,7 @@ namespace Asv.Mavlink
         public byte ComponentId { get; set; } = 254;
         public byte TargetSystemId { get; } = 1;
         public byte TargetComponenId { get; } = 1;
-        public int CommandTimeoutMs { get; set; } = 10000;
+        public int CommandTimeoutMs { get; set; } = 1000;
         public int TimeoutToReadAllParamsMs { get; set; } = 10000;
         public int ReadParamTimeoutMs { get; set; } = 10000;
     }
@@ -428,7 +429,7 @@ namespace Asv.Mavlink
             await t.ConfigureAwait(false);
         }
 
-        public async Task<MavParam> ReadParam(string name, CancellationToken cancel)
+        public async Task<MavParam> ReadParam(string name,int attemptCount, CancellationToken cancel)
         {
             var packet = new ParamRequestReadPacket
             {
@@ -442,18 +443,47 @@ namespace Asv.Mavlink
                     ParamIndex = -1,
                 }
             };
-            var t = Task.Run(() => OnParamUpdated.FirstAsync(_ => _.Name == name).Wait(), cancel);
-            // we need start listen before send request
-            while (t.Status == TaskStatus.WaitingForActivation)
+            byte currentAttempt = 0;
+            MavParam result = null;
+            while (currentAttempt < attemptCount)
             {
-                await Task.Delay(TaskStartDelayMs, cancel);
+                ++currentAttempt;
+
+                using (var timeoutCancel = new CancellationTokenSource(_config.ReadParamTimeoutMs))
+                using (var linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, timeoutCancel.Token))
+                {
+                    var eve = new AsyncAutoResetEvent(false);
+                    IDisposable subscribe = null;
+                    try
+                    {
+                        subscribe = OnParamUpdated.FirstAsync(_ => _.Name == name)
+                            .Subscribe(_ =>
+                            {
+                                result = _;
+                                eve.Set();
+                            });
+                        await _mavlinkConnection.Send(packet, linkedCancel.Token).ConfigureAwait(false);
+                        await eve.WaitAsync(linkedCancel.Token);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        if (!timeoutCancel.IsCancellationRequested)
+                        {
+                            throw;
+                        }
+                    }
+                    finally
+                    {
+                        subscribe?.Dispose();
+                    }
+                    return result;
+                }
             }
-            await _mavlinkConnection.Send(packet, cancel).ConfigureAwait(false);
-            await t.ConfigureAwait(false);
-            return t.Result;
+            if (result == null) throw new TimeoutException(string.Format("Timeout to read param '{0}' with '{1}' attempts (timeout {1} times by {2:g} )", name, currentAttempt, TimeSpan.FromMilliseconds(_config.CommandTimeoutMs)));
+            return result;
         }
 
-        public async Task<MavParam> ReadParam(short index, CancellationToken cancel)
+        public async Task<MavParam> ReadParam(short index, int attemptCount, CancellationToken cancel)
         {
             var packet = new ParamRequestReadPacket
             {
@@ -467,23 +497,48 @@ namespace Asv.Mavlink
                     ParamIndex = index,
                 }
             };
-
-            using (var timeoutCancel = new CancellationTokenSource(_config.ReadParamTimeoutMs))
-            using (var linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, timeoutCancel.Token))
+            byte currentAttempt = 0;
+            MavParam result = null;
+            while (currentAttempt < attemptCount)
             {
-                var t = Task.Run(()=>OnParamUpdated.FirstAsync(_ => _.Index == index).Wait(),linkedCancel.Token);
-                await _mavlinkConnection.Send(packet, linkedCancel.Token).ConfigureAwait(false);
-                // we need start listen before send request
-                while (t.Status == TaskStatus.WaitingForActivation)
+                ++currentAttempt;
+
+                using (var timeoutCancel = new CancellationTokenSource(_config.ReadParamTimeoutMs))
+                using (var linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, timeoutCancel.Token))
                 {
-                    await Task.Delay(TaskStartDelayMs, linkedCancel.Token);
+                    var eve = new AsyncAutoResetEvent(false);
+                    IDisposable subscribe = null;
+                    try
+                    {
+                        subscribe = OnParamUpdated.FirstAsync(_ => _.Index == index)
+                            .Subscribe(_ =>
+                            {
+                                result = _;
+                                eve.Set();
+                            } );
+                        await _mavlinkConnection.Send(packet, linkedCancel.Token).ConfigureAwait(false);
+                        await eve.WaitAsync(linkedCancel.Token);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        if (!timeoutCancel.IsCancellationRequested)
+                        {
+                            throw;
+                        }
+                    }
+                    finally
+                    {
+                        subscribe?.Dispose();
+                    }
+                    return result;
                 }
-                await t.ConfigureAwait(false);
-                return t.Result;
             }
+            if (result == null) throw new TimeoutException(string.Format("Timeout to read param with index '{0}' with '{1}' attempts (timeout {1} times by {2:g} )", index, currentAttempt, TimeSpan.FromMilliseconds(_config.CommandTimeoutMs)));
+            return result;
         }
 
-        public async Task<MavParam> WriteParam(MavParam param, CancellationToken cancel)
+
+        public async Task<MavParam> WriteParam(MavParam param, int attemptCount, CancellationToken cancel)
         {
             var packet = new ParamSetPacket()
             {
@@ -499,19 +554,47 @@ namespace Asv.Mavlink
                 }
             };
 
-            using (var timeoutCancel = new CancellationTokenSource(_config.ReadParamTimeoutMs))
-            using (var linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, timeoutCancel.Token))
+            byte currentAttempt = 0;
+            MavParam result = null;
+            while (currentAttempt < attemptCount)
             {
-                var t = Task.Run(() => OnParamUpdated.FirstAsync(_ => _.Name == param.Name).Wait(), linkedCancel.Token);
-                // we need start listen before send request
-                while (t.Status == TaskStatus.WaitingForActivation)
+                ++currentAttempt;
+
+                using (var timeoutCancel = new CancellationTokenSource(_config.ReadParamTimeoutMs))
+                using (var linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, timeoutCancel.Token))
                 {
-                    await Task.Delay(TaskStartDelayMs, linkedCancel.Token);
+                    var eve = new AsyncAutoResetEvent(false);
+                    IDisposable subscribe = null;
+                    try
+                    {
+                        subscribe = OnParamUpdated.FirstAsync(_ => _.Name == param.Name).Subscribe(_ =>
+                        {
+                            result = _;
+                            eve.Set();
+                        });
+                        await _mavlinkConnection.Send(packet, linkedCancel.Token).ConfigureAwait(false);
+                        await eve.WaitAsync(linkedCancel.Token);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        if (!timeoutCancel.IsCancellationRequested)
+                        {
+                            throw;
+                        }
+                    }
+                    finally
+                    {
+                        subscribe?.Dispose();
+                    }
+                    return result;
                 }
-                await _mavlinkConnection.Send(packet, linkedCancel.Token).ConfigureAwait(false);
-                await t.ConfigureAwait(false);
-                return t.Result;
+
             }
+
+            if (result == null) throw new TimeoutException(string.Format("Timeout to write param '{0}' with '{1}' attempts (timeout {1} times by {2:g} )", param.Name, currentAttempt, TimeSpan.FromMilliseconds(_config.CommandTimeoutMs)));
+            return result;
+
+
         }
 
         private void InternalReadParams(IProgress<double> progress)
@@ -584,19 +667,20 @@ namespace Asv.Mavlink
                 using (var timeoutCancel = new CancellationTokenSource(_config.CommandTimeoutMs))
                 using (var linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, timeoutCancel.Token))
                 {
+                    IDisposable subscribe = null;
                     try
                     {
-                        var t = Task.Run(() => InputPackets                                     .Where(_ => _.MessageId == CommandAckPacket.PacketMessageId)
-                                     .Cast<CommandAckPacket>()
-                                     .FirstAsync(_ => _.Payload.TargetComponent == _config.ComponentId &&
-                                                      _.Payload.TargetSystem == _config.SystemId).Wait(),linkedCancel.Token);
-                        // we need start listen before send request
-                        while (t.Status == TaskStatus.WaitingForActivation)
-                        {
-                            await Task.Delay(TaskStartDelayMs, linkedCancel.Token);
-                        }
-                        await _mavlinkConnection.Send(packet, cancel).ConfigureAwait(false);
-                        result = await t;
+                        var eve = new AsyncAutoResetEvent(false);
+                        subscribe = InputPackets.Where(_ => _.MessageId == CommandAckPacket.PacketMessageId)
+                            .Cast<CommandAckPacket>()
+                            .FirstAsync(_ => _.Payload.TargetComponent == _config.ComponentId &&
+                                             _.Payload.TargetSystem == _config.SystemId).Subscribe(_ =>
+                            {
+                                result = _;
+                                eve.Set();
+                            });
+                        await _mavlinkConnection.Send(packet, linkedCancel.Token).ConfigureAwait(false);
+                        await eve.WaitAsync(linkedCancel.Token);
                         break;
                     }
                     catch (TaskCanceledException)
@@ -605,6 +689,10 @@ namespace Asv.Mavlink
                         {
                             throw;
                         }
+                    }
+                    finally
+                    {
+                        subscribe?.Dispose();
                     }
                 }
             }
