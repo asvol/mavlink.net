@@ -91,7 +91,7 @@ namespace Asv.Mavlink
         }
 
         public IRxValue<Exception> PortError => _port.Error;
-        public IObservable<DeserizliaePackageException> OnPacketErrors => _mavlinkConnection.DeserizliaePackageErrors;
+        public IObservable<DeserizliaePackageException> OnPacketErrors => _mavlinkConnection.DeserializePackageErrors;
 
         public IRxValue<LinkState> Link => _link;
         public IRxValue<int> PacketRateHz => _packetRate;
@@ -443,6 +443,7 @@ namespace Asv.Mavlink
                     ParamIndex = -1,
                 }
             };
+
             byte currentAttempt = 0;
             MavParam result = null;
             while (currentAttempt < attemptCount)
@@ -559,7 +560,6 @@ namespace Asv.Mavlink
             while (currentAttempt < attemptCount)
             {
                 ++currentAttempt;
-
                 using (var timeoutCancel = new CancellationTokenSource(_config.ReadParamTimeoutMs))
                 using (var linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, timeoutCancel.Token))
                 {
@@ -636,6 +636,38 @@ namespace Asv.Mavlink
             return new string(payload.ParamId.Where(_ => _ != '\0').ToArray());
         }
 
+        public async Task SetPositionTargetLocalNed(uint timeBootMs, MavFrame coordinateFrame, PositionTargetTypemask typeMask, float x,
+            float y, float z, float vx, float vy, float vz, float afx, float afy, float afz, float yaw, float yawRate,
+            CancellationToken cancel)
+        {
+            var packet = new SetPositionTargetLocalNedPacket
+            {
+                ComponenId = _config.ComponentId,
+                SystemId = _config.SystemId,
+                Payload =
+                {
+                    TimeBootMs = timeBootMs,
+                    TargetComponent = _config.TargetComponenId,
+                    TargetSystem = _config.TargetSystemId,
+                    CoordinateFrame = coordinateFrame,
+                    TypeMask = typeMask,
+                    X = x,
+                    Y=y,
+                    Z=z,
+                    Vx = vx,
+                    Vy = vy,
+                    Vz=vz,
+                    Afx = afx,
+                    Afy=afy,
+                    Afz=afz,
+                    Yaw=yaw,
+                    YawRate = yawRate,
+
+                }
+            };
+            await _mavlinkConnection.Send(packet, cancel).ConfigureAwait(false);
+        }
+
         public async Task<CommandAckPayload> SendCommand(MavCmd command, float param1, float param2, float param3, float param4, float param5, float param6, float param7, int atteptCount, CancellationToken cancel)
         {
             var packet = new CommandLongPacket
@@ -681,6 +713,7 @@ namespace Asv.Mavlink
                             });
                         await _mavlinkConnection.Send(packet, linkedCancel.Token).ConfigureAwait(false);
                         await eve.WaitAsync(linkedCancel.Token);
+
                         break;
                     }
                     catch (TaskCanceledException)

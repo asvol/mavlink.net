@@ -495,12 +495,12 @@ namespace Asv.Mavlink.V2.Uavionix
         /// </summary>
         public int Gpslon { get; set; }
         /// <summary>
-        /// Altitude in mm (m * 1E-3) UP +ve. WGS84 altitude. If unknown set to INT32_MAX
+        /// Altitude (WGS84). UP +ve. If unknown set to INT32_MAX
         /// OriginName: gpsAlt, Units: mm, IsExtended: false
         /// </summary>
         public int Gpsalt { get; set; }
         /// <summary>
-        /// Barometric pressure altitude relative to a standard atmosphere of 1013.2 mBar and NOT bar corrected altitude (m * 1E-3). (up +ve). If unknown set to INT32_MAX
+        /// Barometric pressure altitude (MSL) relative to a standard atmosphere of 1013.2 mBar and NOT bar corrected altitude (m * 1E-3). (up +ve). If unknown set to INT32_MAX
         /// OriginName: baroAltMSL, Units: mbar, IsExtended: false
         /// </summary>
         public int Baroaltmsl { get; set; }

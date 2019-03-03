@@ -183,7 +183,7 @@ namespace Asv.Mavlink.V2.Common
             src.Register(()=>new LoggingDataAckedPacket());
             src.Register(()=>new LoggingAckPacket());
             src.Register(()=>new VideoStreamInformationPacket());
-            src.Register(()=>new SetVideoStreamSettingsPacket());
+            src.Register(()=>new VideoStreamStatusPacket());
             src.Register(()=>new WifiConfigApPacket());
             src.Register(()=>new ProtocolVersionPacket());
             src.Register(()=>new UavcanNodeStatusPacket());
@@ -195,7 +195,14 @@ namespace Asv.Mavlink.V2.Common
             src.Register(()=>new ParamExtAckPacket());
             src.Register(()=>new ObstacleDistancePacket());
             src.Register(()=>new OdometryPacket());
-            src.Register(()=>new TrajectoryPacket());
+            src.Register(()=>new TrajectoryRepresentationWaypointsPacket());
+            src.Register(()=>new TrajectoryRepresentationBezierPacket());
+            src.Register(()=>new CellularStatusPacket());
+            src.Register(()=>new UtmGlobalPositionPacket());
+            src.Register(()=>new DebugFloatArrayPacket());
+            src.Register(()=>new OrbitExecutionStatusPacket());
+            src.Register(()=>new StatustextLongPacket());
+            src.Register(()=>new WheelDistancePacket());
         }
     }
 
@@ -223,7 +230,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavAutopilotSlugs = 2,
         /// <summary>
-        /// ArduPilotMega / ArduCopter, http://diydrones.com
+        /// ArduPilot - Plane/Copter/Rover/Sub/Tracker, http://ardupilot.org
         /// MAV_AUTOPILOT_ARDUPILOTMEGA
         /// </summary>
         MavAutopilotArdupilotmega = 3,
@@ -268,7 +275,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavAutopilotFp = 11,
         /// <summary>
-        /// PX4 Autopilot - http://pixhawk.ethz.ch/px4/
+        /// PX4 Autopilot - http://px4.io/
         /// MAV_AUTOPILOT_PX4
         /// </summary>
         MavAutopilotPx4 = 12,
@@ -310,6 +317,7 @@ namespace Asv.Mavlink.V2.Common
     }
 
     /// <summary>
+    /// MAVLINK system type. All components in a system should report this type in their HEARTBEAT.
     ///  MAV_TYPE
     /// </summary>
     public enum MavType
@@ -445,12 +453,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavTypeVtolReserved5 = 25,
         /// <summary>
-        /// Onboard gimbal
+        /// Gimbal (standalone)
         /// MAV_TYPE_GIMBAL
         /// </summary>
         MavTypeGimbal = 26,
         /// <summary>
-        /// Onboard ADSB peripheral
+        /// ADSB system (standalone)
         /// MAV_TYPE_ADSB
         /// </summary>
         MavTypeAdsb = 27,
@@ -465,7 +473,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavTypeDodecarotor = 29,
         /// <summary>
-        /// Camera
+        /// Camera (standalone)
         /// MAV_TYPE_CAMERA
         /// </summary>
         MavTypeCamera = 30,
@@ -475,7 +483,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavTypeChargingStation = 31,
         /// <summary>
-        /// Onboard FLARM collision avoidance system
+        /// FLARM collision avoidance system (standalone)
         /// MAV_TYPE_FLARM
         /// </summary>
         MavTypeFlarm = 32,
@@ -833,207 +841,215 @@ namespace Asv.Mavlink.V2.Common
     }
 
     /// <summary>
+    /// Component ids (values) for the different types and instances of onboard hardware/software that might make up a MAVLink system (autopilot, cameras, servos, GPS systems, avoidance systems etc.). 
+    ///       Components must use the appropriate ID in their source address when sending messages. Components can also use IDs to determine if they are the intended recipient of an incoming message. The MAV_COMP_ID_ALL value is used to indicate messages that must be processed by all components.
+    ///       When creating new entries, components that can have multiple instances (e.g. cameras, servos etc.) should be allocated sequential values. An appropriate number of values should be left free after these components to allow the number of instances to be expanded.
     ///  MAV_COMPONENT
     /// </summary>
     public enum MavComponent
     {
         /// <summary>
-        /// 
+        /// Used to broadcast messages to all components of the receiving system. Components should attempt to process messages with this component ID and forward to components on any other interfaces.
         /// MAV_COMP_ID_ALL
         /// </summary>
         MavCompIdAll = 0,
         /// <summary>
-        /// 
+        /// System flight controller component ("autopilot"). Only one autopilot is expected in a particular system.
         /// MAV_COMP_ID_AUTOPILOT1
         /// </summary>
         MavCompIdAutopilot1 = 1,
         /// <summary>
-        /// 
+        /// Camera #1.
         /// MAV_COMP_ID_CAMERA
         /// </summary>
         MavCompIdCamera = 100,
         /// <summary>
-        /// 
+        /// Camera #2.
         /// MAV_COMP_ID_CAMERA2
         /// </summary>
         MavCompIdCamera2 = 101,
         /// <summary>
-        /// 
+        /// Camera #3.
         /// MAV_COMP_ID_CAMERA3
         /// </summary>
         MavCompIdCamera3 = 102,
         /// <summary>
-        /// 
+        /// Camera #4.
         /// MAV_COMP_ID_CAMERA4
         /// </summary>
         MavCompIdCamera4 = 103,
         /// <summary>
-        /// 
+        /// Camera #5.
         /// MAV_COMP_ID_CAMERA5
         /// </summary>
         MavCompIdCamera5 = 104,
         /// <summary>
-        /// 
+        /// Camera #6.
         /// MAV_COMP_ID_CAMERA6
         /// </summary>
         MavCompIdCamera6 = 105,
         /// <summary>
-        /// 
+        /// Servo #1.
         /// MAV_COMP_ID_SERVO1
         /// </summary>
         MavCompIdServo1 = 140,
         /// <summary>
-        /// 
+        /// Servo #2.
         /// MAV_COMP_ID_SERVO2
         /// </summary>
         MavCompIdServo2 = 141,
         /// <summary>
-        /// 
+        /// Servo #3.
         /// MAV_COMP_ID_SERVO3
         /// </summary>
         MavCompIdServo3 = 142,
         /// <summary>
-        /// 
+        /// Servo #4.
         /// MAV_COMP_ID_SERVO4
         /// </summary>
         MavCompIdServo4 = 143,
         /// <summary>
-        /// 
+        /// Servo #5.
         /// MAV_COMP_ID_SERVO5
         /// </summary>
         MavCompIdServo5 = 144,
         /// <summary>
-        /// 
+        /// Servo #6.
         /// MAV_COMP_ID_SERVO6
         /// </summary>
         MavCompIdServo6 = 145,
         /// <summary>
-        /// 
+        /// Servo #7.
         /// MAV_COMP_ID_SERVO7
         /// </summary>
         MavCompIdServo7 = 146,
         /// <summary>
-        /// 
+        /// Servo #8.
         /// MAV_COMP_ID_SERVO8
         /// </summary>
         MavCompIdServo8 = 147,
         /// <summary>
-        /// 
+        /// Servo #9.
         /// MAV_COMP_ID_SERVO9
         /// </summary>
         MavCompIdServo9 = 148,
         /// <summary>
-        /// 
+        /// Servo #10.
         /// MAV_COMP_ID_SERVO10
         /// </summary>
         MavCompIdServo10 = 149,
         /// <summary>
-        /// 
+        /// Servo #11.
         /// MAV_COMP_ID_SERVO11
         /// </summary>
         MavCompIdServo11 = 150,
         /// <summary>
-        /// 
+        /// Servo #12.
         /// MAV_COMP_ID_SERVO12
         /// </summary>
         MavCompIdServo12 = 151,
         /// <summary>
-        /// 
+        /// Servo #13.
         /// MAV_COMP_ID_SERVO13
         /// </summary>
         MavCompIdServo13 = 152,
         /// <summary>
-        /// 
+        /// Servo #14.
         /// MAV_COMP_ID_SERVO14
         /// </summary>
         MavCompIdServo14 = 153,
         /// <summary>
-        /// 
+        /// Gimbal component.
         /// MAV_COMP_ID_GIMBAL
         /// </summary>
         MavCompIdGimbal = 154,
         /// <summary>
-        /// 
+        /// Logging component.
         /// MAV_COMP_ID_LOG
         /// </summary>
         MavCompIdLog = 155,
         /// <summary>
-        /// 
+        /// Automatic Dependent Surveillance-Broadcast (ADS-B) component.
         /// MAV_COMP_ID_ADSB
         /// </summary>
         MavCompIdAdsb = 156,
         /// <summary>
-        /// On Screen Display (OSD) devices for video links
+        /// On Screen Display (OSD) devices for video links.
         /// MAV_COMP_ID_OSD
         /// </summary>
         MavCompIdOsd = 157,
         /// <summary>
-        /// Generic autopilot peripheral component ID. Meant for devices that do not implement the parameter sub-protocol
+        /// Generic autopilot peripheral component ID. Meant for devices that do not implement the parameter microservice.
         /// MAV_COMP_ID_PERIPHERAL
         /// </summary>
         MavCompIdPeripheral = 158,
         /// <summary>
-        /// 
+        /// Gimbal ID for QX1.
         /// MAV_COMP_ID_QX1_GIMBAL
         /// </summary>
         MavCompIdQx1Gimbal = 159,
         /// <summary>
-        /// 
+        /// FLARM collision alert component.
         /// MAV_COMP_ID_FLARM
         /// </summary>
         MavCompIdFlarm = 160,
         /// <summary>
-        /// 
-        /// MAV_COMP_ID_MAPPER
-        /// </summary>
-        MavCompIdMapper = 180,
-        /// <summary>
-        /// 
+        /// Component that can generate/supply a mission flight plan (e.g. GCS or developer API).
         /// MAV_COMP_ID_MISSIONPLANNER
         /// </summary>
         MavCompIdMissionplanner = 190,
         /// <summary>
-        /// 
+        /// Component that finds an optimal path between points based on a certain constraint (e.g. minimum snap, shortest path, cost, etc.).
         /// MAV_COMP_ID_PATHPLANNER
         /// </summary>
         MavCompIdPathplanner = 195,
         /// <summary>
-        /// 
+        /// Component that plans a collision free path between two points.
+        /// MAV_COMP_ID_OBSTACLE_AVOIDANCE
+        /// </summary>
+        MavCompIdObstacleAvoidance = 196,
+        /// <summary>
+        /// Component that provides position estimates using VIO techniques.
+        /// MAV_COMP_ID_VISUAL_INERTIAL_ODOMETRY
+        /// </summary>
+        MavCompIdVisualInertialOdometry = 197,
+        /// <summary>
+        /// Inertial Measurement Unit (IMU) #1.
         /// MAV_COMP_ID_IMU
         /// </summary>
         MavCompIdImu = 200,
         /// <summary>
-        /// 
+        /// Inertial Measurement Unit (IMU) #2.
         /// MAV_COMP_ID_IMU_2
         /// </summary>
         MavCompIdImu2 = 201,
         /// <summary>
-        /// 
+        /// Inertial Measurement Unit (IMU) #3.
         /// MAV_COMP_ID_IMU_3
         /// </summary>
         MavCompIdImu3 = 202,
         /// <summary>
-        /// 
+        /// GPS #1.
         /// MAV_COMP_ID_GPS
         /// </summary>
         MavCompIdGps = 220,
         /// <summary>
-        /// 
+        /// GPS #2.
         /// MAV_COMP_ID_GPS2
         /// </summary>
         MavCompIdGps2 = 221,
         /// <summary>
-        /// 
+        /// Component to bridge MAVLink to UDP (i.e. from a UART).
         /// MAV_COMP_ID_UDP_BRIDGE
         /// </summary>
         MavCompIdUdpBridge = 240,
         /// <summary>
-        /// 
+        /// Component to bridge to UART (i.e. from UDP).
         /// MAV_COMP_ID_UART_BRIDGE
         /// </summary>
         MavCompIdUartBridge = 241,
         /// <summary>
-        /// 
+        /// Component for handling system messages (e.g. to ARM, takeoff, etc.).
         /// MAV_COMP_ID_SYSTEM_CONTROL
         /// </summary>
         MavCompIdSystemControl = 250,
@@ -1180,6 +1196,11 @@ namespace Asv.Mavlink.V2.Common
         /// MAV_SYS_STATUS_SENSOR_PROXIMITY
         /// </summary>
         MavSysStatusSensorProximity = 67108864,
+        /// <summary>
+        /// 0x8000000 Satellite Communication 
+        /// MAV_SYS_STATUS_SENSOR_SATCOM
+        /// </summary>
+        MavSysStatusSensorSatcom = 134217728,
     }
 
     /// <summary>
@@ -1188,7 +1209,7 @@ namespace Asv.Mavlink.V2.Common
     public enum MavFrame
     {
         /// <summary>
-        /// Global coordinate frame, WGS84 coordinate system. First value / x: latitude, second value / y: longitude, third value / z: positive altitude over mean sea level (MSL).
+        /// Global (WGS84) coordinate frame + MSL altitude. First value / x: latitude, second value / y: longitude, third value / z: positive altitude over mean sea level (MSL).
         /// MAV_FRAME_GLOBAL
         /// </summary>
         MavFrameGlobal = 0,
@@ -1203,7 +1224,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavFrameMission = 2,
         /// <summary>
-        /// Global coordinate frame, WGS84 coordinate system, relative altitude over ground with respect to the home position. First value / x: latitude, second value / y: longitude, third value / z: positive altitude with 0 being at the altitude of the home location.
+        /// Global (WGS84) coordinate frame + altitude relative to the home position. First value / x: latitude, second value / y: longitude, third value / z: positive altitude with 0 being at the altitude of the home location.
         /// MAV_FRAME_GLOBAL_RELATIVE_ALT
         /// </summary>
         MavFrameGlobalRelativeAlt = 3,
@@ -1213,12 +1234,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavFrameLocalEnu = 4,
         /// <summary>
-        /// Global coordinate frame, WGS84 coordinate system. First value / x: latitude in degrees*1.0e-7, second value / y: longitude in degrees*1.0e-7, third value / z: positive altitude over mean sea level (MSL).
+        /// Global (WGS84) coordinate frame (scaled) + MSL altitude. First value / x: latitude in degrees*1.0e-7, second value / y: longitude in degrees*1.0e-7, third value / z: positive altitude over mean sea level (MSL).
         /// MAV_FRAME_GLOBAL_INT
         /// </summary>
         MavFrameGlobalInt = 5,
         /// <summary>
-        /// Global coordinate frame, WGS84 coordinate system, relative altitude over ground with respect to the home position. First value / x: latitude in degrees*10e-7, second value / y: longitude in degrees*10e-7, third value / z: positive altitude with 0 being at the altitude of the home location.
+        /// Global (WGS84) coordinate frame (scaled) + altitude relative to the home position. First value / x: latitude in degrees*10e-7, second value / y: longitude in degrees*10e-7, third value / z: positive altitude with 0 being at the altitude of the home location.
         /// MAV_FRAME_GLOBAL_RELATIVE_ALT_INT
         /// </summary>
         MavFrameGlobalRelativeAltInt = 6,
@@ -1238,12 +1259,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavFrameBodyOffsetNed = 9,
         /// <summary>
-        /// Global coordinate frame with above terrain level altitude. WGS84 coordinate system, relative altitude over terrain with respect to the waypoint coordinate. First value / x: latitude in degrees, second value / y: longitude in degrees, third value / z: positive altitude in meters with 0 being at ground level in terrain model.
+        /// Global (WGS84) coordinate frame with AGL altitude (at the waypoint coordinate). First value / x: latitude in degrees, second value / y: longitude in degrees, third value / z: positive altitude in meters with 0 being at ground level in terrain model.
         /// MAV_FRAME_GLOBAL_TERRAIN_ALT
         /// </summary>
         MavFrameGlobalTerrainAlt = 10,
         /// <summary>
-        /// Global coordinate frame with above terrain level altitude. WGS84 coordinate system, relative altitude over terrain with respect to the waypoint coordinate. First value / x: latitude in degrees*10e-7, second value / y: longitude in degrees*10e-7, third value / z: positive altitude in meters with 0 being at ground level in terrain model.
+        /// Global (WGS84) coordinate frame (scaled) with AGL altitude (at the waypoint coordinate). First value / x: latitude in degrees*10e-7, second value / y: longitude in degrees*10e-7, third value / z: positive altitude in meters with 0 being at ground level in terrain model.
         /// MAV_FRAME_GLOBAL_TERRAIN_ALT_INT
         /// </summary>
         MavFrameGlobalTerrainAltInt = 11,
@@ -1607,7 +1628,7 @@ namespace Asv.Mavlink.V2.Common
         MavCmdNavFollow = 25,
         /// <summary>
         /// Continue on the current course and climb/descend to specified altitude.  When the altitude is reached continue to the next command (i.e., don't proceed to the next command until the desired altitude is reached.
-        /// Param 1 - Climb or Descend (0 = Neutral, command completes when within 5m of this command's altitude, 1 = Climbing, command completes when at or above this command's altitude, 2 = Descending, command completes when at or below this command's altitude. 
+        /// Param 1 - Climb or Descend (0 = Neutral, command completes when within 5m of this command's altitude, 1 = Climbing, command completes when at or above this command's altitude, 2 = Descending, command completes when at or below this command's altitude.
         /// Param 2 - Empty
         /// Param 3 - Empty
         /// Param 4 - Empty
@@ -1618,7 +1639,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdNavContinueAndChangeAlt = 30,
         /// <summary>
-        /// Begin loiter at the specified Latitude and Longitude.  If Lat=Lon=0, then loiter at the current position.  Don't consider the navigation command complete (don't leave loiter) until the altitude has been reached.  Additionally, if the Heading Required parameter is non-zero the  aircraft will not leave the loiter until heading toward the next waypoint. 
+        /// Begin loiter at the specified Latitude and Longitude.  If Lat=Lon=0, then loiter at the current position.  Don't consider the navigation command complete (don't leave loiter) until the altitude has been reached.  Additionally, if the Heading Required parameter is non-zero the  aircraft will not leave the loiter until heading toward the next waypoint.
         /// Param 1 - Heading Required (0 = False)
         /// Param 2 - Radius in meters. If positive loiter clockwise, negative counter-clockwise, 0 means no change to standard loiter.
         /// Param 3 - Empty
@@ -1654,20 +1675,20 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdDoFollowReposition = 33,
         /// <summary>
-        /// WIP: Start orbiting on the circumference of a circle defined by the parameters. Setting any value NaN results in using defaults.
-        /// Param 1 - Radius of the circle in meters. positive: Orbit clockwise. negative: Orbit counter-clockwise. 
+        /// Start orbiting on the circumference of a circle defined by the parameters. Setting any value NaN results in using defaults.
+        /// Param 1 - Radius of the circle in meters. positive: Orbit clockwise. negative: Orbit counter-clockwise.
         /// Param 2 - Velocity tangential in m/s. NaN: Vehicle configuration default.
-        /// Param 3 - Yaw behaviour of the vehicle. 0: vehicle front points to the center (default). 1: Hold last heading. 2: Leave yaw uncontrolled.
+        /// Param 3 - Yaw behavior of the vehicle. 0: vehicle front points to the center (default). 1: Hold last heading. 2: Leave yaw uncontrolled.
         /// Param 4 - Reserved (e.g. for dynamic center beacon options)
-        /// Param 5 - Center point latitude / X coordinate. NaN: Use current vehicle position or current center if already orbiting.
-        /// Param 6 - Center point longitude / Y coordinate.
-        /// Param 7 - Center point altitude / Z coordinate.
+        /// Param 5 - Center point latitude (if no MAV_FRAME specified) / X coordinate according to MAV_FRAME. NaN: Use current vehicle position or current center if already orbiting.
+        /// Param 6 - Center point longitude (if no MAV_FRAME specified) / Y coordinate according to MAV_FRAME. NaN: Use current vehicle position or current center if already orbiting.
+        /// Param 7 - Center point altitude (MSL) (if no MAV_FRAME specified) / Z coordinate according to MAV_FRAME. NaN: Use current vehicle position or current center if already orbiting.
         /// MAV_CMD_DO_ORBIT
         /// </summary>
         MavCmdDoOrbit = 34,
         /// <summary>
-        /// THIS INTERFACE IS DEPRECATED AS OF JANUARY 2018. Please use MAV_CMD_DO_SET_ROI_* messages instead. Sets the region of interest (ROI) for a sensor set or the vehicle itself. This can then be used by the vehicles control system to control the vehicle attitude and the attitude of various sensors such as cameras.
-        /// Param 1 - Region of intereset mode. (see MAV_ROI enum)
+        /// Sets the region of interest (ROI) for a sensor set or the vehicle itself. This can then be used by the vehicles control system to control the vehicle attitude and the attitude of various sensors such as cameras.
+        /// Param 1 - Region of interest mode. (see MAV_ROI enum)
         /// Param 2 - Waypoint index/ target ID. (see MAV_ROI enum)
         /// Param 3 - ROI index (allows a vehicle to manage multiple ROI's)
         /// Param 4 - Empty
@@ -1859,7 +1880,7 @@ namespace Asv.Mavlink.V2.Common
         MavCmdDoJump = 177,
         /// <summary>
         /// Change speed and/or throttle set points.
-        /// Param 1 - Speed type (0=Airspeed, 1=Ground Speed)
+        /// Param 1 - Speed type (0=Airspeed, 1=Ground Speed, 2=Climb Speed, 3=Descent Speed)
         /// Param 2 - Speed  (m/s, -1 indicates no change)
         /// Param 3 - Throttle  ( Percent, -1 indicates no change)
         /// Param 4 - absolute or relative [0,1]
@@ -1906,7 +1927,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdDoSetRelay = 181,
         /// <summary>
-        /// Cycle a relay on and off for a desired number of cyles with a desired period.
+        /// Cycle a relay on and off for a desired number of cycles with a desired period.
         /// Param 1 - Relay number
         /// Param 2 - Cycle count
         /// Param 3 - Cycle time (seconds, decimal)
@@ -1990,7 +2011,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdDoRallyLand = 190,
         /// <summary>
-        /// Mission command to safely abort an autonmous landing.
+        /// Mission command to safely abort an autonomous landing.
         /// Param 1 - Altitude (meters)
         /// Param 2 - Empty
         /// Param 3 - Empty
@@ -2086,8 +2107,8 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdDoControlVideo = 200,
         /// <summary>
-        /// THIS INTERFACE IS DEPRECATED AS OF JANUARY 2018. Please use MAV_CMD_DO_SET_ROI_* messages instead. Sets the region of interest (ROI) for a sensor set or the vehicle itself. This can then be used by the vehicles control system to control the vehicle attitude and the attitude of various sensors such as cameras.
-        /// Param 1 - Region of intereset mode. (see MAV_ROI enum)
+        /// Sets the region of interest (ROI) for a sensor set or the vehicle itself. This can then be used by the vehicles control system to control the vehicle attitude and the attitude of various sensors such as cameras.
+        /// Param 1 - Region of interest mode. (see MAV_ROI enum)
         /// Param 2 - Waypoint index/ target ID. (see MAV_ROI enum)
         /// Param 3 - ROI index (allows a vehicle to manage multiple ROI's)
         /// Param 4 - Empty
@@ -2098,7 +2119,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdDoSetRoi = 201,
         /// <summary>
-        /// THIS INTERFACE IS DEPRECATED since 2018-01. Please use PARAM_EXT_XXX messages and the camera definition format described in https://mavlink.io/en/protocol/camera_def.html.
+        /// Configure digital camera. This is a fallback message for systems that have not yet implemented PARAM_EXT_XXX messages and camera definition files (see https://mavlink.io/en/services/camera_def.html ).
         /// Param 1 - Modes: P, TV, AV, M, Etc
         /// Param 2 - Shutter speed: Divisor number for one second
         /// Param 3 - Aperture: F stop number
@@ -2110,7 +2131,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdDoDigicamConfigure = 202,
         /// <summary>
-        /// THIS INTERFACE IS DEPRECATED since 2018-01. Please use PARAM_EXT_XXX messages and the camera definition format described in https://mavlink.io/en/protocol/camera_def.html.
+        /// Control digital camera. This is a fallback message for systems that have not yet implemented PARAM_EXT_XXX messages and camera definition files (see https://mavlink.io/en/services/camera_def.html ).
         /// Param 1 - Session control e.g. show/hide lens
         /// Param 2 - Zoom's absolute position
         /// Param 3 - Zooming step value to offset zoom from the current position
@@ -2127,9 +2148,9 @@ namespace Asv.Mavlink.V2.Common
         /// Param 2 - stabilize roll? (1 = yes, 0 = no)
         /// Param 3 - stabilize pitch? (1 = yes, 0 = no)
         /// Param 4 - stabilize yaw? (1 = yes, 0 = no)
-        /// Param 5 - roll input (0 = angle, 1 = angular rate)
-        /// Param 6 - pitch input (0 = angle, 1 = angular rate)
-        /// Param 7 - yaw input (0 = angle, 1 = angular rate)
+        /// Param 5 - roll input (0 = angle body frame, 1 = angular rate, 2 = angle absolute frame)
+        /// Param 6 - pitch input (0 = angle body frame, 1 = angular rate, 2 = angle absolute frame)
+        /// Param 7 - yaw input (0 = angle body frame, 1 = angular rate, 2 = angle absolute frame)
         /// MAV_CMD_DO_MOUNT_CONFIGURE
         /// </summary>
         MavCmdDoMountConfigure = 204,
@@ -2146,7 +2167,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdDoMountControl = 205,
         /// <summary>
-        /// Mission command to set camera trigger distance for this flight. The camera is trigerred each time this distance is exceeded. This command can also be used to set the shutter integration time for the camera.
+        /// Mission command to set camera trigger distance for this flight. The camera is triggered each time this distance is exceeded. This command can also be used to set the shutter integration time for the camera.
         /// Param 1 - Camera trigger distance (meters). 0 to stop triggering.
         /// Param 2 - Camera shutter integration time (milliseconds). -1 or 0 to ignore
         /// Param 3 - Trigger camera once immediately. (0 = no trigger, 1 = trigger)
@@ -2254,11 +2275,11 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdDoGuidedMaster = 221,
         /// <summary>
-        /// set limits for external control
-        /// Param 1 - timeout - maximum time (in seconds) that external controller will be allowed to control vehicle. 0 means no timeout
-        /// Param 2 - absolute altitude min (in meters, AMSL) - if vehicle moves below this alt, the command will be aborted and the mission will continue.  0 means no lower altitude limit
-        /// Param 3 - absolute altitude max (in meters)- if vehicle moves above this alt, the command will be aborted and the mission will continue.  0 means no upper altitude limit
-        /// Param 4 - horizontal move limit (in meters, AMSL) - if vehicle moves more than this distance from it's location at the moment the command was executed, the command will be aborted and the mission will continue. 0 means no horizontal altitude limit
+        /// Set limits for external control
+        /// Param 1 - Timeout - maximum time (in seconds) that external controller will be allowed to control vehicle. 0 means no timeout.
+        /// Param 2 - Altitude (MSL) min, in meters - if vehicle moves below this alt, the command will be aborted and the mission will continue. 0 means no lower altitude limit.
+        /// Param 3 - Altitude (MSL) max, in meters - if vehicle moves above this alt, the command will be aborted and the mission will continue. 0 means no upper altitude limit.
+        /// Param 4 - Horizontal move limit, in meters - if vehicle moves more than this distance from its location at the moment the command was executed, the command will be aborted and the mission will continue. 0 means no horizontal move limit.
         /// Param 5 - Empty
         /// Param 6 - Empty
         /// Param 7 - Empty
@@ -2278,6 +2299,19 @@ namespace Asv.Mavlink.V2.Common
         /// MAV_CMD_DO_ENGINE_CONTROL
         /// </summary>
         MavCmdDoEngineControl = 223,
+        /// <summary>
+        /// Set the mission item with sequence number seq as current item. This means that the MAV will continue to this mission item on the shortest path (not following the mission items in-between).
+        /// Param 1 - Mission sequence value to set
+        /// Param 2 - Empty
+        /// Param 3 - Empty
+        /// Param 4 - Empty
+        /// Param 5 - Empty
+        /// Param 5 - Empty
+        /// Param 6 - Empty
+        /// Param 7 - Empty
+        /// MAV_CMD_DO_SET_MISSION_CURRENT
+        /// </summary>
+        MavCmdDoSetMissionCurrent = 224,
         /// <summary>
         /// NOP - This command is only used to mark the upper limit of the DO commands in the enumeration
         /// Param 1 - Empty
@@ -2436,7 +2470,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdRequestCameraSettings = 522,
         /// <summary>
-        /// WIP: Request storage information (STORAGE_INFORMATION). Use the command's target_component to target a specific component's storage.
+        /// Request storage information (STORAGE_INFORMATION). Use the command's target_component to target a specific component's storage.
         /// Param 1 - Storage ID (0 for all, 1 for first, 2 for second, etc.)
         /// Param 2 - 0: No Action 1: Request storage information
         /// Param 3 - Reserved (all remaining params)
@@ -2444,7 +2478,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdRequestStorageInformation = 525,
         /// <summary>
-        /// WIP: Format a storage medium. Once format is complete, a STORAGE_INFORMATION message is sent. Use the command's target_component to target a specific component's storage.
+        /// Format a storage medium. Once format is complete, a STORAGE_INFORMATION message is sent. Use the command's target_component to target a specific component's storage.
         /// Param 1 - Storage ID (1 for first, 2 for second, etc.)
         /// Param 2 - 0: No action 1: Format storage
         /// Param 3 - Reserved (all remaining params)
@@ -2459,7 +2493,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdRequestCameraCaptureStatus = 527,
         /// <summary>
-        /// WIP: Request flight information (FLIGHT_INFORMATION)
+        /// Request flight information (FLIGHT_INFORMATION)
         /// Param 1 - 1: Request flight information
         /// Param 2 - Reserved (all remaining params)
         /// MAV_CMD_REQUEST_FLIGHT_INFORMATION
@@ -2473,33 +2507,62 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdResetCameraSettings = 529,
         /// <summary>
-        /// Set camera running mode. Use NAN for reserved values.
+        /// Set camera running mode. Use NaN for reserved values. GCS will send a MAV_CMD_REQUEST_VIDEO_STREAM_STATUS command after a mode change if the camera supports video streaming.
         /// Param 1 - Reserved (Set to 0)
-        /// Param 2 - Camera mode (see CAMERA_MODE enum)
+        /// Param 2 - Camera mode
         /// Param 3 - Reserved (all remaining params)
         /// MAV_CMD_SET_CAMERA_MODE
         /// </summary>
         MavCmdSetCameraMode = 530,
         /// <summary>
-        /// Start image capture sequence. Sends CAMERA_IMAGE_CAPTURED after each capture. Use NAN for reserved values.
+        /// Set camera zoom. Camera must respond with a CAMERA_SETTINGS message (on success). Use NaN for reserved values.
+        /// Param 1 - Zoom type
+        /// Param 2 - Zoom value. The range of valid values depend on the zoom type.
+        /// Param 3 - Reserved (all remaining params)
+        /// MAV_CMD_SET_CAMERA_ZOOM
+        /// </summary>
+        MavCmdSetCameraZoom = 531,
+        /// <summary>
+        /// Set camera focus. Camera must respond with a CAMERA_SETTINGS message (on success). Use NaN for reserved values.
+        /// Param 1 - Focus type
+        /// Param 2 - Focus value
+        /// Param 3 - Reserved (all remaining params)
+        /// MAV_CMD_SET_CAMERA_FOCUS
+        /// </summary>
+        MavCmdSetCameraFocus = 532,
+        /// <summary>
+        /// Tagged jump target. Can be jumped to with MAV_CMD_DO_JUMP_TAG.
+        /// Param 1 - Tag.
+        /// MAV_CMD_JUMP_TAG
+        /// </summary>
+        MavCmdJumpTag = 600,
+        /// <summary>
+        /// Jump to the matching tag in the mission list. Repeat this action for the specified number of times. A mission should contain a single matching tag for each jump. If this is not the case then a jump to a missing tag should complete the mission, and a jump where there are multiple matching tags should always select the one with the lowest mission sequence number.
+        /// Param 1 - Target tag to jump to.
+        /// Param 2 - Repeat count
+        /// MAV_CMD_DO_JUMP_TAG
+        /// </summary>
+        MavCmdDoJumpTag = 601,
+        /// <summary>
+        /// Start image capture sequence. Sends CAMERA_IMAGE_CAPTURED after each capture. Use NaN for reserved values.
         /// Param 1 - Reserved (Set to 0)
-        /// Param 2 - Duration between two consecutive pictures (in seconds)
-        /// Param 3 - Number of images to capture total - 0 for unlimited capture
-        /// Param 4 - Capture sequence (ID to prevent double captures when a command is retransmitted, 0: unused, >= 1: used)
+        /// Param 2 - Desired elapsed time between two consecutive pictures (in seconds). Minimum values depend on hardware (typically greater than 2 seconds).
+        /// Param 3 - Total number of images to capture. 0 to capture forever/until MAV_CMD_IMAGE_STOP_CAPTURE.
+        /// Param 4 - Capture sequence number starting from 1. This is only valid for single-capture (param3 == 1). Increment the capture ID for each capture command to prevent double captures when a command is re-transmitted. Use 0 to ignore it.
         /// Param 5 - Reserved (all remaining params)
         /// MAV_CMD_IMAGE_START_CAPTURE
         /// </summary>
         MavCmdImageStartCapture = 2000,
         /// <summary>
-        /// Stop image capture sequence Use NAN for reserved values.
+        /// Stop image capture sequence Use NaN for reserved values.
         /// Param 1 - Reserved (Set to 0)
         /// Param 2 - Reserved (all remaining params)
         /// MAV_CMD_IMAGE_STOP_CAPTURE
         /// </summary>
         MavCmdImageStopCapture = 2001,
         /// <summary>
-        /// WIP: Re-request a CAMERA_IMAGE_CAPTURE packet. Use NAN for reserved values.
-        /// Param 1 - Sequence number for missing CAMERA_IMAGE_CAPTURE packet
+        /// Re-request a CAMERA_IMAGE_CAPTURE message. Use NaN for reserved values.
+        /// Param 1 - Sequence number for missing CAMERA_IMAGE_CAPTURE message
         /// Param 2 - Reserved (all remaining params)
         /// MAV_CMD_REQUEST_CAMERA_IMAGE_CAPTURE
         /// </summary>
@@ -2513,42 +2576,48 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdDoTriggerControl = 2003,
         /// <summary>
-        /// Starts video capture (recording). Use NAN for reserved values.
-        /// Param 1 - Reserved (Set to 0)
+        /// Starts video capture (recording). Use NaN for reserved values.
+        /// Param 1 - Video Stream ID (0 for all streams)
         /// Param 2 - Frequency CAMERA_CAPTURE_STATUS messages should be sent while recording (0 for no messages, otherwise frequency in Hz)
         /// Param 3 - Reserved (all remaining params)
         /// MAV_CMD_VIDEO_START_CAPTURE
         /// </summary>
         MavCmdVideoStartCapture = 2500,
         /// <summary>
-        /// Stop the current video capture (recording). Use NAN for reserved values.
-        /// Param 1 - Reserved (Set to 0)
+        /// Stop the current video capture (recording). Use NaN for reserved values.
+        /// Param 1 - Video Stream ID (0 for all streams)
         /// Param 2 - Reserved (all remaining params)
         /// MAV_CMD_VIDEO_STOP_CAPTURE
         /// </summary>
         MavCmdVideoStopCapture = 2501,
         /// <summary>
-        /// WIP: Start video streaming
-        /// Param 1 - Camera ID (0 for all cameras, 1 for first, 2 for second, etc.)
+        /// Start video streaming
+        /// Param 1 - Video Stream ID (0 for all streams, 1 for first, 2 for second, etc.)
         /// Param 2 - Reserved
         /// MAV_CMD_VIDEO_START_STREAMING
         /// </summary>
         MavCmdVideoStartStreaming = 2502,
         /// <summary>
-        /// WIP: Stop the current video streaming
-        /// Param 1 - Camera ID (0 for all cameras, 1 for first, 2 for second, etc.)
+        /// Stop the given video stream
+        /// Param 1 - Video Stream ID (0 for all streams, 1 for first, 2 for second, etc.)
         /// Param 2 - Reserved
         /// MAV_CMD_VIDEO_STOP_STREAMING
         /// </summary>
         MavCmdVideoStopStreaming = 2503,
         /// <summary>
-        /// WIP: Request video stream information (VIDEO_STREAM_INFORMATION)
-        /// Param 1 - Camera ID (0 for all cameras, 1 for first, 2 for second, etc.)
-        /// Param 2 - 0: No Action 1: Request video stream information
-        /// Param 3 - Reserved (all remaining params)
+        /// Request video stream information (VIDEO_STREAM_INFORMATION)
+        /// Param 1 - Video Stream ID (0 for all streams, 1 for first, 2 for second, etc.)
+        /// Param 2 - Reserved (all remaining params)
         /// MAV_CMD_REQUEST_VIDEO_STREAM_INFORMATION
         /// </summary>
         MavCmdRequestVideoStreamInformation = 2504,
+        /// <summary>
+        /// Request video stream status (VIDEO_STREAM_STATUS)
+        /// Param 1 - Video Stream ID (0 for all streams, 1 for first, 2 for second, etc.)
+        /// Param 2 - Reserved (all remaining params)
+        /// MAV_CMD_REQUEST_VIDEO_STREAM_STATUS
+        /// </summary>
+        MavCmdRequestVideoStreamStatus = 2505,
         /// <summary>
         /// Request to start streaming logging data over MAVLink (see also LOGGING_DATA message)
         /// Param 1 - Format: 0: ULog
@@ -2576,18 +2645,18 @@ namespace Asv.Mavlink.V2.Common
         /// <summary>
         /// 
         /// Param 1 - Landing gear ID (default: 0, -1 for all)
-        /// Param 2 - Landing gear position (Down: 0, Up: 1, NAN for no change)
-        /// Param 3 - Reserved, set to NAN
-        /// Param 4 - Reserved, set to NAN
-        /// Param 5 - Reserved, set to NAN
-        /// Param 6 - Reserved, set to NAN
-        /// Param 7 - Reserved, set to NAN
+        /// Param 2 - Landing gear position (Down: 0, Up: 1, NaN for no change)
+        /// Param 3 - Reserved, set to NaN
+        /// Param 4 - Reserved, set to NaN
+        /// Param 5 - Reserved, set to NaN
+        /// Param 6 - Reserved, set to NaN
+        /// Param 7 - Reserved, set to NaN
         /// MAV_CMD_AIRFRAME_CONFIGURATION
         /// </summary>
         MavCmdAirframeConfiguration = 2520,
         /// <summary>
         /// Request to start/stop transmitting over the high latency telemetry
-        /// Param 1 - Control transmittion over high latency telemetry (0: stop, 1: start)
+        /// Param 1 - Control transmission over high latency telemetry (0: stop, 1: start)
         /// Param 2 - Empty
         /// Param 3 - Empty
         /// Param 4 - Empty
@@ -2613,7 +2682,14 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdDoVtolTransition = 3000,
         /// <summary>
-        /// This command sets the submode to standard guided when vehicle is in guided mode. The vehicle holds position and altitude and the user can input the desired velocites along all three axes.
+        /// Request authorization to arm the vehicle to a external entity, the arm authorizer is responsible to request all data that is needs from the vehicle before authorize or deny the request. If approved the progress of command_ack message should be set with period of time that this authorization is valid in seconds or in case it was denied it should be set with one of the reasons in ARM_AUTH_DENIED_REASON.
+        ///         
+        /// Param 1 - Vehicle system id, this way ground station can request arm authorization on behalf of any vehicle
+        /// MAV_CMD_ARM_AUTHORIZATION_REQUEST
+        /// </summary>
+        MavCmdArmAuthorizationRequest = 3001,
+        /// <summary>
+        /// This command sets the submode to standard guided when vehicle is in guided mode. The vehicle holds position and altitude and the user can input the desired velocities along all three axes.
         ///                   
         /// MAV_CMD_SET_GUIDED_SUBMODE_STANDARD
         /// </summary>
@@ -2631,7 +2707,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdSetGuidedSubmodeCircle = 4001,
         /// <summary>
-        /// WIP: Delay mission state machine until gate has been reached.
+        /// Delay mission state machine until gate has been reached.
         /// Param 1 - Geometry: 0: orthogonal to path between previous and next waypoint.
         /// Param 2 - Altitude: 0: ignore altitude
         /// Param 3 - Empty
@@ -2642,13 +2718,6 @@ namespace Asv.Mavlink.V2.Common
         /// MAV_CMD_CONDITION_GATE
         /// </summary>
         MavCmdConditionGate = 4501,
-        /// <summary>
-        /// Request authorization to arm the vehicle to a external entity, the arm authorizer is resposible to request all data that is needs from the vehicle before authorize or deny the request. If approved the progress of command_ack message should be set with period of time that this authorization is valid in seconds or in case it was denied it should be set with one of the reasons in ARM_AUTH_DENIED_REASON.
-        ///         
-        /// Param 1 - Vehicle system id, this way ground station can request arm authorization on behalf of any vehicle
-        /// MAV_CMD_ARM_AUTHORIZATION_REQUEST
-        /// </summary>
-        MavCmdArmAuthorizationRequest = 3001,
         /// <summary>
         /// Fence return point. There can only be one fence return point.
         ///         
@@ -2743,17 +2812,17 @@ namespace Asv.Mavlink.V2.Common
         /// Deploy payload on a Lat / Lon / Alt position. This includes the navigation to reach the required release position and velocity.
         /// Param 1 - Operation mode. 0: prepare single payload deploy (overwriting previous requests), but do not execute it. 1: execute payload deploy immediately (rejecting further deploy commands during execution, but allowing abort). 2: add payload deploy to existing deployment list.
         /// Param 2 - Desired approach vector in degrees compass heading (0..360). A negative value indicates the system can define the approach vector at will.
-        /// Param 3 - Desired ground speed at release time. This can be overriden by the airframe in case it needs to meet minimum airspeed. A negative value indicates the system can define the ground speed at will.
+        /// Param 3 - Desired ground speed at release time. This can be overridden by the airframe in case it needs to meet minimum airspeed. A negative value indicates the system can define the ground speed at will.
         /// Param 4 - Minimum altitude clearance to the release position in meters. A negative value indicates the system can define the clearance at will.
         /// Param 5 - Latitude unscaled for MISSION_ITEM or in 1e7 degrees for MISSION_ITEM_INT
         /// Param 6 - Longitude unscaled for MISSION_ITEM or in 1e7 degrees for MISSION_ITEM_INT
-        /// Param 7 - Altitude, in meters AMSL
+        /// Param 7 - Altitude (MSL), in meters
         /// MAV_CMD_PAYLOAD_PREPARE_DEPLOY
         /// </summary>
         MavCmdPayloadPrepareDeploy = 30001,
         /// <summary>
         /// Control the payload deployment.
-        /// Param 1 - Operation mode. 0: Abort deployment, continue normal mission. 1: switch to payload deploment mode. 100: delete first payload deployment request. 101: delete all payload deployment requests.
+        /// Param 1 - Operation mode. 0: Abort deployment, continue normal mission. 1: switch to payload deployment mode. 100: delete first payload deployment request. 101: delete all payload deployment requests.
         /// Param 2 - Reserved
         /// Param 3 - Reserved
         /// Param 4 - Reserved
@@ -2771,7 +2840,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude, in meters AMSL
+        /// Param 7 - Altitude (MSL), in meters
         /// MAV_CMD_WAYPOINT_USER_1
         /// </summary>
         MavCmdWaypointUser1 = 31000,
@@ -2783,7 +2852,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude, in meters AMSL
+        /// Param 7 - Altitude (MSL), in meters
         /// MAV_CMD_WAYPOINT_USER_2
         /// </summary>
         MavCmdWaypointUser2 = 31001,
@@ -2795,7 +2864,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude, in meters AMSL
+        /// Param 7 - Altitude (MSL), in meters
         /// MAV_CMD_WAYPOINT_USER_3
         /// </summary>
         MavCmdWaypointUser3 = 31002,
@@ -2807,7 +2876,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude, in meters AMSL
+        /// Param 7 - Altitude (MSL), in meters
         /// MAV_CMD_WAYPOINT_USER_4
         /// </summary>
         MavCmdWaypointUser4 = 31003,
@@ -2819,7 +2888,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude, in meters AMSL
+        /// Param 7 - Altitude (MSL), in meters
         /// MAV_CMD_WAYPOINT_USER_5
         /// </summary>
         MavCmdWaypointUser5 = 31004,
@@ -2831,7 +2900,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude, in meters AMSL
+        /// Param 7 - Altitude (MSL), in meters
         /// MAV_CMD_SPATIAL_USER_1
         /// </summary>
         MavCmdSpatialUser1 = 31005,
@@ -2843,7 +2912,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude, in meters AMSL
+        /// Param 7 - Altitude (MSL), in meters
         /// MAV_CMD_SPATIAL_USER_2
         /// </summary>
         MavCmdSpatialUser2 = 31006,
@@ -2855,7 +2924,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude, in meters AMSL
+        /// Param 7 - Altitude (MSL), in meters
         /// MAV_CMD_SPATIAL_USER_3
         /// </summary>
         MavCmdSpatialUser3 = 31007,
@@ -2867,7 +2936,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude, in meters AMSL
+        /// Param 7 - Altitude (MSL), in meters
         /// MAV_CMD_SPATIAL_USER_4
         /// </summary>
         MavCmdSpatialUser4 = 31008,
@@ -2879,7 +2948,7 @@ namespace Asv.Mavlink.V2.Common
         /// Param 4 - User defined
         /// Param 5 - Latitude unscaled
         /// Param 6 - Longitude unscaled
-        /// Param 7 - Altitude, in meters AMSL
+        /// Param 7 - Altitude (MSL), in meters
         /// MAV_CMD_SPATIAL_USER_5
         /// </summary>
         MavCmdSpatialUser5 = 31009,
@@ -2946,7 +3015,7 @@ namespace Asv.Mavlink.V2.Common
     }
 
     /// <summary>
-    /// THIS INTERFACE IS DEPRECATED AS OF JULY 2015. Please use MESSAGE_INTERVAL instead. A data stream is not a fixed set of messages, but rather a
+    /// A data stream is not a fixed set of messages, but rather a
     ///      recommendation to the autopilot software. Individual autopilots may or may not obey
     ///      the recommended messages.
     ///  MAV_DATA_STREAM
@@ -3001,7 +3070,7 @@ namespace Asv.Mavlink.V2.Common
     }
 
     /// <summary>
-    /// THIS INTERFACE IS DEPRECATED AS OF JANUARY 2018. Please use MAV_CMD_DO_SET_ROI_* messages instead. The ROI (region of interest) for the vehicle. This can be
+    /// The ROI (region of interest) for the vehicle. This can be
     ///                 be used by the vehicle for camera/vehicle attitude alignment (see
     ///                 MAV_CMD_NAV_ROI).
     ///  MAV_ROI
@@ -3248,7 +3317,7 @@ namespace Asv.Mavlink.V2.Common
     }
 
     /// <summary>
-    /// result in a mavlink mission ack
+    /// Result of mission operation (in a MISSION_ACK message).
     ///  MAV_MISSION_RESULT
     /// </summary>
     public enum MavMissionResult
@@ -3259,75 +3328,80 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavMissionAccepted = 0,
         /// <summary>
-        /// generic error / not accepting mission commands at all right now
+        /// Generic error / not accepting mission commands at all right now.
         /// MAV_MISSION_ERROR
         /// </summary>
         MavMissionError = 1,
         /// <summary>
-        /// coordinate frame is not supported
+        /// Coordinate frame is not supported.
         /// MAV_MISSION_UNSUPPORTED_FRAME
         /// </summary>
         MavMissionUnsupportedFrame = 2,
         /// <summary>
-        /// command is not supported
+        /// Command is not supported.
         /// MAV_MISSION_UNSUPPORTED
         /// </summary>
         MavMissionUnsupported = 3,
         /// <summary>
-        /// mission item exceeds storage space
+        /// Mission item exceeds storage space.
         /// MAV_MISSION_NO_SPACE
         /// </summary>
         MavMissionNoSpace = 4,
         /// <summary>
-        /// one of the parameters has an invalid value
+        /// One of the parameters has an invalid value.
         /// MAV_MISSION_INVALID
         /// </summary>
         MavMissionInvalid = 5,
         /// <summary>
-        /// param1 has an invalid value
+        /// param1 has an invalid value.
         /// MAV_MISSION_INVALID_PARAM1
         /// </summary>
         MavMissionInvalidParam1 = 6,
         /// <summary>
-        /// param2 has an invalid value
+        /// param2 has an invalid value.
         /// MAV_MISSION_INVALID_PARAM2
         /// </summary>
         MavMissionInvalidParam2 = 7,
         /// <summary>
-        /// param3 has an invalid value
+        /// param3 has an invalid value.
         /// MAV_MISSION_INVALID_PARAM3
         /// </summary>
         MavMissionInvalidParam3 = 8,
         /// <summary>
-        /// param4 has an invalid value
+        /// param4 has an invalid value.
         /// MAV_MISSION_INVALID_PARAM4
         /// </summary>
         MavMissionInvalidParam4 = 9,
         /// <summary>
-        /// x/param5 has an invalid value
+        /// x / param5 has an invalid value.
         /// MAV_MISSION_INVALID_PARAM5_X
         /// </summary>
         MavMissionInvalidParam5X = 10,
         /// <summary>
-        /// y/param6 has an invalid value
+        /// y / param6 has an invalid value.
         /// MAV_MISSION_INVALID_PARAM6_Y
         /// </summary>
         MavMissionInvalidParam6Y = 11,
         /// <summary>
-        /// param7 has an invalid value
+        /// z / param7 has an invalid value.
         /// MAV_MISSION_INVALID_PARAM7
         /// </summary>
         MavMissionInvalidParam7 = 12,
         /// <summary>
-        /// received waypoint out of sequence
+        /// Mission item received out of sequence
         /// MAV_MISSION_INVALID_SEQUENCE
         /// </summary>
         MavMissionInvalidSequence = 13,
         /// <summary>
-        /// not accepting any mission commands from this communication partner
+        /// Not accepting any mission commands from this communication partner.
         /// MAV_MISSION_DENIED
         /// </summary>
         MavMissionDenied = 14,
+        /// <summary>
+        /// Current mission operation cancelled (e.g. mission upload, mission download).
+        /// MAV_MISSION_OPERATION_CANCELLED
+        /// </summary>
+        MavMissionOperationCancelled = 15,
     }
 
     /// <summary>
@@ -3362,7 +3436,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavSeverityWarning = 4,
         /// <summary>
-        /// An unusual event has occured, though not an error condition. This should be investigated for the root cause.
+        /// An unusual event has occurred, though not an error condition. This should be investigated for the root cause.
         /// MAV_SEVERITY_NOTICE
         /// </summary>
         MavSeverityNotice = 5,
@@ -3712,10 +3786,25 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavSensorRotationRoll90Yaw270 = 37,
         /// <summary>
-        /// Roll: 315, Pitch: 315, Yaw: 315
-        /// MAV_SENSOR_ROTATION_ROLL_315_PITCH_315_YAW_315
+        /// Roll: 90, Pitch: 68, Yaw: 293
+        /// MAV_SENSOR_ROTATION_ROLL_90_PITCH_68_YAW_293
         /// </summary>
-        MavSensorRotationRoll315Pitch315Yaw315 = 38,
+        MavSensorRotationRoll90Pitch68Yaw293 = 38,
+        /// <summary>
+        /// Pitch: 315
+        /// MAV_SENSOR_ROTATION_PITCH_315
+        /// </summary>
+        MavSensorRotationPitch315 = 39,
+        /// <summary>
+        /// Roll: 90, Pitch: 315
+        /// MAV_SENSOR_ROTATION_ROLL_90_PITCH_315
+        /// </summary>
+        MavSensorRotationRoll90Pitch315 = 40,
+        /// <summary>
+        /// Custom orientation
+        /// MAV_SENSOR_ROTATION_CUSTOM
+        /// </summary>
+        MavSensorRotationCustom = 100,
     }
 
     /// <summary>
@@ -3790,7 +3879,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavProtocolCapabilityCompassCalibration = 4096,
         /// <summary>
-        /// Autopilot supports mavlink version 2.
+        /// Autopilot supports MAVLink version 2.
         /// MAV_PROTOCOL_CAPABILITY_MAVLINK2
         /// </summary>
         MavProtocolCapabilityMavlink2 = 8192,
@@ -3823,12 +3912,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavMissionTypeMission = 0,
         /// <summary>
-        /// Specifies GeoFence area(s). Items are MAV_CMD_FENCE_ GeoFence items.
+        /// Specifies GeoFence area(s). Items are MAV_CMD_NAV_FENCE_ GeoFence items.
         /// MAV_MISSION_TYPE_FENCE
         /// </summary>
         MavMissionTypeFence = 1,
         /// <summary>
-        /// Specifies the rally points for the vehicle. Rally points are alternative RTL points. Items are MAV_CMD_RALLY_POINT rally point items.
+        /// Specifies the rally points for the vehicle. Rally points are alternative RTL points. Items are MAV_CMD_NAV_RALLY_POINT rally point items.
         /// MAV_MISSION_TYPE_RALLY
         /// </summary>
         MavMissionTypeRally = 2,
@@ -4190,7 +4279,7 @@ namespace Asv.Mavlink.V2.Common
     }
 
     /// <summary>
-    /// Bitmask of options for the MAV_CMD_DO_REPOSITION
+    /// Bitmap of options for the MAV_CMD_DO_REPOSITION
     ///  MAV_DO_REPOSITION_FLAGS
     /// </summary>
     public enum MavDoRepositionFlags
@@ -4504,6 +4593,24 @@ namespace Asv.Mavlink.V2.Common
     }
 
     /// <summary>
+    /// RTK GPS baseline coordinate system, used for RTK corrections
+    ///  RTK_BASELINE_COORDINATE_SYSTEM
+    /// </summary>
+    public enum RtkBaselineCoordinateSystem
+    {
+        /// <summary>
+        /// Earth-centered, Earth-fixed
+        /// RTK_BASELINE_COORDINATE_SYSTEM_ECEF
+        /// </summary>
+        RtkBaselineCoordinateSystemEcef = 0,
+        /// <summary>
+        /// North, East, Down
+        /// RTK_BASELINE_COORDINATE_SYSTEM_NED
+        /// </summary>
+        RtkBaselineCoordinateSystemNed = 1,
+    }
+
+    /// <summary>
     /// Type of landing target
     ///  LANDING_TARGET_TYPE
     /// </summary>
@@ -4565,18 +4672,18 @@ namespace Asv.Mavlink.V2.Common
     }
 
     /// <summary>
-    /// Camera capability flags (Bitmap).
+    /// Camera capability flags (Bitmap)
     ///  CAMERA_CAP_FLAGS
     /// </summary>
     public enum CameraCapFlags
     {
         /// <summary>
-        /// Camera is able to record video.
+        /// Camera is able to record video
         /// CAMERA_CAP_FLAGS_CAPTURE_VIDEO
         /// </summary>
         CameraCapFlagsCaptureVideo = 1,
         /// <summary>
-        /// Camera is able to capture images.
+        /// Camera is able to capture images
         /// CAMERA_CAP_FLAGS_CAPTURE_IMAGE
         /// </summary>
         CameraCapFlagsCaptureImage = 2,
@@ -4600,6 +4707,113 @@ namespace Asv.Mavlink.V2.Common
         /// CAMERA_CAP_FLAGS_HAS_IMAGE_SURVEY_MODE
         /// </summary>
         CameraCapFlagsHasImageSurveyMode = 32,
+        /// <summary>
+        /// Camera has basic zoom control (MAV_CMD_SET_CAMERA_ZOOM)
+        /// CAMERA_CAP_FLAGS_HAS_BASIC_ZOOM
+        /// </summary>
+        CameraCapFlagsHasBasicZoom = 64,
+        /// <summary>
+        /// Camera has basic focus control (MAV_CMD_SET_CAMERA_FOCUS)
+        /// CAMERA_CAP_FLAGS_HAS_BASIC_FOCUS
+        /// </summary>
+        CameraCapFlagsHasBasicFocus = 128,
+        /// <summary>
+        /// Camera has video streaming capabilities (use MAV_CMD_REQUEST_VIDEO_STREAM_INFORMATION for video streaming info)
+        /// CAMERA_CAP_FLAGS_HAS_VIDEO_STREAM
+        /// </summary>
+        CameraCapFlagsHasVideoStream = 256,
+    }
+
+    /// <summary>
+    /// Stream status flags (Bitmap)
+    ///  VIDEO_STREAM_STATUS_FLAGS
+    /// </summary>
+    public enum VideoStreamStatusFlags
+    {
+        /// <summary>
+        /// Stream is active (running)
+        /// VIDEO_STREAM_STATUS_FLAGS_RUNNING
+        /// </summary>
+        VideoStreamStatusFlagsRunning = 1,
+        /// <summary>
+        /// Stream is thermal imaging
+        /// VIDEO_STREAM_STATUS_FLAGS_THERMAL
+        /// </summary>
+        VideoStreamStatusFlagsThermal = 2,
+    }
+
+    /// <summary>
+    /// Video stream types
+    ///  VIDEO_STREAM_TYPE
+    /// </summary>
+    public enum VideoStreamType
+    {
+        /// <summary>
+        /// Stream is RTSP
+        /// VIDEO_STREAM_TYPE_RTSP
+        /// </summary>
+        VideoStreamTypeRtsp = 0,
+        /// <summary>
+        /// Stream is RTP UDP (URI gives the port number)
+        /// VIDEO_STREAM_TYPE_RTPUDP
+        /// </summary>
+        VideoStreamTypeRtpudp = 1,
+        /// <summary>
+        /// Stream is MPEG on TCP
+        /// VIDEO_STREAM_TYPE_TCP_MPEG
+        /// </summary>
+        VideoStreamTypeTcpMpeg = 2,
+        /// <summary>
+        /// Stream is h.264 on MPEG TS (URI gives the port number)
+        /// VIDEO_STREAM_TYPE_MPEG_TS_H264
+        /// </summary>
+        VideoStreamTypeMpegTsH264 = 3,
+    }
+
+    /// <summary>
+    /// Zoom types for MAV_CMD_SET_CAMERA_ZOOM
+    ///  CAMERA_ZOOM_TYPE
+    /// </summary>
+    public enum CameraZoomType
+    {
+        /// <summary>
+        /// Zoom one step increment (-1 for wide, 1 for tele)
+        /// ZOOM_TYPE_STEP
+        /// </summary>
+        ZoomTypeStep = 0,
+        /// <summary>
+        /// Continuous zoom up/down until stopped (-1 for wide, 1 for tele, 0 to stop zooming)
+        /// ZOOM_TYPE_CONTINUOUS
+        /// </summary>
+        ZoomTypeContinuous = 1,
+        /// <summary>
+        /// Zoom value as proportion of full camera range (a value between 0.0 and 100.0)
+        /// ZOOM_TYPE_RANGE
+        /// </summary>
+        ZoomTypeRange = 2,
+    }
+
+    /// <summary>
+    /// Focus types for MAV_CMD_SET_CAMERA_FOCUS
+    ///  SET_FOCUS_TYPE
+    /// </summary>
+    public enum SetFocusType
+    {
+        /// <summary>
+        /// Focus one step increment (-1 for focusing in, 1 for focusing out towards infinity).
+        /// FOCUS_TYPE_STEP
+        /// </summary>
+        FocusTypeStep = 0,
+        /// <summary>
+        /// Continuous focus up/down until stopped (-1 for focusing in, 1 for focusing out towards infinity, 0 to stop focusing)
+        /// FOCUS_TYPE_CONTINUOUS
+        /// </summary>
+        FocusTypeContinuous = 1,
+        /// <summary>
+        /// Zoom value as proportion of full camera range (a value between 0.0 and 100.0)
+        /// FOCUS_TYPE_RANGE
+        /// </summary>
+        FocusTypeRange = 2,
     }
 
     /// <summary>
@@ -4691,24 +4905,6 @@ namespace Asv.Mavlink.V2.Common
     }
 
     /// <summary>
-    /// RTK GPS baseline coordinate system, used for RTK corrections
-    ///  RTK_BASELINE_COORDINATE_SYSTEM
-    /// </summary>
-    public enum RtkBaselineCoordinateSystem
-    {
-        /// <summary>
-        /// Earth-centered, Earth-fixed
-        /// RTK_BASELINE_COORDINATE_SYSTEM_ECEF
-        /// </summary>
-        RtkBaselineCoordinateSystemEcef = 0,
-        /// <summary>
-        /// North, East, Down
-        /// RTK_BASELINE_COORDINATE_SYSTEM_NED
-        /// </summary>
-        RtkBaselineCoordinateSystemNed = 1,
-    }
-
-    /// <summary>
     /// RC type
     ///  RC_TYPE
     /// </summary>
@@ -4727,37 +4923,194 @@ namespace Asv.Mavlink.V2.Common
     }
 
     /// <summary>
-    /// WORK IN PROGRESS! DO NOT DEPLOY! Enumeration of possible waypoint/trajectory representation
-    ///  MAV_TRAJECTORY_REPRESENTATION
+    /// Bitmap to indicate which dimensions should be ignored by the vehicle: a value of 0b0000000000000000 or 0b0000001000000000 indicates that none of the setpoint dimensions should be ignored. If bit 9 is set the floats afx afy afz should be interpreted as force instead of acceleration.
+    ///  POSITION_TARGET_TYPEMASK
     /// </summary>
-    public enum MavTrajectoryRepresentation
+    [Flags]
+    public enum PositionTargetTypemask
     {
         /// <summary>
-        /// Array of waypoints with the following order
-        /// Param 1 - X-coordinate of waypoint [m], set to NaN if not being used
-        /// Param 2 - Y-coordinate of waypoint [m], set to NaN if not being used
-        /// Param 3 - Z-coordinate of waypoint [m], set to NaN if not being used
-        /// Param 4 - X-velocity of waypoint [m/s], set to NaN if not being used
-        /// Param 5 - Y-velocity of waypoint [m/s], set to NaN if not being used
-        /// Param 6 - Z-velocity of waypoint [m/s], set to NaN if not being used
-        /// Param 7 - X-acceleration of waypoint [m/s/s], set to NaN if not being used
-        /// Param 8 - Y-acceleration of waypoint [m/s/s], set to NaN if not being used
-        /// Param 9 - Z-acceleration of waypoint [m/s/s], set to NaN if not being used
-        /// Param 10 - Yaw [rad], set to NaN for unchanged
-        /// Param 11 - Yaw-rate [rad/s], set to NaN for unchanged
-        /// MAV_TRAJECTORY_REPRESENTATION_WAYPOINTS
+        /// Ignore position x
+        /// POSITION_TARGET_TYPEMASK_X_IGNORE
         /// </summary>
-        MavTrajectoryRepresentationWaypoints = 0,
+        PositionTargetTypemaskXIgnore = 1,
         /// <summary>
-        /// WORK IN PROGRESS! DO NOT DEPLOY! Array of bezier points with the following order
-        /// Param 1 - X-coordinate of starting bezier point [m], set to NaN if not being used
-        /// Param 2 - Y-coordinate of starting bezier point [m], set to NaN if not being used
-        /// Param 3 - Z-coordinate of starting bezier point [m], set to NaN if not being used
-        /// Param 4 - Bezier time horizon [s], set to NaN if velocity/acceleration should not be incorporated
-        /// Param 5 - Yaw [rad], set to NaN for unchanged
-        /// MAV_TRAJECTORY_REPRESENTATION_BEZIER
+        /// Ignore position y
+        /// POSITION_TARGET_TYPEMASK_Y_IGNORE
         /// </summary>
-        MavTrajectoryRepresentationBezier = 1,
+        PositionTargetTypemaskYIgnore = 2,
+        /// <summary>
+        /// Ignore position z
+        /// POSITION_TARGET_TYPEMASK_Z_IGNORE
+        /// </summary>
+        PositionTargetTypemaskZIgnore = 4,
+        /// <summary>
+        /// Ignore velocity x
+        /// POSITION_TARGET_TYPEMASK_VX_IGNORE
+        /// </summary>
+        PositionTargetTypemaskVxIgnore = 8,
+        /// <summary>
+        /// Ignore velocity y
+        /// POSITION_TARGET_TYPEMASK_VY_IGNORE
+        /// </summary>
+        PositionTargetTypemaskVyIgnore = 16,
+        /// <summary>
+        /// Ignore velocity z
+        /// POSITION_TARGET_TYPEMASK_VZ_IGNORE
+        /// </summary>
+        PositionTargetTypemaskVzIgnore = 32,
+        /// <summary>
+        /// Ignore acceleration x
+        /// POSITION_TARGET_TYPEMASK_AX_IGNORE
+        /// </summary>
+        PositionTargetTypemaskAxIgnore = 64,
+        /// <summary>
+        /// Ignore acceleration y
+        /// POSITION_TARGET_TYPEMASK_AY_IGNORE
+        /// </summary>
+        PositionTargetTypemaskAyIgnore = 128,
+        /// <summary>
+        /// Ignore acceleration z
+        /// POSITION_TARGET_TYPEMASK_AZ_IGNORE
+        /// </summary>
+        PositionTargetTypemaskAzIgnore = 256,
+        /// <summary>
+        /// Use force instead of acceleration
+        /// POSITION_TARGET_TYPEMASK_FORCE_SET
+        /// </summary>
+        PositionTargetTypemaskForceSet = 512,
+        /// <summary>
+        /// Ignore yaw
+        /// POSITION_TARGET_TYPEMASK_YAW_IGNORE
+        /// </summary>
+        PositionTargetTypemaskYawIgnore = 1024,
+        /// <summary>
+        /// Ignore yaw rate
+        /// POSITION_TARGET_TYPEMASK_YAW_RATE_IGNORE
+        /// </summary>
+        PositionTargetTypemaskYawRateIgnore = 2048,
+    }
+
+    /// <summary>
+    /// Airborne status of UAS.
+    ///  UTM_FLIGHT_STATE
+    /// </summary>
+    public enum UtmFlightState
+    {
+        /// <summary>
+        /// The flight state can't be determined.
+        /// UTM_FLIGHT_STATE_UNKNOWN
+        /// </summary>
+        UtmFlightStateUnknown = 1,
+        /// <summary>
+        /// UAS on ground.
+        /// UTM_FLIGHT_STATE_GROUND
+        /// </summary>
+        UtmFlightStateGround = 2,
+        /// <summary>
+        /// UAS airborne.
+        /// UTM_FLIGHT_STATE_AIRBORNE
+        /// </summary>
+        UtmFlightStateAirborne = 3,
+        /// <summary>
+        /// UAS is in an emergency flight state.
+        /// UTM_FLIGHT_STATE_EMERGENCY
+        /// </summary>
+        UtmFlightStateEmergency = 16,
+        /// <summary>
+        /// UAS has no active controls.
+        /// UTM_FLIGHT_STATE_NOCTRL
+        /// </summary>
+        UtmFlightStateNoctrl = 32,
+    }
+
+    /// <summary>
+    /// Flags for the global position report.
+    ///  UTM_DATA_AVAIL_FLAGS
+    /// </summary>
+    public enum UtmDataAvailFlags
+    {
+        /// <summary>
+        /// The field time contains valid data.
+        /// UTM_DATA_AVAIL_FLAGS_TIME_VALID
+        /// </summary>
+        UtmDataAvailFlagsTimeValid = 1,
+        /// <summary>
+        /// The field uas_id contains valid data.
+        /// UTM_DATA_AVAIL_FLAGS_UAS_ID_AVAILABLE
+        /// </summary>
+        UtmDataAvailFlagsUasIdAvailable = 2,
+        /// <summary>
+        /// The fields lat, lon and h_acc contain valid data.
+        /// UTM_DATA_AVAIL_FLAGS_POSITION_AVAILABLE
+        /// </summary>
+        UtmDataAvailFlagsPositionAvailable = 4,
+        /// <summary>
+        /// The fields alt and v_acc contain valid data.
+        /// UTM_DATA_AVAIL_FLAGS_ALTITUDE_AVAILABLE
+        /// </summary>
+        UtmDataAvailFlagsAltitudeAvailable = 8,
+        /// <summary>
+        /// The field relative_alt contains valid data.
+        /// UTM_DATA_AVAIL_FLAGS_RELATIVE_ALTITUDE_AVAILABLE
+        /// </summary>
+        UtmDataAvailFlagsRelativeAltitudeAvailable = 16,
+        /// <summary>
+        /// The fields vx and vy contain valid data.
+        /// UTM_DATA_AVAIL_FLAGS_HORIZONTAL_VELO_AVAILABLE
+        /// </summary>
+        UtmDataAvailFlagsHorizontalVeloAvailable = 32,
+        /// <summary>
+        /// The field vz contains valid data.
+        /// UTM_DATA_AVAIL_FLAGS_VERTICAL_VELO_AVAILABLE
+        /// </summary>
+        UtmDataAvailFlagsVerticalVeloAvailable = 64,
+        /// <summary>
+        /// The fields next_lat, next_lon and next_alt contain valid data.
+        /// UTM_DATA_AVAIL_FLAGS_NEXT_WAYPOINT_AVAILABLE
+        /// </summary>
+        UtmDataAvailFlagsNextWaypointAvailable = 128,
+    }
+
+    /// <summary>
+    /// Cellular network radio type
+    ///  CELLULAR_NETWORK_RADIO_TYPE
+    /// </summary>
+    public enum CellularNetworkRadioType
+    {
+        /// <summary>
+        /// CELLULAR_NETWORK_RADIO_TYPE_NONE
+        /// </summary>
+        CellularNetworkRadioTypeNone = 0,
+        /// <summary>
+        /// CELLULAR_NETWORK_RADIO_TYPE_GSM
+        /// </summary>
+        CellularNetworkRadioTypeGsm = 1,
+        /// <summary>
+        /// CELLULAR_NETWORK_RADIO_TYPE_CDMA
+        /// </summary>
+        CellularNetworkRadioTypeCdma = 2,
+        /// <summary>
+        /// CELLULAR_NETWORK_RADIO_TYPE_WCDMA
+        /// </summary>
+        CellularNetworkRadioTypeWcdma = 3,
+        /// <summary>
+        /// CELLULAR_NETWORK_RADIO_TYPE_LTE
+        /// </summary>
+        CellularNetworkRadioTypeLte = 4,
+    }
+
+    /// <summary>
+    /// These flags encode the cellular network status
+    ///  CELLULAR_NETWORK_STATUS_FLAG
+    /// </summary>
+    public enum CellularNetworkStatusFlag
+    {
+        /// <summary>
+        /// Roaming is active
+        /// CELLULAR_NETWORK_STATUS_FLAG_ROAMING
+        /// </summary>
+        CellularNetworkStatusFlagRoaming = 1,
     }
 
 
@@ -4766,7 +5119,7 @@ namespace Asv.Mavlink.V2.Common
 #region Messages
 
     /// <summary>
-    /// The heartbeat message shows that a system is present and responding. The type of the MAV and Autopilot hardware allow the receiving system to treat further messages from this system appropriate (e.g. by laying out the user interface based on the autopilot).
+    /// The heartbeat message shows that a system or component is present and responding. The type and autopilot fields (along with the message component id), allow the receiving system to treat further messages from this system appropriately (e.g. by laying out the user interface based on the autopilot).
     ///  HEARTBEAT
     /// </summary>
     public class HeartbeatPacket: PacketV2<HeartbeatPayload>
@@ -4817,22 +5170,22 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint CustomMode { get; set; }
         /// <summary>
-        /// Type of the MAV (quadrotor, helicopter, etc., up to 15 types, defined in MAV_TYPE ENUM)
+        /// Type of the system (quadrotor, helicopter, etc.). Components use the same type as their associated system.
         /// OriginName: type, Units: , IsExtended: false
         /// </summary>
         public MavType Type { get; set; }
         /// <summary>
-        /// Autopilot type / class. defined in MAV_AUTOPILOT ENUM
+        /// Autopilot type / class.
         /// OriginName: autopilot, Units: , IsExtended: false
         /// </summary>
         public MavAutopilot Autopilot { get; set; }
         /// <summary>
-        /// System mode bitfield, as defined by MAV_MODE_FLAG enum
+        /// System mode bitmap.
         /// OriginName: base_mode, Units: , IsExtended: false
         /// </summary>
         public MavModeFlag BaseMode { get; set; }
         /// <summary>
-        /// System status flag, as defined by MAV_STATE enum
+        /// System status flag.
         /// OriginName: system_status, Units: , IsExtended: false
         /// </summary>
         public MavState SystemStatus { get; set; }
@@ -4843,7 +5196,7 @@ namespace Asv.Mavlink.V2.Common
         public byte MavlinkVersion { get; set; }
     }
     /// <summary>
-    /// The general system state. If the system is following the MAVLink standard, the system state is mainly defined by three orthogonal states/modes: The system mode, which is either LOCKED (motors shut down and locked), MANUAL (system under RC control), GUIDED (system with autonomous position control, position setpoint controlled manually) or AUTO (system guided by path/waypoint planner). The NAV_MODE defined the current flight state: LIFTOFF (often an open-loop maneuver), LANDING, WAYPOINTS or VECTOR. This represents the internal navigation state machine. The system status shows whether the system is currently active or not and if an emergency occured. During the CRITICAL and EMERGENCY states the MAV is still considered to be active, but should start emergency procedures autonomously. After a failure occured it should first move from active to critical to allow manual intervention and then move to emergency after a certain timeout.
+    /// The general system state. If the system is following the MAVLink standard, the system state is mainly defined by three orthogonal states/modes: The system mode, which is either LOCKED (motors shut down and locked), MANUAL (system under RC control), GUIDED (system with autonomous position control, position setpoint controlled manually) or AUTO (system guided by path/waypoint planner). The NAV_MODE defined the current flight state: LIFTOFF (often an open-loop maneuver), LANDING, WAYPOINTS or VECTOR. This represents the internal navigation state machine. The system status shows whether the system is currently active or not and if an emergency occurred. During the CRITICAL and EMERGENCY states the MAV is still considered to be active, but should start emergency procedures autonomously. After a failure occurred it should first move from active to critical to allow manual intervention and then move to emergency after a certain timeout.
     ///  SYS_STATUS
     /// </summary>
     public class SysStatusPacket: PacketV2<SysStatusPayload>
@@ -4903,37 +5256,37 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Bitmask showing which onboard controllers and sensors are present. Value of 0: not present. Value of 1: present. Indices defined by ENUM MAV_SYS_STATUS_SENSOR
+        /// Bitmap showing which onboard controllers and sensors are present. Value of 0: not present. Value of 1: present.
         /// OriginName: onboard_control_sensors_present, Units: , IsExtended: false
         /// </summary>
         public MavSysStatusSensor OnboardControlSensorsPresent { get; set; }
         /// <summary>
-        /// Bitmask showing which onboard controllers and sensors are enabled:  Value of 0: not enabled. Value of 1: enabled. Indices defined by ENUM MAV_SYS_STATUS_SENSOR
+        /// Bitmap showing which onboard controllers and sensors are enabled:  Value of 0: not enabled. Value of 1: enabled.
         /// OriginName: onboard_control_sensors_enabled, Units: , IsExtended: false
         /// </summary>
         public MavSysStatusSensor OnboardControlSensorsEnabled { get; set; }
         /// <summary>
-        /// Bitmask showing which onboard controllers and sensors are operational or have an error:  Value of 0: not enabled. Value of 1: enabled. Indices defined by ENUM MAV_SYS_STATUS_SENSOR
+        /// Bitmap showing which onboard controllers and sensors are operational or have an error:  Value of 0: not enabled. Value of 1: enabled.
         /// OriginName: onboard_control_sensors_health, Units: , IsExtended: false
         /// </summary>
         public MavSysStatusSensor OnboardControlSensorsHealth { get; set; }
         /// <summary>
-        /// Maximum usage in percent of the mainloop time, (0%: 0, 100%: 1000) should be always below 1000
+        /// Maximum usage in percent of the mainloop time. Values: [0-1000] - should always be below 1000
         /// OriginName: load, Units: d%, IsExtended: false
         /// </summary>
         public ushort Load { get; set; }
         /// <summary>
-        /// Battery voltage, in millivolts (1 = 1 millivolt)
+        /// Battery voltage
         /// OriginName: voltage_battery, Units: mV, IsExtended: false
         /// </summary>
         public ushort VoltageBattery { get; set; }
         /// <summary>
-        /// Battery current, in 10*milliamperes (1 = 10 milliampere), -1: autopilot does not measure the current
+        /// Battery current, -1: autopilot does not measure the current
         /// OriginName: current_battery, Units: cA, IsExtended: false
         /// </summary>
         public short CurrentBattery { get; set; }
         /// <summary>
-        /// Communication drops in percent, (0%: 0, 100%: 10'000), (UART, I2C, SPI, CAN), dropped packets on all links (packets that were corrupted on reception on the MAV)
+        /// Communication drop rate, (UART, I2C, SPI, CAN), dropped packets on all links (packets that were corrupted on reception on the MAV)
         /// OriginName: drop_rate_comm, Units: c%, IsExtended: false
         /// </summary>
         public ushort DropRateComm { get; set; }
@@ -4963,7 +5316,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort ErrorsCount4 { get; set; }
         /// <summary>
-        /// Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot estimate the remaining battery
+        /// Remaining battery energy, -1: autopilot estimate the remaining battery
         /// OriginName: battery_remaining, Units: %, IsExtended: false
         /// </summary>
         public sbyte BatteryRemaining { get; set; }
@@ -5007,12 +5360,12 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp of the master clock in microseconds since UNIX epoch.
+        /// Timestamp (UNIX epoch time).
         /// OriginName: time_unix_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUnixUsec { get; set; }
         /// <summary>
-        /// Timestamp of the component clock since boot time in milliseconds.
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -5060,7 +5413,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Unix timestamp in microseconds or since system boot if smaller than MAVLink epoch (1.1.2009)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -5070,12 +5423,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint Seq { get; set; }
         /// <summary>
-        /// 0: request ping from all receiving systems, if greater than 0: message is a ping response and number is the system id of the requesting system
+        /// 0: request ping from all receiving systems. If greater than 0: message is a ping response and number is the system id of the requesting system
         /// OriginName: target_system, Units: , IsExtended: false
         /// </summary>
         public byte TargetSystem { get; set; }
         /// <summary>
-        /// 0: request ping from all receiving components, if greater than 0: message is a ping response and number is the system id of the requesting system
+        /// 0: request ping from all receiving components. If greater than 0: message is a ping response and number is the component id of the requesting component.
         /// OriginName: target_component, Units: , IsExtended: false
         /// </summary>
         public byte TargetComponent { get; set; }
@@ -5250,7 +5603,7 @@ namespace Asv.Mavlink.V2.Common
         public byte GetKeyMaxItemsCount() => 32;
     }
     /// <summary>
-    /// THIS INTERFACE IS DEPRECATED. USE COMMAND_LONG with MAV_CMD_DO_SET_MODE INSTEAD. Set the system mode, as defined by enum MAV_MODE. There is no target component id as the mode is by definition for the overall aircraft, not only for one component.
+    /// Set the system mode, as defined by enum MAV_MODE. There is no target component id as the mode is by definition for the overall aircraft, not only for one component.
     ///  SET_MODE
     /// </summary>
     public class SetModePacket: PacketV2<SetModePayload>
@@ -5300,13 +5653,13 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetSystem { get; set; }
         /// <summary>
-        /// The new base mode
+        /// The new base mode.
         /// OriginName: base_mode, Units: , IsExtended: false
         /// </summary>
         public MavMode BaseMode { get; set; }
     }
     /// <summary>
-    /// Request to read the onboard parameter with the param_id string id. Onboard parameters are stored as key[const char*] -> value[float]. This allows to send a parameter to any other component (such as the GCS) without the need of previous knowledge of possible parameter names. Thus the same GCS can store different parameters for different autopilots. See also https://mavlink.io/en/protocol/parameter.html for a full documentation of QGroundControl and IMU code.
+    /// Request to read the onboard parameter with the param_id string id. Onboard parameters are stored as key[const char*] -> value[float]. This allows to send a parameter to any other component (such as the GCS) without the need of previous knowledge of possible parameter names. Thus the same GCS can store different parameters for different autopilots. See also https://mavlink.io/en/services/parameter.html for a full documentation of QGroundControl and IMU code.
     ///  PARAM_REQUEST_READ
     /// </summary>
     public class ParamRequestReadPacket: PacketV2<ParamRequestReadPayload>
@@ -5490,13 +5843,13 @@ namespace Asv.Mavlink.V2.Common
         public char[] ParamId { get; set; } = new char[16];
         public byte GetParamIdMaxItemsCount() => 16;
         /// <summary>
-        /// Onboard parameter type: see the MAV_PARAM_TYPE enum for supported data types.
+        /// Onboard parameter type.
         /// OriginName: param_type, Units: , IsExtended: false
         /// </summary>
         public MavParamType ParamType { get; set; }
     }
     /// <summary>
-    /// Set a parameter value TEMPORARILY to RAM. It will be reset to default on system reboot. Send the ACTION MAV_ACTION_STORAGE_WRITE to PERMANENTLY write the RAM contents to EEPROM. IMPORTANT: The receiving component should acknowledge the new parameter value by sending a param_value message to all communication partners. This will also ensure that multiple GCS all have an up-to-date list of all parameters. If the sending GCS did not receive a PARAM_VALUE message within its timeout time, it should re-send the PARAM_SET message.
+    /// Set a parameter value (write new value to permanent storage). IMPORTANT: The receiving component should acknowledge the new parameter value by sending a PARAM_VALUE message to all communication partners. This will also ensure that multiple GCS all have an up-to-date list of all parameters. If the sending GCS did not receive a PARAM_VALUE message within its timeout time, it should re-send the PARAM_SET message.
     ///  PARAM_SET
     /// </summary>
     public class ParamSetPacket: PacketV2<ParamSetPayload>
@@ -5564,7 +5917,7 @@ namespace Asv.Mavlink.V2.Common
         public char[] ParamId { get; set; } = new char[16];
         public byte GetParamIdMaxItemsCount() => 16;
         /// <summary>
-        /// Onboard parameter type: see the MAV_PARAM_TYPE enum for supported data types.
+        /// Onboard parameter type.
         /// OriginName: param_type, Units: , IsExtended: false
         /// </summary>
         public MavParamType ParamType { get; set; }
@@ -5645,22 +5998,22 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Latitude (WGS84, EGM96 ellipsoid), in degrees * 1E7
+        /// Latitude (WGS84, EGM96 ellipsoid)
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude (WGS84, EGM96 ellipsoid), in degrees * 1E7
+        /// Longitude (WGS84, EGM96 ellipsoid)
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude (AMSL, NOT WGS84), in meters * 1000 (positive for up). Note that virtually all GPS modules provide the AMSL altitude in addition to the WGS84 altitude.
+        /// Altitude (MSL). Positive for up. Note that virtually all GPS modules provide the MSL altitude in addition to the WGS84 altitude.
         /// OriginName: alt, Units: mm, IsExtended: false
         /// </summary>
         public int Alt { get; set; }
@@ -5675,7 +6028,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort Epv { get; set; }
         /// <summary>
-        /// GPS ground speed (m/s * 100). If unknown, set to: UINT16_MAX
+        /// GPS ground speed. If unknown, set to: UINT16_MAX
         /// OriginName: vel, Units: cm/s, IsExtended: false
         /// </summary>
         public ushort Vel { get; set; }
@@ -5685,7 +6038,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort Cog { get; set; }
         /// <summary>
-        /// See the GPS_FIX_TYPE enum.
+        /// GPS fix type.
         /// OriginName: fix_type, Units: , IsExtended: false
         /// </summary>
         public GpsFixType FixType { get; set; }
@@ -5695,27 +6048,27 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte SatellitesVisible { get; set; }
         /// <summary>
-        /// Altitude (above WGS84, EGM96 ellipsoid), in meters * 1000 (positive for up).
+        /// Altitude (above WGS84, EGM96 ellipsoid). Positive for up.
         /// OriginName: alt_ellipsoid, Units: mm, IsExtended: true
         /// </summary>
         public int AltEllipsoid { get; set; }
         /// <summary>
-        /// Position uncertainty in meters * 1000 (positive for up).
+        /// Position uncertainty. Positive for up.
         /// OriginName: h_acc, Units: mm, IsExtended: true
         /// </summary>
         public uint HAcc { get; set; }
         /// <summary>
-        /// Altitude uncertainty in meters * 1000 (positive for up).
+        /// Altitude uncertainty. Positive for up.
         /// OriginName: v_acc, Units: mm, IsExtended: true
         /// </summary>
         public uint VAcc { get; set; }
         /// <summary>
-        /// Speed uncertainty in meters * 1000 (positive for up).
+        /// Speed uncertainty. Positive for up.
         /// OriginName: vel_acc, Units: mm, IsExtended: true
         /// </summary>
         public uint VelAcc { get; set; }
         /// <summary>
-        /// Heading / track uncertainty in degrees * 1e5.
+        /// Heading / track uncertainty
         /// OriginName: hdg_acc, Units: degE5, IsExtended: true
         /// </summary>
         public uint HdgAcc { get; set; }
@@ -5889,52 +6242,52 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// X acceleration (mg)
+        /// X acceleration
         /// OriginName: xacc, Units: mG, IsExtended: false
         /// </summary>
         public short Xacc { get; set; }
         /// <summary>
-        /// Y acceleration (mg)
+        /// Y acceleration
         /// OriginName: yacc, Units: mG, IsExtended: false
         /// </summary>
         public short Yacc { get; set; }
         /// <summary>
-        /// Z acceleration (mg)
+        /// Z acceleration
         /// OriginName: zacc, Units: mG, IsExtended: false
         /// </summary>
         public short Zacc { get; set; }
         /// <summary>
-        /// Angular speed around X axis (millirad /sec)
+        /// Angular speed around X axis
         /// OriginName: xgyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Xgyro { get; set; }
         /// <summary>
-        /// Angular speed around Y axis (millirad /sec)
+        /// Angular speed around Y axis
         /// OriginName: ygyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Ygyro { get; set; }
         /// <summary>
-        /// Angular speed around Z axis (millirad /sec)
+        /// Angular speed around Z axis
         /// OriginName: zgyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Zgyro { get; set; }
         /// <summary>
-        /// X Magnetic field (milli tesla)
+        /// X Magnetic field
         /// OriginName: xmag, Units: mT, IsExtended: false
         /// </summary>
         public short Xmag { get; set; }
         /// <summary>
-        /// Y Magnetic field (milli tesla)
+        /// Y Magnetic field
         /// OriginName: ymag, Units: mT, IsExtended: false
         /// </summary>
         public short Ymag { get; set; }
         /// <summary>
-        /// Z Magnetic field (milli tesla)
+        /// Z Magnetic field
         /// OriginName: zmag, Units: mT, IsExtended: false
         /// </summary>
         public short Zmag { get; set; }
@@ -5994,7 +6347,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -6089,7 +6442,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -6099,12 +6452,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public short PressAbs { get; set; }
         /// <summary>
-        /// Differential pressure 1 (raw, 0 if nonexistant)
+        /// Differential pressure 1 (raw, 0 if nonexistent)
         /// OriginName: press_diff1, Units: , IsExtended: false
         /// </summary>
         public short PressDiff1 { get; set; }
         /// <summary>
-        /// Differential pressure 2 (raw, 0 if nonexistant)
+        /// Differential pressure 2 (raw, 0 if nonexistent)
         /// OriginName: press_diff2, Units: , IsExtended: false
         /// </summary>
         public short PressDiff2 { get; set; }
@@ -6157,22 +6510,22 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Absolute pressure (hectopascal)
+        /// Absolute pressure
         /// OriginName: press_abs, Units: hPa, IsExtended: false
         /// </summary>
         public float PressAbs { get; set; }
         /// <summary>
-        /// Differential pressure 1 (hectopascal)
+        /// Differential pressure 1
         /// OriginName: press_diff, Units: hPa, IsExtended: false
         /// </summary>
         public float PressDiff { get; set; }
         /// <summary>
-        /// Temperature measurement (0.01 degrees celsius)
+        /// Temperature
         /// OriginName: temperature, Units: cdegC, IsExtended: false
         /// </summary>
         public short Temperature { get; set; }
@@ -6226,37 +6579,37 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Roll angle (rad, -pi..+pi)
+        /// Roll angle (-pi..+pi)
         /// OriginName: roll, Units: rad, IsExtended: false
         /// </summary>
         public float Roll { get; set; }
         /// <summary>
-        /// Pitch angle (rad, -pi..+pi)
+        /// Pitch angle (-pi..+pi)
         /// OriginName: pitch, Units: rad, IsExtended: false
         /// </summary>
         public float Pitch { get; set; }
         /// <summary>
-        /// Yaw angle (rad, -pi..+pi)
+        /// Yaw angle (-pi..+pi)
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
         /// <summary>
-        /// Roll angular speed (rad/s)
+        /// Roll angular speed
         /// OriginName: rollspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Rollspeed { get; set; }
         /// <summary>
-        /// Pitch angular speed (rad/s)
+        /// Pitch angular speed
         /// OriginName: pitchspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Pitchspeed { get; set; }
         /// <summary>
-        /// Yaw angular speed (rad/s)
+        /// Yaw angular speed
         /// OriginName: yawspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Yawspeed { get; set; }
@@ -6312,7 +6665,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -6337,17 +6690,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Q4 { get; set; }
         /// <summary>
-        /// Roll angular speed (rad/s)
+        /// Roll angular speed
         /// OriginName: rollspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Rollspeed { get; set; }
         /// <summary>
-        /// Pitch angular speed (rad/s)
+        /// Pitch angular speed
         /// OriginName: pitchspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Pitchspeed { get; set; }
         /// <summary>
-        /// Yaw angular speed (rad/s)
+        /// Yaw angular speed
         /// OriginName: yawspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Yawspeed { get; set; }
@@ -6401,7 +6754,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -6490,53 +6843,53 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Latitude, expressed as degrees * 1E7
+        /// Latitude, expressed
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude, expressed as degrees * 1E7
+        /// Longitude, expressed
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude in meters, expressed as * 1000 (millimeters), AMSL (not WGS84 - note that virtually all GPS modules provide the AMSL as well)
+        /// Altitude (MSL). Note that virtually all GPS modules provide both WGS84 and MSL.
         /// OriginName: alt, Units: mm, IsExtended: false
         /// </summary>
         public int Alt { get; set; }
         /// <summary>
-        /// Altitude above ground in meters, expressed as * 1000 (millimeters)
+        /// Altitude above ground
         /// OriginName: relative_alt, Units: mm, IsExtended: false
         /// </summary>
         public int RelativeAlt { get; set; }
         /// <summary>
-        /// Ground X Speed (Latitude, positive north), expressed as m/s * 100
+        /// Ground X Speed (Latitude, positive north)
         /// OriginName: vx, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vx { get; set; }
         /// <summary>
-        /// Ground Y Speed (Longitude, positive east), expressed as m/s * 100
+        /// Ground Y Speed (Longitude, positive east)
         /// OriginName: vy, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vy { get; set; }
         /// <summary>
-        /// Ground Z Speed (Altitude, positive down), expressed as m/s * 100
+        /// Ground Z Speed (Altitude, positive down)
         /// OriginName: vz, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vz { get; set; }
         /// <summary>
-        /// Vehicle heading (yaw angle) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: UINT16_MAX
+        /// Vehicle heading (yaw angle), 0.0..359.99 degrees. If unknown, set to: UINT16_MAX
         /// OriginName: hdg, Units: cdeg, IsExtended: false
         /// </summary>
         public ushort Hdg { get; set; }
     }
     /// <summary>
-    /// The scaled values of the RC channels received. (-100%) -10000, (0%) 0, (100%) 10000. Channels that are inactive should be set to UINT16_MAX.
+    /// The scaled values of the RC channels received: (-100%) -10000, (0%) 0, (100%) 10000. Channels that are inactive should be set to UINT16_MAX.
     ///  RC_CHANNELS_SCALED
     /// </summary>
     public class RcChannelsScaledPacket: PacketV2<RcChannelsScaledPayload>
@@ -6592,47 +6945,47 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// RC channel 1 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
+        /// RC channel 1 value scaled.
         /// OriginName: chan1_scaled, Units: , IsExtended: false
         /// </summary>
         public short Chan1Scaled { get; set; }
         /// <summary>
-        /// RC channel 2 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
+        /// RC channel 2 value scaled.
         /// OriginName: chan2_scaled, Units: , IsExtended: false
         /// </summary>
         public short Chan2Scaled { get; set; }
         /// <summary>
-        /// RC channel 3 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
+        /// RC channel 3 value scaled.
         /// OriginName: chan3_scaled, Units: , IsExtended: false
         /// </summary>
         public short Chan3Scaled { get; set; }
         /// <summary>
-        /// RC channel 4 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
+        /// RC channel 4 value scaled.
         /// OriginName: chan4_scaled, Units: , IsExtended: false
         /// </summary>
         public short Chan4Scaled { get; set; }
         /// <summary>
-        /// RC channel 5 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
+        /// RC channel 5 value scaled.
         /// OriginName: chan5_scaled, Units: , IsExtended: false
         /// </summary>
         public short Chan5Scaled { get; set; }
         /// <summary>
-        /// RC channel 6 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
+        /// RC channel 6 value scaled.
         /// OriginName: chan6_scaled, Units: , IsExtended: false
         /// </summary>
         public short Chan6Scaled { get; set; }
         /// <summary>
-        /// RC channel 7 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
+        /// RC channel 7 value scaled.
         /// OriginName: chan7_scaled, Units: , IsExtended: false
         /// </summary>
         public short Chan7Scaled { get; set; }
         /// <summary>
-        /// RC channel 8 value scaled, (-100%) -10000, (0%) 0, (100%) 10000, (invalid) INT16_MAX.
+        /// RC channel 8 value scaled.
         /// OriginName: chan8_scaled, Units: , IsExtended: false
         /// </summary>
         public short Chan8Scaled { get; set; }
@@ -6642,13 +6995,13 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Port { get; set; }
         /// <summary>
-        /// Receive signal strength indicator, 0: 0%, 100: 100%, 255: invalid/unknown.
+        /// Receive signal strength indicator. Values: [0-100], 255: invalid/unknown.
         /// OriginName: rssi, Units: %, IsExtended: false
         /// </summary>
         public byte Rssi { get; set; }
     }
     /// <summary>
-    /// The RAW values of the RC channels received. The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%. Individual receivers/transmitters might violate this specification.
+    /// The RAW values of the RC channels received. The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%. A value of UINT16_MAX implies the channel is unused. Individual receivers/transmitters might violate this specification.
     ///  RC_CHANNELS_RAW
     /// </summary>
     public class RcChannelsRawPacket: PacketV2<RcChannelsRawPayload>
@@ -6704,47 +7057,47 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// RC channel 1 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 1 value.
         /// OriginName: chan1_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan1Raw { get; set; }
         /// <summary>
-        /// RC channel 2 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 2 value.
         /// OriginName: chan2_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan2Raw { get; set; }
         /// <summary>
-        /// RC channel 3 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 3 value.
         /// OriginName: chan3_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan3Raw { get; set; }
         /// <summary>
-        /// RC channel 4 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 4 value.
         /// OriginName: chan4_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan4Raw { get; set; }
         /// <summary>
-        /// RC channel 5 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 5 value.
         /// OriginName: chan5_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan5Raw { get; set; }
         /// <summary>
-        /// RC channel 6 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 6 value.
         /// OriginName: chan6_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan6Raw { get; set; }
         /// <summary>
-        /// RC channel 7 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 7 value.
         /// OriginName: chan7_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan7Raw { get; set; }
         /// <summary>
-        /// RC channel 8 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 8 value.
         /// OriginName: chan8_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan8Raw { get; set; }
@@ -6754,7 +7107,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Port { get; set; }
         /// <summary>
-        /// Receive signal strength indicator, 0: 0%, 100: 100%, 255: invalid/unknown.
+        /// Receive signal strength indicator. Values: [0-100], 255: invalid/unknown.
         /// OriginName: rssi, Units: %, IsExtended: false
         /// </summary>
         public byte Rssi { get; set; }
@@ -6846,47 +7199,47 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public uint TimeUsec { get; set; }
         /// <summary>
-        /// Servo output 1 value, in microseconds
+        /// Servo output 1 value
         /// OriginName: servo1_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Servo1Raw { get; set; }
         /// <summary>
-        /// Servo output 2 value, in microseconds
+        /// Servo output 2 value
         /// OriginName: servo2_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Servo2Raw { get; set; }
         /// <summary>
-        /// Servo output 3 value, in microseconds
+        /// Servo output 3 value
         /// OriginName: servo3_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Servo3Raw { get; set; }
         /// <summary>
-        /// Servo output 4 value, in microseconds
+        /// Servo output 4 value
         /// OriginName: servo4_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Servo4Raw { get; set; }
         /// <summary>
-        /// Servo output 5 value, in microseconds
+        /// Servo output 5 value
         /// OriginName: servo5_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Servo5Raw { get; set; }
         /// <summary>
-        /// Servo output 6 value, in microseconds
+        /// Servo output 6 value
         /// OriginName: servo6_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Servo6Raw { get; set; }
         /// <summary>
-        /// Servo output 7 value, in microseconds
+        /// Servo output 7 value
         /// OriginName: servo7_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Servo7Raw { get; set; }
         /// <summary>
-        /// Servo output 8 value, in microseconds
+        /// Servo output 8 value
         /// OriginName: servo8_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Servo8Raw { get; set; }
@@ -6896,48 +7249,48 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Port { get; set; }
         /// <summary>
-        /// Servo output 9 value, in microseconds
+        /// Servo output 9 value
         /// OriginName: servo9_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Servo9Raw { get; set; }
         /// <summary>
-        /// Servo output 10 value, in microseconds
+        /// Servo output 10 value
         /// OriginName: servo10_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Servo10Raw { get; set; }
         /// <summary>
-        /// Servo output 11 value, in microseconds
+        /// Servo output 11 value
         /// OriginName: servo11_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Servo11Raw { get; set; }
         /// <summary>
-        /// Servo output 12 value, in microseconds
+        /// Servo output 12 value
         /// OriginName: servo12_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Servo12Raw { get; set; }
         /// <summary>
-        /// Servo output 13 value, in microseconds
+        /// Servo output 13 value
         /// OriginName: servo13_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Servo13Raw { get; set; }
         /// <summary>
-        /// Servo output 14 value, in microseconds
+        /// Servo output 14 value
         /// OriginName: servo14_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Servo14Raw { get; set; }
         /// <summary>
-        /// Servo output 15 value, in microseconds
+        /// Servo output 15 value
         /// OriginName: servo15_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Servo15Raw { get; set; }
         /// <summary>
-        /// Servo output 16 value, in microseconds
+        /// Servo output 16 value
         /// OriginName: servo16_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Servo16Raw { get; set; }
     }
     /// <summary>
-    /// Request a partial list of mission items from the system/component. https://mavlink.io/en/protocol/mission.html. If start and end index are the same, just send one waypoint.
+    /// Request a partial list of mission items from the system/component. https://mavlink.io/en/services/mission.html. If start and end index are the same, just send one waypoint.
     ///  MISSION_REQUEST_PARTIAL_LIST
     /// </summary>
     public class MissionRequestPartialListPacket: PacketV2<MissionRequestPartialListPayload>
@@ -6983,7 +7336,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Start index, 0 by default
+        /// Start index
         /// OriginName: start_index, Units: , IsExtended: false
         /// </summary>
         public short StartIndex { get; set; }
@@ -7003,7 +7356,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Mission type, see MAV_MISSION_TYPE
+        /// Mission type.
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -7055,7 +7408,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Start index, 0 by default and smaller / equal to the largest index of the current onboard list.
+        /// Start index. Must be smaller / equal to the largest index of the current onboard list.
         /// OriginName: start_index, Units: , IsExtended: false
         /// </summary>
         public short StartIndex { get; set; }
@@ -7075,14 +7428,14 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Mission type, see MAV_MISSION_TYPE
+        /// Mission type.
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
     }
     /// <summary>
     /// Message encoding a mission item. This message is emitted to announce
-    ///                 the presence of a mission item and to set a mission item on the system. The mission item can be either in x, y, z meters (type: LOCAL) or x:lat, y:lon, z:altitude. Local frame is Z-down, right handed (NED), global frame is Z-up, right handed (ENU). See also https://mavlink.io/en/protocol/mission.html.
+    ///                 the presence of a mission item and to set a mission item on the system. The mission item can be either in x, y, z meters (type: LOCAL) or x:lat, y:lon, z:altitude. Local frame is Z-down, right handed (NED), global frame is Z-up, right handed (ENU). See also https://mavlink.io/en/services/mission.html.
     ///  MISSION_ITEM
     /// </summary>
     public class MissionItemPacket: PacketV2<MissionItemPayload>
@@ -7188,7 +7541,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort Seq { get; set; }
         /// <summary>
-        /// The scheduled action for the waypoint, as defined by MAV_CMD enum
+        /// The scheduled action for the waypoint.
         /// OriginName: command, Units: , IsExtended: false
         /// </summary>
         public MavCmd Command { get; set; }
@@ -7203,7 +7556,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// The coordinate system of the waypoint, as defined by MAV_FRAME enum
+        /// The coordinate system of the waypoint.
         /// OriginName: frame, Units: , IsExtended: false
         /// </summary>
         public MavFrame Frame { get; set; }
@@ -7213,18 +7566,18 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Current { get; set; }
         /// <summary>
-        /// autocontinue to next wp
+        /// Autocontinue to next waypoint
         /// OriginName: autocontinue, Units: , IsExtended: false
         /// </summary>
         public byte Autocontinue { get; set; }
         /// <summary>
-        /// Mission type, see MAV_MISSION_TYPE
+        /// Mission type.
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
     }
     /// <summary>
-    /// Request the information of the mission item with the sequence number seq. The response of the system to this message should be a MISSION_ITEM message. https://mavlink.io/en/protocol/mission.html
+    /// Request the information of the mission item with the sequence number seq. The response of the system to this message should be a MISSION_ITEM message. https://mavlink.io/en/services/mission.html
     ///  MISSION_REQUEST
     /// </summary>
     public class MissionRequestPacket: PacketV2<MissionRequestPayload>
@@ -7283,7 +7636,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Mission type, see MAV_MISSION_TYPE
+        /// Mission type.
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -7439,7 +7792,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Mission type, see MAV_MISSION_TYPE
+        /// Mission type.
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -7504,7 +7857,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Mission type, see MAV_MISSION_TYPE
+        /// Mission type.
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -7562,7 +7915,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Mission type, see MAV_MISSION_TYPE
+        /// Mission type.
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -7610,7 +7963,7 @@ namespace Asv.Mavlink.V2.Common
         public ushort Seq { get; set; }
     }
     /// <summary>
-    /// Ack message during waypoint handling. The type field states if this message is a positive ack (type=0) or if an error happened (type=non-zero).
+    /// Acknowledgment message during waypoint handling. The type field states if this message is a positive ack (type=0) or if an error happened (type=non-zero).
     ///  MISSION_ACK
     /// </summary>
     public class MissionAckPacket: PacketV2<MissionAckPayload>
@@ -7664,12 +8017,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// See MAV_MISSION_RESULT enum
+        /// Mission result.
         /// OriginName: type, Units: , IsExtended: false
         /// </summary>
         public MavMissionResult Type { get; set; }
         /// <summary>
-        /// Mission type, see MAV_MISSION_TYPE
+        /// Mission type.
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -7721,17 +8074,17 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Latitude (WGS84), in degrees * 1E7
+        /// Latitude (WGS84)
         /// OriginName: latitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Latitude { get; set; }
         /// <summary>
-        /// Longitude (WGS84), in degrees * 1E7
+        /// Longitude (WGS84)
         /// OriginName: longitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Longitude { get; set; }
         /// <summary>
-        /// Altitude (AMSL), in meters * 1000 (positive for up)
+        /// Altitude (MSL). Positive for up.
         /// OriginName: altitude, Units: mm, IsExtended: false
         /// </summary>
         public int Altitude { get; set; }
@@ -7741,7 +8094,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetSystem { get; set; }
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: true
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -7791,28 +8144,28 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Latitude (WGS84), in degrees * 1E7
+        /// Latitude (WGS84)
         /// OriginName: latitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Latitude { get; set; }
         /// <summary>
-        /// Longitude (WGS84), in degrees * 1E7
+        /// Longitude (WGS84)
         /// OriginName: longitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Longitude { get; set; }
         /// <summary>
-        /// Altitude (AMSL), in meters * 1000 (positive for up)
+        /// Altitude (MSL). Positive for up.
         /// OriginName: altitude, Units: mm, IsExtended: false
         /// </summary>
         public int Altitude { get; set; }
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: true
         /// </summary>
         public ulong TimeUsec { get; set; }
     }
     /// <summary>
-    /// Bind a RC channel to a parameter. The parameter should change accoding to the RC channel value.
+    /// Bind a RC channel to a parameter. The parameter should change according to the RC channel value.
     ///  PARAM_MAP_RC
     /// </summary>
     public class ParamMapRcPacket: PacketV2<ParamMapRcPayload>
@@ -7908,13 +8261,13 @@ namespace Asv.Mavlink.V2.Common
         public char[] ParamId { get; set; } = new char[16];
         public byte GetParamIdMaxItemsCount() => 16;
         /// <summary>
-        /// Index of parameter RC channel. Not equal to the RC channel id. Typically correpsonds to a potentiometer-knob on the RC.
+        /// Index of parameter RC channel. Not equal to the RC channel id. Typically corresponds to a potentiometer-knob on the RC.
         /// OriginName: parameter_rc_channel_index, Units: , IsExtended: false
         /// </summary>
         public byte ParameterRcChannelIndex { get; set; }
     }
     /// <summary>
-    /// Request the information of the mission item with the sequence number seq. The response of the system to this message should be a MISSION_ITEM_INT message. https://mavlink.io/en/protocol/mission.html
+    /// Request the information of the mission item with the sequence number seq. The response of the system to this message should be a MISSION_ITEM_INT message. https://mavlink.io/en/services/mission.html
     ///  MISSION_REQUEST_INT
     /// </summary>
     public class MissionRequestIntPacket: PacketV2<MissionRequestIntPayload>
@@ -7973,7 +8326,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Mission type, see MAV_MISSION_TYPE
+        /// Mission type.
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
@@ -8071,7 +8424,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// Coordinate frame, as defined by MAV_FRAME enum. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
+        /// Coordinate frame. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
         /// OriginName: frame, Units: , IsExtended: false
         /// </summary>
         public MavFrame Frame { get; set; }
@@ -8155,7 +8508,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float P2z { get; set; }
         /// <summary>
-        /// Coordinate frame, as defined by MAV_FRAME enum. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
+        /// Coordinate frame. Can be either global, GPS, right-handed with Z axis up or local, right handed, Z axis down.
         /// OriginName: frame, Units: , IsExtended: false
         /// </summary>
         public MavFrame Frame { get; set; }
@@ -8222,7 +8575,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since system boot or since UNIX epoch)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -8232,17 +8585,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float[] Q { get; } = new float[4];
         /// <summary>
-        /// Roll angular speed (rad/s)
+        /// Roll angular speed
         /// OriginName: rollspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Rollspeed { get; set; }
         /// <summary>
-        /// Pitch angular speed (rad/s)
+        /// Pitch angular speed
         /// OriginName: pitchspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Pitchspeed { get; set; }
         /// <summary>
-        /// Yaw angular speed (rad/s)
+        /// Yaw angular speed
         /// OriginName: yawspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Yawspeed { get; set; }
@@ -8304,42 +8657,42 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Current desired roll in degrees
+        /// Current desired roll
         /// OriginName: nav_roll, Units: deg, IsExtended: false
         /// </summary>
         public float NavRoll { get; set; }
         /// <summary>
-        /// Current desired pitch in degrees
+        /// Current desired pitch
         /// OriginName: nav_pitch, Units: deg, IsExtended: false
         /// </summary>
         public float NavPitch { get; set; }
         /// <summary>
-        /// Current altitude error in meters
+        /// Current altitude error
         /// OriginName: alt_error, Units: m, IsExtended: false
         /// </summary>
         public float AltError { get; set; }
         /// <summary>
-        /// Current airspeed error in meters/second
+        /// Current airspeed error
         /// OriginName: aspd_error, Units: m/s, IsExtended: false
         /// </summary>
         public float AspdError { get; set; }
         /// <summary>
-        /// Current crosstrack error on x-y plane in meters
+        /// Current crosstrack error on x-y plane
         /// OriginName: xtrack_error, Units: m, IsExtended: false
         /// </summary>
         public float XtrackError { get; set; }
         /// <summary>
-        /// Current desired heading in degrees
+        /// Current desired heading
         /// OriginName: nav_bearing, Units: deg, IsExtended: false
         /// </summary>
         public short NavBearing { get; set; }
         /// <summary>
-        /// Bearing to current waypoint/target in degrees
+        /// Bearing to current waypoint/target
         /// OriginName: target_bearing, Units: deg, IsExtended: false
         /// </summary>
         public short TargetBearing { get; set; }
         /// <summary>
-        /// Distance to active waypoint in meters
+        /// Distance to active waypoint
         /// OriginName: wp_dist, Units: m, IsExtended: false
         /// </summary>
         public ushort WpDist { get; set; }
@@ -8407,42 +8760,42 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since system boot or since UNIX epoch)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Latitude, expressed as degrees * 1E7
+        /// Latitude
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude, expressed as degrees * 1E7
+        /// Longitude
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude in meters, expressed as * 1000 (millimeters), above MSL
+        /// Altitude in meters above MSL
         /// OriginName: alt, Units: mm, IsExtended: false
         /// </summary>
         public int Alt { get; set; }
         /// <summary>
-        /// Altitude above ground in meters, expressed as * 1000 (millimeters)
+        /// Altitude above ground
         /// OriginName: relative_alt, Units: mm, IsExtended: false
         /// </summary>
         public int RelativeAlt { get; set; }
         /// <summary>
-        /// Ground X Speed (Latitude), expressed as m/s
+        /// Ground X Speed (Latitude)
         /// OriginName: vx, Units: m/s, IsExtended: false
         /// </summary>
         public float Vx { get; set; }
         /// <summary>
-        /// Ground Y Speed (Longitude), expressed as m/s
+        /// Ground Y Speed (Longitude)
         /// OriginName: vy, Units: m/s, IsExtended: false
         /// </summary>
         public float Vy { get; set; }
         /// <summary>
-        /// Ground Z Speed (Altitude), expressed as m/s
+        /// Ground Z Speed (Altitude)
         /// OriginName: vz, Units: m/s, IsExtended: false
         /// </summary>
         public float Vz { get; set; }
@@ -8525,7 +8878,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since system boot or since UNIX epoch)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -8545,32 +8898,32 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Z { get; set; }
         /// <summary>
-        /// X Speed (m/s)
+        /// X Speed
         /// OriginName: vx, Units: m/s, IsExtended: false
         /// </summary>
         public float Vx { get; set; }
         /// <summary>
-        /// Y Speed (m/s)
+        /// Y Speed
         /// OriginName: vy, Units: m/s, IsExtended: false
         /// </summary>
         public float Vy { get; set; }
         /// <summary>
-        /// Z Speed (m/s)
+        /// Z Speed
         /// OriginName: vz, Units: m/s, IsExtended: false
         /// </summary>
         public float Vz { get; set; }
         /// <summary>
-        /// X Acceleration (m/s^2)
+        /// X Acceleration
         /// OriginName: ax, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Ax { get; set; }
         /// <summary>
-        /// Y Acceleration (m/s^2)
+        /// Y Acceleration
         /// OriginName: ay, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Ay { get; set; }
         /// <summary>
-        /// Z Acceleration (m/s^2)
+        /// Z Acceleration
         /// OriginName: az, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Az { get; set; }
@@ -8587,7 +8940,7 @@ namespace Asv.Mavlink.V2.Common
         public MavEstimatorType EstimatorType { get; set; }
     }
     /// <summary>
-    /// The PPM values of the RC channels received. The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%. Individual receivers/transmitters might violate this specification.
+    /// The PPM values of the RC channels received. The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%.  A value of UINT16_MAX implies the channel is unused. Individual receivers/transmitters might violate this specification.
     ///  RC_CHANNELS
     /// </summary>
     public class RcChannelsPacket: PacketV2<RcChannelsPayload>
@@ -8663,97 +9016,97 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// RC channel 1 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 1 value.
         /// OriginName: chan1_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan1Raw { get; set; }
         /// <summary>
-        /// RC channel 2 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 2 value.
         /// OriginName: chan2_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan2Raw { get; set; }
         /// <summary>
-        /// RC channel 3 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 3 value.
         /// OriginName: chan3_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan3Raw { get; set; }
         /// <summary>
-        /// RC channel 4 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 4 value.
         /// OriginName: chan4_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan4Raw { get; set; }
         /// <summary>
-        /// RC channel 5 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 5 value.
         /// OriginName: chan5_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan5Raw { get; set; }
         /// <summary>
-        /// RC channel 6 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 6 value.
         /// OriginName: chan6_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan6Raw { get; set; }
         /// <summary>
-        /// RC channel 7 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 7 value.
         /// OriginName: chan7_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan7Raw { get; set; }
         /// <summary>
-        /// RC channel 8 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 8 value.
         /// OriginName: chan8_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan8Raw { get; set; }
         /// <summary>
-        /// RC channel 9 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 9 value.
         /// OriginName: chan9_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan9Raw { get; set; }
         /// <summary>
-        /// RC channel 10 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 10 value.
         /// OriginName: chan10_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan10Raw { get; set; }
         /// <summary>
-        /// RC channel 11 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 11 value.
         /// OriginName: chan11_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan11Raw { get; set; }
         /// <summary>
-        /// RC channel 12 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 12 value.
         /// OriginName: chan12_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan12Raw { get; set; }
         /// <summary>
-        /// RC channel 13 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 13 value.
         /// OriginName: chan13_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan13Raw { get; set; }
         /// <summary>
-        /// RC channel 14 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 14 value.
         /// OriginName: chan14_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan14Raw { get; set; }
         /// <summary>
-        /// RC channel 15 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 15 value.
         /// OriginName: chan15_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan15Raw { get; set; }
         /// <summary>
-        /// RC channel 16 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 16 value.
         /// OriginName: chan16_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan16Raw { get; set; }
         /// <summary>
-        /// RC channel 17 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 17 value.
         /// OriginName: chan17_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan17Raw { get; set; }
         /// <summary>
-        /// RC channel 18 value, in microseconds. A value of UINT16_MAX implies the channel is unused.
+        /// RC channel 18 value.
         /// OriginName: chan18_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan18Raw { get; set; }
@@ -8763,13 +9116,13 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Chancount { get; set; }
         /// <summary>
-        /// Receive signal strength indicator, 0: 0%, 100: 100%, 255: invalid/unknown.
+        /// Receive signal strength indicator. Values: [0-100], 255: invalid/unknown.
         /// OriginName: rssi, Units: %, IsExtended: false
         /// </summary>
         public byte Rssi { get; set; }
     }
     /// <summary>
-    /// THIS INTERFACE IS DEPRECATED. USE SET_MESSAGE_INTERVAL INSTEAD.
+    /// Request a data stream.
     ///  REQUEST_DATA_STREAM
     /// </summary>
     public class RequestDataStreamPacket: PacketV2<RequestDataStreamPayload>
@@ -8839,7 +9192,7 @@ namespace Asv.Mavlink.V2.Common
         public byte StartStop { get; set; }
     }
     /// <summary>
-    /// THIS INTERFACE IS DEPRECATED. USE MESSAGE_INTERVAL INSTEAD.
+    /// Data stream status information.
     ///  DATA_STREAM
     /// </summary>
     public class DataStreamPacket: PacketV2<DataStreamPayload>
@@ -9066,42 +9419,42 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// RC channel 1 value, in microseconds. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 1 value. A value of UINT16_MAX means to ignore this field.
         /// OriginName: chan1_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan1Raw { get; set; }
         /// <summary>
-        /// RC channel 2 value, in microseconds. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 2 value. A value of UINT16_MAX means to ignore this field.
         /// OriginName: chan2_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan2Raw { get; set; }
         /// <summary>
-        /// RC channel 3 value, in microseconds. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 3 value. A value of UINT16_MAX means to ignore this field.
         /// OriginName: chan3_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan3Raw { get; set; }
         /// <summary>
-        /// RC channel 4 value, in microseconds. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 4 value. A value of UINT16_MAX means to ignore this field.
         /// OriginName: chan4_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan4Raw { get; set; }
         /// <summary>
-        /// RC channel 5 value, in microseconds. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 5 value. A value of UINT16_MAX means to ignore this field.
         /// OriginName: chan5_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan5Raw { get; set; }
         /// <summary>
-        /// RC channel 6 value, in microseconds. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 6 value. A value of UINT16_MAX means to ignore this field.
         /// OriginName: chan6_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan6Raw { get; set; }
         /// <summary>
-        /// RC channel 7 value, in microseconds. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 7 value. A value of UINT16_MAX means to ignore this field.
         /// OriginName: chan7_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan7Raw { get; set; }
         /// <summary>
-        /// RC channel 8 value, in microseconds. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 8 value. A value of UINT16_MAX means to ignore this field.
         /// OriginName: chan8_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan8Raw { get; set; }
@@ -9116,59 +9469,59 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// RC channel 9 value, in microseconds. A value of 0 means to ignore this field.
+        /// RC channel 9 value. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan9_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan9Raw { get; set; }
         /// <summary>
-        /// RC channel 10 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 10 value. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan10_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan10Raw { get; set; }
         /// <summary>
-        /// RC channel 11 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 11 value. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan11_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan11Raw { get; set; }
         /// <summary>
-        /// RC channel 12 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 12 value. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan12_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan12Raw { get; set; }
         /// <summary>
-        /// RC channel 13 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 13 value. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan13_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan13Raw { get; set; }
         /// <summary>
-        /// RC channel 14 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 14 value. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan14_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan14Raw { get; set; }
         /// <summary>
-        /// RC channel 15 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 15 value. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan15_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan15Raw { get; set; }
         /// <summary>
-        /// RC channel 16 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 16 value. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan16_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan16Raw { get; set; }
         /// <summary>
-        /// RC channel 17 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 17 value. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan17_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan17Raw { get; set; }
         /// <summary>
-        /// RC channel 18 value, in microseconds. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 18 value. A value of 0 or UINT16_MAX means to ignore this field.
         /// OriginName: chan18_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan18Raw { get; set; }
     }
     /// <summary>
     /// Message encoding a mission item. This message is emitted to announce
-    ///                 the presence of a mission item and to set a mission item on the system. The mission item can be either in x, y, z meters (type: LOCAL) or x:lat, y:lon, z:altitude. Local frame is Z-down, right handed (NED), global frame is Z-up, right handed (ENU). See also https://mavlink.io/en/protocol/mission.html.
+    ///                 the presence of a mission item and to set a mission item on the system. The mission item can be either in x, y, z meters (type: LOCAL) or x:lat, y:lon, z:altitude. Local frame is Z-down, right handed (NED), global frame is Z-up, right handed (ENU). See also https://mavlink.io/en/services/mission.html.
     ///  MISSION_ITEM_INT
     /// </summary>
     public class MissionItemIntPacket: PacketV2<MissionItemIntPayload>
@@ -9274,7 +9627,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort Seq { get; set; }
         /// <summary>
-        /// The scheduled action for the waypoint, as defined by MAV_CMD enum
+        /// The scheduled action for the waypoint.
         /// OriginName: command, Units: , IsExtended: false
         /// </summary>
         public MavCmd Command { get; set; }
@@ -9289,7 +9642,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// The coordinate system of the waypoint, as defined by MAV_FRAME enum
+        /// The coordinate system of the waypoint.
         /// OriginName: frame, Units: , IsExtended: false
         /// </summary>
         public MavFrame Frame { get; set; }
@@ -9299,18 +9652,18 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Current { get; set; }
         /// <summary>
-        /// autocontinue to next wp
+        /// Autocontinue to next waypoint
         /// OriginName: autocontinue, Units: , IsExtended: false
         /// </summary>
         public byte Autocontinue { get; set; }
         /// <summary>
-        /// Mission type, see MAV_MISSION_TYPE
+        /// Mission type.
         /// OriginName: mission_type, Units: , IsExtended: true
         /// </summary>
         public MavMissionType MissionType { get; set; }
     }
     /// <summary>
-    /// Metrics typically displayed on a HUD for fixed wing aircraft
+    /// Metrics typically displayed on a HUD for fixed wing aircraft.
     ///  VFR_HUD
     /// </summary>
     public class VfrHudPacket: PacketV2<VfrHudPayload>
@@ -9356,32 +9709,32 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Current airspeed in m/s
+        /// Current indicated airspeed (IAS).
         /// OriginName: airspeed, Units: m/s, IsExtended: false
         /// </summary>
         public float Airspeed { get; set; }
         /// <summary>
-        /// Current ground speed in m/s
+        /// Current ground speed.
         /// OriginName: groundspeed, Units: m/s, IsExtended: false
         /// </summary>
         public float Groundspeed { get; set; }
         /// <summary>
-        /// Current altitude (MSL), in meters
+        /// Current altitude (MSL).
         /// OriginName: alt, Units: m, IsExtended: false
         /// </summary>
         public float Alt { get; set; }
         /// <summary>
-        /// Current climb rate in meters/second
+        /// Current climb rate.
         /// OriginName: climb, Units: m/s, IsExtended: false
         /// </summary>
         public float Climb { get; set; }
         /// <summary>
-        /// Current heading in degrees, in compass units (0..360, 0=north)
+        /// Current heading in compass units (0-360, 0=north).
         /// OriginName: heading, Units: deg, IsExtended: false
         /// </summary>
         public short Heading { get; set; }
         /// <summary>
-        /// Current throttle setting in integer percent, 0 to 100
+        /// Current throttle setting (0 to 100).
         /// OriginName: throttle, Units: %, IsExtended: false
         /// </summary>
         public ushort Throttle { get; set; }
@@ -9477,12 +9830,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public int Y { get; set; }
         /// <summary>
-        /// PARAM7 / z position: global: altitude in meters (relative or absolute, depending on frame.
+        /// PARAM7 / z position: global: altitude in meters (relative or absolute, depending on frame).
         /// OriginName: z, Units: , IsExtended: false
         /// </summary>
         public float Z { get; set; }
         /// <summary>
-        /// The scheduled action for the mission item, as defined by MAV_CMD enum
+        /// The scheduled action for the mission item.
         /// OriginName: command, Units: , IsExtended: false
         /// </summary>
         public MavCmd Command { get; set; }
@@ -9497,7 +9850,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// The coordinate system of the COMMAND, as defined by MAV_FRAME enum
+        /// The coordinate system of the COMMAND.
         /// OriginName: frame, Units: , IsExtended: false
         /// </summary>
         public MavFrame Frame { get; set; }
@@ -9569,42 +9922,42 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Parameter 1, as defined by MAV_CMD enum.
+        /// Parameter 1 (for the specific command).
         /// OriginName: param1, Units: , IsExtended: false
         /// </summary>
         public float Param1 { get; set; }
         /// <summary>
-        /// Parameter 2, as defined by MAV_CMD enum.
+        /// Parameter 2 (for the specific command).
         /// OriginName: param2, Units: , IsExtended: false
         /// </summary>
         public float Param2 { get; set; }
         /// <summary>
-        /// Parameter 3, as defined by MAV_CMD enum.
+        /// Parameter 3 (for the specific command).
         /// OriginName: param3, Units: , IsExtended: false
         /// </summary>
         public float Param3 { get; set; }
         /// <summary>
-        /// Parameter 4, as defined by MAV_CMD enum.
+        /// Parameter 4 (for the specific command).
         /// OriginName: param4, Units: , IsExtended: false
         /// </summary>
         public float Param4 { get; set; }
         /// <summary>
-        /// Parameter 5, as defined by MAV_CMD enum.
+        /// Parameter 5 (for the specific command).
         /// OriginName: param5, Units: , IsExtended: false
         /// </summary>
         public float Param5 { get; set; }
         /// <summary>
-        /// Parameter 6, as defined by MAV_CMD enum.
+        /// Parameter 6 (for the specific command).
         /// OriginName: param6, Units: , IsExtended: false
         /// </summary>
         public float Param6 { get; set; }
         /// <summary>
-        /// Parameter 7, as defined by MAV_CMD enum.
+        /// Parameter 7 (for the specific command).
         /// OriginName: param7, Units: , IsExtended: false
         /// </summary>
         public float Param7 { get; set; }
         /// <summary>
-        /// Command ID, as defined by MAV_CMD enum.
+        /// Command ID (of command to send).
         /// OriginName: command, Units: , IsExtended: false
         /// </summary>
         public MavCmd Command { get; set; }
@@ -9679,12 +10032,12 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Command ID, as defined by MAV_CMD enum.
+        /// Command ID (of acknowledged command).
         /// OriginName: command, Units: , IsExtended: false
         /// </summary>
         public MavCmd Command { get; set; }
         /// <summary>
-        /// See MAV_RESULT enum
+        /// Result of command.
         /// OriginName: result, Units: , IsExtended: false
         /// </summary>
         public MavResult Result { get; set; }
@@ -9758,22 +10111,22 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp in milliseconds since system boot
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Desired roll rate in radians per second
+        /// Desired roll rate
         /// OriginName: roll, Units: rad/s, IsExtended: false
         /// </summary>
         public float Roll { get; set; }
         /// <summary>
-        /// Desired pitch rate in radians per second
+        /// Desired pitch rate
         /// OriginName: pitch, Units: rad/s, IsExtended: false
         /// </summary>
         public float Pitch { get; set; }
         /// <summary>
-        /// Desired yaw rate in radians per second
+        /// Desired yaw rate
         /// OriginName: yaw, Units: rad/s, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
@@ -9854,7 +10207,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp in milliseconds since system boot
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -9865,17 +10218,17 @@ namespace Asv.Mavlink.V2.Common
         public float[] Q { get; set; } = new float[4];
         public byte GetQMaxItemsCount() => 4;
         /// <summary>
-        /// Body roll rate in radians per second
+        /// Body roll rate
         /// OriginName: body_roll_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float BodyRollRate { get; set; }
         /// <summary>
-        /// Body pitch rate in radians per second
+        /// Body pitch rate
         /// OriginName: body_pitch_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float BodyPitchRate { get; set; }
         /// <summary>
-        /// Body yaw rate in radians per second
+        /// Body yaw rate
         /// OriginName: body_yaw_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float BodyYawRate { get; set; }
@@ -9957,7 +10310,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp in milliseconds since system boot
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -9968,17 +10321,17 @@ namespace Asv.Mavlink.V2.Common
         public float[] Q { get; set; } = new float[4];
         public byte GetQMaxItemsCount() => 4;
         /// <summary>
-        /// Body roll rate in radians per second
+        /// Body roll rate
         /// OriginName: body_roll_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float BodyRollRate { get; set; }
         /// <summary>
-        /// Body pitch rate in radians per second
+        /// Body pitch rate
         /// OriginName: body_pitch_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float BodyPitchRate { get; set; }
         /// <summary>
-        /// Body yaw rate in radians per second
+        /// Body yaw rate
         /// OriginName: body_yaw_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float BodyYawRate { get; set; }
@@ -10032,7 +10385,7 @@ namespace Asv.Mavlink.V2.Common
             Afz = BitConverter.ToSingle(buffer, index);index+=4;
             Yaw = BitConverter.ToSingle(buffer, index);index+=4;
             YawRate = BitConverter.ToSingle(buffer, index);index+=4;
-            TypeMask = BitConverter.ToUInt16(buffer,index);index+=2;
+            TypeMask = (PositionTargetTypemask)BitConverter.ToUInt16(buffer,index);index+=2;
             TargetSystem = (byte)buffer[index++];
             TargetComponent = (byte)buffer[index++];
             CoordinateFrame = (MavFrame)buffer[index++];
@@ -10052,7 +10405,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Afz).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Yaw).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(YawRate).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(TypeMask).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes((ushort)TypeMask).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)CoordinateFrame;index+=1;
@@ -10060,37 +10413,37 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp in milliseconds since system boot
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// X Position in NED frame in meters
+        /// X Position in NED frame
         /// OriginName: x, Units: m, IsExtended: false
         /// </summary>
         public float X { get; set; }
         /// <summary>
-        /// Y Position in NED frame in meters
+        /// Y Position in NED frame
         /// OriginName: y, Units: m, IsExtended: false
         /// </summary>
         public float Y { get; set; }
         /// <summary>
-        /// Z Position in NED frame in meters (note, altitude is negative in NED)
+        /// Z Position in NED frame (note, altitude is negative in NED)
         /// OriginName: z, Units: m, IsExtended: false
         /// </summary>
         public float Z { get; set; }
         /// <summary>
-        /// X velocity in NED frame in meter / s
+        /// X velocity in NED frame
         /// OriginName: vx, Units: m/s, IsExtended: false
         /// </summary>
         public float Vx { get; set; }
         /// <summary>
-        /// Y velocity in NED frame in meter / s
+        /// Y velocity in NED frame
         /// OriginName: vy, Units: m/s, IsExtended: false
         /// </summary>
         public float Vy { get; set; }
         /// <summary>
-        /// Z velocity in NED frame in meter / s
+        /// Z velocity in NED frame
         /// OriginName: vz, Units: m/s, IsExtended: false
         /// </summary>
         public float Vz { get; set; }
@@ -10110,20 +10463,20 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Afz { get; set; }
         /// <summary>
-        /// yaw setpoint in rad
+        /// yaw setpoint
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
         /// <summary>
-        /// yaw rate setpoint in rad/s
+        /// yaw rate setpoint
         /// OriginName: yaw_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float YawRate { get; set; }
         /// <summary>
-        /// Bitmask to indicate which dimensions should be ignored by the vehicle: a value of 0b0000000000000000 or 0b0000001000000000 indicates that none of the setpoint dimensions should be ignored. If bit 10 is set the floats afx afy afz should be interpreted as force instead of acceleration. Mapping: bit 1: x, bit 2: y, bit 3: z, bit 4: vx, bit 5: vy, bit 6: vz, bit 7: ax, bit 8: ay, bit 9: az, bit 10: is force setpoint, bit 11: yaw, bit 12: yaw rate
+        /// Bitmap to indicate which dimensions should be ignored by the vehicle.
         /// OriginName: type_mask, Units: , IsExtended: false
         /// </summary>
-        public ushort TypeMask { get; set; }
+        public PositionTargetTypemask TypeMask { get; set; }
         /// <summary>
         /// System ID
         /// OriginName: target_system, Units: , IsExtended: false
@@ -10179,7 +10532,7 @@ namespace Asv.Mavlink.V2.Common
             Afz = BitConverter.ToSingle(buffer, index);index+=4;
             Yaw = BitConverter.ToSingle(buffer, index);index+=4;
             YawRate = BitConverter.ToSingle(buffer, index);index+=4;
-            TypeMask = BitConverter.ToUInt16(buffer,index);index+=2;
+            TypeMask = (PositionTargetTypemask)BitConverter.ToUInt16(buffer,index);index+=2;
             CoordinateFrame = (MavFrame)buffer[index++];
         }
 
@@ -10197,43 +10550,43 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Afz).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Yaw).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(YawRate).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(TypeMask).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes((ushort)TypeMask).CopyTo(buffer, index);index+=2;
             buffer[index] = (byte)CoordinateFrame;index+=1;
             return index; // /*PayloadByteSize*/51;
         }
 
         /// <summary>
-        /// Timestamp in milliseconds since system boot
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// X Position in NED frame in meters
+        /// X Position in NED frame
         /// OriginName: x, Units: m, IsExtended: false
         /// </summary>
         public float X { get; set; }
         /// <summary>
-        /// Y Position in NED frame in meters
+        /// Y Position in NED frame
         /// OriginName: y, Units: m, IsExtended: false
         /// </summary>
         public float Y { get; set; }
         /// <summary>
-        /// Z Position in NED frame in meters (note, altitude is negative in NED)
+        /// Z Position in NED frame (note, altitude is negative in NED)
         /// OriginName: z, Units: m, IsExtended: false
         /// </summary>
         public float Z { get; set; }
         /// <summary>
-        /// X velocity in NED frame in meter / s
+        /// X velocity in NED frame
         /// OriginName: vx, Units: m/s, IsExtended: false
         /// </summary>
         public float Vx { get; set; }
         /// <summary>
-        /// Y velocity in NED frame in meter / s
+        /// Y velocity in NED frame
         /// OriginName: vy, Units: m/s, IsExtended: false
         /// </summary>
         public float Vy { get; set; }
         /// <summary>
-        /// Z velocity in NED frame in meter / s
+        /// Z velocity in NED frame
         /// OriginName: vz, Units: m/s, IsExtended: false
         /// </summary>
         public float Vz { get; set; }
@@ -10253,20 +10606,20 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Afz { get; set; }
         /// <summary>
-        /// yaw setpoint in rad
+        /// yaw setpoint
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
         /// <summary>
-        /// yaw rate setpoint in rad/s
+        /// yaw rate setpoint
         /// OriginName: yaw_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float YawRate { get; set; }
         /// <summary>
-        /// Bitmask to indicate which dimensions should be ignored by the vehicle: a value of 0b0000000000000000 or 0b0000001000000000 indicates that none of the setpoint dimensions should be ignored. If bit 10 is set the floats afx afy afz should be interpreted as force instead of acceleration. Mapping: bit 1: x, bit 2: y, bit 3: z, bit 4: vx, bit 5: vy, bit 6: vz, bit 7: ax, bit 8: ay, bit 9: az, bit 10: is force setpoint, bit 11: yaw, bit 12: yaw rate
+        /// Bitmap to indicate which dimensions should be ignored by the vehicle.
         /// OriginName: type_mask, Units: , IsExtended: false
         /// </summary>
-        public ushort TypeMask { get; set; }
+        public PositionTargetTypemask TypeMask { get; set; }
         /// <summary>
         /// Valid options are: MAV_FRAME_LOCAL_NED = 1, MAV_FRAME_LOCAL_OFFSET_NED = 7, MAV_FRAME_BODY_NED = 8, MAV_FRAME_BODY_OFFSET_NED = 9
         /// OriginName: coordinate_frame, Units: , IsExtended: false
@@ -10312,7 +10665,7 @@ namespace Asv.Mavlink.V2.Common
             Afz = BitConverter.ToSingle(buffer, index);index+=4;
             Yaw = BitConverter.ToSingle(buffer, index);index+=4;
             YawRate = BitConverter.ToSingle(buffer, index);index+=4;
-            TypeMask = BitConverter.ToUInt16(buffer,index);index+=2;
+            TypeMask = (PositionTargetTypemask)BitConverter.ToUInt16(buffer,index);index+=2;
             TargetSystem = (byte)buffer[index++];
             TargetComponent = (byte)buffer[index++];
             CoordinateFrame = (MavFrame)buffer[index++];
@@ -10332,7 +10685,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Afz).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Yaw).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(YawRate).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(TypeMask).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes((ushort)TypeMask).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)CoordinateFrame;index+=1;
@@ -10340,37 +10693,37 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp in milliseconds since system boot. The rationale for the timestamp in the setpoint is to allow the system to compensate for the transport delay of the setpoint. This allows the system to compensate processing latency.
+        /// Timestamp (time since system boot). The rationale for the timestamp in the setpoint is to allow the system to compensate for the transport delay of the setpoint. This allows the system to compensate processing latency.
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// X Position in WGS84 frame in 1e7 * degrees
+        /// X Position in WGS84 frame
         /// OriginName: lat_int, Units: degE7, IsExtended: false
         /// </summary>
         public int LatInt { get; set; }
         /// <summary>
-        /// Y Position in WGS84 frame in 1e7 * degrees
+        /// Y Position in WGS84 frame
         /// OriginName: lon_int, Units: degE7, IsExtended: false
         /// </summary>
         public int LonInt { get; set; }
         /// <summary>
-        /// Altitude in meters in AMSL altitude, not WGS84 if absolute or relative, above terrain if GLOBAL_TERRAIN_ALT_INT
+        /// Altitude (MSL, Relative to home, or AGL - depending on frame)
         /// OriginName: alt, Units: m, IsExtended: false
         /// </summary>
         public float Alt { get; set; }
         /// <summary>
-        /// X velocity in NED frame in meter / s
+        /// X velocity in NED frame
         /// OriginName: vx, Units: m/s, IsExtended: false
         /// </summary>
         public float Vx { get; set; }
         /// <summary>
-        /// Y velocity in NED frame in meter / s
+        /// Y velocity in NED frame
         /// OriginName: vy, Units: m/s, IsExtended: false
         /// </summary>
         public float Vy { get; set; }
         /// <summary>
-        /// Z velocity in NED frame in meter / s
+        /// Z velocity in NED frame
         /// OriginName: vz, Units: m/s, IsExtended: false
         /// </summary>
         public float Vz { get; set; }
@@ -10390,20 +10743,20 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Afz { get; set; }
         /// <summary>
-        /// yaw setpoint in rad
+        /// yaw setpoint
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
         /// <summary>
-        /// yaw rate setpoint in rad/s
+        /// yaw rate setpoint
         /// OriginName: yaw_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float YawRate { get; set; }
         /// <summary>
-        /// Bitmask to indicate which dimensions should be ignored by the vehicle: a value of 0b0000000000000000 or 0b0000001000000000 indicates that none of the setpoint dimensions should be ignored. If bit 10 is set the floats afx afy afz should be interpreted as force instead of acceleration. Mapping: bit 1: x, bit 2: y, bit 3: z, bit 4: vx, bit 5: vy, bit 6: vz, bit 7: ax, bit 8: ay, bit 9: az, bit 10: is force setpoint, bit 11: yaw, bit 12: yaw rate
+        /// Bitmap to indicate which dimensions should be ignored by the vehicle.
         /// OriginName: type_mask, Units: , IsExtended: false
         /// </summary>
-        public ushort TypeMask { get; set; }
+        public PositionTargetTypemask TypeMask { get; set; }
         /// <summary>
         /// System ID
         /// OriginName: target_system, Units: , IsExtended: false
@@ -10459,7 +10812,7 @@ namespace Asv.Mavlink.V2.Common
             Afz = BitConverter.ToSingle(buffer, index);index+=4;
             Yaw = BitConverter.ToSingle(buffer, index);index+=4;
             YawRate = BitConverter.ToSingle(buffer, index);index+=4;
-            TypeMask = BitConverter.ToUInt16(buffer,index);index+=2;
+            TypeMask = (PositionTargetTypemask)BitConverter.ToUInt16(buffer,index);index+=2;
             CoordinateFrame = (MavFrame)buffer[index++];
         }
 
@@ -10477,43 +10830,43 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Afz).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Yaw).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(YawRate).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(TypeMask).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes((ushort)TypeMask).CopyTo(buffer, index);index+=2;
             buffer[index] = (byte)CoordinateFrame;index+=1;
             return index; // /*PayloadByteSize*/51;
         }
 
         /// <summary>
-        /// Timestamp in milliseconds since system boot. The rationale for the timestamp in the setpoint is to allow the system to compensate for the transport delay of the setpoint. This allows the system to compensate processing latency.
+        /// Timestamp (time since system boot). The rationale for the timestamp in the setpoint is to allow the system to compensate for the transport delay of the setpoint. This allows the system to compensate processing latency.
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// X Position in WGS84 frame in 1e7 * degrees
+        /// X Position in WGS84 frame
         /// OriginName: lat_int, Units: degE7, IsExtended: false
         /// </summary>
         public int LatInt { get; set; }
         /// <summary>
-        /// Y Position in WGS84 frame in 1e7 * degrees
+        /// Y Position in WGS84 frame
         /// OriginName: lon_int, Units: degE7, IsExtended: false
         /// </summary>
         public int LonInt { get; set; }
         /// <summary>
-        /// Altitude in meters in AMSL altitude, not WGS84 if absolute or relative, above terrain if GLOBAL_TERRAIN_ALT_INT
+        /// Altitude (MSL, AGL or relative to home altitude, depending on frame)
         /// OriginName: alt, Units: m, IsExtended: false
         /// </summary>
         public float Alt { get; set; }
         /// <summary>
-        /// X velocity in NED frame in meter / s
+        /// X velocity in NED frame
         /// OriginName: vx, Units: m/s, IsExtended: false
         /// </summary>
         public float Vx { get; set; }
         /// <summary>
-        /// Y velocity in NED frame in meter / s
+        /// Y velocity in NED frame
         /// OriginName: vy, Units: m/s, IsExtended: false
         /// </summary>
         public float Vy { get; set; }
         /// <summary>
-        /// Z velocity in NED frame in meter / s
+        /// Z velocity in NED frame
         /// OriginName: vz, Units: m/s, IsExtended: false
         /// </summary>
         public float Vz { get; set; }
@@ -10533,20 +10886,20 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Afz { get; set; }
         /// <summary>
-        /// yaw setpoint in rad
+        /// yaw setpoint
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
         /// <summary>
-        /// yaw rate setpoint in rad/s
+        /// yaw rate setpoint
         /// OriginName: yaw_rate, Units: rad/s, IsExtended: false
         /// </summary>
         public float YawRate { get; set; }
         /// <summary>
-        /// Bitmask to indicate which dimensions should be ignored by the vehicle: a value of 0b0000000000000000 or 0b0000001000000000 indicates that none of the setpoint dimensions should be ignored. If bit 10 is set the floats afx afy afz should be interpreted as force instead of acceleration. Mapping: bit 1: x, bit 2: y, bit 3: z, bit 4: vx, bit 5: vy, bit 6: vz, bit 7: ax, bit 8: ay, bit 9: az, bit 10: is force setpoint, bit 11: yaw, bit 12: yaw rate
+        /// Bitmap to indicate which dimensions should be ignored by the vehicle.
         /// OriginName: type_mask, Units: , IsExtended: false
         /// </summary>
-        public ushort TypeMask { get; set; }
+        public PositionTargetTypemask TypeMask { get; set; }
         /// <summary>
         /// Valid options are: MAV_FRAME_GLOBAL_INT = 5, MAV_FRAME_GLOBAL_RELATIVE_ALT_INT = 6, MAV_FRAME_GLOBAL_TERRAIN_ALT_INT = 11
         /// OriginName: coordinate_frame, Units: , IsExtended: false
@@ -10602,7 +10955,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -10638,7 +10991,7 @@ namespace Asv.Mavlink.V2.Common
         public float Yaw { get; set; }
     }
     /// <summary>
-    /// DEPRECATED PACKET! Suffers from missing airspeed fields and singularities due to Euler angles. Please use HIL_STATE_QUATERNION instead. Sent from simulation to autopilot. This packet is useful for high throughput applications such as hardware in the loop simulations.
+    /// Sent from simulation to autopilot. This packet is useful for high throughput applications such as hardware in the loop simulations.
     ///  HIL_STATE
     /// </summary>
     public class HilStatePacket: PacketV2<HilStatePayload>
@@ -10704,82 +11057,82 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Roll angle (rad)
+        /// Roll angle
         /// OriginName: roll, Units: rad, IsExtended: false
         /// </summary>
         public float Roll { get; set; }
         /// <summary>
-        /// Pitch angle (rad)
+        /// Pitch angle
         /// OriginName: pitch, Units: rad, IsExtended: false
         /// </summary>
         public float Pitch { get; set; }
         /// <summary>
-        /// Yaw angle (rad)
+        /// Yaw angle
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
         /// <summary>
-        /// Body frame roll / phi angular speed (rad/s)
+        /// Body frame roll / phi angular speed
         /// OriginName: rollspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Rollspeed { get; set; }
         /// <summary>
-        /// Body frame pitch / theta angular speed (rad/s)
+        /// Body frame pitch / theta angular speed
         /// OriginName: pitchspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Pitchspeed { get; set; }
         /// <summary>
-        /// Body frame yaw / psi angular speed (rad/s)
+        /// Body frame yaw / psi angular speed
         /// OriginName: yawspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Yawspeed { get; set; }
         /// <summary>
-        /// Latitude, expressed as degrees * 1E7
+        /// Latitude
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude, expressed as degrees * 1E7
+        /// Longitude
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude in meters, expressed as * 1000 (millimeters)
+        /// Altitude
         /// OriginName: alt, Units: mm, IsExtended: false
         /// </summary>
         public int Alt { get; set; }
         /// <summary>
-        /// Ground X Speed (Latitude), expressed as m/s * 100
+        /// Ground X Speed (Latitude)
         /// OriginName: vx, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vx { get; set; }
         /// <summary>
-        /// Ground Y Speed (Longitude), expressed as m/s * 100
+        /// Ground Y Speed (Longitude)
         /// OriginName: vy, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vy { get; set; }
         /// <summary>
-        /// Ground Z Speed (Altitude), expressed as m/s * 100
+        /// Ground Z Speed (Altitude)
         /// OriginName: vz, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vz { get; set; }
         /// <summary>
-        /// X acceleration (mg)
+        /// X acceleration
         /// OriginName: xacc, Units: mG, IsExtended: false
         /// </summary>
         public short Xacc { get; set; }
         /// <summary>
-        /// Y acceleration (mg)
+        /// Y acceleration
         /// OriginName: yacc, Units: mG, IsExtended: false
         /// </summary>
         public short Yacc { get; set; }
         /// <summary>
-        /// Z acceleration (mg)
+        /// Z acceleration
         /// OriginName: zacc, Units: mG, IsExtended: false
         /// </summary>
         public short Zacc { get; set; }
@@ -10841,7 +11194,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -10886,7 +11239,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Aux4 { get; set; }
         /// <summary>
-        /// System mode (MAV_MODE)
+        /// System mode.
         /// OriginName: mode, Units: , IsExtended: false
         /// </summary>
         public MavMode Mode { get; set; }
@@ -10959,72 +11312,72 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// RC channel 1 value, in microseconds
+        /// RC channel 1 value
         /// OriginName: chan1_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan1Raw { get; set; }
         /// <summary>
-        /// RC channel 2 value, in microseconds
+        /// RC channel 2 value
         /// OriginName: chan2_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan2Raw { get; set; }
         /// <summary>
-        /// RC channel 3 value, in microseconds
+        /// RC channel 3 value
         /// OriginName: chan3_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan3Raw { get; set; }
         /// <summary>
-        /// RC channel 4 value, in microseconds
+        /// RC channel 4 value
         /// OriginName: chan4_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan4Raw { get; set; }
         /// <summary>
-        /// RC channel 5 value, in microseconds
+        /// RC channel 5 value
         /// OriginName: chan5_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan5Raw { get; set; }
         /// <summary>
-        /// RC channel 6 value, in microseconds
+        /// RC channel 6 value
         /// OriginName: chan6_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan6Raw { get; set; }
         /// <summary>
-        /// RC channel 7 value, in microseconds
+        /// RC channel 7 value
         /// OriginName: chan7_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan7Raw { get; set; }
         /// <summary>
-        /// RC channel 8 value, in microseconds
+        /// RC channel 8 value
         /// OriginName: chan8_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan8Raw { get; set; }
         /// <summary>
-        /// RC channel 9 value, in microseconds
+        /// RC channel 9 value
         /// OriginName: chan9_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan9Raw { get; set; }
         /// <summary>
-        /// RC channel 10 value, in microseconds
+        /// RC channel 10 value
         /// OriginName: chan10_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan10Raw { get; set; }
         /// <summary>
-        /// RC channel 11 value, in microseconds
+        /// RC channel 11 value
         /// OriginName: chan11_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan11Raw { get; set; }
         /// <summary>
-        /// RC channel 12 value, in microseconds
+        /// RC channel 12 value
         /// OriginName: chan12_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan12Raw { get; set; }
         /// <summary>
-        /// Receive signal strength indicator, 0: 0%, 255: 100%
+        /// Receive signal strength indicator. Values: [0-100], 255: invalid/unknown.
         /// OriginName: rssi, Units: , IsExtended: false
         /// </summary>
         public byte Rssi { get; set; }
@@ -11080,7 +11433,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -11096,7 +11449,7 @@ namespace Asv.Mavlink.V2.Common
         public float[] Controls { get; set; } = new float[16];
         public byte GetControlsMaxItemsCount() => 16;
         /// <summary>
-        /// System mode (MAV_MODE), includes arming state.
+        /// System mode. Includes arming state.
         /// OriginName: mode, Units: , IsExtended: false
         /// </summary>
         public MavMode Mode { get; set; }
@@ -11160,33 +11513,33 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (UNIX)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Flow in meters in x-sensor direction, angular-speed compensated
+        /// Flow in x-sensor direction, angular-speed compensated
         /// OriginName: flow_comp_m_x, Units: m, IsExtended: false
         /// </summary>
         public float FlowCompMX { get; set; }
         /// <summary>
-        /// Flow in meters in y-sensor direction, angular-speed compensated
+        /// Flow in y-sensor direction, angular-speed compensated
         /// OriginName: flow_comp_m_y, Units: m, IsExtended: false
         /// </summary>
         public float FlowCompMY { get; set; }
         /// <summary>
-        /// Ground distance in meters. Positive value: distance known. Negative value: Unknown distance
+        /// Ground distance. Positive value: distance known. Negative value: Unknown distance
         /// OriginName: ground_distance, Units: m, IsExtended: false
         /// </summary>
         public float GroundDistance { get; set; }
         /// <summary>
-        /// Flow in pixels * 10 in x-sensor direction (dezi-pixels)
-        /// OriginName: flow_x, Units: dpixels, IsExtended: false
+        /// Flow in x-sensor direction
+        /// OriginName: flow_x, Units: dpix, IsExtended: false
         /// </summary>
         public short FlowX { get; set; }
         /// <summary>
-        /// Flow in pixels * 10 in y-sensor direction (dezi-pixels)
-        /// OriginName: flow_y, Units: dpixels, IsExtended: false
+        /// Flow in y-sensor direction
+        /// OriginName: flow_y, Units: dpix, IsExtended: false
         /// </summary>
         public short FlowY { get; set; }
         /// <summary>
@@ -11200,17 +11553,18 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Quality { get; set; }
         /// <summary>
-        /// Flow rate in radians/second about X axis
+        /// Flow rate about X axis
         /// OriginName: flow_rate_x, Units: rad/s, IsExtended: true
         /// </summary>
         public float FlowRateX { get; set; }
         /// <summary>
-        /// Flow rate in radians/second about Y axis
+        /// Flow rate about Y axis
         /// OriginName: flow_rate_y, Units: rad/s, IsExtended: true
         /// </summary>
         public float FlowRateY { get; set; }
     }
     /// <summary>
+    /// Global position/attitude estimate from a vision source.
     ///  GLOBAL_VISION_POSITION_ESTIMATE
     /// </summary>
     public class GlobalVisionPositionEstimatePacket: PacketV2<GlobalVisionPositionEstimatePayload>
@@ -11269,7 +11623,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds, synced to UNIX time or since system boot)
+        /// Timestamp (UNIX time or since system boot)
         /// OriginName: usec, Units: us, IsExtended: false
         /// </summary>
         public ulong Usec { get; set; }
@@ -11289,17 +11643,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Z { get; set; }
         /// <summary>
-        /// Roll angle in rad
+        /// Roll angle
         /// OriginName: roll, Units: rad, IsExtended: false
         /// </summary>
         public float Roll { get; set; }
         /// <summary>
-        /// Pitch angle in rad
+        /// Pitch angle
         /// OriginName: pitch, Units: rad, IsExtended: false
         /// </summary>
         public float Pitch { get; set; }
         /// <summary>
-        /// Yaw angle in rad
+        /// Yaw angle
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
@@ -11310,6 +11664,7 @@ namespace Asv.Mavlink.V2.Common
         public float[] Covariance { get; } = new float[21];
     }
     /// <summary>
+    /// Global position/attitude estimate from a vision source.
     ///  VISION_POSITION_ESTIMATE
     /// </summary>
     public class VisionPositionEstimatePacket: PacketV2<VisionPositionEstimatePayload>
@@ -11368,7 +11723,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds, synced to UNIX time or since system boot)
+        /// Timestamp (UNIX time or time since system boot)
         /// OriginName: usec, Units: us, IsExtended: false
         /// </summary>
         public ulong Usec { get; set; }
@@ -11388,17 +11743,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Z { get; set; }
         /// <summary>
-        /// Roll angle in rad
+        /// Roll angle
         /// OriginName: roll, Units: rad, IsExtended: false
         /// </summary>
         public float Roll { get; set; }
         /// <summary>
-        /// Pitch angle in rad
+        /// Pitch angle
         /// OriginName: pitch, Units: rad, IsExtended: false
         /// </summary>
         public float Pitch { get; set; }
         /// <summary>
-        /// Yaw angle in rad
+        /// Yaw angle
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
@@ -11409,6 +11764,7 @@ namespace Asv.Mavlink.V2.Common
         public float[] Covariance { get; } = new float[21];
     }
     /// <summary>
+    /// Speed estimate from a vision source.
     ///  VISION_SPEED_ESTIMATE
     /// </summary>
     public class VisionSpeedEstimatePacket: PacketV2<VisionSpeedEstimatePayload>
@@ -11461,7 +11817,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds, synced to UNIX time or since system boot)
+        /// Timestamp (UNIX time or time since system boot)
         /// OriginName: usec, Units: us, IsExtended: false
         /// </summary>
         public ulong Usec { get; set; }
@@ -11487,6 +11843,7 @@ namespace Asv.Mavlink.V2.Common
         public float[] Covariance { get; } = new float[9];
     }
     /// <summary>
+    /// Global position estimate from a Vicon motion system source.
     ///  VICON_POSITION_ESTIMATE
     /// </summary>
     public class ViconPositionEstimatePacket: PacketV2<ViconPositionEstimatePayload>
@@ -11545,7 +11902,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds, synced to UNIX time or since system boot)
+        /// Timestamp (UNIX time or time since system boot)
         /// OriginName: usec, Units: us, IsExtended: false
         /// </summary>
         public ulong Usec { get; set; }
@@ -11565,17 +11922,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Z { get; set; }
         /// <summary>
-        /// Roll angle in rad
+        /// Roll angle
         /// OriginName: roll, Units: rad, IsExtended: false
         /// </summary>
         public float Roll { get; set; }
         /// <summary>
-        /// Pitch angle in rad
+        /// Pitch angle
         /// OriginName: pitch, Units: rad, IsExtended: false
         /// </summary>
         public float Pitch { get; set; }
         /// <summary>
-        /// Yaw angle in rad
+        /// Yaw angle
         /// OriginName: yaw, Units: rad, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
@@ -11650,62 +12007,62 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds, synced to UNIX time or since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// X acceleration (m/s^2)
+        /// X acceleration
         /// OriginName: xacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Xacc { get; set; }
         /// <summary>
-        /// Y acceleration (m/s^2)
+        /// Y acceleration
         /// OriginName: yacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Yacc { get; set; }
         /// <summary>
-        /// Z acceleration (m/s^2)
+        /// Z acceleration
         /// OriginName: zacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Zacc { get; set; }
         /// <summary>
-        /// Angular speed around X axis (rad / sec)
+        /// Angular speed around X axis
         /// OriginName: xgyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Xgyro { get; set; }
         /// <summary>
-        /// Angular speed around Y axis (rad / sec)
+        /// Angular speed around Y axis
         /// OriginName: ygyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Ygyro { get; set; }
         /// <summary>
-        /// Angular speed around Z axis (rad / sec)
+        /// Angular speed around Z axis
         /// OriginName: zgyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Zgyro { get; set; }
         /// <summary>
-        /// X Magnetic field (Gauss)
+        /// X Magnetic field
         /// OriginName: xmag, Units: gauss, IsExtended: false
         /// </summary>
         public float Xmag { get; set; }
         /// <summary>
-        /// Y Magnetic field (Gauss)
+        /// Y Magnetic field
         /// OriginName: ymag, Units: gauss, IsExtended: false
         /// </summary>
         public float Ymag { get; set; }
         /// <summary>
-        /// Z Magnetic field (Gauss)
+        /// Z Magnetic field
         /// OriginName: zmag, Units: gauss, IsExtended: false
         /// </summary>
         public float Zmag { get; set; }
         /// <summary>
-        /// Absolute pressure in millibar
+        /// Absolute pressure
         /// OriginName: abs_pressure, Units: mbar, IsExtended: false
         /// </summary>
         public float AbsPressure { get; set; }
         /// <summary>
-        /// Differential pressure in millibar
+        /// Differential pressure
         /// OriginName: diff_pressure, Units: mbar, IsExtended: false
         /// </summary>
         public float DiffPressure { get; set; }
@@ -11715,12 +12072,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float PressureAlt { get; set; }
         /// <summary>
-        /// Temperature in degrees celsius
+        /// Temperature
         /// OriginName: temperature, Units: degC, IsExtended: false
         /// </summary>
         public float Temperature { get; set; }
         /// <summary>
-        /// Bitmask for fields that have updated since last message, bit 0 = xacc, bit 12: temperature
+        /// Bitmap for fields that have updated since last message, bit 0 = xacc, bit 12: temperature
         /// OriginName: fields_updated, Units: , IsExtended: false
         /// </summary>
         public ushort FieldsUpdated { get; set; }
@@ -11784,52 +12141,52 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds, synced to UNIX time or since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Integration time in microseconds. Divide integrated_x and integrated_y by the integration time to obtain average flow. The integration time also indicates the.
+        /// Integration time. Divide integrated_x and integrated_y by the integration time to obtain average flow. The integration time also indicates the.
         /// OriginName: integration_time_us, Units: us, IsExtended: false
         /// </summary>
         public uint IntegrationTimeUs { get; set; }
         /// <summary>
-        /// Flow in radians around X axis (Sensor RH rotation about the X axis induces a positive flow. Sensor linear motion along the positive Y axis induces a negative flow.)
+        /// Flow around X axis (Sensor RH rotation about the X axis induces a positive flow. Sensor linear motion along the positive Y axis induces a negative flow.)
         /// OriginName: integrated_x, Units: rad, IsExtended: false
         /// </summary>
         public float IntegratedX { get; set; }
         /// <summary>
-        /// Flow in radians around Y axis (Sensor RH rotation about the Y axis induces a positive flow. Sensor linear motion along the positive X axis induces a positive flow.)
+        /// Flow around Y axis (Sensor RH rotation about the Y axis induces a positive flow. Sensor linear motion along the positive X axis induces a positive flow.)
         /// OriginName: integrated_y, Units: rad, IsExtended: false
         /// </summary>
         public float IntegratedY { get; set; }
         /// <summary>
-        /// RH rotation around X axis (rad)
+        /// RH rotation around X axis
         /// OriginName: integrated_xgyro, Units: rad, IsExtended: false
         /// </summary>
         public float IntegratedXgyro { get; set; }
         /// <summary>
-        /// RH rotation around Y axis (rad)
+        /// RH rotation around Y axis
         /// OriginName: integrated_ygyro, Units: rad, IsExtended: false
         /// </summary>
         public float IntegratedYgyro { get; set; }
         /// <summary>
-        /// RH rotation around Z axis (rad)
+        /// RH rotation around Z axis
         /// OriginName: integrated_zgyro, Units: rad, IsExtended: false
         /// </summary>
         public float IntegratedZgyro { get; set; }
         /// <summary>
-        /// Time in microseconds since the distance was sampled.
+        /// Time since the distance was sampled.
         /// OriginName: time_delta_distance_us, Units: us, IsExtended: false
         /// </summary>
         public uint TimeDeltaDistanceUs { get; set; }
         /// <summary>
-        /// Distance to the center of the flow field in meters. Positive value (including zero): distance known. Negative value: Unknown distance.
+        /// Distance to the center of the flow field. Positive value (including zero): distance known. Negative value: Unknown distance.
         /// OriginName: distance, Units: m, IsExtended: false
         /// </summary>
         public float Distance { get; set; }
         /// <summary>
-        /// Temperature * 100 in centi-degrees Celsius
+        /// Temperature
         /// OriginName: temperature, Units: cdegC, IsExtended: false
         /// </summary>
         public short Temperature { get; set; }
@@ -11909,62 +12266,62 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds, synced to UNIX time or since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// X acceleration (m/s^2)
+        /// X acceleration
         /// OriginName: xacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Xacc { get; set; }
         /// <summary>
-        /// Y acceleration (m/s^2)
+        /// Y acceleration
         /// OriginName: yacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Yacc { get; set; }
         /// <summary>
-        /// Z acceleration (m/s^2)
+        /// Z acceleration
         /// OriginName: zacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Zacc { get; set; }
         /// <summary>
-        /// Angular speed around X axis in body frame (rad / sec)
+        /// Angular speed around X axis in body frame
         /// OriginName: xgyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Xgyro { get; set; }
         /// <summary>
-        /// Angular speed around Y axis in body frame (rad / sec)
+        /// Angular speed around Y axis in body frame
         /// OriginName: ygyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Ygyro { get; set; }
         /// <summary>
-        /// Angular speed around Z axis in body frame (rad / sec)
+        /// Angular speed around Z axis in body frame
         /// OriginName: zgyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Zgyro { get; set; }
         /// <summary>
-        /// X Magnetic field (Gauss)
+        /// X Magnetic field
         /// OriginName: xmag, Units: gauss, IsExtended: false
         /// </summary>
         public float Xmag { get; set; }
         /// <summary>
-        /// Y Magnetic field (Gauss)
+        /// Y Magnetic field
         /// OriginName: ymag, Units: gauss, IsExtended: false
         /// </summary>
         public float Ymag { get; set; }
         /// <summary>
-        /// Z Magnetic field (Gauss)
+        /// Z Magnetic field
         /// OriginName: zmag, Units: gauss, IsExtended: false
         /// </summary>
         public float Zmag { get; set; }
         /// <summary>
-        /// Absolute pressure in millibar
+        /// Absolute pressure
         /// OriginName: abs_pressure, Units: mbar, IsExtended: false
         /// </summary>
         public float AbsPressure { get; set; }
         /// <summary>
-        /// Differential pressure (airspeed) in millibar
+        /// Differential pressure (airspeed)
         /// OriginName: diff_pressure, Units: mbar, IsExtended: false
         /// </summary>
         public float DiffPressure { get; set; }
@@ -11974,12 +12331,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float PressureAlt { get; set; }
         /// <summary>
-        /// Temperature in degrees celsius
+        /// Temperature
         /// OriginName: temperature, Units: degC, IsExtended: false
         /// </summary>
         public float Temperature { get; set; }
         /// <summary>
-        /// Bitmask for fields that have updated since last message, bit 0 = xacc, bit 12: temperature, bit 31: full reset of attitude/position/velocities/etc was performed in sim.
+        /// Bitmap for fields that have updated since last message, bit 0 = xacc, bit 12: temperature, bit 31: full reset of attitude/position/velocities/etc was performed in sim.
         /// OriginName: fields_updated, Units: , IsExtended: false
         /// </summary>
         public uint FieldsUpdated { get; set; }
@@ -12096,47 +12453,47 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Yaw { get; set; }
         /// <summary>
-        /// X acceleration m/s/s
+        /// X acceleration
         /// OriginName: xacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Xacc { get; set; }
         /// <summary>
-        /// Y acceleration m/s/s
+        /// Y acceleration
         /// OriginName: yacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Yacc { get; set; }
         /// <summary>
-        /// Z acceleration m/s/s
+        /// Z acceleration
         /// OriginName: zacc, Units: m/s/s, IsExtended: false
         /// </summary>
         public float Zacc { get; set; }
         /// <summary>
-        /// Angular speed around X axis rad/s
+        /// Angular speed around X axis
         /// OriginName: xgyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Xgyro { get; set; }
         /// <summary>
-        /// Angular speed around Y axis rad/s
+        /// Angular speed around Y axis
         /// OriginName: ygyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Ygyro { get; set; }
         /// <summary>
-        /// Angular speed around Z axis rad/s
+        /// Angular speed around Z axis
         /// OriginName: zgyro, Units: rad/s, IsExtended: false
         /// </summary>
         public float Zgyro { get; set; }
         /// <summary>
-        /// Latitude in degrees
+        /// Latitude
         /// OriginName: lat, Units: deg, IsExtended: false
         /// </summary>
         public float Lat { get; set; }
         /// <summary>
-        /// Longitude in degrees
+        /// Longitude
         /// OriginName: lon, Units: deg, IsExtended: false
         /// </summary>
         public float Lon { get; set; }
         /// <summary>
-        /// Altitude in meters
+        /// Altitude
         /// OriginName: alt, Units: m, IsExtended: false
         /// </summary>
         public float Alt { get; set; }
@@ -12151,17 +12508,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float StdDevVert { get; set; }
         /// <summary>
-        /// True velocity in m/s in NORTH direction in earth-fixed NED frame
+        /// True velocity in NORTH direction in earth-fixed NED frame
         /// OriginName: vn, Units: m/s, IsExtended: false
         /// </summary>
         public float Vn { get; set; }
         /// <summary>
-        /// True velocity in m/s in EAST direction in earth-fixed NED frame
+        /// True velocity in EAST direction in earth-fixed NED frame
         /// OriginName: ve, Units: m/s, IsExtended: false
         /// </summary>
         public float Ve { get; set; }
         /// <summary>
-        /// True velocity in m/s in DOWN direction in earth-fixed NED frame
+        /// True velocity in DOWN direction in earth-fixed NED frame
         /// OriginName: vd, Units: m/s, IsExtended: false
         /// </summary>
         public float Vd { get; set; }
@@ -12235,7 +12592,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Remrssi { get; set; }
         /// <summary>
-        /// Remaining free buffer space in percent.
+        /// Remaining free buffer space.
         /// OriginName: txbuf, Units: %, IsExtended: false
         /// </summary>
         public byte Txbuf { get; set; }
@@ -12410,7 +12767,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp for the image frame in microseconds
+        /// Timestamp for image frame (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -12482,57 +12839,57 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Latitude (WGS84), in degrees * 1E7
+        /// Latitude (WGS84)
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude (WGS84), in degrees * 1E7
+        /// Longitude (WGS84)
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude (AMSL, not WGS84), in meters * 1000 (positive for up)
+        /// Altitude (MSL). Positive for up.
         /// OriginName: alt, Units: mm, IsExtended: false
         /// </summary>
         public int Alt { get; set; }
         /// <summary>
-        /// GPS HDOP horizontal dilution of position in cm (m*100). If unknown, set to: 65535
-        /// OriginName: eph, Units: , IsExtended: false
+        /// GPS HDOP horizontal dilution of position. If unknown, set to: 65535
+        /// OriginName: eph, Units: cm, IsExtended: false
         /// </summary>
         public ushort Eph { get; set; }
         /// <summary>
-        /// GPS VDOP vertical dilution of position in cm (m*100). If unknown, set to: 65535
-        /// OriginName: epv, Units: , IsExtended: false
+        /// GPS VDOP vertical dilution of position. If unknown, set to: 65535
+        /// OriginName: epv, Units: cm, IsExtended: false
         /// </summary>
         public ushort Epv { get; set; }
         /// <summary>
-        /// GPS ground speed in cm/s. If unknown, set to: 65535
+        /// GPS ground speed. If unknown, set to: 65535
         /// OriginName: vel, Units: cm/s, IsExtended: false
         /// </summary>
         public ushort Vel { get; set; }
         /// <summary>
-        /// GPS velocity in cm/s in NORTH direction in earth-fixed NED frame
+        /// GPS velocity in NORTH direction in earth-fixed NED frame
         /// OriginName: vn, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vn { get; set; }
         /// <summary>
-        /// GPS velocity in cm/s in EAST direction in earth-fixed NED frame
+        /// GPS velocity in EAST direction in earth-fixed NED frame
         /// OriginName: ve, Units: cm/s, IsExtended: false
         /// </summary>
         public short Ve { get; set; }
         /// <summary>
-        /// GPS velocity in cm/s in DOWN direction in earth-fixed NED frame
+        /// GPS velocity in DOWN direction in earth-fixed NED frame
         /// OriginName: vd, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vd { get; set; }
         /// <summary>
-        /// Course over ground (NOT heading, but direction of movement) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: 65535
+        /// Course over ground (NOT heading, but direction of movement), 0.0..359.99 degrees. If unknown, set to: 65535
         /// OriginName: cog, Units: cdeg, IsExtended: false
         /// </summary>
         public ushort Cog { get; set; }
@@ -12606,12 +12963,12 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds, synced to UNIX time or since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Integration time in microseconds. Divide integrated_x and integrated_y by the integration time to obtain average flow. The integration time also indicates the.
+        /// Integration time. Divide integrated_x and integrated_y by the integration time to obtain average flow. The integration time also indicates the.
         /// OriginName: integration_time_us, Units: us, IsExtended: false
         /// </summary>
         public uint IntegrationTimeUs { get; set; }
@@ -12626,32 +12983,32 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float IntegratedY { get; set; }
         /// <summary>
-        /// RH rotation around X axis (rad)
+        /// RH rotation around X axis
         /// OriginName: integrated_xgyro, Units: rad, IsExtended: false
         /// </summary>
         public float IntegratedXgyro { get; set; }
         /// <summary>
-        /// RH rotation around Y axis (rad)
+        /// RH rotation around Y axis
         /// OriginName: integrated_ygyro, Units: rad, IsExtended: false
         /// </summary>
         public float IntegratedYgyro { get; set; }
         /// <summary>
-        /// RH rotation around Z axis (rad)
+        /// RH rotation around Z axis
         /// OriginName: integrated_zgyro, Units: rad, IsExtended: false
         /// </summary>
         public float IntegratedZgyro { get; set; }
         /// <summary>
-        /// Time in microseconds since the distance was sampled.
+        /// Time since the distance was sampled.
         /// OriginName: time_delta_distance_us, Units: us, IsExtended: false
         /// </summary>
         public uint TimeDeltaDistanceUs { get; set; }
         /// <summary>
-        /// Distance to the center of the flow field in meters. Positive value (including zero): distance known. Negative value: Unknown distance.
+        /// Distance to the center of the flow field. Positive value (including zero): distance known. Negative value: Unknown distance.
         /// OriginName: distance, Units: m, IsExtended: false
         /// </summary>
         public float Distance { get; set; }
         /// <summary>
-        /// Temperature * 100 in centi-degrees Celsius
+        /// Temperature
         /// OriginName: temperature, Units: cdegC, IsExtended: false
         /// </summary>
         public short Temperature { get; set; }
@@ -12741,7 +13098,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -12752,72 +13109,72 @@ namespace Asv.Mavlink.V2.Common
         public float[] AttitudeQuaternion { get; set; } = new float[4];
         public byte GetAttitudeQuaternionMaxItemsCount() => 4;
         /// <summary>
-        /// Body frame roll / phi angular speed (rad/s)
+        /// Body frame roll / phi angular speed
         /// OriginName: rollspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Rollspeed { get; set; }
         /// <summary>
-        /// Body frame pitch / theta angular speed (rad/s)
+        /// Body frame pitch / theta angular speed
         /// OriginName: pitchspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Pitchspeed { get; set; }
         /// <summary>
-        /// Body frame yaw / psi angular speed (rad/s)
+        /// Body frame yaw / psi angular speed
         /// OriginName: yawspeed, Units: rad/s, IsExtended: false
         /// </summary>
         public float Yawspeed { get; set; }
         /// <summary>
-        /// Latitude, expressed as degrees * 1E7
+        /// Latitude
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude, expressed as degrees * 1E7
+        /// Longitude
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude in meters, expressed as * 1000 (millimeters)
+        /// Altitude
         /// OriginName: alt, Units: mm, IsExtended: false
         /// </summary>
         public int Alt { get; set; }
         /// <summary>
-        /// Ground X Speed (Latitude), expressed as cm/s
+        /// Ground X Speed (Latitude)
         /// OriginName: vx, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vx { get; set; }
         /// <summary>
-        /// Ground Y Speed (Longitude), expressed as cm/s
+        /// Ground Y Speed (Longitude)
         /// OriginName: vy, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vy { get; set; }
         /// <summary>
-        /// Ground Z Speed (Altitude), expressed as cm/s
+        /// Ground Z Speed (Altitude)
         /// OriginName: vz, Units: cm/s, IsExtended: false
         /// </summary>
         public short Vz { get; set; }
         /// <summary>
-        /// Indicated airspeed, expressed as cm/s
+        /// Indicated airspeed
         /// OriginName: ind_airspeed, Units: cm/s, IsExtended: false
         /// </summary>
         public ushort IndAirspeed { get; set; }
         /// <summary>
-        /// True airspeed, expressed as cm/s
+        /// True airspeed
         /// OriginName: true_airspeed, Units: cm/s, IsExtended: false
         /// </summary>
         public ushort TrueAirspeed { get; set; }
         /// <summary>
-        /// X acceleration (mg)
+        /// X acceleration
         /// OriginName: xacc, Units: mG, IsExtended: false
         /// </summary>
         public short Xacc { get; set; }
         /// <summary>
-        /// Y acceleration (mg)
+        /// Y acceleration
         /// OriginName: yacc, Units: mG, IsExtended: false
         /// </summary>
         public short Yacc { get; set; }
         /// <summary>
-        /// Z acceleration (mg)
+        /// Z acceleration
         /// OriginName: zacc, Units: mG, IsExtended: false
         /// </summary>
         public short Zacc { get; set; }
@@ -12877,52 +13234,52 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// X acceleration (mg)
+        /// X acceleration
         /// OriginName: xacc, Units: mG, IsExtended: false
         /// </summary>
         public short Xacc { get; set; }
         /// <summary>
-        /// Y acceleration (mg)
+        /// Y acceleration
         /// OriginName: yacc, Units: mG, IsExtended: false
         /// </summary>
         public short Yacc { get; set; }
         /// <summary>
-        /// Z acceleration (mg)
+        /// Z acceleration
         /// OriginName: zacc, Units: mG, IsExtended: false
         /// </summary>
         public short Zacc { get; set; }
         /// <summary>
-        /// Angular speed around X axis (millirad /sec)
+        /// Angular speed around X axis
         /// OriginName: xgyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Xgyro { get; set; }
         /// <summary>
-        /// Angular speed around Y axis (millirad /sec)
+        /// Angular speed around Y axis
         /// OriginName: ygyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Ygyro { get; set; }
         /// <summary>
-        /// Angular speed around Z axis (millirad /sec)
+        /// Angular speed around Z axis
         /// OriginName: zgyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Zgyro { get; set; }
         /// <summary>
-        /// X Magnetic field (milli tesla)
+        /// X Magnetic field
         /// OriginName: xmag, Units: mT, IsExtended: false
         /// </summary>
         public short Xmag { get; set; }
         /// <summary>
-        /// Y Magnetic field (milli tesla)
+        /// Y Magnetic field
         /// OriginName: ymag, Units: mT, IsExtended: false
         /// </summary>
         public short Ymag { get; set; }
         /// <summary>
-        /// Z Magnetic field (milli tesla)
+        /// Z Magnetic field
         /// OriginName: zmag, Units: mT, IsExtended: false
         /// </summary>
         public short Zmag { get; set; }
@@ -13035,12 +13392,12 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// UTC timestamp of log in seconds since 1970, or 0 if not available
+        /// UTC timestamp of log since 1970, or 0 if not available
         /// OriginName: time_utc, Units: s, IsExtended: false
         /// </summary>
         public uint TimeUtc { get; set; }
         /// <summary>
-        /// Size of the log (may be approximate) in bytes
+        /// Size of the log (may be approximate)
         /// OriginName: size, Units: bytes, IsExtended: false
         /// </summary>
         public uint Size { get; set; }
@@ -13301,7 +13658,7 @@ namespace Asv.Mavlink.V2.Common
         public byte TargetComponent { get; set; }
     }
     /// <summary>
-    /// data for injecting into the onboard GPS (used for DGPS)
+    /// Data for injecting into the onboard GPS (used for DGPS)
     ///  GPS_INJECT_DATA
     /// </summary>
     public class GpsInjectDataPacket: PacketV2<GpsInjectDataPayload>
@@ -13361,12 +13718,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// data length
+        /// Data length
         /// OriginName: len, Units: bytes, IsExtended: false
         /// </summary>
         public byte Len { get; set; }
         /// <summary>
-        /// raw data (110 is enough for 12 satellites of RTCMv2)
+        /// Raw data (110 is enough for 12 satellites of RTCMv2)
         /// OriginName: data, Units: , IsExtended: false
         /// </summary>
         public byte[] Data { get; set; } = new byte[110];
@@ -13431,22 +13788,22 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Latitude (WGS84), in degrees * 1E7
+        /// Latitude (WGS84)
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude (WGS84), in degrees * 1E7
+        /// Longitude (WGS84)
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude (AMSL, not WGS84), in meters * 1000 (positive for up)
+        /// Altitude (MSL). Positive for up.
         /// OriginName: alt, Units: mm, IsExtended: false
         /// </summary>
         public int Alt { get; set; }
@@ -13456,27 +13813,27 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint DgpsAge { get; set; }
         /// <summary>
-        /// GPS HDOP horizontal dilution of position in cm (m*100). If unknown, set to: UINT16_MAX
+        /// GPS HDOP horizontal dilution of position. If unknown, set to: UINT16_MAX
         /// OriginName: eph, Units: cm, IsExtended: false
         /// </summary>
         public ushort Eph { get; set; }
         /// <summary>
-        /// GPS VDOP vertical dilution of position in cm (m*100). If unknown, set to: UINT16_MAX
+        /// GPS VDOP vertical dilution of position. If unknown, set to: UINT16_MAX
         /// OriginName: epv, Units: cm, IsExtended: false
         /// </summary>
         public ushort Epv { get; set; }
         /// <summary>
-        /// GPS ground speed (m/s * 100). If unknown, set to: UINT16_MAX
+        /// GPS ground speed. If unknown, set to: UINT16_MAX
         /// OriginName: vel, Units: cm/s, IsExtended: false
         /// </summary>
         public ushort Vel { get; set; }
         /// <summary>
-        /// Course over ground (NOT heading, but direction of movement) in degrees * 100, 0.0..359.99 degrees. If unknown, set to: UINT16_MAX
+        /// Course over ground (NOT heading, but direction of movement): 0.0..359.99 degrees. If unknown, set to: UINT16_MAX
         /// OriginName: cog, Units: cdeg, IsExtended: false
         /// </summary>
         public ushort Cog { get; set; }
         /// <summary>
-        /// See the GPS_FIX_TYPE enum.
+        /// GPS fix type.
         /// OriginName: fix_type, Units: , IsExtended: false
         /// </summary>
         public GpsFixType FixType { get; set; }
@@ -13532,17 +13889,17 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// 5V rail voltage in millivolts
+        /// 5V rail voltage.
         /// OriginName: Vcc, Units: mV, IsExtended: false
         /// </summary>
         public ushort Vcc { get; set; }
         /// <summary>
-        /// servo rail voltage in millivolts
+        /// Servo rail voltage.
         /// OriginName: Vservo, Units: mV, IsExtended: false
         /// </summary>
         public ushort Vservo { get; set; }
         /// <summary>
-        /// power supply status flags (see MAV_POWER_STATUS enum)
+        /// Bitmap of power supply status flags.
         /// OriginName: flags, Units: , IsExtended: false
         /// </summary>
         public MavPowerStatus Flags { get; set; }
@@ -13607,17 +13964,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint Baudrate { get; set; }
         /// <summary>
-        /// Timeout for reply data in milliseconds
+        /// Timeout for reply data
         /// OriginName: timeout, Units: ms, IsExtended: false
         /// </summary>
         public ushort Timeout { get; set; }
         /// <summary>
-        /// See SERIAL_CONTROL_DEV enum
+        /// Serial control device type.
         /// OriginName: device, Units: , IsExtended: false
         /// </summary>
         public SerialControlDev Device { get; set; }
         /// <summary>
-        /// See SERIAL_CONTROL_FLAG enum
+        /// Bitmap of serial control flags.
         /// OriginName: flags, Units: , IsExtended: false
         /// </summary>
         public SerialControlFlag Flags { get; set; }
@@ -13694,7 +14051,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Time since boot of last baseline message received in ms.
+        /// Time since boot of last baseline message received.
         /// OriginName: time_last_baseline_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeLastBaselineMs { get; set; }
@@ -13704,17 +14061,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint Tow { get; set; }
         /// <summary>
-        /// Current baseline in ECEF x or NED north component in mm.
+        /// Current baseline in ECEF x or NED north component.
         /// OriginName: baseline_a_mm, Units: mm, IsExtended: false
         /// </summary>
         public int BaselineAMm { get; set; }
         /// <summary>
-        /// Current baseline in ECEF y or NED east component in mm.
+        /// Current baseline in ECEF y or NED east component.
         /// OriginName: baseline_b_mm, Units: mm, IsExtended: false
         /// </summary>
         public int BaselineBMm { get; set; }
         /// <summary>
-        /// Current baseline in ECEF z or NED down component in mm.
+        /// Current baseline in ECEF z or NED down component.
         /// OriginName: baseline_c_mm, Units: mm, IsExtended: false
         /// </summary>
         public int BaselineCMm { get; set; }
@@ -13744,7 +14101,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte RtkHealth { get; set; }
         /// <summary>
-        /// Rate of baseline messages being received by GPS, in HZ
+        /// Rate of baseline messages being received by GPS
         /// OriginName: rtk_rate, Units: Hz, IsExtended: false
         /// </summary>
         public byte RtkRate { get; set; }
@@ -13820,7 +14177,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Time since boot of last baseline message received in ms.
+        /// Time since boot of last baseline message received.
         /// OriginName: time_last_baseline_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeLastBaselineMs { get; set; }
@@ -13830,17 +14187,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint Tow { get; set; }
         /// <summary>
-        /// Current baseline in ECEF x or NED north component in mm.
+        /// Current baseline in ECEF x or NED north component.
         /// OriginName: baseline_a_mm, Units: mm, IsExtended: false
         /// </summary>
         public int BaselineAMm { get; set; }
         /// <summary>
-        /// Current baseline in ECEF y or NED east component in mm.
+        /// Current baseline in ECEF y or NED east component.
         /// OriginName: baseline_b_mm, Units: mm, IsExtended: false
         /// </summary>
         public int BaselineBMm { get; set; }
         /// <summary>
-        /// Current baseline in ECEF z or NED down component in mm.
+        /// Current baseline in ECEF z or NED down component.
         /// OriginName: baseline_c_mm, Units: mm, IsExtended: false
         /// </summary>
         public int BaselineCMm { get; set; }
@@ -13870,7 +14227,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte RtkHealth { get; set; }
         /// <summary>
-        /// Rate of baseline messages being received by GPS, in HZ
+        /// Rate of baseline messages being received by GPS
         /// OriginName: rtk_rate, Units: Hz, IsExtended: false
         /// </summary>
         public byte RtkRate { get; set; }
@@ -13940,57 +14297,58 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// X acceleration (mg)
+        /// X acceleration
         /// OriginName: xacc, Units: mG, IsExtended: false
         /// </summary>
         public short Xacc { get; set; }
         /// <summary>
-        /// Y acceleration (mg)
+        /// Y acceleration
         /// OriginName: yacc, Units: mG, IsExtended: false
         /// </summary>
         public short Yacc { get; set; }
         /// <summary>
-        /// Z acceleration (mg)
+        /// Z acceleration
         /// OriginName: zacc, Units: mG, IsExtended: false
         /// </summary>
         public short Zacc { get; set; }
         /// <summary>
-        /// Angular speed around X axis (millirad /sec)
+        /// Angular speed around X axis
         /// OriginName: xgyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Xgyro { get; set; }
         /// <summary>
-        /// Angular speed around Y axis (millirad /sec)
+        /// Angular speed around Y axis
         /// OriginName: ygyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Ygyro { get; set; }
         /// <summary>
-        /// Angular speed around Z axis (millirad /sec)
+        /// Angular speed around Z axis
         /// OriginName: zgyro, Units: mrad/s, IsExtended: false
         /// </summary>
         public short Zgyro { get; set; }
         /// <summary>
-        /// X Magnetic field (milli tesla)
+        /// X Magnetic field
         /// OriginName: xmag, Units: mT, IsExtended: false
         /// </summary>
         public short Xmag { get; set; }
         /// <summary>
-        /// Y Magnetic field (milli tesla)
+        /// Y Magnetic field
         /// OriginName: ymag, Units: mT, IsExtended: false
         /// </summary>
         public short Ymag { get; set; }
         /// <summary>
-        /// Z Magnetic field (milli tesla)
+        /// Z Magnetic field
         /// OriginName: zmag, Units: mT, IsExtended: false
         /// </summary>
         public short Zmag { get; set; }
     }
     /// <summary>
+    /// Handshake message to initiate, control and stop image streaming when using the Image Transmission Protocol: https://mavlink.io/en/services/image_transmission.html.
     ///  DATA_TRANSMISSION_HANDSHAKE
     /// </summary>
     public class DataTransmissionHandshakePacket: PacketV2<DataTransmissionHandshakePayload>
@@ -14020,7 +14378,7 @@ namespace Asv.Mavlink.V2.Common
             Width = BitConverter.ToUInt16(buffer,index);index+=2;
             Height = BitConverter.ToUInt16(buffer,index);index+=2;
             Packets = BitConverter.ToUInt16(buffer,index);index+=2;
-            Type = (byte)buffer[index++];
+            Type = (MavlinkDataStreamType)buffer[index++];
             Payload = (byte)buffer[index++];
             JpgQuality = (byte)buffer[index++];
         }
@@ -14031,49 +14389,50 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Width).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Height).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Packets).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes(Type).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Type;index+=1;
             BitConverter.GetBytes(Payload).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(JpgQuality).CopyTo(buffer, index);index+=1;
             return index; // /*PayloadByteSize*/13;
         }
 
         /// <summary>
-        /// total data size in bytes (set on ACK only)
+        /// total data size (set on ACK only).
         /// OriginName: size, Units: bytes, IsExtended: false
         /// </summary>
         public uint Size { get; set; }
         /// <summary>
-        /// Width of a matrix or image
+        /// Width of a matrix or image.
         /// OriginName: width, Units: , IsExtended: false
         /// </summary>
         public ushort Width { get; set; }
         /// <summary>
-        /// Height of a matrix or image
+        /// Height of a matrix or image.
         /// OriginName: height, Units: , IsExtended: false
         /// </summary>
         public ushort Height { get; set; }
         /// <summary>
-        /// number of packets beeing sent (set on ACK only)
+        /// Number of packets being sent (set on ACK only).
         /// OriginName: packets, Units: , IsExtended: false
         /// </summary>
         public ushort Packets { get; set; }
         /// <summary>
-        /// type of requested/acknowledged data (as defined in ENUM DATA_TYPES in mavlink/include/mavlink_types.h)
+        /// Type of requested/acknowledged data.
         /// OriginName: type, Units: , IsExtended: false
         /// </summary>
-        public byte Type { get; set; }
+        public MavlinkDataStreamType Type { get; set; }
         /// <summary>
-        /// payload size per packet (normally 253 byte, see DATA field size in message ENCAPSULATED_DATA) (set on ACK only)
+        /// Payload size per packet (normally 253 byte, see DATA field size in message ENCAPSULATED_DATA) (set on ACK only).
         /// OriginName: payload, Units: bytes, IsExtended: false
         /// </summary>
         public byte Payload { get; set; }
         /// <summary>
-        /// JPEG quality out of [1,100]
+        /// JPEG quality. Values: [1-100].
         /// OriginName: jpg_quality, Units: %, IsExtended: false
         /// </summary>
         public byte JpgQuality { get; set; }
     }
     /// <summary>
+    /// Data packet for images sent using the Image Transmission Protocol: https://mavlink.io/en/services/image_transmission.html.
     ///  ENCAPSULATED_DATA
     /// </summary>
     public class EncapsulatedDataPacket: PacketV2<EncapsulatedDataPayload>
@@ -14131,6 +14490,7 @@ namespace Asv.Mavlink.V2.Common
         public byte GetDataMaxItemsCount() => 253;
     }
     /// <summary>
+    /// Distance sensor information for an onboard rangefinder.
     ///  DISTANCE_SENSOR
     /// </summary>
     public class DistanceSensorPacket: PacketV2<DistanceSensorPayload>
@@ -14149,7 +14509,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class DistanceSensorPayload : IPayload
     {
-        public byte GetMaxByteSize() => 14;
+        public byte GetMaxByteSize() => 38;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -14164,6 +14524,19 @@ namespace Asv.Mavlink.V2.Common
             Id = (byte)buffer[index++];
             Orientation = (MavSensorOrientation)buffer[index++];
             Covariance = (byte)buffer[index++];
+            // extended field 'HorizontalFov' can be empty
+            if (index >= endIndex) return;
+            HorizontalFov = BitConverter.ToSingle(buffer, index);index+=4;
+            // extended field 'VerticalFov' can be empty
+            if (index >= endIndex) return;
+            VerticalFov = BitConverter.ToSingle(buffer, index);index+=4;
+            // extended field 'Quaternion' can be empty
+            if (index >= endIndex) return;
+            arraySize = 4;
+            for(var i=0;i<arraySize;i++)
+            {
+                Quaternion[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
         }
 
         public int Serialize(byte[] buffer, int index)
@@ -14176,21 +14549,27 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(Id).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)Orientation;index+=1;
             BitConverter.GetBytes(Covariance).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/14;
+            BitConverter.GetBytes(HorizontalFov).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(VerticalFov).CopyTo(buffer, index);index+=4;
+            for(var i=0;i<Quaternion.Length;i++)
+            {
+                BitConverter.GetBytes(Quaternion[i]).CopyTo(buffer, index);index+=4;
+            }
+            return index; // /*PayloadByteSize*/38;
         }
 
         /// <summary>
-        /// Time since system boot
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Minimum distance the sensor can measure in centimeters
+        /// Minimum distance the sensor can measure
         /// OriginName: min_distance, Units: cm, IsExtended: false
         /// </summary>
         public ushort MinDistance { get; set; }
         /// <summary>
-        /// Maximum distance the sensor can measure in centimeters
+        /// Maximum distance the sensor can measure
         /// OriginName: max_distance, Units: cm, IsExtended: false
         /// </summary>
         public ushort MaxDistance { get; set; }
@@ -14200,7 +14579,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort CurrentDistance { get; set; }
         /// <summary>
-        /// Type from MAV_DISTANCE_SENSOR enum.
+        /// Type of distance sensor.
         /// OriginName: type, Units: , IsExtended: false
         /// </summary>
         public MavDistanceSensor Type { get; set; }
@@ -14210,15 +14589,30 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte Id { get; set; }
         /// <summary>
-        /// Direction the sensor faces from MAV_SENSOR_ORIENTATION enum. downward-facing: ROTATION_PITCH_270, upward-facing: ROTATION_PITCH_90, backward-facing: ROTATION_PITCH_180, forward-facing: ROTATION_NONE, left-facing: ROTATION_YAW_90, right-facing: ROTATION_YAW_270
+        /// Direction the sensor faces. downward-facing: ROTATION_PITCH_270, upward-facing: ROTATION_PITCH_90, backward-facing: ROTATION_PITCH_180, forward-facing: ROTATION_NONE, left-facing: ROTATION_YAW_90, right-facing: ROTATION_YAW_270
         /// OriginName: orientation, Units: , IsExtended: false
         /// </summary>
         public MavSensorOrientation Orientation { get; set; }
         /// <summary>
-        /// Measurement covariance in centimeters, 0 for unknown / invalid readings
+        /// Measurement covariance, 0 for unknown / invalid readings
         /// OriginName: covariance, Units: cm, IsExtended: false
         /// </summary>
         public byte Covariance { get; set; }
+        /// <summary>
+        /// Horizontal Field of View (angle) where the distance measurement is valid and the field of view is known. Otherwise this is set to 0.
+        /// OriginName: horizontal_fov, Units: rad, IsExtended: true
+        /// </summary>
+        public float HorizontalFov { get; set; }
+        /// <summary>
+        /// Vertical Field of View (angle) where the distance measurement is valid and the field of view is known. Otherwise this is set to 0.
+        /// OriginName: vertical_fov, Units: rad, IsExtended: true
+        /// </summary>
+        public float VerticalFov { get; set; }
+        /// <summary>
+        /// Quaternion of the sensor orientation in vehicle body frame (w, x, y, z order, zero-rotation is 1, 0, 0, 0). Zero-rotation is along the vehicle body x-axis. This field is required if the orientation is set to MAV_SENSOR_ROTATION_CUSTOM. Set it to 0 if invalid."
+        /// OriginName: quaternion, Units: , IsExtended: true
+        /// </summary>
+        public float[] Quaternion { get; } = new float[4];
     }
     /// <summary>
     /// Request for terrain data and terrain status
@@ -14268,17 +14662,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ulong Mask { get; set; }
         /// <summary>
-        /// Latitude of SW corner of first grid (degrees *10^7)
+        /// Latitude of SW corner of first grid
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude of SW corner of first grid (in degrees *10^7)
+        /// Longitude of SW corner of first grid
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Grid spacing in meters
+        /// Grid spacing
         /// OriginName: grid_spacing, Units: m, IsExtended: false
         /// </summary>
         public ushort GridSpacing { get; set; }
@@ -14336,22 +14730,22 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Latitude of SW corner of first grid (degrees *10^7)
+        /// Latitude of SW corner of first grid
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude of SW corner of first grid (in degrees *10^7)
+        /// Longitude of SW corner of first grid
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Grid spacing in meters
+        /// Grid spacing
         /// OriginName: grid_spacing, Units: m, IsExtended: false
         /// </summary>
         public ushort GridSpacing { get; set; }
         /// <summary>
-        /// Terrain data in meters AMSL
+        /// Terrain data MSL
         /// OriginName: data, Units: m, IsExtended: false
         /// </summary>
         public short[] Data { get; set; } = new short[16];
@@ -14401,12 +14795,12 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Latitude (degrees *10^7)
+        /// Latitude
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude (degrees *10^7)
+        /// Longitude
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
@@ -14460,22 +14854,22 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Latitude (degrees *10^7)
+        /// Latitude
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude (degrees *10^7)
+        /// Longitude
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Terrain height in meters AMSL
+        /// Terrain height MSL
         /// OriginName: terrain_height, Units: m, IsExtended: false
         /// </summary>
         public float TerrainHeight { get; set; }
         /// <summary>
-        /// Current vehicle height above lat/lon terrain height (meters)
+        /// Current vehicle height above lat/lon terrain height
         /// OriginName: current_height, Units: m, IsExtended: false
         /// </summary>
         public float CurrentHeight { get; set; }
@@ -14538,22 +14932,22 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Absolute pressure (hectopascal)
+        /// Absolute pressure
         /// OriginName: press_abs, Units: hPa, IsExtended: false
         /// </summary>
         public float PressAbs { get; set; }
         /// <summary>
-        /// Differential pressure 1 (hectopascal)
+        /// Differential pressure
         /// OriginName: press_diff, Units: hPa, IsExtended: false
         /// </summary>
         public float PressDiff { get; set; }
         /// <summary>
-        /// Temperature measurement (0.01 degrees celsius)
+        /// Temperature measurement
         /// OriginName: temperature, Units: cdegC, IsExtended: false
         /// </summary>
         public short Temperature { get; set; }
@@ -14622,7 +15016,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (micros since boot or Unix epoch)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -14633,17 +15027,17 @@ namespace Asv.Mavlink.V2.Common
         public float[] Q { get; set; } = new float[4];
         public byte GetQMaxItemsCount() => 4;
         /// <summary>
-        /// X position in meters (NED)
+        /// X position (NED)
         /// OriginName: x, Units: m, IsExtended: false
         /// </summary>
         public float X { get; set; }
         /// <summary>
-        /// Y position in meters (NED)
+        /// Y position (NED)
         /// OriginName: y, Units: m, IsExtended: false
         /// </summary>
         public float Y { get; set; }
         /// <summary>
-        /// Z position in meters (NED)
+        /// Z position (NED)
         /// OriginName: z, Units: m, IsExtended: false
         /// </summary>
         public float Z { get; set; }
@@ -14706,7 +15100,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (micros since boot or Unix epoch)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -14781,7 +15175,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (micros since boot or Unix epoch)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -14846,7 +15240,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (micros since boot or Unix epoch)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -14856,7 +15250,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float AltitudeMonotonic { get; set; }
         /// <summary>
-        /// This altitude measure is strictly above mean sea level and might be non-monotonic (it might reset on events like GPS lock or when a new QNH value is set). It should be the altitude to which global altitude waypoints are compared to. Note that it is *not* the GPS altitude, however, most GPS modules already output AMSL by default and not the WGS84 altitude.
+        /// This altitude measure is strictly above mean sea level and might be non-monotonic (it might reset on events like GPS lock or when a new QNH value is set). It should be the altitude to which global altitude waypoints are compared to. Note that it is *not* the GPS altitude, however, most GPS modules already output MSL by default and not the WGS84 altitude.
         /// OriginName: altitude_amsl, Units: m, IsExtended: false
         /// </summary>
         public float AltitudeAmsl { get; set; }
@@ -15010,28 +15404,28 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Absolute pressure (hectopascal)
+        /// Absolute pressure
         /// OriginName: press_abs, Units: hPa, IsExtended: false
         /// </summary>
         public float PressAbs { get; set; }
         /// <summary>
-        /// Differential pressure 1 (hectopascal)
+        /// Differential pressure
         /// OriginName: press_diff, Units: hPa, IsExtended: false
         /// </summary>
         public float PressDiff { get; set; }
         /// <summary>
-        /// Temperature measurement (0.01 degrees celsius)
+        /// Temperature measurement
         /// OriginName: temperature, Units: cdegC, IsExtended: false
         /// </summary>
         public short Temperature { get; set; }
     }
     /// <summary>
-    /// current motion information from a designated system
+    /// Current motion information from a designated system
     ///  FOLLOW_TARGET
     /// </summary>
     public class FollowTargetPacket: PacketV2<FollowTargetPayload>
@@ -15123,7 +15517,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp in milliseconds since system boot
+        /// Timestamp (time since system boot).
         /// OriginName: timestamp, Units: ms, IsExtended: false
         /// </summary>
         public ulong Timestamp { get; set; }
@@ -15133,17 +15527,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ulong CustomState { get; set; }
         /// <summary>
-        /// Latitude (WGS84), in degrees * 1E7
+        /// Latitude (WGS84)
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude (WGS84), in degrees * 1E7
+        /// Longitude (WGS84)
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// AMSL, in meters
+        /// Altitude (MSL)
         /// OriginName: alt, Units: m, IsExtended: false
         /// </summary>
         public float Alt { get; set; }
@@ -15270,7 +15664,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (micros since boot or Unix epoch)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -15425,28 +15819,28 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Consumed charge, in milliampere hours (1 = 1 mAh), -1: autopilot does not provide mAh consumption estimate
+        /// Consumed charge, -1: autopilot does not provide consumption estimate
         /// OriginName: current_consumed, Units: mAh, IsExtended: false
         /// </summary>
         public int CurrentConsumed { get; set; }
         /// <summary>
-        /// Consumed energy, in HectoJoules (intergrated U*I*dt)  (1 = 100 Joule), -1: autopilot does not provide energy consumption estimate
+        /// Consumed energy, -1: autopilot does not provide energy consumption estimate
         /// OriginName: energy_consumed, Units: hJ, IsExtended: false
         /// </summary>
         public int EnergyConsumed { get; set; }
         /// <summary>
-        /// Temperature of the battery in centi-degrees celsius. INT16_MAX for unknown temperature.
+        /// Temperature of the battery. INT16_MAX for unknown temperature.
         /// OriginName: temperature, Units: cdegC, IsExtended: false
         /// </summary>
         public short Temperature { get; set; }
         /// <summary>
-        /// Battery voltage of cells, in millivolts (1 = 1 millivolt). Cells above the valid cell count for this battery should have the UINT16_MAX value.
+        /// Battery voltage of cells. Cells above the valid cell count for this battery should have the UINT16_MAX value.
         /// OriginName: voltages, Units: mV, IsExtended: false
         /// </summary>
         public ushort[] Voltages { get; set; } = new ushort[10];
         public byte GetVoltagesMaxItemsCount() => 10;
         /// <summary>
-        /// Battery current, in 10*milliamperes (1 = 10 milliampere), -1: autopilot does not measure the current
+        /// Battery current, -1: autopilot does not measure the current
         /// OriginName: current_battery, Units: cA, IsExtended: false
         /// </summary>
         public short CurrentBattery { get; set; }
@@ -15466,12 +15860,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public MavBatteryType Type { get; set; }
         /// <summary>
-        /// Remaining battery energy: (0%: 0, 100%: 100), -1: autopilot does not estimate the remaining battery
+        /// Remaining battery energy. Values: [0-100], -1: autopilot does not estimate the remaining battery.
         /// OriginName: battery_remaining, Units: %, IsExtended: false
         /// </summary>
         public sbyte BatteryRemaining { get; set; }
         /// <summary>
-        /// Remaining battery time, in seconds (1 = 1s = 0% energy left), 0: autopilot does not provide remaining battery time estimate
+        /// Remaining battery time, 0: autopilot does not provide remaining battery time estimate
         /// OriginName: time_remaining, Units: s, IsExtended: true
         /// </summary>
         public int TimeRemaining { get; set; }
@@ -15571,7 +15965,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// bitmask of capabilities (see MAV_PROTOCOL_CAPABILITY enum)
+        /// Bitmap of capabilities
         /// OriginName: capabilities, Units: , IsExtended: false
         /// </summary>
         public MavProtocolCapability Capabilities { get; set; }
@@ -15633,7 +16027,7 @@ namespace Asv.Mavlink.V2.Common
         public byte[] Uid2 { get; } = new byte[18];
     }
     /// <summary>
-    /// The location of a landing area captured from a downward facing camera
+    /// The location of a landing target. See: https://mavlink.io/en/services/landing_target.html
     ///  LANDING_TARGET
     /// </summary>
     public class LandingTargetPacket: PacketV2<LandingTargetPayload>
@@ -15714,32 +16108,32 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (micros since boot or Unix epoch)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// X-axis angular offset (in radians) of the target from the center of the image
+        /// X-axis angular offset of the target from the center of the image
         /// OriginName: angle_x, Units: rad, IsExtended: false
         /// </summary>
         public float AngleX { get; set; }
         /// <summary>
-        /// Y-axis angular offset (in radians) of the target from the center of the image
+        /// Y-axis angular offset of the target from the center of the image
         /// OriginName: angle_y, Units: rad, IsExtended: false
         /// </summary>
         public float AngleY { get; set; }
         /// <summary>
-        /// Distance to the target from the vehicle in meters
+        /// Distance to the target from the vehicle
         /// OriginName: distance, Units: m, IsExtended: false
         /// </summary>
         public float Distance { get; set; }
         /// <summary>
-        /// Size in radians of target along x-axis
+        /// Size of target along x-axis
         /// OriginName: size_x, Units: rad, IsExtended: false
         /// </summary>
         public float SizeX { get; set; }
         /// <summary>
-        /// Size in radians of target along y-axis
+        /// Size of target along y-axis
         /// OriginName: size_y, Units: rad, IsExtended: false
         /// </summary>
         public float SizeY { get; set; }
@@ -15749,22 +16143,22 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetNum { get; set; }
         /// <summary>
-        /// MAV_FRAME enum specifying the whether the following feilds are earth-frame, body-frame, etc.
+        /// Coordinate frame used for following fields.
         /// OriginName: frame, Units: , IsExtended: false
         /// </summary>
         public MavFrame Frame { get; set; }
         /// <summary>
-        /// X Position of the landing target on MAV_FRAME
+        /// X Position of the landing target in MAV_FRAME
         /// OriginName: x, Units: m, IsExtended: true
         /// </summary>
         public float X { get; set; }
         /// <summary>
-        /// Y Position of the landing target on MAV_FRAME
+        /// Y Position of the landing target in MAV_FRAME
         /// OriginName: y, Units: m, IsExtended: true
         /// </summary>
         public float Y { get; set; }
         /// <summary>
-        /// Z Position of the landing target on MAV_FRAME
+        /// Z Position of the landing target in MAV_FRAME
         /// OriginName: z, Units: m, IsExtended: true
         /// </summary>
         public float Z { get; set; }
@@ -15774,18 +16168,18 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float[] Q { get; } = new float[4];
         /// <summary>
-        /// LANDING_TARGET_TYPE enum specifying the type of landing target
+        /// Type of landing target
         /// OriginName: type, Units: , IsExtended: true
         /// </summary>
         public LandingTargetType Type { get; set; }
         /// <summary>
-        /// Boolean indicating known position (1) or default unkown position (0), for validation of positioning of the landing target
+        /// Boolean indicating whether the position fields (x, y, z, q, type) contain valid target position information (valid: 1, invalid: 0). Default is 0 (invalid).
         /// OriginName: position_valid, Units: , IsExtended: true
         /// </summary>
         public byte PositionValid { get; set; }
     }
     /// <summary>
-    /// Estimator status message including flags, innovation test ratios and estimated accuracies. The flags message is an integer bitmask containing information on which EKF outputs are valid. See the ESTIMATOR_STATUS_FLAGS enum definition for further information. The innovaton test ratios show the magnitude of the sensor innovation divided by the innovation check threshold. Under normal operation the innovaton test ratios should be below 0.5 with occasional values up to 1.0. Values greater than 1.0 should be rare under normal operation and indicate that a measurement has been rejected by the filter. The user should be notified if an innovation test ratio greater than 1.0 is recorded. Notifications for values in the range between 0.5 and 1.0 should be optional and controllable by the user.
+    /// Estimator status message including flags, innovation test ratios and estimated accuracies. The flags message is an integer bitmask containing information on which EKF outputs are valid. See the ESTIMATOR_STATUS_FLAGS enum definition for further information. The innovation test ratios show the magnitude of the sensor innovation divided by the innovation check threshold. Under normal operation the innovation test ratios should be below 0.5 with occasional values up to 1.0. Values greater than 1.0 should be rare under normal operation and indicate that a measurement has been rejected by the filter. The user should be notified if an innovation test ratio greater than 1.0 is recorded. Notifications for values in the range between 0.5 and 1.0 should be optional and controllable by the user.
     ///  ESTIMATOR_STATUS
     /// </summary>
     public class EstimatorStatusPacket: PacketV2<EstimatorStatusPayload>
@@ -15839,7 +16233,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (micros since boot or Unix epoch)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -15874,22 +16268,23 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float TasRatio { get; set; }
         /// <summary>
-        /// Horizontal position 1-STD accuracy relative to the EKF local origin (m)
+        /// Horizontal position 1-STD accuracy relative to the EKF local origin
         /// OriginName: pos_horiz_accuracy, Units: m, IsExtended: false
         /// </summary>
         public float PosHorizAccuracy { get; set; }
         /// <summary>
-        /// Vertical position 1-STD accuracy relative to the EKF local origin (m)
+        /// Vertical position 1-STD accuracy relative to the EKF local origin
         /// OriginName: pos_vert_accuracy, Units: m, IsExtended: false
         /// </summary>
         public float PosVertAccuracy { get; set; }
         /// <summary>
-        /// Integer bitmask indicating which EKF outputs are valid. See definition for ESTIMATOR_STATUS_FLAGS.
+        /// Bitmap indicating which EKF outputs are valid.
         /// OriginName: flags, Units: , IsExtended: false
         /// </summary>
         public EstimatorStatusFlags Flags { get; set; }
     }
     /// <summary>
+    /// Wind covariance estimate from vehicle.
     ///  WIND_COV
     /// </summary>
     public class WindCovPacket: PacketV2<WindCovPayload>
@@ -15941,22 +16336,22 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (micros since boot or Unix epoch)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Wind in X (NED) direction in m/s
+        /// Wind in X (NED) direction
         /// OriginName: wind_x, Units: m/s, IsExtended: false
         /// </summary>
         public float WindX { get; set; }
         /// <summary>
-        /// Wind in Y (NED) direction in m/s
+        /// Wind in Y (NED) direction
         /// OriginName: wind_y, Units: m/s, IsExtended: false
         /// </summary>
         public float WindY { get; set; }
         /// <summary>
-        /// Wind in Z (NED) direction in m/s
+        /// Wind in Z (NED) direction
         /// OriginName: wind_z, Units: m/s, IsExtended: false
         /// </summary>
         public float WindZ { get; set; }
@@ -15971,7 +16366,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float VarVert { get; set; }
         /// <summary>
-        /// AMSL altitude (m) this measurement was taken at
+        /// Altitude (MSL) that this measurement was taken at
         /// OriginName: wind_alt, Units: m, IsExtended: false
         /// </summary>
         public float WindAlt { get; set; }
@@ -15987,7 +16382,7 @@ namespace Asv.Mavlink.V2.Common
         public float VertAccuracy { get; set; }
     }
     /// <summary>
-    /// GPS sensor input message.  This is a raw sensor value sent by the GPS. This is NOT the global position estimate of the sytem.
+    /// GPS sensor input message.  This is a raw sensor value sent by the GPS. This is NOT the global position estimate of the system.
     ///  GPS_INPUT
     /// </summary>
     public class GpsInputPacket: PacketV2<GpsInputPayload>
@@ -16057,72 +16452,72 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (micros since boot or Unix epoch)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// GPS time (milliseconds from start of GPS week)
+        /// GPS time (from start of GPS week)
         /// OriginName: time_week_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeWeekMs { get; set; }
         /// <summary>
-        /// Latitude (WGS84), in degrees * 1E7
+        /// Latitude (WGS84)
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude (WGS84), in degrees * 1E7
+        /// Longitude (WGS84)
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude (AMSL, not WGS84), in m (positive for up)
+        /// Altitude (MSL). Positive for up.
         /// OriginName: alt, Units: m, IsExtended: false
         /// </summary>
         public float Alt { get; set; }
         /// <summary>
-        /// GPS HDOP horizontal dilution of position in m
+        /// GPS HDOP horizontal dilution of position
         /// OriginName: hdop, Units: m, IsExtended: false
         /// </summary>
         public float Hdop { get; set; }
         /// <summary>
-        /// GPS VDOP vertical dilution of position in m
+        /// GPS VDOP vertical dilution of position
         /// OriginName: vdop, Units: m, IsExtended: false
         /// </summary>
         public float Vdop { get; set; }
         /// <summary>
-        /// GPS velocity in m/s in NORTH direction in earth-fixed NED frame
+        /// GPS velocity in NORTH direction in earth-fixed NED frame
         /// OriginName: vn, Units: m/s, IsExtended: false
         /// </summary>
         public float Vn { get; set; }
         /// <summary>
-        /// GPS velocity in m/s in EAST direction in earth-fixed NED frame
+        /// GPS velocity in EAST direction in earth-fixed NED frame
         /// OriginName: ve, Units: m/s, IsExtended: false
         /// </summary>
         public float Ve { get; set; }
         /// <summary>
-        /// GPS velocity in m/s in DOWN direction in earth-fixed NED frame
+        /// GPS velocity in DOWN direction in earth-fixed NED frame
         /// OriginName: vd, Units: m/s, IsExtended: false
         /// </summary>
         public float Vd { get; set; }
         /// <summary>
-        /// GPS speed accuracy in m/s
+        /// GPS speed accuracy
         /// OriginName: speed_accuracy, Units: m/s, IsExtended: false
         /// </summary>
         public float SpeedAccuracy { get; set; }
         /// <summary>
-        /// GPS horizontal accuracy in m
+        /// GPS horizontal accuracy
         /// OriginName: horiz_accuracy, Units: m, IsExtended: false
         /// </summary>
         public float HorizAccuracy { get; set; }
         /// <summary>
-        /// GPS vertical accuracy in m
+        /// GPS vertical accuracy
         /// OriginName: vert_accuracy, Units: m, IsExtended: false
         /// </summary>
         public float VertAccuracy { get; set; }
         /// <summary>
-        /// Flags indicating which fields to ignore (see GPS_INPUT_IGNORE_FLAGS enum).  All other fields must be provided.
+        /// Bitmap indicating which GPS input flags fields to ignore.  All other fields must be provided.
         /// OriginName: ignore_flags, Units: , IsExtended: false
         /// </summary>
         public GpsInputIgnoreFlags IgnoreFlags { get; set; }
@@ -16300,52 +16695,52 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint CustomMode { get; set; }
         /// <summary>
-        /// Latitude, expressed as degrees * 1E7
+        /// Latitude
         /// OriginName: latitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Latitude { get; set; }
         /// <summary>
-        /// Longitude, expressed as degrees * 1E7
+        /// Longitude
         /// OriginName: longitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Longitude { get; set; }
         /// <summary>
-        /// roll (centidegrees)
+        /// roll
         /// OriginName: roll, Units: cdeg, IsExtended: false
         /// </summary>
         public short Roll { get; set; }
         /// <summary>
-        /// pitch (centidegrees)
+        /// pitch
         /// OriginName: pitch, Units: cdeg, IsExtended: false
         /// </summary>
         public short Pitch { get; set; }
         /// <summary>
-        /// heading (centidegrees)
+        /// heading
         /// OriginName: heading, Units: cdeg, IsExtended: false
         /// </summary>
         public ushort Heading { get; set; }
         /// <summary>
-        /// heading setpoint (centidegrees)
+        /// heading setpoint
         /// OriginName: heading_sp, Units: cdeg, IsExtended: false
         /// </summary>
         public short HeadingSp { get; set; }
         /// <summary>
-        /// Altitude above mean sea level (meters)
+        /// Altitude above mean sea level
         /// OriginName: altitude_amsl, Units: m, IsExtended: false
         /// </summary>
         public short AltitudeAmsl { get; set; }
         /// <summary>
-        /// Altitude setpoint relative to the home position (meters)
+        /// Altitude setpoint relative to the home position
         /// OriginName: altitude_sp, Units: m, IsExtended: false
         /// </summary>
         public short AltitudeSp { get; set; }
         /// <summary>
-        /// distance to target (meters)
+        /// distance to target
         /// OriginName: wp_distance, Units: m, IsExtended: false
         /// </summary>
         public ushort WpDistance { get; set; }
         /// <summary>
-        /// System mode bitfield, as defined by MAV_MODE_FLAG enum.
+        /// Bitmap of enabled system modes.
         /// OriginName: base_mode, Units: , IsExtended: false
         /// </summary>
         public MavModeFlag BaseMode { get; set; }
@@ -16360,22 +16755,22 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public sbyte Throttle { get; set; }
         /// <summary>
-        /// airspeed (m/s)
+        /// airspeed
         /// OriginName: airspeed, Units: m/s, IsExtended: false
         /// </summary>
         public byte Airspeed { get; set; }
         /// <summary>
-        /// airspeed setpoint (m/s)
+        /// airspeed setpoint
         /// OriginName: airspeed_sp, Units: m/s, IsExtended: false
         /// </summary>
         public byte AirspeedSp { get; set; }
         /// <summary>
-        /// groundspeed (m/s)
+        /// groundspeed
         /// OriginName: groundspeed, Units: m/s, IsExtended: false
         /// </summary>
         public byte Groundspeed { get; set; }
         /// <summary>
-        /// climb rate (m/s)
+        /// climb rate
         /// OriginName: climb_rate, Units: m/s, IsExtended: false
         /// </summary>
         public sbyte ClimbRate { get; set; }
@@ -16385,7 +16780,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte GpsNsat { get; set; }
         /// <summary>
-        /// See the GPS_FIX_TYPE enum.
+        /// GPS Fix type.
         /// OriginName: gps_fix_type, Units: , IsExtended: false
         /// </summary>
         public GpsFixType GpsFixType { get; set; }
@@ -16416,7 +16811,7 @@ namespace Asv.Mavlink.V2.Common
         public byte WpNum { get; set; }
     }
     /// <summary>
-    /// WIP: Message appropriate for high latency connections like Iridium (version 2)
+    /// Message appropriate for high latency connections like Iridium (version 2)
     ///  HIGH_LATENCY2
     /// </summary>
     public class HighLatency2Packet: PacketV2<HighLatency2Payload>
@@ -16509,12 +16904,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint Timestamp { get; set; }
         /// <summary>
-        /// Latitude, expressed as degrees * 1E7
+        /// Latitude
         /// OriginName: latitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Latitude { get; set; }
         /// <summary>
-        /// Longitude, expressed as degrees * 1E7
+        /// Longitude
         /// OriginName: longitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Longitude { get; set; }
@@ -16534,7 +16929,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public short TargetAltitude { get; set; }
         /// <summary>
-        /// Distance to target waypoint or position (meters / 10)
+        /// Distance to target waypoint or position
         /// OriginName: target_distance, Units: dam, IsExtended: false
         /// </summary>
         public ushort TargetDistance { get; set; }
@@ -16544,77 +16939,77 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort WpNum { get; set; }
         /// <summary>
-        /// Indicates failures as defined in HL_FAILURE_FLAG ENUM. 
+        /// Bitmap of failure flags.
         /// OriginName: failure_flags, Units: , IsExtended: false
         /// </summary>
         public HlFailureFlag FailureFlags { get; set; }
         /// <summary>
-        /// Type of the MAV (quadrotor, helicopter, etc., up to 15 types, defined in MAV_TYPE ENUM)
+        /// Type of the MAV (quadrotor, helicopter, etc.)
         /// OriginName: type, Units: , IsExtended: false
         /// </summary>
         public MavType Type { get; set; }
         /// <summary>
-        /// Autopilot type / class. defined in MAV_AUTOPILOT ENUM
+        /// Autopilot type / class.
         /// OriginName: autopilot, Units: , IsExtended: false
         /// </summary>
         public MavAutopilot Autopilot { get; set; }
         /// <summary>
-        /// Heading (degrees / 2)
+        /// Heading
         /// OriginName: heading, Units: deg/2, IsExtended: false
         /// </summary>
         public byte Heading { get; set; }
         /// <summary>
-        /// Heading setpoint (degrees / 2)
+        /// Heading setpoint
         /// OriginName: target_heading, Units: deg/2, IsExtended: false
         /// </summary>
         public byte TargetHeading { get; set; }
         /// <summary>
-        /// Throttle (percentage)
+        /// Throttle
         /// OriginName: throttle, Units: %, IsExtended: false
         /// </summary>
         public byte Throttle { get; set; }
         /// <summary>
-        /// Airspeed (m/s * 5)
+        /// Airspeed
         /// OriginName: airspeed, Units: m/s*5, IsExtended: false
         /// </summary>
         public byte Airspeed { get; set; }
         /// <summary>
-        /// Airspeed setpoint (m/s * 5)
+        /// Airspeed setpoint
         /// OriginName: airspeed_sp, Units: m/s*5, IsExtended: false
         /// </summary>
         public byte AirspeedSp { get; set; }
         /// <summary>
-        /// Groundspeed (m/s * 5)
+        /// Groundspeed
         /// OriginName: groundspeed, Units: m/s*5, IsExtended: false
         /// </summary>
         public byte Groundspeed { get; set; }
         /// <summary>
-        /// Windspeed (m/s * 5)
+        /// Windspeed
         /// OriginName: windspeed, Units: m/s*5, IsExtended: false
         /// </summary>
         public byte Windspeed { get; set; }
         /// <summary>
-        /// Wind heading (deg / 2)
+        /// Wind heading
         /// OriginName: wind_heading, Units: deg/2, IsExtended: false
         /// </summary>
         public byte WindHeading { get; set; }
         /// <summary>
-        /// Maximum error horizontal position since last message (m * 10)
+        /// Maximum error horizontal position since last message
         /// OriginName: eph, Units: dm, IsExtended: false
         /// </summary>
         public byte Eph { get; set; }
         /// <summary>
-        /// Maximum error vertical position since last message (m * 10)
+        /// Maximum error vertical position since last message
         /// OriginName: epv, Units: dm, IsExtended: false
         /// </summary>
         public byte Epv { get; set; }
         /// <summary>
-        /// Air temperature (degrees C) from airspeed sensor
+        /// Air temperature from airspeed sensor
         /// OriginName: temperature_air, Units: degC, IsExtended: false
         /// </summary>
         public sbyte TemperatureAir { get; set; }
         /// <summary>
-        /// Maximum climb rate magnitude since last message (m/s * 10)
+        /// Maximum climb rate magnitude since last message
         /// OriginName: climb_rate, Units: dm/s, IsExtended: false
         /// </summary>
         public sbyte ClimbRate { get; set; }
@@ -16688,7 +17083,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (micros since boot or Unix epoch)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -16724,7 +17119,7 @@ namespace Asv.Mavlink.V2.Common
         public uint Clipping2 { get; set; }
     }
     /// <summary>
-    /// This message can be requested by sending the MAV_CMD_GET_HOME_POSITION command. The position the system will return to and land on. The position is set automatically by the system during the takeoff in case it was not explicitely set by the operator before or after. The position the system will return to and land on. The global and local positions encode the position in the respective coordinate frames, while the q parameter encodes the orientation of the surface. Under normal conditions it describes the heading and terrain slope, which can be used by the aircraft to adjust the approach. The approach 3D vector describes the point to which the system should fly in normal flight mode and then perform a landing sequence along the vector.
+    /// This message can be requested by sending the MAV_CMD_GET_HOME_POSITION command. The position the system will return to and land on. The position is set automatically by the system during the takeoff in case it was not explicitly set by the operator before or after. The position the system will return to and land on. The global and local positions encode the position in the respective coordinate frames, while the q parameter encodes the orientation of the surface. Under normal conditions it describes the heading and terrain slope, which can be used by the aircraft to adjust the approach. The approach 3D vector describes the point to which the system should fly in normal flight mode and then perform a landing sequence along the vector.
     ///  HOME_POSITION
     /// </summary>
     public class HomePositionPacket: PacketV2<HomePositionPayload>
@@ -16790,17 +17185,17 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Latitude (WGS84), in degrees * 1E7
+        /// Latitude (WGS84)
         /// OriginName: latitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Latitude { get; set; }
         /// <summary>
-        /// Longitude (WGS84, in degrees * 1E7
+        /// Longitude (WGS84)
         /// OriginName: longitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Longitude { get; set; }
         /// <summary>
-        /// Altitude (AMSL), in meters * 1000 (positive for up)
+        /// Altitude (MSL). Positive for up.
         /// OriginName: altitude, Units: mm, IsExtended: false
         /// </summary>
         public int Altitude { get; set; }
@@ -16841,13 +17236,13 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float ApproachZ { get; set; }
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: true
         /// </summary>
         public ulong TimeUsec { get; set; }
     }
     /// <summary>
-    /// The position the system will return to and land on. The position is set automatically by the system during the takeoff in case it was not explicitely set by the operator before or after. The global and local positions encode the position in the respective coordinate frames, while the q parameter encodes the orientation of the surface. Under normal conditions it describes the heading and terrain slope, which can be used by the aircraft to adjust the approach. The approach 3D vector describes the point to which the system should fly in normal flight mode and then perform a landing sequence along the vector.
+    /// The position the system will return to and land on. The position is set automatically by the system during the takeoff in case it was not explicitly set by the operator before or after. The global and local positions encode the position in the respective coordinate frames, while the q parameter encodes the orientation of the surface. Under normal conditions it describes the heading and terrain slope, which can be used by the aircraft to adjust the approach. The approach 3D vector describes the point to which the system should fly in normal flight mode and then perform a landing sequence along the vector.
     ///  SET_HOME_POSITION
     /// </summary>
     public class SetHomePositionPacket: PacketV2<SetHomePositionPayload>
@@ -16915,17 +17310,17 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Latitude (WGS84), in degrees * 1E7
+        /// Latitude (WGS84)
         /// OriginName: latitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Latitude { get; set; }
         /// <summary>
-        /// Longitude (WGS84, in degrees * 1E7
+        /// Longitude (WGS84)
         /// OriginName: longitude, Units: degE7, IsExtended: false
         /// </summary>
         public int Longitude { get; set; }
         /// <summary>
-        /// Altitude (AMSL), in meters * 1000 (positive for up)
+        /// Altitude (MSL). Positive for up.
         /// OriginName: altitude, Units: mm, IsExtended: false
         /// </summary>
         public int Altitude { get; set; }
@@ -16971,7 +17366,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetSystem { get; set; }
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: true
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -17015,7 +17410,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// The interval between two messages, in microseconds. A value of -1 indicates this stream is disabled, 0 indicates it is not available, > 0 indicates the interval at which it is sent.
+        /// The interval between two messages. A value of -1 indicates this stream is disabled, 0 indicates it is not available, > 0 indicates the interval at which it is sent.
         /// OriginName: interval_us, Units: us, IsExtended: false
         /// </summary>
         public int IntervalUs { get; set; }
@@ -17143,37 +17538,37 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint IcaoAddress { get; set; }
         /// <summary>
-        /// Latitude, expressed as degrees * 1E7
+        /// Latitude
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude, expressed as degrees * 1E7
+        /// Longitude
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude(ASL) in millimeters
+        /// Altitude(ASL)
         /// OriginName: altitude, Units: mm, IsExtended: false
         /// </summary>
         public int Altitude { get; set; }
         /// <summary>
-        /// Course over ground in centidegrees
+        /// Course over ground
         /// OriginName: heading, Units: cdeg, IsExtended: false
         /// </summary>
         public ushort Heading { get; set; }
         /// <summary>
-        /// The horizontal velocity in centimeters/second
+        /// The horizontal velocity
         /// OriginName: hor_velocity, Units: cm/s, IsExtended: false
         /// </summary>
         public ushort HorVelocity { get; set; }
         /// <summary>
-        /// The vertical velocity in centimeters/second, positive is up
+        /// The vertical velocity. Positive is up
         /// OriginName: ver_velocity, Units: cm/s, IsExtended: false
         /// </summary>
         public short VerVelocity { get; set; }
         /// <summary>
-        /// Flags to indicate various statuses including valid data fields
+        /// Bitmap to indicate various statuses including valid data fields
         /// OriginName: flags, Units: , IsExtended: false
         /// </summary>
         public AdsbFlags Flags { get; set; }
@@ -17183,7 +17578,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort Squawk { get; set; }
         /// <summary>
-        /// Type from ADSB_ALTITUDE_TYPE enum
+        /// ADSB altitude type.
         /// OriginName: altitude_type, Units: , IsExtended: false
         /// </summary>
         public AdsbAltitudeType AltitudeType { get; set; }
@@ -17194,7 +17589,7 @@ namespace Asv.Mavlink.V2.Common
         public char[] Callsign { get; set; } = new char[9];
         public byte GetCallsignMaxItemsCount() => 9;
         /// <summary>
-        /// Type from ADSB_EMITTER_TYPE enum
+        /// ADSB emitter type.
         /// OriginName: emitter_type, Units: , IsExtended: false
         /// </summary>
         public AdsbEmitterType EmitterType { get; set; }
@@ -17258,17 +17653,17 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint Id { get; set; }
         /// <summary>
-        /// Estimated time until collision occurs (seconds)
+        /// Estimated time until collision occurs
         /// OriginName: time_to_minimum_delta, Units: s, IsExtended: false
         /// </summary>
         public float TimeToMinimumDelta { get; set; }
         /// <summary>
-        /// Closest vertical distance in meters between vehicle and object
+        /// Closest vertical distance between vehicle and object
         /// OriginName: altitude_minimum_delta, Units: m, IsExtended: false
         /// </summary>
         public float AltitudeMinimumDelta { get; set; }
         /// <summary>
-        /// Closest horizontal distance in meteres between vehicle and object
+        /// Closest horizontal distance between vehicle and object
         /// OriginName: horizontal_minimum_delta, Units: m, IsExtended: false
         /// </summary>
         public float HorizontalMinimumDelta { get; set; }
@@ -17341,7 +17736,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// A code that identifies the software component that understands this message (analogous to usb device classes or mime type strings).  If this code is less than 32768, it is considered a 'registered' protocol extension and the corresponding entry should be added to https://github.com/mavlink/mavlink/extension-message-ids.xml.  Software creators can register blocks of message IDs as needed (useful for GCS specific metadata, etc...). Message_types greater than 32767 are considered local experiments and should not be checked in to any widely distributed codebase.
+        /// A code that identifies the software component that understands this message (analogous to USB device classes or mime type strings).  If this code is less than 32768, it is considered a 'registered' protocol extension and the corresponding entry should be added to https://github.com/mavlink/mavlink/extension-message-ids.xml.  Software creators can register blocks of message IDs as needed (useful for GCS specific metadata, etc...). Message_types greater than 32767 are considered local experiments and should not be checked in to any widely distributed codebase.
         /// OriginName: message_type, Units: , IsExtended: false
         /// </summary>
         public ushort MessageType { get; set; }
@@ -17440,6 +17835,7 @@ namespace Asv.Mavlink.V2.Common
         public byte GetValueMaxItemsCount() => 32;
     }
     /// <summary>
+    /// To debug something using a named 3D vector.
     ///  DEBUG_VECT
     /// </summary>
     public class DebugVectPacket: PacketV2<DebugVectPayload>
@@ -17486,7 +17882,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -17556,7 +17952,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -17616,7 +18012,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -17674,7 +18070,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Severity of status. Relies on the definitions within RFC-5424. See enum MAV_SEVERITY.
+        /// Severity of status. Relies on the definitions within RFC-5424.
         /// OriginName: severity, Units: , IsExtended: false
         /// </summary>
         public MavSeverity Severity { get; set; }
@@ -17726,7 +18122,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -17814,7 +18210,7 @@ namespace Asv.Mavlink.V2.Common
         public byte GetSecretKeyMaxItemsCount() => 32;
     }
     /// <summary>
-    /// Report button state change
+    /// Report button state change.
     ///  BUTTON_CHANGE
     /// </summary>
     public class ButtonChangePacket: PacketV2<ButtonChangePayload>
@@ -17854,17 +18250,17 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Time of last change of button state
+        /// Time of last change of button state.
         /// OriginName: last_change_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint LastChangeMs { get; set; }
         /// <summary>
-        /// Bitmap state of buttons
+        /// Bitmap for state of buttons.
         /// OriginName: state, Units: , IsExtended: false
         /// </summary>
         public byte State { get; set; }
@@ -17889,7 +18285,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class PlayTunePayload : IPayload
     {
-        public byte GetMaxByteSize() => 32;
+        public byte GetMaxByteSize() => 232;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -17898,9 +18294,14 @@ namespace Asv.Mavlink.V2.Common
             var arraySize = 0;
             TargetSystem = (byte)buffer[index++];
             TargetComponent = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/30 - Math.Max(0,((/*PayloadByteSize*/32 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/30 - Math.Max(0,((/*PayloadByteSize*/232 - payloadSize - /*ExtendedFieldsLength*/200)/1 /*FieldTypeByteSize*/));
             Tune = new char[arraySize];
             Encoding.ASCII.GetChars(buffer, index,arraySize,Tune,0);
+            index+=arraySize;
+            // extended field 'Tune2' can be empty
+            if (index >= endIndex) return;
+            arraySize = 200;
+            Encoding.ASCII.GetChars(buffer, index,arraySize,Tune2,0);
             index+=arraySize;
         }
 
@@ -17909,7 +18310,8 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             Encoding.ASCII.GetBytes(Tune,0,Tune.Length,buffer,index);index+=30;
-            return index; // /*PayloadByteSize*/32;
+            Encoding.ASCII.GetBytes(Tune2,0,Tune2.Length,buffer,index);index+=200;
+            return index; // /*PayloadByteSize*/232;
         }
 
         /// <summary>
@@ -17928,6 +18330,11 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public char[] Tune { get; set; } = new char[30];
         public byte GetTuneMaxItemsCount() => 30;
+        /// <summary>
+        /// tune extension (appended to tune)
+        /// OriginName: tune2, Units: , IsExtended: true
+        /// </summary>
+        public char[] Tune2 { get; } = new char[200];
     }
     /// <summary>
     /// Information about a camera
@@ -18007,7 +18414,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -18017,32 +18424,32 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint FirmwareVersion { get; set; }
         /// <summary>
-        /// Focal length in mm
+        /// Focal length
         /// OriginName: focal_length, Units: mm, IsExtended: false
         /// </summary>
         public float FocalLength { get; set; }
         /// <summary>
-        /// Image sensor size horizontal in mm
+        /// Image sensor size horizontal
         /// OriginName: sensor_size_h, Units: mm, IsExtended: false
         /// </summary>
         public float SensorSizeH { get; set; }
         /// <summary>
-        /// Image sensor size vertical in mm
+        /// Image sensor size vertical
         /// OriginName: sensor_size_v, Units: mm, IsExtended: false
         /// </summary>
         public float SensorSizeV { get; set; }
         /// <summary>
-        /// CAMERA_CAP_FLAGS enum flags (bitmap) describing camera capabilities.
+        /// Bitmap of camera capability flags.
         /// OriginName: flags, Units: , IsExtended: false
         /// </summary>
         public CameraCapFlags Flags { get; set; }
         /// <summary>
-        /// Image resolution in pixels horizontal
+        /// Horizontal image resolution
         /// OriginName: resolution_h, Units: pix, IsExtended: false
         /// </summary>
         public ushort ResolutionH { get; set; }
         /// <summary>
-        /// Image resolution in pixels vertical
+        /// Vertical image resolution
         /// OriginName: resolution_v, Units: pix, IsExtended: false
         /// </summary>
         public ushort ResolutionV { get; set; }
@@ -18093,7 +18500,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class CameraSettingsPayload : IPayload
     {
-        public byte GetMaxByteSize() => 5;
+        public byte GetMaxByteSize() => 13;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -18102,28 +18509,46 @@ namespace Asv.Mavlink.V2.Common
             var arraySize = 0;
             TimeBootMs = BitConverter.ToUInt32(buffer,index);index+=4;
             ModeId = (CameraMode)buffer[index++];
+            // extended field 'Zoomlevel' can be empty
+            if (index >= endIndex) return;
+            Zoomlevel = BitConverter.ToSingle(buffer, index);index+=4;
+            // extended field 'Focuslevel' can be empty
+            if (index >= endIndex) return;
+            Focuslevel = BitConverter.ToSingle(buffer, index);index+=4;
         }
 
         public int Serialize(byte[] buffer, int index)
         {
             BitConverter.GetBytes(TimeBootMs).CopyTo(buffer, index);index+=4;
             buffer[index] = (byte)ModeId;index+=1;
-            return index; // /*PayloadByteSize*/5;
+            BitConverter.GetBytes(Zoomlevel).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(Focuslevel).CopyTo(buffer, index);index+=4;
+            return index; // /*PayloadByteSize*/13;
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Camera mode (CAMERA_MODE)
+        /// Camera mode
         /// OriginName: mode_id, Units: , IsExtended: false
         /// </summary>
         public CameraMode ModeId { get; set; }
+        /// <summary>
+        /// Current zoom level (0.0 to 100.0, NaN if not known)
+        /// OriginName: zoomLevel, Units: , IsExtended: true
+        /// </summary>
+        public float Zoomlevel { get; set; }
+        /// <summary>
+        /// Current focus level (0.0 to 100.0, NaN if not known)
+        /// OriginName: focusLevel, Units: , IsExtended: true
+        /// </summary>
+        public float Focuslevel { get; set; }
     }
     /// <summary>
-    /// WIP: Information about a storage medium.
+    /// Information about a storage medium.
     ///  STORAGE_INFORMATION
     /// </summary>
     public class StorageInformationPacket: PacketV2<StorageInformationPayload>
@@ -18175,33 +18600,33 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Total capacity in MiB
-        /// OriginName: total_capacity, Units: Mibytes, IsExtended: false
+        /// Total capacity.
+        /// OriginName: total_capacity, Units: MiB, IsExtended: false
         /// </summary>
         public float TotalCapacity { get; set; }
         /// <summary>
-        /// Used capacity in MiB
-        /// OriginName: used_capacity, Units: Mibytes, IsExtended: false
+        /// Used capacity.
+        /// OriginName: used_capacity, Units: MiB, IsExtended: false
         /// </summary>
         public float UsedCapacity { get; set; }
         /// <summary>
-        /// Available capacity in MiB
-        /// OriginName: available_capacity, Units: Mibytes, IsExtended: false
+        /// Available storage capacity.
+        /// OriginName: available_capacity, Units: MiB, IsExtended: false
         /// </summary>
         public float AvailableCapacity { get; set; }
         /// <summary>
-        /// Read speed in MiB/s
-        /// OriginName: read_speed, Units: Mibytes/s, IsExtended: false
+        /// Read speed.
+        /// OriginName: read_speed, Units: MiB/s, IsExtended: false
         /// </summary>
         public float ReadSpeed { get; set; }
         /// <summary>
-        /// Write speed in MiB/s
-        /// OriginName: write_speed, Units: Mibytes/s, IsExtended: false
+        /// Write speed.
+        /// OriginName: write_speed, Units: MiB/s, IsExtended: false
         /// </summary>
         public float WriteSpeed { get; set; }
         /// <summary>
@@ -18221,7 +18646,7 @@ namespace Asv.Mavlink.V2.Common
         public byte Status { get; set; }
     }
     /// <summary>
-    /// Information about the status of a capture
+    /// Information about the status of a capture.
     ///  CAMERA_CAPTURE_STATUS
     /// </summary>
     public class CameraCaptureStatusPacket: PacketV2<CameraCaptureStatusPayload>
@@ -18267,23 +18692,23 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Image capture interval in seconds
+        /// Image capture interval
         /// OriginName: image_interval, Units: s, IsExtended: false
         /// </summary>
         public float ImageInterval { get; set; }
         /// <summary>
-        /// Time in milliseconds since recording started
+        /// Time since recording started
         /// OriginName: recording_time_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint RecordingTimeMs { get; set; }
         /// <summary>
-        /// Available storage capacity in MiB
-        /// OriginName: available_capacity, Units: Mibytes, IsExtended: false
+        /// Available storage capacity.
+        /// OriginName: available_capacity, Units: MiB, IsExtended: false
         /// </summary>
         public float AvailableCapacity { get; set; }
         /// <summary>
@@ -18364,33 +18789,33 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch) in UTC. 0 for unknown.
+        /// Timestamp (time since UNIX epoch) in UTC. 0 for unknown.
         /// OriginName: time_utc, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUtc { get; set; }
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Latitude, expressed as degrees * 1E7 where image was taken
+        /// Latitude where image was taken
         /// OriginName: lat, Units: degE7, IsExtended: false
         /// </summary>
         public int Lat { get; set; }
         /// <summary>
-        /// Longitude, expressed as degrees * 1E7 where capture was taken
+        /// Longitude where capture was taken
         /// OriginName: lon, Units: degE7, IsExtended: false
         /// </summary>
         public int Lon { get; set; }
         /// <summary>
-        /// Altitude in meters, expressed as * 1E3 (AMSL, not WGS84) where image was taken
-        /// OriginName: alt, Units: m, IsExtended: false
+        /// Altitude (MSL) where image was taken
+        /// OriginName: alt, Units: mm, IsExtended: false
         /// </summary>
         public int Alt { get; set; }
         /// <summary>
-        /// Altitude above ground in meters, expressed as * 1E3 where image was taken
-        /// OriginName: relative_alt, Units: m, IsExtended: false
+        /// Altitude above ground
+        /// OriginName: relative_alt, Units: mm, IsExtended: false
         /// </summary>
         public int RelativeAlt { get; set; }
         /// <summary>
@@ -18421,7 +18846,7 @@ namespace Asv.Mavlink.V2.Common
         public byte GetFileUrlMaxItemsCount() => 205;
     }
     /// <summary>
-    /// WIP: Information about flight since last arming
+    /// Information about flight since last arming.
     ///  FLIGHT_INFORMATION
     /// </summary>
     public class FlightInformationPacket: PacketV2<FlightInformationPayload>
@@ -18463,22 +18888,22 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp at arming (microseconds since UNIX epoch) in UTC, 0 for unknown
+        /// Timestamp at arming (time since UNIX epoch) in UTC, 0 for unknown
         /// OriginName: arming_time_utc, Units: us, IsExtended: false
         /// </summary>
         public ulong ArmingTimeUtc { get; set; }
         /// <summary>
-        /// Timestamp at takeoff (microseconds since UNIX epoch) in UTC, 0 for unknown
+        /// Timestamp at takeoff (time since UNIX epoch) in UTC, 0 for unknown
         /// OriginName: takeoff_time_utc, Units: us, IsExtended: false
         /// </summary>
         public ulong TakeoffTimeUtc { get; set; }
         /// <summary>
-        /// Universally unique identifier (UUID) of flight, should correspond to name of logfiles
+        /// Universally unique identifier (UUID) of flight, should correspond to name of log files
         /// OriginName: flight_uuid, Units: , IsExtended: false
         /// </summary>
         public ulong FlightUuid { get; set; }
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
@@ -18530,27 +18955,27 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (milliseconds since system boot)
+        /// Timestamp (time since system boot).
         /// OriginName: time_boot_ms, Units: ms, IsExtended: false
         /// </summary>
         public uint TimeBootMs { get; set; }
         /// <summary>
-        /// Roll in global frame in degrees (set to NaN for invalid).
+        /// Roll in global frame (set to NaN for invalid).
         /// OriginName: roll, Units: deg, IsExtended: false
         /// </summary>
         public float Roll { get; set; }
         /// <summary>
-        /// Pitch in global frame in degrees (set to NaN for invalid).
+        /// Pitch in global frame (set to NaN for invalid).
         /// OriginName: pitch, Units: deg, IsExtended: false
         /// </summary>
         public float Pitch { get; set; }
         /// <summary>
-        /// Yaw relative to vehicle in degrees (set to NaN for invalid).
+        /// Yaw relative to vehicle(set to NaN for invalid).
         /// OriginName: yaw, Units: deg, IsExtended: false
         /// </summary>
         public float Yaw { get; set; }
         /// <summary>
-        /// Yaw in absolute frame in degrees, North is 0 (set to NaN for invalid).
+        /// Yaw in absolute frame, North is 0 (set to NaN for invalid).
         /// OriginName: yaw_absolute, Units: deg, IsExtended: true
         /// </summary>
         public float YawAbsolute { get; set; }
@@ -18784,14 +19209,14 @@ namespace Asv.Mavlink.V2.Common
         public byte TargetComponent { get; set; }
     }
     /// <summary>
-    /// WIP: Information about video stream
+    /// Information about video stream
     ///  VIDEO_STREAM_INFORMATION
     /// </summary>
     public class VideoStreamInformationPacket: PacketV2<VideoStreamInformationPayload>
     {
 	    public const int PacketMessageId = 269;
         public override int MessageId => PacketMessageId;
-        public override byte GetCrcEtra() => 58;
+        public override byte GetCrcEtra() => 109;
 
         public override VideoStreamInformationPayload Payload { get; } = new VideoStreamInformationPayload();
 
@@ -18803,7 +19228,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class VideoStreamInformationPayload : IPayload
     {
-        public byte GetMaxByteSize() => 246;
+        public byte GetMaxByteSize() => 213;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -18812,12 +19237,18 @@ namespace Asv.Mavlink.V2.Common
             var arraySize = 0;
             Framerate = BitConverter.ToSingle(buffer, index);index+=4;
             Bitrate = BitConverter.ToUInt32(buffer,index);index+=4;
+            Flags = (VideoStreamStatusFlags)BitConverter.ToUInt16(buffer,index);index+=2;
             ResolutionH = BitConverter.ToUInt16(buffer,index);index+=2;
             ResolutionV = BitConverter.ToUInt16(buffer,index);index+=2;
             Rotation = BitConverter.ToUInt16(buffer,index);index+=2;
-            CameraId = (byte)buffer[index++];
-            Status = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/230 - Math.Max(0,((/*PayloadByteSize*/246 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            Hfov = BitConverter.ToUInt16(buffer,index);index+=2;
+            StreamId = (byte)buffer[index++];
+            Count = (byte)buffer[index++];
+            Type = (VideoStreamType)buffer[index++];
+            arraySize = 32;
+            Encoding.ASCII.GetChars(buffer, index,arraySize,Name,0);
+            index+=arraySize;
+            arraySize = /*ArrayLength*/160 - Math.Max(0,((/*PayloadByteSize*/213 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             Uri = new char[arraySize];
             Encoding.ASCII.GetChars(buffer, index,arraySize,Uri,0);
             index+=arraySize;
@@ -18827,32 +19258,153 @@ namespace Asv.Mavlink.V2.Common
         {
             BitConverter.GetBytes(Framerate).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Bitrate).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes((ushort)Flags).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(ResolutionH).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(ResolutionV).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Rotation).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes(CameraId).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes(Status).CopyTo(buffer, index);index+=1;
-            Encoding.ASCII.GetBytes(Uri,0,Uri.Length,buffer,index);index+=230;
-            return index; // /*PayloadByteSize*/246;
+            BitConverter.GetBytes(Hfov).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes(StreamId).CopyTo(buffer, index);index+=1;
+            BitConverter.GetBytes(Count).CopyTo(buffer, index);index+=1;
+            buffer[index] = (byte)Type;index+=1;
+            Encoding.ASCII.GetBytes(Name,0,Name.Length,buffer,index);index+=32;
+            Encoding.ASCII.GetBytes(Uri,0,Uri.Length,buffer,index);index+=160;
+            return index; // /*PayloadByteSize*/213;
         }
 
         /// <summary>
-        /// Frames per second
+        /// Frame rate.
         /// OriginName: framerate, Units: Hz, IsExtended: false
         /// </summary>
         public float Framerate { get; set; }
         /// <summary>
-        /// Bit rate in bits per second
+        /// Bit rate.
         /// OriginName: bitrate, Units: bits/s, IsExtended: false
         /// </summary>
         public uint Bitrate { get; set; }
         /// <summary>
-        /// Resolution horizontal in pixels
+        /// Bitmap of stream status flags.
+        /// OriginName: flags, Units: , IsExtended: false
+        /// </summary>
+        public VideoStreamStatusFlags Flags { get; set; }
+        /// <summary>
+        /// Horizontal resolution.
         /// OriginName: resolution_h, Units: pix, IsExtended: false
         /// </summary>
         public ushort ResolutionH { get; set; }
         /// <summary>
-        /// Resolution vertical in pixels
+        /// Vertical resolution.
+        /// OriginName: resolution_v, Units: pix, IsExtended: false
+        /// </summary>
+        public ushort ResolutionV { get; set; }
+        /// <summary>
+        /// Video image rotation clockwise.
+        /// OriginName: rotation, Units: deg, IsExtended: false
+        /// </summary>
+        public ushort Rotation { get; set; }
+        /// <summary>
+        /// Horizontal Field of view.
+        /// OriginName: hfov, Units: deg, IsExtended: false
+        /// </summary>
+        public ushort Hfov { get; set; }
+        /// <summary>
+        /// Video Stream ID (1 for first, 2 for second, etc.)
+        /// OriginName: stream_id, Units: , IsExtended: false
+        /// </summary>
+        public byte StreamId { get; set; }
+        /// <summary>
+        /// Number of streams available.
+        /// OriginName: count, Units: , IsExtended: false
+        /// </summary>
+        public byte Count { get; set; }
+        /// <summary>
+        /// Type of stream.
+        /// OriginName: type, Units: , IsExtended: false
+        /// </summary>
+        public VideoStreamType Type { get; set; }
+        /// <summary>
+        /// Stream name.
+        /// OriginName: name, Units: , IsExtended: false
+        /// </summary>
+        public char[] Name { get; } = new char[32];
+        /// <summary>
+        /// Video stream URI (TCP or RTSP URI ground station should connect to) or port number (UDP port ground station should listen to).
+        /// OriginName: uri, Units: , IsExtended: false
+        /// </summary>
+        public char[] Uri { get; set; } = new char[160];
+        public byte GetUriMaxItemsCount() => 160;
+    }
+    /// <summary>
+    /// Information about the status of a video stream.
+    ///  VIDEO_STREAM_STATUS
+    /// </summary>
+    public class VideoStreamStatusPacket: PacketV2<VideoStreamStatusPayload>
+    {
+	    public const int PacketMessageId = 270;
+        public override int MessageId => PacketMessageId;
+        public override byte GetCrcEtra() => 59;
+
+        public override VideoStreamStatusPayload Payload { get; } = new VideoStreamStatusPayload();
+
+        public override string Name => "VIDEO_STREAM_STATUS";
+    }
+
+    /// <summary>
+    ///  VIDEO_STREAM_STATUS
+    /// </summary>
+    public class VideoStreamStatusPayload : IPayload
+    {
+        public byte GetMaxByteSize() => 19;
+
+        public void Deserialize(byte[] buffer, int offset, int payloadSize)
+        {
+            var index = offset;
+            var endIndex = offset + payloadSize;
+            var arraySize = 0;
+            Framerate = BitConverter.ToSingle(buffer, index);index+=4;
+            Bitrate = BitConverter.ToUInt32(buffer,index);index+=4;
+            Flags = (VideoStreamStatusFlags)BitConverter.ToUInt16(buffer,index);index+=2;
+            ResolutionH = BitConverter.ToUInt16(buffer,index);index+=2;
+            ResolutionV = BitConverter.ToUInt16(buffer,index);index+=2;
+            Rotation = BitConverter.ToUInt16(buffer,index);index+=2;
+            Hfov = BitConverter.ToUInt16(buffer,index);index+=2;
+            StreamId = (byte)buffer[index++];
+        }
+
+        public int Serialize(byte[] buffer, int index)
+        {
+            BitConverter.GetBytes(Framerate).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(Bitrate).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes((ushort)Flags).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes(ResolutionH).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes(ResolutionV).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes(Rotation).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes(Hfov).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes(StreamId).CopyTo(buffer, index);index+=1;
+            return index; // /*PayloadByteSize*/19;
+        }
+
+        /// <summary>
+        /// Frame rate
+        /// OriginName: framerate, Units: Hz, IsExtended: false
+        /// </summary>
+        public float Framerate { get; set; }
+        /// <summary>
+        /// Bit rate
+        /// OriginName: bitrate, Units: bits/s, IsExtended: false
+        /// </summary>
+        public uint Bitrate { get; set; }
+        /// <summary>
+        /// Bitmap of stream status flags
+        /// OriginName: flags, Units: , IsExtended: false
+        /// </summary>
+        public VideoStreamStatusFlags Flags { get; set; }
+        /// <summary>
+        /// Horizontal resolution
+        /// OriginName: resolution_h, Units: pix, IsExtended: false
+        /// </summary>
+        public ushort ResolutionH { get; set; }
+        /// <summary>
+        /// Vertical resolution
         /// OriginName: resolution_v, Units: pix, IsExtended: false
         /// </summary>
         public ushort ResolutionV { get; set; }
@@ -18862,123 +19414,15 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public ushort Rotation { get; set; }
         /// <summary>
-        /// Camera ID (1 for first, 2 for second, etc.)
-        /// OriginName: camera_id, Units: , IsExtended: false
+        /// Horizontal Field of view
+        /// OriginName: hfov, Units: deg, IsExtended: false
         /// </summary>
-        public byte CameraId { get; set; }
+        public ushort Hfov { get; set; }
         /// <summary>
-        /// Current status of video streaming (0: not running, 1: in progress)
-        /// OriginName: status, Units: , IsExtended: false
+        /// Video Stream ID (1 for first, 2 for second, etc.)
+        /// OriginName: stream_id, Units: , IsExtended: false
         /// </summary>
-        public byte Status { get; set; }
-        /// <summary>
-        /// Video stream URI
-        /// OriginName: uri, Units: , IsExtended: false
-        /// </summary>
-        public char[] Uri { get; set; } = new char[230];
-        public byte GetUriMaxItemsCount() => 230;
-    }
-    /// <summary>
-    /// WIP: Message that sets video stream settings
-    ///  SET_VIDEO_STREAM_SETTINGS
-    /// </summary>
-    public class SetVideoStreamSettingsPacket: PacketV2<SetVideoStreamSettingsPayload>
-    {
-	    public const int PacketMessageId = 270;
-        public override int MessageId => PacketMessageId;
-        public override byte GetCrcEtra() => 232;
-
-        public override SetVideoStreamSettingsPayload Payload { get; } = new SetVideoStreamSettingsPayload();
-
-        public override string Name => "SET_VIDEO_STREAM_SETTINGS";
-    }
-
-    /// <summary>
-    ///  SET_VIDEO_STREAM_SETTINGS
-    /// </summary>
-    public class SetVideoStreamSettingsPayload : IPayload
-    {
-        public byte GetMaxByteSize() => 247;
-
-        public void Deserialize(byte[] buffer, int offset, int payloadSize)
-        {
-            var index = offset;
-            var endIndex = offset + payloadSize;
-            var arraySize = 0;
-            Framerate = BitConverter.ToSingle(buffer, index);index+=4;
-            Bitrate = BitConverter.ToUInt32(buffer,index);index+=4;
-            ResolutionH = BitConverter.ToUInt16(buffer,index);index+=2;
-            ResolutionV = BitConverter.ToUInt16(buffer,index);index+=2;
-            Rotation = BitConverter.ToUInt16(buffer,index);index+=2;
-            TargetSystem = (byte)buffer[index++];
-            TargetComponent = (byte)buffer[index++];
-            CameraId = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/230 - Math.Max(0,((/*PayloadByteSize*/247 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
-            Uri = new char[arraySize];
-            Encoding.ASCII.GetChars(buffer, index,arraySize,Uri,0);
-            index+=arraySize;
-        }
-
-        public int Serialize(byte[] buffer, int index)
-        {
-            BitConverter.GetBytes(Framerate).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(Bitrate).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(ResolutionH).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes(ResolutionV).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes(Rotation).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes(CameraId).CopyTo(buffer, index);index+=1;
-            Encoding.ASCII.GetBytes(Uri,0,Uri.Length,buffer,index);index+=230;
-            return index; // /*PayloadByteSize*/247;
-        }
-
-        /// <summary>
-        /// Frames per second (set to -1 for highest framerate possible)
-        /// OriginName: framerate, Units: Hz, IsExtended: false
-        /// </summary>
-        public float Framerate { get; set; }
-        /// <summary>
-        /// Bit rate in bits per second (set to -1 for auto)
-        /// OriginName: bitrate, Units: bits/s, IsExtended: false
-        /// </summary>
-        public uint Bitrate { get; set; }
-        /// <summary>
-        /// Resolution horizontal in pixels (set to -1 for highest resolution possible)
-        /// OriginName: resolution_h, Units: pix, IsExtended: false
-        /// </summary>
-        public ushort ResolutionH { get; set; }
-        /// <summary>
-        /// Resolution vertical in pixels (set to -1 for highest resolution possible)
-        /// OriginName: resolution_v, Units: pix, IsExtended: false
-        /// </summary>
-        public ushort ResolutionV { get; set; }
-        /// <summary>
-        /// Video image rotation clockwise (0-359 degrees)
-        /// OriginName: rotation, Units: deg, IsExtended: false
-        /// </summary>
-        public ushort Rotation { get; set; }
-        /// <summary>
-        /// system ID of the target
-        /// OriginName: target_system, Units: , IsExtended: false
-        /// </summary>
-        public byte TargetSystem { get; set; }
-        /// <summary>
-        /// component ID of the target
-        /// OriginName: target_component, Units: , IsExtended: false
-        /// </summary>
-        public byte TargetComponent { get; set; }
-        /// <summary>
-        /// Camera ID (1 for first, 2 for second, etc.)
-        /// OriginName: camera_id, Units: , IsExtended: false
-        /// </summary>
-        public byte CameraId { get; set; }
-        /// <summary>
-        /// Video stream URI
-        /// OriginName: uri, Units: , IsExtended: false
-        /// </summary>
-        public char[] Uri { get; set; } = new char[230];
-        public byte GetUriMaxItemsCount() => 230;
+        public byte StreamId { get; set; }
     }
     /// <summary>
     /// Configure AP SSID and Password.
@@ -19036,7 +19480,7 @@ namespace Asv.Mavlink.V2.Common
         public byte GetPasswordMaxItemsCount() => 64;
     }
     /// <summary>
-    /// WIP: Version and capability of protocol version. This message is the response to REQUEST_PROTOCOL_VERSION and is used as part of the handshaking to establish which MAVLink version should be used on the network. Every node should respond to REQUEST_PROTOCOL_VERSION to enable the handshaking. Library implementers should consider adding this into the default decoding state machine to allow the protocol core to respond directly.
+    /// Version and capability of protocol version. This message is the response to REQUEST_PROTOCOL_VERSION and is used as part of the handshaking to establish which MAVLink version should be used on the network. Every node should respond to REQUEST_PROTOCOL_VERSION to enable the handshaking. Library implementers should consider adding this into the default decoding state machine to allow the protocol core to respond directly.
     ///  PROTOCOL_VERSION
     /// </summary>
     public class ProtocolVersionPacket: PacketV2<ProtocolVersionPayload>
@@ -19168,12 +19612,12 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// The number of seconds since the start-up of the node.
+        /// Time since the start-up of the node.
         /// OriginName: uptime_sec, Units: s, IsExtended: false
         /// </summary>
         public uint UptimeSec { get; set; }
@@ -19261,12 +19705,12 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since UNIX epoch or microseconds since system boot)
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// The number of seconds since the start-up of the node.
+        /// Time since the start-up of the node.
         /// OriginName: uptime_sec, Units: s, IsExtended: false
         /// </summary>
         public uint UptimeSec { get; set; }
@@ -19494,7 +19938,7 @@ namespace Asv.Mavlink.V2.Common
         public char[] ParamValue { get; set; } = new char[128];
         public byte GetParamValueMaxItemsCount() => 128;
         /// <summary>
-        /// Parameter type: see the MAV_PARAM_EXT_TYPE enum for supported data types.
+        /// Parameter type.
         /// OriginName: param_type, Units: , IsExtended: false
         /// </summary>
         public MavParamExtType ParamType { get; set; }
@@ -19570,7 +20014,7 @@ namespace Asv.Mavlink.V2.Common
         public char[] ParamValue { get; set; } = new char[128];
         public byte GetParamValueMaxItemsCount() => 128;
         /// <summary>
-        /// Parameter type: see the MAV_PARAM_EXT_TYPE enum for supported data types.
+        /// Parameter type.
         /// OriginName: param_type, Units: , IsExtended: false
         /// </summary>
         public MavParamExtType ParamType { get; set; }
@@ -19634,12 +20078,12 @@ namespace Asv.Mavlink.V2.Common
         public char[] ParamValue { get; set; } = new char[128];
         public byte GetParamValueMaxItemsCount() => 128;
         /// <summary>
-        /// Parameter type: see the MAV_PARAM_EXT_TYPE enum for supported data types.
+        /// Parameter type.
         /// OriginName: param_type, Units: , IsExtended: false
         /// </summary>
         public MavParamExtType ParamType { get; set; }
         /// <summary>
-        /// Result code: see the PARAM_ACK enum for possible codes.
+        /// Result code.
         /// OriginName: param_result, Units: , IsExtended: false
         /// </summary>
         public ParamAck ParamResult { get; set; }
@@ -19699,7 +20143,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since system boot or since UNIX epoch).
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -19710,12 +20154,12 @@ namespace Asv.Mavlink.V2.Common
         public ushort[] Distances { get; set; } = new ushort[72];
         public byte GetDistancesMaxItemsCount() => 72;
         /// <summary>
-        /// Minimum distance the sensor can measure in centimeters.
+        /// Minimum distance the sensor can measure.
         /// OriginName: min_distance, Units: cm, IsExtended: false
         /// </summary>
         public ushort MinDistance { get; set; }
         /// <summary>
-        /// Maximum distance the sensor can measure in centimeters.
+        /// Maximum distance the sensor can measure.
         /// OriginName: max_distance, Units: cm, IsExtended: false
         /// </summary>
         public ushort MaxDistance { get; set; }
@@ -19817,7 +20261,7 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Timestamp (microseconds since system boot or since UNIX epoch).
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
@@ -19883,37 +20327,37 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float[] TwistCovariance { get; } = new float[21];
         /// <summary>
-        /// Coordinate frame of reference for the pose data, as defined by MAV_FRAME enum.
+        /// Coordinate frame of reference for the pose data.
         /// OriginName: frame_id, Units: , IsExtended: false
         /// </summary>
         public MavFrame FrameId { get; set; }
         /// <summary>
-        /// Coordinate frame of reference for the velocity in free space (twist) data, as defined by MAV_FRAME enum.
+        /// Coordinate frame of reference for the velocity in free space (twist) data.
         /// OriginName: child_frame_id, Units: , IsExtended: false
         /// </summary>
         public MavFrame ChildFrameId { get; set; }
     }
     /// <summary>
-    /// WORK IN PROGRESS! DO NOT DEPLOY! Message to describe a trajectory in the local frame. Supported trajectory types are enumerated in MAV_TRAJECTORY_REPRESENTATION
-    ///  TRAJECTORY
+    /// Describe a trajectory using an array of up-to 5 waypoints in the local frame.
+    ///  TRAJECTORY_REPRESENTATION_WAYPOINTS
     /// </summary>
-    public class TrajectoryPacket: PacketV2<TrajectoryPayload>
+    public class TrajectoryRepresentationWaypointsPacket: PacketV2<TrajectoryRepresentationWaypointsPayload>
     {
 	    public const int PacketMessageId = 332;
         public override int MessageId => PacketMessageId;
-        public override byte GetCrcEtra() => 131;
+        public override byte GetCrcEtra() => 91;
 
-        public override TrajectoryPayload Payload { get; } = new TrajectoryPayload();
+        public override TrajectoryRepresentationWaypointsPayload Payload { get; } = new TrajectoryRepresentationWaypointsPayload();
 
-        public override string Name => "TRAJECTORY";
+        public override string Name => "TRAJECTORY_REPRESENTATION_WAYPOINTS";
     }
 
     /// <summary>
-    ///  TRAJECTORY
+    ///  TRAJECTORY_REPRESENTATION_WAYPOINTS
     /// </summary>
-    public class TrajectoryPayload : IPayload
+    public class TrajectoryRepresentationWaypointsPayload : IPayload
     {
-        public byte GetMaxByteSize() => 234;
+        public byte GetMaxByteSize() => 229;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -19921,112 +20365,828 @@ namespace Asv.Mavlink.V2.Common
             var endIndex = offset + payloadSize;
             var arraySize = 0;
             TimeUsec = BitConverter.ToUInt64(buffer,index);index+=8;
-            arraySize = /*ArrayLength*/11 - Math.Max(0,((/*PayloadByteSize*/234 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
-            Point1 = new float[arraySize];
+            arraySize = /*ArrayLength*/5 - Math.Max(0,((/*PayloadByteSize*/229 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            PosX = new float[arraySize];
             for(var i=0;i<arraySize;i++)
             {
-                Point1[i] = BitConverter.ToSingle(buffer, index);index+=4;
+                PosX[i] = BitConverter.ToSingle(buffer, index);index+=4;
             }
-            arraySize = 11;
-            for(var i=0;i<arraySize;i++)
-            {
-                Point2[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            arraySize = 11;
-            for(var i=0;i<arraySize;i++)
-            {
-                Point3[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            arraySize = 11;
-            for(var i=0;i<arraySize;i++)
-            {
-                Point4[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            arraySize = 11;
-            for(var i=0;i<arraySize;i++)
-            {
-                Point5[i] = BitConverter.ToSingle(buffer, index);index+=4;
-            }
-            Type = (MavTrajectoryRepresentation)buffer[index++];
             arraySize = 5;
             for(var i=0;i<arraySize;i++)
             {
-                PointValid[i] = (byte)buffer[index++];
+                PosY[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            arraySize = 5;
+            for(var i=0;i<arraySize;i++)
+            {
+                PosZ[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            arraySize = 5;
+            for(var i=0;i<arraySize;i++)
+            {
+                VelX[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            arraySize = 5;
+            for(var i=0;i<arraySize;i++)
+            {
+                VelY[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            arraySize = 5;
+            for(var i=0;i<arraySize;i++)
+            {
+                VelZ[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            arraySize = 5;
+            for(var i=0;i<arraySize;i++)
+            {
+                AccX[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            arraySize = 5;
+            for(var i=0;i<arraySize;i++)
+            {
+                AccY[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            arraySize = 5;
+            for(var i=0;i<arraySize;i++)
+            {
+                AccZ[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            arraySize = 5;
+            for(var i=0;i<arraySize;i++)
+            {
+                PosYaw[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            arraySize = 5;
+            for(var i=0;i<arraySize;i++)
+            {
+                VelYaw[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            ValidPoints = (byte)buffer[index++];
+        }
+
+        public int Serialize(byte[] buffer, int index)
+        {
+            BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
+            for(var i=0;i<PosX.Length;i++)
+            {
+                BitConverter.GetBytes(PosX[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<PosY.Length;i++)
+            {
+                BitConverter.GetBytes(PosY[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<PosZ.Length;i++)
+            {
+                BitConverter.GetBytes(PosZ[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<VelX.Length;i++)
+            {
+                BitConverter.GetBytes(VelX[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<VelY.Length;i++)
+            {
+                BitConverter.GetBytes(VelY[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<VelZ.Length;i++)
+            {
+                BitConverter.GetBytes(VelZ[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<AccX.Length;i++)
+            {
+                BitConverter.GetBytes(AccX[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<AccY.Length;i++)
+            {
+                BitConverter.GetBytes(AccY[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<AccZ.Length;i++)
+            {
+                BitConverter.GetBytes(AccZ[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<PosYaw.Length;i++)
+            {
+                BitConverter.GetBytes(PosYaw[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<VelYaw.Length;i++)
+            {
+                BitConverter.GetBytes(VelYaw[i]).CopyTo(buffer, index);index+=4;
+            }
+            BitConverter.GetBytes(ValidPoints).CopyTo(buffer, index);index+=1;
+            return index; // /*PayloadByteSize*/229;
+        }
+
+        /// <summary>
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// OriginName: time_usec, Units: us, IsExtended: false
+        /// </summary>
+        public ulong TimeUsec { get; set; }
+        /// <summary>
+        /// X-coordinate of waypoint, set to NaN if not being used
+        /// OriginName: pos_x, Units: m, IsExtended: false
+        /// </summary>
+        public float[] PosX { get; set; } = new float[5];
+        public byte GetPosXMaxItemsCount() => 5;
+        /// <summary>
+        /// Y-coordinate of waypoint, set to NaN if not being used
+        /// OriginName: pos_y, Units: m, IsExtended: false
+        /// </summary>
+        public float[] PosY { get; } = new float[5];
+        /// <summary>
+        /// Z-coordinate of waypoint, set to NaN if not being used
+        /// OriginName: pos_z, Units: m, IsExtended: false
+        /// </summary>
+        public float[] PosZ { get; } = new float[5];
+        /// <summary>
+        /// X-velocity of waypoint, set to NaN if not being used
+        /// OriginName: vel_x, Units: m/s, IsExtended: false
+        /// </summary>
+        public float[] VelX { get; } = new float[5];
+        /// <summary>
+        /// Y-velocity of waypoint, set to NaN if not being used
+        /// OriginName: vel_y, Units: m/s, IsExtended: false
+        /// </summary>
+        public float[] VelY { get; } = new float[5];
+        /// <summary>
+        /// Z-velocity of waypoint, set to NaN if not being used
+        /// OriginName: vel_z, Units: m/s, IsExtended: false
+        /// </summary>
+        public float[] VelZ { get; } = new float[5];
+        /// <summary>
+        /// X-acceleration of waypoint, set to NaN if not being used
+        /// OriginName: acc_x, Units: m/s/s, IsExtended: false
+        /// </summary>
+        public float[] AccX { get; } = new float[5];
+        /// <summary>
+        /// Y-acceleration of waypoint, set to NaN if not being used
+        /// OriginName: acc_y, Units: m/s/s, IsExtended: false
+        /// </summary>
+        public float[] AccY { get; } = new float[5];
+        /// <summary>
+        /// Z-acceleration of waypoint, set to NaN if not being used
+        /// OriginName: acc_z, Units: m/s/s, IsExtended: false
+        /// </summary>
+        public float[] AccZ { get; } = new float[5];
+        /// <summary>
+        /// Yaw angle, set to NaN if not being used
+        /// OriginName: pos_yaw, Units: rad, IsExtended: false
+        /// </summary>
+        public float[] PosYaw { get; } = new float[5];
+        /// <summary>
+        /// Yaw rate, set to NaN if not being used
+        /// OriginName: vel_yaw, Units: rad/s, IsExtended: false
+        /// </summary>
+        public float[] VelYaw { get; } = new float[5];
+        /// <summary>
+        /// Number of valid points (up-to 5 waypoints are possible)
+        /// OriginName: valid_points, Units: , IsExtended: false
+        /// </summary>
+        public byte ValidPoints { get; set; }
+    }
+    /// <summary>
+    /// Describe a trajectory using an array of up-to 5 bezier points in the local frame.
+    ///  TRAJECTORY_REPRESENTATION_BEZIER
+    /// </summary>
+    public class TrajectoryRepresentationBezierPacket: PacketV2<TrajectoryRepresentationBezierPayload>
+    {
+	    public const int PacketMessageId = 333;
+        public override int MessageId => PacketMessageId;
+        public override byte GetCrcEtra() => 231;
+
+        public override TrajectoryRepresentationBezierPayload Payload { get; } = new TrajectoryRepresentationBezierPayload();
+
+        public override string Name => "TRAJECTORY_REPRESENTATION_BEZIER";
+    }
+
+    /// <summary>
+    ///  TRAJECTORY_REPRESENTATION_BEZIER
+    /// </summary>
+    public class TrajectoryRepresentationBezierPayload : IPayload
+    {
+        public byte GetMaxByteSize() => 109;
+
+        public void Deserialize(byte[] buffer, int offset, int payloadSize)
+        {
+            var index = offset;
+            var endIndex = offset + payloadSize;
+            var arraySize = 0;
+            TimeUsec = BitConverter.ToUInt64(buffer,index);index+=8;
+            arraySize = /*ArrayLength*/5 - Math.Max(0,((/*PayloadByteSize*/109 - payloadSize - /*ExtendedFieldsLength*/0)/4 /*FieldTypeByteSize*/));
+            PosX = new float[arraySize];
+            for(var i=0;i<arraySize;i++)
+            {
+                PosX[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            arraySize = 5;
+            for(var i=0;i<arraySize;i++)
+            {
+                PosY[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            arraySize = 5;
+            for(var i=0;i<arraySize;i++)
+            {
+                PosZ[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            arraySize = 5;
+            for(var i=0;i<arraySize;i++)
+            {
+                Delta[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            arraySize = 5;
+            for(var i=0;i<arraySize;i++)
+            {
+                PosYaw[i] = BitConverter.ToSingle(buffer, index);index+=4;
+            }
+            ValidPoints = (byte)buffer[index++];
+        }
+
+        public int Serialize(byte[] buffer, int index)
+        {
+            BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
+            for(var i=0;i<PosX.Length;i++)
+            {
+                BitConverter.GetBytes(PosX[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<PosY.Length;i++)
+            {
+                BitConverter.GetBytes(PosY[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<PosZ.Length;i++)
+            {
+                BitConverter.GetBytes(PosZ[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<Delta.Length;i++)
+            {
+                BitConverter.GetBytes(Delta[i]).CopyTo(buffer, index);index+=4;
+            }
+            for(var i=0;i<PosYaw.Length;i++)
+            {
+                BitConverter.GetBytes(PosYaw[i]).CopyTo(buffer, index);index+=4;
+            }
+            BitConverter.GetBytes(ValidPoints).CopyTo(buffer, index);index+=1;
+            return index; // /*PayloadByteSize*/109;
+        }
+
+        /// <summary>
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// OriginName: time_usec, Units: us, IsExtended: false
+        /// </summary>
+        public ulong TimeUsec { get; set; }
+        /// <summary>
+        /// X-coordinate of starting bezier point, set to NaN if not being used
+        /// OriginName: pos_x, Units: m, IsExtended: false
+        /// </summary>
+        public float[] PosX { get; set; } = new float[5];
+        public byte GetPosXMaxItemsCount() => 5;
+        /// <summary>
+        /// Y-coordinate of starting bezier point, set to NaN if not being used
+        /// OriginName: pos_y, Units: m, IsExtended: false
+        /// </summary>
+        public float[] PosY { get; } = new float[5];
+        /// <summary>
+        /// Z-coordinate of starting bezier point, set to NaN if not being used
+        /// OriginName: pos_z, Units: m, IsExtended: false
+        /// </summary>
+        public float[] PosZ { get; } = new float[5];
+        /// <summary>
+        /// Bezier time horizon, set to NaN if velocity/acceleration should not be incorporated
+        /// OriginName: delta, Units: s, IsExtended: false
+        /// </summary>
+        public float[] Delta { get; } = new float[5];
+        /// <summary>
+        /// Yaw, set to NaN for unchanged
+        /// OriginName: pos_yaw, Units: rad, IsExtended: false
+        /// </summary>
+        public float[] PosYaw { get; } = new float[5];
+        /// <summary>
+        /// Number of valid points (up-to 5 waypoints are possible)
+        /// OriginName: valid_points, Units: , IsExtended: false
+        /// </summary>
+        public byte ValidPoints { get; set; }
+    }
+    /// <summary>
+    /// Report current used cellular network status
+    ///  CELLULAR_STATUS
+    /// </summary>
+    public class CellularStatusPacket: PacketV2<CellularStatusPayload>
+    {
+	    public const int PacketMessageId = 334;
+        public override int MessageId => PacketMessageId;
+        public override byte GetCrcEtra() => 135;
+
+        public override CellularStatusPayload Payload { get; } = new CellularStatusPayload();
+
+        public override string Name => "CELLULAR_STATUS";
+    }
+
+    /// <summary>
+    ///  CELLULAR_STATUS
+    /// </summary>
+    public class CellularStatusPayload : IPayload
+    {
+        public byte GetMaxByteSize() => 14;
+
+        public void Deserialize(byte[] buffer, int offset, int payloadSize)
+        {
+            var index = offset;
+            var endIndex = offset + payloadSize;
+            var arraySize = 0;
+            Cid = BitConverter.ToUInt32(buffer,index);index+=4;
+            Status = (CellularNetworkStatusFlag)BitConverter.ToUInt16(buffer,index);index+=2;
+            Mcc = BitConverter.ToUInt16(buffer,index);index+=2;
+            Mnc = BitConverter.ToUInt16(buffer,index);index+=2;
+            Lac = BitConverter.ToUInt16(buffer,index);index+=2;
+            Type = (CellularNetworkRadioType)buffer[index++];
+            Quality = (byte)buffer[index++];
+        }
+
+        public int Serialize(byte[] buffer, int index)
+        {
+            BitConverter.GetBytes(Cid).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes((ushort)Status).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes(Mcc).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes(Mnc).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes(Lac).CopyTo(buffer, index);index+=2;
+            buffer[index] = (byte)Type;index+=1;
+            BitConverter.GetBytes(Quality).CopyTo(buffer, index);index+=1;
+            return index; // /*PayloadByteSize*/14;
+        }
+
+        /// <summary>
+        /// Cell ID. If unknown, set to: UINT32_MAX
+        /// OriginName: cid, Units: , IsExtended: false
+        /// </summary>
+        public uint Cid { get; set; }
+        /// <summary>
+        /// Status bitmap
+        /// OriginName: status, Units: , IsExtended: false
+        /// </summary>
+        public CellularNetworkStatusFlag Status { get; set; }
+        /// <summary>
+        /// Mobile country code. If unknown, set to: UINT16_MAX
+        /// OriginName: mcc, Units: , IsExtended: false
+        /// </summary>
+        public ushort Mcc { get; set; }
+        /// <summary>
+        /// Mobile network code. If unknown, set to: UINT16_MAX
+        /// OriginName: mnc, Units: , IsExtended: false
+        /// </summary>
+        public ushort Mnc { get; set; }
+        /// <summary>
+        /// Location area code. If unknown, set to: 0
+        /// OriginName: lac, Units: , IsExtended: false
+        /// </summary>
+        public ushort Lac { get; set; }
+        /// <summary>
+        /// Cellular network radio type: gsm, cdma, lte...
+        /// OriginName: type, Units: , IsExtended: false
+        /// </summary>
+        public CellularNetworkRadioType Type { get; set; }
+        /// <summary>
+        /// Cellular network RSSI/RSRP in dBm, absolute value
+        /// OriginName: quality, Units: , IsExtended: false
+        /// </summary>
+        public byte Quality { get; set; }
+    }
+    /// <summary>
+    /// The global position resulting from GPS and sensor fusion.
+    ///  UTM_GLOBAL_POSITION
+    /// </summary>
+    public class UtmGlobalPositionPacket: PacketV2<UtmGlobalPositionPayload>
+    {
+	    public const int PacketMessageId = 340;
+        public override int MessageId => PacketMessageId;
+        public override byte GetCrcEtra() => 99;
+
+        public override UtmGlobalPositionPayload Payload { get; } = new UtmGlobalPositionPayload();
+
+        public override string Name => "UTM_GLOBAL_POSITION";
+    }
+
+    /// <summary>
+    ///  UTM_GLOBAL_POSITION
+    /// </summary>
+    public class UtmGlobalPositionPayload : IPayload
+    {
+        public byte GetMaxByteSize() => 70;
+
+        public void Deserialize(byte[] buffer, int offset, int payloadSize)
+        {
+            var index = offset;
+            var endIndex = offset + payloadSize;
+            var arraySize = 0;
+            Time = BitConverter.ToUInt64(buffer,index);index+=8;
+            Lat = BitConverter.ToInt32(buffer,index);index+=4;
+            Lon = BitConverter.ToInt32(buffer,index);index+=4;
+            Alt = BitConverter.ToInt32(buffer,index);index+=4;
+            RelativeAlt = BitConverter.ToInt32(buffer,index);index+=4;
+            NextLat = BitConverter.ToInt32(buffer,index);index+=4;
+            NextLon = BitConverter.ToInt32(buffer,index);index+=4;
+            NextAlt = BitConverter.ToInt32(buffer,index);index+=4;
+            Vx = BitConverter.ToInt16(buffer,index);index+=2;
+            Vy = BitConverter.ToInt16(buffer,index);index+=2;
+            Vz = BitConverter.ToInt16(buffer,index);index+=2;
+            HAcc = BitConverter.ToUInt16(buffer,index);index+=2;
+            VAcc = BitConverter.ToUInt16(buffer,index);index+=2;
+            VelAcc = BitConverter.ToUInt16(buffer,index);index+=2;
+            UpdateRate = BitConverter.ToUInt16(buffer,index);index+=2;
+            arraySize = /*ArrayLength*/18 - Math.Max(0,((/*PayloadByteSize*/70 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            UasId = new byte[arraySize];
+            for(var i=0;i<arraySize;i++)
+            {
+                UasId[i] = (byte)buffer[index++];
+            }
+            FlightState = (UtmFlightState)buffer[index++];
+            Flags = (UtmDataAvailFlags)buffer[index++];
+        }
+
+        public int Serialize(byte[] buffer, int index)
+        {
+            BitConverter.GetBytes(Time).CopyTo(buffer, index);index+=8;
+            BitConverter.GetBytes(Lat).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(Lon).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(Alt).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(RelativeAlt).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(NextLat).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(NextLon).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(NextAlt).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(Vx).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes(Vy).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes(Vz).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes(HAcc).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes(VAcc).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes(VelAcc).CopyTo(buffer, index);index+=2;
+            BitConverter.GetBytes(UpdateRate).CopyTo(buffer, index);index+=2;
+            for(var i=0;i<UasId.Length;i++)
+            {
+                buffer[index] = (byte)UasId[i];index+=1;
+            }
+            buffer[index] = (byte)FlightState;index+=1;
+            buffer[index] = (byte)Flags;index+=1;
+            return index; // /*PayloadByteSize*/70;
+        }
+
+        /// <summary>
+        /// Time of applicability of position (microseconds since UNIX epoch).
+        /// OriginName: time, Units: us, IsExtended: false
+        /// </summary>
+        public ulong Time { get; set; }
+        /// <summary>
+        /// Latitude (WGS84)
+        /// OriginName: lat, Units: degE7, IsExtended: false
+        /// </summary>
+        public int Lat { get; set; }
+        /// <summary>
+        /// Longitude (WGS84)
+        /// OriginName: lon, Units: degE7, IsExtended: false
+        /// </summary>
+        public int Lon { get; set; }
+        /// <summary>
+        /// Altitude (WGS84)
+        /// OriginName: alt, Units: mm, IsExtended: false
+        /// </summary>
+        public int Alt { get; set; }
+        /// <summary>
+        /// Altitude above ground
+        /// OriginName: relative_alt, Units: mm, IsExtended: false
+        /// </summary>
+        public int RelativeAlt { get; set; }
+        /// <summary>
+        /// Next waypoint, latitude (WGS84)
+        /// OriginName: next_lat, Units: degE7, IsExtended: false
+        /// </summary>
+        public int NextLat { get; set; }
+        /// <summary>
+        /// Next waypoint, longitude (WGS84)
+        /// OriginName: next_lon, Units: degE7, IsExtended: false
+        /// </summary>
+        public int NextLon { get; set; }
+        /// <summary>
+        /// Next waypoint, altitude (WGS84)
+        /// OriginName: next_alt, Units: mm, IsExtended: false
+        /// </summary>
+        public int NextAlt { get; set; }
+        /// <summary>
+        /// Ground X speed (latitude, positive north)
+        /// OriginName: vx, Units: cm/s, IsExtended: false
+        /// </summary>
+        public short Vx { get; set; }
+        /// <summary>
+        /// Ground Y speed (longitude, positive east)
+        /// OriginName: vy, Units: cm/s, IsExtended: false
+        /// </summary>
+        public short Vy { get; set; }
+        /// <summary>
+        /// Ground Z speed (altitude, positive down)
+        /// OriginName: vz, Units: cm/s, IsExtended: false
+        /// </summary>
+        public short Vz { get; set; }
+        /// <summary>
+        /// Horizontal position uncertainty (standard deviation)
+        /// OriginName: h_acc, Units: mm, IsExtended: false
+        /// </summary>
+        public ushort HAcc { get; set; }
+        /// <summary>
+        /// Altitude uncertainty (standard deviation)
+        /// OriginName: v_acc, Units: mm, IsExtended: false
+        /// </summary>
+        public ushort VAcc { get; set; }
+        /// <summary>
+        /// Speed uncertainty (standard deviation)
+        /// OriginName: vel_acc, Units: cm/s, IsExtended: false
+        /// </summary>
+        public ushort VelAcc { get; set; }
+        /// <summary>
+        /// Time until next update. Set to 0 if unknown or in data driven mode.
+        /// OriginName: update_rate, Units: cs, IsExtended: false
+        /// </summary>
+        public ushort UpdateRate { get; set; }
+        /// <summary>
+        /// Unique UAS ID.
+        /// OriginName: uas_id, Units: , IsExtended: false
+        /// </summary>
+        public byte[] UasId { get; set; } = new byte[18];
+        public byte GetUasIdMaxItemsCount() => 18;
+        /// <summary>
+        /// Flight state
+        /// OriginName: flight_state, Units: , IsExtended: false
+        /// </summary>
+        public UtmFlightState FlightState { get; set; }
+        /// <summary>
+        /// Bitwise OR combination of the data available flags.
+        /// OriginName: flags, Units: , IsExtended: false
+        /// </summary>
+        public UtmDataAvailFlags Flags { get; set; }
+    }
+    /// <summary>
+    /// Large debug/prototyping array. The message uses the maximum available payload for data. The array_id and name fields are used to discriminate between messages in code and in user interfaces (respectively). Do not use in production code.
+    ///  DEBUG_FLOAT_ARRAY
+    /// </summary>
+    public class DebugFloatArrayPacket: PacketV2<DebugFloatArrayPayload>
+    {
+	    public const int PacketMessageId = 350;
+        public override int MessageId => PacketMessageId;
+        public override byte GetCrcEtra() => 232;
+
+        public override DebugFloatArrayPayload Payload { get; } = new DebugFloatArrayPayload();
+
+        public override string Name => "DEBUG_FLOAT_ARRAY";
+    }
+
+    /// <summary>
+    ///  DEBUG_FLOAT_ARRAY
+    /// </summary>
+    public class DebugFloatArrayPayload : IPayload
+    {
+        public byte GetMaxByteSize() => 252;
+
+        public void Deserialize(byte[] buffer, int offset, int payloadSize)
+        {
+            var index = offset;
+            var endIndex = offset + payloadSize;
+            var arraySize = 0;
+            TimeUsec = BitConverter.ToUInt64(buffer,index);index+=8;
+            ArrayId = BitConverter.ToUInt16(buffer,index);index+=2;
+            arraySize = /*ArrayLength*/10 - Math.Max(0,((/*PayloadByteSize*/252 - payloadSize - /*ExtendedFieldsLength*/232)/1 /*FieldTypeByteSize*/));
+            Name = new char[arraySize];
+            Encoding.ASCII.GetChars(buffer, index,arraySize,Name,0);
+            index+=arraySize;
+            // extended field 'Data' can be empty
+            if (index >= endIndex) return;
+            arraySize = 58;
+            for(var i=0;i<arraySize;i++)
+            {
+                Data[i] = BitConverter.ToSingle(buffer, index);index+=4;
             }
         }
 
         public int Serialize(byte[] buffer, int index)
         {
             BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
-            for(var i=0;i<Point1.Length;i++)
+            BitConverter.GetBytes(ArrayId).CopyTo(buffer, index);index+=2;
+            Encoding.ASCII.GetBytes(Name,0,Name.Length,buffer,index);index+=10;
+            for(var i=0;i<Data.Length;i++)
             {
-                BitConverter.GetBytes(Point1[i]).CopyTo(buffer, index);index+=4;
+                BitConverter.GetBytes(Data[i]).CopyTo(buffer, index);index+=4;
             }
-            for(var i=0;i<Point2.Length;i++)
-            {
-                BitConverter.GetBytes(Point2[i]).CopyTo(buffer, index);index+=4;
-            }
-            for(var i=0;i<Point3.Length;i++)
-            {
-                BitConverter.GetBytes(Point3[i]).CopyTo(buffer, index);index+=4;
-            }
-            for(var i=0;i<Point4.Length;i++)
-            {
-                BitConverter.GetBytes(Point4[i]).CopyTo(buffer, index);index+=4;
-            }
-            for(var i=0;i<Point5.Length;i++)
-            {
-                BitConverter.GetBytes(Point5[i]).CopyTo(buffer, index);index+=4;
-            }
-            buffer[index] = (byte)Type;index+=1;
-            for(var i=0;i<PointValid.Length;i++)
-            {
-                buffer[index] = (byte)PointValid[i];index+=1;
-            }
-            return index; // /*PayloadByteSize*/234;
+            return index; // /*PayloadByteSize*/252;
         }
 
         /// <summary>
-        /// Timestamp (microseconds since system boot or since UNIX epoch).
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
         /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
         public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Depending on the type (see MAV_TRAJECTORY_REPRESENTATION)
-        /// OriginName: point_1, Units: , IsExtended: false
+        /// Unique ID used to discriminate between arrays
+        /// OriginName: array_id, Units: , IsExtended: false
         /// </summary>
-        public float[] Point1 { get; set; } = new float[11];
-        public byte GetPoint1MaxItemsCount() => 11;
+        public ushort ArrayId { get; set; }
         /// <summary>
-        /// Depending on the type (see MAV_TRAJECTORY_REPRESENTATION)
-        /// OriginName: point_2, Units: , IsExtended: false
+        /// Name, for human-friendly display in a Ground Control Station
+        /// OriginName: name, Units: , IsExtended: false
         /// </summary>
-        public float[] Point2 { get; } = new float[11];
+        public char[] Name { get; set; } = new char[10];
+        public byte GetNameMaxItemsCount() => 10;
         /// <summary>
-        /// Depending on the type (see MAV_TRAJECTORY_REPRESENTATION)
-        /// OriginName: point_3, Units: , IsExtended: false
+        /// data
+        /// OriginName: data, Units: , IsExtended: true
         /// </summary>
-        public float[] Point3 { get; } = new float[11];
+        public float[] Data { get; } = new float[58];
+    }
+    /// <summary>
+    /// Vehicle status report that is sent out while orbit execution is in progress (see MAV_CMD_DO_ORBIT).
+    ///  ORBIT_EXECUTION_STATUS
+    /// </summary>
+    public class OrbitExecutionStatusPacket: PacketV2<OrbitExecutionStatusPayload>
+    {
+	    public const int PacketMessageId = 360;
+        public override int MessageId => PacketMessageId;
+        public override byte GetCrcEtra() => 11;
+
+        public override OrbitExecutionStatusPayload Payload { get; } = new OrbitExecutionStatusPayload();
+
+        public override string Name => "ORBIT_EXECUTION_STATUS";
+    }
+
+    /// <summary>
+    ///  ORBIT_EXECUTION_STATUS
+    /// </summary>
+    public class OrbitExecutionStatusPayload : IPayload
+    {
+        public byte GetMaxByteSize() => 25;
+
+        public void Deserialize(byte[] buffer, int offset, int payloadSize)
+        {
+            var index = offset;
+            var endIndex = offset + payloadSize;
+            var arraySize = 0;
+            TimeUsec = BitConverter.ToUInt64(buffer,index);index+=8;
+            Radius = BitConverter.ToSingle(buffer, index);index+=4;
+            X = BitConverter.ToInt32(buffer,index);index+=4;
+            Y = BitConverter.ToInt32(buffer,index);index+=4;
+            Z = BitConverter.ToSingle(buffer, index);index+=4;
+            Frame = (MavFrame)buffer[index++];
+        }
+
+        public int Serialize(byte[] buffer, int index)
+        {
+            BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
+            BitConverter.GetBytes(Radius).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(X).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(Y).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(Z).CopyTo(buffer, index);index+=4;
+            buffer[index] = (byte)Frame;index+=1;
+            return index; // /*PayloadByteSize*/25;
+        }
+
         /// <summary>
-        /// Depending on the type (see MAV_TRAJECTORY_REPRESENTATION)
-        /// OriginName: point_4, Units: , IsExtended: false
+        /// Timestamp (UNIX Epoch time or time since system boot). The receiving end can infer timestamp format (since 1.1.1970 or since system boot) by checking for the magnitude the number.
+        /// OriginName: time_usec, Units: us, IsExtended: false
         /// </summary>
-        public float[] Point4 { get; } = new float[11];
+        public ulong TimeUsec { get; set; }
         /// <summary>
-        /// Depending on the type (see MAV_TRAJECTORY_REPRESENTATION)
-        /// OriginName: point_5, Units: , IsExtended: false
+        /// Radius of the orbit circle. Positive values orbit clockwise, negative values orbit counter-clockwise.
+        /// OriginName: radius, Units: m, IsExtended: false
         /// </summary>
-        public float[] Point5 { get; } = new float[11];
+        public float Radius { get; set; }
         /// <summary>
-        /// Waypoints, Bezier etc. see MAV_TRAJECTORY_REPRESENTATION
-        /// OriginName: type, Units: , IsExtended: false
+        /// X coordinate of center point. Coordinate system depends on frame field: local = x position in meters * 1e4, global = latitude in degrees * 1e7.
+        /// OriginName: x, Units: , IsExtended: false
         /// </summary>
-        public MavTrajectoryRepresentation Type { get; set; }
+        public int X { get; set; }
         /// <summary>
-        /// States if respective point is valid (boolean)
-        /// OriginName: point_valid, Units: , IsExtended: false
+        /// Y coordinate of center point.  Coordinate system depends on frame field: local = x position in meters * 1e4, global = latitude in degrees * 1e7.
+        /// OriginName: y, Units: , IsExtended: false
         /// </summary>
-        public byte[] PointValid { get; } = new byte[5];
+        public int Y { get; set; }
+        /// <summary>
+        /// Altitude of center point. Coordinate system depends on frame field.
+        /// OriginName: z, Units: m, IsExtended: false
+        /// </summary>
+        public float Z { get; set; }
+        /// <summary>
+        /// The coordinate system of the fields: x, y, z.
+        /// OriginName: frame, Units: , IsExtended: false
+        /// </summary>
+        public MavFrame Frame { get; set; }
+    }
+    /// <summary>
+    /// Status text message (use only for important status and error messages). The full message payload can be used for status text, but we recommend that updates be kept concise. Note: The message is intended as a less restrictive replacement for STATUSTEXT.
+    ///  STATUSTEXT_LONG
+    /// </summary>
+    public class StatustextLongPacket: PacketV2<StatustextLongPayload>
+    {
+	    public const int PacketMessageId = 365;
+        public override int MessageId => PacketMessageId;
+        public override byte GetCrcEtra() => 36;
+
+        public override StatustextLongPayload Payload { get; } = new StatustextLongPayload();
+
+        public override string Name => "STATUSTEXT_LONG";
+    }
+
+    /// <summary>
+    ///  STATUSTEXT_LONG
+    /// </summary>
+    public class StatustextLongPayload : IPayload
+    {
+        public byte GetMaxByteSize() => 255;
+
+        public void Deserialize(byte[] buffer, int offset, int payloadSize)
+        {
+            var index = offset;
+            var endIndex = offset + payloadSize;
+            var arraySize = 0;
+            Severity = (MavSeverity)buffer[index++];
+            arraySize = /*ArrayLength*/254 - Math.Max(0,((/*PayloadByteSize*/255 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            Text = new char[arraySize];
+            Encoding.ASCII.GetChars(buffer, index,arraySize,Text,0);
+            index+=arraySize;
+        }
+
+        public int Serialize(byte[] buffer, int index)
+        {
+            buffer[index] = (byte)Severity;index+=1;
+            Encoding.ASCII.GetBytes(Text,0,Text.Length,buffer,index);index+=254;
+            return index; // /*PayloadByteSize*/255;
+        }
+
+        /// <summary>
+        /// Severity of status. Relies on the definitions within RFC-5424.
+        /// OriginName: severity, Units: , IsExtended: false
+        /// </summary>
+        public MavSeverity Severity { get; set; }
+        /// <summary>
+        /// Status text message, without null termination character.
+        /// OriginName: text, Units: , IsExtended: false
+        /// </summary>
+        public char[] Text { get; set; } = new char[254];
+        public byte GetTextMaxItemsCount() => 254;
+    }
+    /// <summary>
+    /// Cumulative distance traveled for each reported wheel.
+    ///  WHEEL_DISTANCE
+    /// </summary>
+    public class WheelDistancePacket: PacketV2<WheelDistancePayload>
+    {
+	    public const int PacketMessageId = 9000;
+        public override int MessageId => PacketMessageId;
+        public override byte GetCrcEtra() => 113;
+
+        public override WheelDistancePayload Payload { get; } = new WheelDistancePayload();
+
+        public override string Name => "WHEEL_DISTANCE";
+    }
+
+    /// <summary>
+    ///  WHEEL_DISTANCE
+    /// </summary>
+    public class WheelDistancePayload : IPayload
+    {
+        public byte GetMaxByteSize() => 137;
+
+        public void Deserialize(byte[] buffer, int offset, int payloadSize)
+        {
+            var index = offset;
+            var endIndex = offset + payloadSize;
+            var arraySize = 0;
+            TimeUsec = BitConverter.ToUInt64(buffer,index);index+=8;
+            arraySize = /*ArrayLength*/16 - Math.Max(0,((/*PayloadByteSize*/137 - payloadSize - /*ExtendedFieldsLength*/0)/8 /*FieldTypeByteSize*/));
+            Distance = new double[arraySize];
+            for(var i=0;i<arraySize;i++)
+            {
+                Distance[i] = BitConverter.ToDouble(buffer, index);index+=8;
+            }
+            Count = (byte)buffer[index++];
+        }
+
+        public int Serialize(byte[] buffer, int index)
+        {
+            BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
+            for(var i=0;i<Distance.Length;i++)
+            {
+                BitConverter.GetBytes(Distance[i]).CopyTo(buffer, index);index+=8;
+            }
+            BitConverter.GetBytes(Count).CopyTo(buffer, index);index+=1;
+            return index; // /*PayloadByteSize*/137;
+        }
+
+        /// <summary>
+        /// Timestamp (synced to UNIX time or since system boot).
+        /// OriginName: time_usec, Units: us, IsExtended: false
+        /// </summary>
+        public ulong TimeUsec { get; set; }
+        /// <summary>
+        /// Distance reported by individual wheel encoders. Forward rotations increase values, reverse rotations decrease them. Not all wheels will necessarily have wheel encoders; the mapping of encoders to wheel positions must be agreed/understood by the endpoints.
+        /// OriginName: distance, Units: m, IsExtended: false
+        /// </summary>
+        public double[] Distance { get; set; } = new double[16];
+        public byte GetDistanceMaxItemsCount() => 16;
+        /// <summary>
+        /// Number of wheels reported.
+        /// OriginName: count, Units: , IsExtended: false
+        /// </summary>
+        public byte Count { get; set; }
     }
 
 

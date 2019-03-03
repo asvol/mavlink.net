@@ -29,7 +29,7 @@ namespace Asv.Mavlink
             _decoder.Dispose();
         }
 
-        public IObservable<DeserizliaePackageException> DeserizliaePackageErrors => _decoder.OutError;
+        public IObservable<DeserizliaePackageException> DeserializePackageErrors => _decoder.OutError;
         public IPort Port { get; }
 
         public Task Send(IPacketV2<IPayload> packet, CancellationToken cancel)

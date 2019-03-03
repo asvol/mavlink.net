@@ -43,6 +43,9 @@ namespace Asv.Mavlink
         Followme,
         Offboard,
         Unknwon,
+        TakeOff,
+        Land,
+        Rtgs
     }
 
     public static class Px4ModeHelper
@@ -69,18 +72,53 @@ namespace Asv.Mavlink
 
         public static Px4CustomMode GetMode(this Px4VehicleMode mode)
         {
-            if (mode.Equals(Manual)) return Px4CustomMode.Manual;
-            if (mode.Equals(Stabilized)) return Px4CustomMode.Stabilized;
-            if (mode.Equals(Acro)) return Px4CustomMode.Acro;
-            if (mode.Equals(Rattitude)) return Px4CustomMode.Rattitude;
-            if (mode.Equals(Altctl)) return Px4CustomMode.Altctl;
-            if (mode.Equals(Posctl)) return Px4CustomMode.Posctl;
-            if (mode.Equals(Loiter)) return Px4CustomMode.Loiter;
-            if (mode.Equals(Mission)) return Px4CustomMode.Mission;
-            if (mode.Equals(RTL)) return Px4CustomMode.RTL;
-            if (mode.Equals(Followme)) return Px4CustomMode.Followme;
-            if (mode.Equals(Offboard)) return Px4CustomMode.Offboard;
+            if (mode.ModeFlag.HasFlag(MavModeFlag.MavModeFlagManualInputEnabled)) // manual modes
+            {
+                switch (mode.CustomMainMode)
+                {
+                    case CustomMainMode.Px4CustomMainModeManual:
+                        return Px4CustomMode.Manual;
+                    case CustomMainMode.Px4CustomMainModeAcro:
+                        return Px4CustomMode.Acro;
+                    case CustomMainMode.Px4CustomMainModeRattitude:
+                        return Px4CustomMode.Rattitude;
+                    case CustomMainMode.Px4CustomMainModeStabilized:
+                        return Px4CustomMode.Stabilized;
+                    case CustomMainMode.Px4CustomMainModeAltctl:
+                        return Px4CustomMode.Altctl;
+                    case CustomMainMode.Px4CustomMainModePosctl:
+                        return Px4CustomMode.Posctl;
+                }
+            }
+            else if (mode.ModeFlag.HasFlag(MavModeFlag.MavModeFlagAutoEnabled)) // auto mode
+            {
+                if (mode.CustomMainMode.HasFlag(CustomMainMode.Px4CustomMainModeAuto))
+                {
+                    switch (mode.CustomSubMode)
+                    {
+                        case CustomSubMode.Px4CustomSubModeAutoMission:
+                            return Px4CustomMode.TakeOff;
+                        case CustomSubMode.Px4CustomSubModeAutoTakeoff:
+                            return Px4CustomMode.Mission;
+                        case CustomSubMode.Px4CustomSubModeAutoLoiter:
+                            return Px4CustomMode.Loiter;
+                        case CustomSubMode.Px4CustomSubModeAutoFollowTarget:
+                            return Px4CustomMode.Followme;
+                        case CustomSubMode.Px4CustomSubModeAutoRTL:
+                            return Px4CustomMode.RTL;
+                        case CustomSubMode.Px4CustomSubModeAutoLand:
+                            return Px4CustomMode.Land;
+                        case CustomSubMode.Px4CustomSubModeAutoRtgs:
+                            return Px4CustomMode.Rtgs;
+                    }
 
+                    if ((int) mode.CustomSubMode == (int) CustomMainMode.Px4CustomMainModeOffboard)
+                    {
+                        return Px4CustomMode.Offboard;
+                    }
+                }
+            }
+            
             return Px4CustomMode.Unknwon;
 
         }
@@ -168,7 +206,7 @@ namespace Asv.Mavlink
             CustomSubMode = (CustomSubMode) ((payload.CustomMode & 0xFF000000) >> 24);
             ModeFlag = payload.BaseMode;
         }
-        public Px4CustomMode Mode => this.GetMode();
+        public Px4CustomMode Px4Mode => this.GetMode();
         public MavModeFlag ModeFlag { get; set; }
         public CustomMainMode CustomMainMode { get; set; }
         public CustomSubMode CustomSubMode { get; set; }

@@ -4359,12 +4359,12 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// </summary>
         public int Lng { get; set; }
         /// <summary>
-        /// Altitude Absolute (AMSL).
+        /// Altitude (MSL).
         /// OriginName: alt_msl, Units: m, IsExtended: false
         /// </summary>
         public float AltMsl { get; set; }
         /// <summary>
-        /// Altitude Relative (above HOME location).
+        /// Altitude (Relative to HOME location).
         /// OriginName: alt_rel, Units: m, IsExtended: false
         /// </summary>
         public float AltRel { get; set; }
@@ -6601,7 +6601,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         public float Ssa { get; set; }
     }
     /// <summary>
-    /// ESC Telemetry Data for ESCs 1 to 4, matching data sent by BLHeli ESCs
+    /// ESC Telemetry Data for ESCs 1 to 4, matching data sent by BLHeli ESCs.
     ///  ESC_TELEMETRY_1_TO_4
     /// </summary>
     public class EscTelemetry1To4Packet: PacketV2<EscTelemetry1To4Payload>
@@ -6690,39 +6690,39 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         }
 
         /// <summary>
-        /// Voltage
+        /// Voltage.
         /// OriginName: voltage, Units: cV, IsExtended: false
         /// </summary>
         public ushort[] Voltage { get; set; } = new ushort[4];
         public byte GetVoltageMaxItemsCount() => 4;
         /// <summary>
-        /// Current
+        /// Current.
         /// OriginName: current, Units: cA, IsExtended: false
         /// </summary>
         public ushort[] Current { get; } = new ushort[4];
         /// <summary>
-        /// Total current
+        /// Total current.
         /// OriginName: totalcurrent, Units: mAh, IsExtended: false
         /// </summary>
         public ushort[] Totalcurrent { get; } = new ushort[4];
         /// <summary>
-        /// RPM (eRPM)
+        /// RPM (eRPM).
         /// OriginName: rpm, Units: rpm, IsExtended: false
         /// </summary>
         public ushort[] Rpm { get; } = new ushort[4];
         /// <summary>
-        /// count of telemetry packets received (wraps at 65535)
+        /// count of telemetry packets received (wraps at 65535).
         /// OriginName: count, Units: , IsExtended: false
         /// </summary>
         public ushort[] Count { get; } = new ushort[4];
         /// <summary>
-        /// Temperature
+        /// Temperature.
         /// OriginName: temperature, Units: degC, IsExtended: false
         /// </summary>
         public byte[] Temperature { get; } = new byte[4];
     }
     /// <summary>
-    /// ESC Telemetry Data for ESCs 5 to 8, matching data sent by BLHeli ESCs
+    /// ESC Telemetry Data for ESCs 5 to 8, matching data sent by BLHeli ESCs.
     ///  ESC_TELEMETRY_5_TO_8
     /// </summary>
     public class EscTelemetry5To8Packet: PacketV2<EscTelemetry5To8Payload>
@@ -6811,39 +6811,39 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         }
 
         /// <summary>
-        /// Voltage
+        /// Voltage.
         /// OriginName: voltage, Units: cV, IsExtended: false
         /// </summary>
         public ushort[] Voltage { get; set; } = new ushort[4];
         public byte GetVoltageMaxItemsCount() => 4;
         /// <summary>
-        /// Current
+        /// Current.
         /// OriginName: current, Units: cA, IsExtended: false
         /// </summary>
         public ushort[] Current { get; } = new ushort[4];
         /// <summary>
-        /// Total current
+        /// Total current.
         /// OriginName: totalcurrent, Units: mAh, IsExtended: false
         /// </summary>
         public ushort[] Totalcurrent { get; } = new ushort[4];
         /// <summary>
-        /// RPM (eRPM)
+        /// RPM (eRPM).
         /// OriginName: rpm, Units: rpm, IsExtended: false
         /// </summary>
         public ushort[] Rpm { get; } = new ushort[4];
         /// <summary>
-        /// count of telemetry packets received (wraps at 65535)
+        /// count of telemetry packets received (wraps at 65535).
         /// OriginName: count, Units: , IsExtended: false
         /// </summary>
         public ushort[] Count { get; } = new ushort[4];
         /// <summary>
-        /// Temperature
+        /// Temperature.
         /// OriginName: temperature, Units: degC, IsExtended: false
         /// </summary>
         public byte[] Temperature { get; } = new byte[4];
     }
     /// <summary>
-    /// ESC Telemetry Data for ESCs 9 to 12, matching data sent by BLHeli ESCs
+    /// ESC Telemetry Data for ESCs 9 to 12, matching data sent by BLHeli ESCs.
     ///  ESC_TELEMETRY_9_TO_12
     /// </summary>
     public class EscTelemetry9To12Packet: PacketV2<EscTelemetry9To12Payload>
@@ -6932,33 +6932,33 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         }
 
         /// <summary>
-        /// Voltage
+        /// Voltage.
         /// OriginName: voltage, Units: cV, IsExtended: false
         /// </summary>
         public ushort[] Voltage { get; set; } = new ushort[4];
         public byte GetVoltageMaxItemsCount() => 4;
         /// <summary>
-        /// Current
+        /// Current.
         /// OriginName: current, Units: cA, IsExtended: false
         /// </summary>
         public ushort[] Current { get; } = new ushort[4];
         /// <summary>
-        /// Total current
+        /// Total current.
         /// OriginName: totalcurrent, Units: mAh, IsExtended: false
         /// </summary>
         public ushort[] Totalcurrent { get; } = new ushort[4];
         /// <summary>
-        /// RPM (eRPM)
+        /// RPM (eRPM).
         /// OriginName: rpm, Units: rpm, IsExtended: false
         /// </summary>
         public ushort[] Rpm { get; } = new ushort[4];
         /// <summary>
-        /// count of telemetry packets received (wraps at 65535)
+        /// count of telemetry packets received (wraps at 65535).
         /// OriginName: count, Units: , IsExtended: false
         /// </summary>
         public ushort[] Count { get; } = new ushort[4];
         /// <summary>
-        /// Temperature
+        /// Temperature.
         /// OriginName: temperature, Units: degC, IsExtended: false
         /// </summary>
         public byte[] Temperature { get; } = new byte[4];

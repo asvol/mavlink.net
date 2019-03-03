@@ -21,6 +21,7 @@ namespace Asv.Mavlink
         IRxValue<GeoPoint> GlobGps { get; }
         IRxValue<GeoPoint> Home { get; }
         IRxValue<bool> Armed { get; }
+
         #region Raw data
 
         IRxValue<HeartbeatPayload> RawHeartbeat { get; }
@@ -47,11 +48,35 @@ namespace Asv.Mavlink
         Task<MavParam> ReadParam(short index,int attemptCount, CancellationToken cancel);
         Task<MavParam> WriteParam(MavParam param, int attemptCount, CancellationToken cancel);
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="timeBootMs">Timestamp (time since system boot).</param>
+        /// <param name="coordinateFrame"> Valid options are: MAV_FRAME_LOCAL_NED = 1, MAV_FRAME_LOCAL_OFFSET_NED = 7, MAV_FRAME_BODY_NED = 8, MAV_FRAME_BODY_OFFSET_NED = 9</param>
+        /// <param name="typeMask">Bitmap to indicate which dimensions should be ignored by the vehicle.</param>
+        /// <param name="x">X Position in NED frame</param>
+        /// <param name="y">Y Position in NED frame</param>
+        /// <param name="z">Z Position in NED frame (note, altitude is negative in NED)</param>
+        /// <param name="vx">X velocity in NED frame</param>
+        /// <param name="vy">Y velocity in NED frame</param>
+        /// <param name="vz">Z velocity in NED frame</param>
+        /// <param name="afx">X acceleration or force (if bit 10 of type_mask is set) in NED frame in meter / s^2 or N</param>
+        /// <param name="afy">Y acceleration or force (if bit 10 of type_mask is set) in NED frame in meter / s^2 or N</param>
+        /// <param name="afz">Z acceleration or force (if bit 10 of type_mask is set) in NED frame in meter / s^2 or N</param>
+        /// <param name="yaw">yaw setpoint</param>
+        /// <param name="yawRate">yaw rate setpoint</param>
+        /// <param name="cancel"></param>
+        /// <returns></returns>
+        Task SetPositionTargetLocalNed(uint timeBootMs, MavFrame coordinateFrame, PositionTargetTypemask typeMask, float x,
+            float y, float z, float vx, float vy, float vz, float afx, float afy, float afz, float yaw, float yawRate,
+            CancellationToken cancel);
+
     }
 
     public static class VehicleHelper
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
 
         public const int DefaultAttemptCount = 3;
 
@@ -251,7 +276,7 @@ namespace Asv.Mavlink
             return MoveRadial(vehicle, moveDistance, moveVelocity, 180, cancel);
         }
 
-        private static async Task MoveRadial(IVehicle vehicle, double moveDistance, double moveVelocity, int radial, CancellationToken cancel)
+        public static async Task MoveRadial(this IVehicle vehicle, double moveDistance, double moveVelocity, int radial, CancellationToken cancel)
         {
             var loc = vehicle.RelGps.Value;
             var alt = loc.Altitude ?? 0;
@@ -260,63 +285,32 @@ namespace Asv.Mavlink
             await vehicle.GoTo((float) moveVelocity, loc, cancel).ConfigureAwait(false);
         }
 
-        public static async Task GoToSmooth(this IVehicle drone, GeoPoint geoPoint, double velocity,
-            double precisionMet, int checkTimeMs, CancellationToken cancel, IProgress<double> progress)
+
+
+        public static Task SetPositionTargetLocalNed(this IVehicle vehicle, uint timeBootMs, MavFrame coordinateFrame, float? x,
+            float? y, float? z, float? vx, float? vy, float? vz, float? afx, float? afy, float? afz, float? yaw, float? yawRate,
+            CancellationToken cancel)
         {
-            const double Magic1 = 4;
-            const double Magic2 = 3;
+            PositionTargetTypemask mask = 0;
+            if (!x.HasValue) mask |= PositionTargetTypemask.PositionTargetTypemaskXIgnore;
+            if (!y.HasValue) mask |= PositionTargetTypemask.PositionTargetTypemaskYIgnore;
+            if (!z.HasValue) mask |= PositionTargetTypemask.PositionTargetTypemaskZIgnore;
 
-            progress = progress ?? new Progress<double>();
-            var startLocation = drone.RelGps.Value;
-            var startDistance = GeoMath.Distance(geoPoint, startLocation);
+            if (!vx.HasValue) mask |= PositionTargetTypemask.PositionTargetTypemaskVxIgnore;
+            if (!vy.HasValue) mask |= PositionTargetTypemask.PositionTargetTypemaskVyIgnore;
+            if (!vz.HasValue) mask |= PositionTargetTypemask.PositionTargetTypemaskVzIgnore;
 
-            Logger.Info("GoToSmooth: '({0}) with V={1:F1} m/sec and precision {2:F2} m. Distance to target {3:F1}",
-                geoPoint, velocity, precisionMet, startDistance);
+            if (!afx.HasValue) mask |= PositionTargetTypemask.PositionTargetTypemaskAxIgnore;
+            if (!afy.HasValue) mask |= PositionTargetTypemask.PositionTargetTypemaskVyIgnore;
+            if (!afz.HasValue) mask |= PositionTargetTypemask.PositionTargetTypemaskVzIgnore;
 
-            progress.Report(0);
-            if (startDistance <= precisionMet)
-            {
-                Logger.Debug("Already in target, nothing to do", startLocation);
-                progress.Report(1);
-                return;
-            }
+            if (!yaw.HasValue) mask |= PositionTargetTypemask.PositionTargetTypemaskYawIgnore;
+            if (!yawRate.HasValue) mask |= PositionTargetTypemask.PositionTargetTypemaskYawRateIgnore;
 
-            var stepCount = (int) (startDistance / (velocity * Magic1));
-            var path = GeoMath.SplitIntoGeoPoints(startLocation, geoPoint, stepCount).ToArray();
-
-
-
-
-            Logger.Debug($"GoToSmooth: split path into '{path.Length}' points => start point to point moving");
-
-            // skip first point, it's start point
-            for (int i = 1; i < path.Length; i++)
-            {
-                Logger.Debug($"GoToSmooth: move to {i} from {path.Length} point: {path[i]}");
-                await drone.GoTo((float) velocity, path[i], cancel).ConfigureAwait(false);
-
-                while (true)
-                {
-                    var loc = drone.RelGps.Value;
-                    var groundVel = drone.RawVfrHud.Value.Groundspeed;
-                    var localDist = GeoMath.Distance(path[i], loc);
-                    var globalDist = GeoMath.Distance(geoPoint, loc);
-                    var prog = Math.Abs(1 - globalDist / startDistance);
-                    Logger.Trace("GoToSmooth: distance to target {0:F1}, location: {1}, progress {2:P2}", globalDist,
-                        loc, prog);
-                    progress.Report(prog);
-                    var maxDistanceToNextPoint = groundVel * Magic2;
-                    if (localDist <= maxDistanceToNextPoint)
-                    {
-                        Logger.Debug(
-                            $"GoToSmooth: local distance to current '{i}' point '{localDist} m' <= '{maxDistanceToNextPoint:F1} m'");
-                        break;
-                    }
-                    await Task.Delay(checkTimeMs, cancel).ConfigureAwait(false);
-                }
-
-            }
-
+            return vehicle.SetPositionTargetLocalNed(timeBootMs,coordinateFrame,mask,x ?? 0, y ?? 0, z ?? 0, vx ?? 0, vy ?? 0, vz ?? 0, afx ?? 0, afy ?? 0, afz ?? 0, yaw ?? 0, yawRate ?? 0, cancel);
         }
+
+        
+
     }
 }
