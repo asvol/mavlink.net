@@ -44,9 +44,9 @@ namespace Asv.Mavlink
         IRxValue<int?> ParamsCount { get; }
         IObservable<MavParam> OnParamUpdated { get; }
         Task ReadAllParams(CancellationToken cancel,IProgress<double> progress = null);
-        Task<MavParam> ReadParam(string name, CancellationToken cancel);
-        Task<MavParam> ReadParam(short index, CancellationToken cancel);
-        Task<MavParam> WriteParam(MavParam param, CancellationToken cancel);
+        Task<MavParam> ReadParam(string name,int attemptCount, CancellationToken cancel);
+        Task<MavParam> ReadParam(short index,int attemptCount, CancellationToken cancel);
+        Task<MavParam> WriteParam(MavParam param, int attemptCount, CancellationToken cancel);
 
         /// <summary>
         /// 
@@ -78,6 +78,22 @@ namespace Asv.Mavlink
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 
+        public const int DefaultAttemptCount = 3;
+
+        public static Task<MavParam> ReadParam(this IVehicle src, string name, CancellationToken cancel)
+        {
+            return src.ReadParam(name, DefaultAttemptCount,cancel);
+        }
+
+        public static Task<MavParam> ReadParam(this IVehicle src, short index, CancellationToken cancel)
+        {
+            return src.ReadParam(index, DefaultAttemptCount, cancel);
+        }
+
+        public static Task<MavParam> WriteParam(this IVehicle src, MavParam param, CancellationToken cancel)
+        {
+            return src.WriteParam(param, DefaultAttemptCount, cancel);
+        }
 
         public static async Task<MavParam> WriteParam(this IVehicle src, string name, float value, CancellationToken cancel)
         {
@@ -140,7 +156,7 @@ namespace Asv.Mavlink
         /// <returns></returns>
         public static Task<CommandAckPayload> ArmDisarm(this IVehicle src, bool state, CancellationToken cancel)
         {
-            return src.SendCommand(MavCmd.MavCmdComponentArmDisarm, state ? 1:0, float.NaN, float.NaN, float.NaN, float.NaN, float.NaN, float.NaN, 1, cancel);
+            return src.SendCommand(MavCmd.MavCmdComponentArmDisarm, state ? 1:0, float.NaN, float.NaN, float.NaN, float.NaN, float.NaN, float.NaN, 3, cancel);
         }
 
         /// <summary>
@@ -159,6 +175,10 @@ namespace Asv.Mavlink
         {
             return src.ArmDisarm(false, cancel);
         }
+
+       
+
+        
 
         /// <summary>
         /// Reposition the vehicle to a specific WGS84 global position.
