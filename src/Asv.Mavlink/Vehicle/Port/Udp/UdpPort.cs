@@ -3,13 +3,16 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Asv.Mavlink.Port
 {
     public class UdpPortConfig
     {
-        public string IpAddress { get; set; }
-        public int Port { get; set; }
+        public string LocalHost { get; set; }
+        public int LocalPort { get; set; }
+        public string RemoteHost { get; set; }
+        public int RemotePort { get; set; }
 
         public static bool TryParseFromUri(Uri uri, out UdpPortConfig opt)
         {
@@ -19,25 +22,45 @@ namespace Asv.Mavlink.Port
                 return false;
             }
 
+            var coll = HttpUtility.ParseQueryString(uri.Query);
+            
             opt = new UdpPortConfig
             {
-                IpAddress = IPAddress.Parse(uri.Host).ToString(),
-                Port = uri.Port,
+                LocalHost = IPAddress.Parse(uri.Host).ToString(),
+                LocalPort = uri.Port,
             };
+
+            var rhost = coll["rhost"];
+            if (rhost != null)
+            {
+                opt.RemoteHost = IPAddress.Parse(rhost).ToString();
+            }
+
+            var rport = coll["rport"];
+            if (rport != null)
+            {
+                opt.RemotePort = int.Parse(rport);
+            }
             return true;
         }
     }
 
     public class UdpPort : PortBase
     {
-        private readonly IPEndPoint _endPoint;
+        private readonly IPEndPoint _recvEndPoint;
         private UdpClient _udp;
         private IPEndPoint _lastRecvEndpoint;
         private CancellationTokenSource _stop;
+        private IPEndPoint _sendEndPoint;
 
         public UdpPort(UdpPortConfig config)
         {
-            _endPoint = new IPEndPoint(IPAddress.Parse(config.IpAddress),config.Port);
+            _recvEndPoint = new IPEndPoint(IPAddress.Parse(config.LocalHost),config.LocalPort);
+            if (!config.RemoteHost.IsNullOrWhiteSpace() && config.RemotePort != 0)
+            {
+                _sendEndPoint = new IPEndPoint(IPAddress.Parse(config.RemoteHost), config.RemotePort);
+            }
+            
         }
 
         protected override Task InternalSend(byte[] data, int count, CancellationToken cancel)
@@ -53,7 +76,11 @@ namespace Asv.Mavlink.Port
 
         protected override void InternalStart()
         {
-            _udp = new UdpClient(_endPoint);
+            _udp = new UdpClient(_recvEndPoint);
+            if (_sendEndPoint != null)
+            {
+                _udp.Connect(_sendEndPoint);
+            }
             _stop = new CancellationTokenSource();
             Task.Factory.StartNew(ListenAsync, _stop.Token, TaskCreationOptions.LongRunning);
         }
@@ -62,11 +89,11 @@ namespace Asv.Mavlink.Port
         {
             try
             {
-                var anyEp = new IPEndPoint(IPAddress.Any, _endPoint.Port);
+                var anyEp = new IPEndPoint(IPAddress.Any, _recvEndPoint.Port);
                 while (true)
                 {
                     var bytes = _udp.Receive(ref anyEp);
-                    if (!Equals(_endPoint.Address, IPAddress.Any) && _lastRecvEndpoint == null)
+                    if (_lastRecvEndpoint == null )
                     {
                         _lastRecvEndpoint = anyEp;
                         _udp.Connect(_lastRecvEndpoint);
