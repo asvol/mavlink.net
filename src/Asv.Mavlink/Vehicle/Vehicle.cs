@@ -9,8 +9,10 @@ using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.Port;
+using Asv.Mavlink.V2.Ardupilotmega;
 using Asv.Mavlink.V2.Common;
 using NLog;
+using MavCmd = Asv.Mavlink.V2.Common.MavCmd;
 
 namespace Asv.Mavlink
 {
@@ -72,7 +74,11 @@ namespace Asv.Mavlink
             _ts = new SingleThreadTaskScheduler("vehicle");
             TaskFactory = new TaskFactory(_ts);
             _port = PortFactory.Create(config.ConnectionString);
-            _mavlinkConnection = new MavlinkV2Connection(_port, _ => _.RegisterCommonDialect());
+            _mavlinkConnection = new MavlinkV2Connection(_port, _ =>
+            {
+                _.RegisterCommonDialect();
+                _.RegisterArdupilotmegaDialect();
+            });
             _mavlinkConnection.Port.Enable();
             InputPackets = _mavlinkConnection.Where(FilterVehicle);
             HandleStatistic();
