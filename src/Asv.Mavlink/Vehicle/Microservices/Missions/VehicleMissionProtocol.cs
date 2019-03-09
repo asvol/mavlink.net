@@ -26,7 +26,7 @@ namespace Asv.Mavlink
         }
 
         public Task MissionItem(MavFrame frame, MavCmd cmd, bool current, bool autoContinue, float param1, float param2, float param3,
-            float param4, int x, int y, float z, MavMissionType missionType, int attemptCount, CancellationToken cancel)
+            float param4, float x, float y, float z, MavMissionType missionType, int attemptCount, CancellationToken cancel)
         {
             var packet = new MissionItemPacket()
             {
@@ -36,10 +36,10 @@ namespace Asv.Mavlink
                 {
                     TargetComponent = _config.TargetComponenId,
                     TargetSystem = _config.TargetSystemId,
-                    Seq = (ushort) Interlocked.Increment(ref _seq),
+                    Seq = 0,
                     Frame = frame,
                     Command = cmd,
-                    Current = (byte) (current? 1:0),
+                    Current = 2,
                     Autocontinue = (byte) (autoContinue? 1:0),
                     Param1 = param1,
                     Param2 = param2,
@@ -47,7 +47,7 @@ namespace Asv.Mavlink
                     Param4 = param4,
                     X = x,
                     Y = y,
-                    Z = z,
+                    Z = 20,
                     MissionType = missionType
                 }
             };

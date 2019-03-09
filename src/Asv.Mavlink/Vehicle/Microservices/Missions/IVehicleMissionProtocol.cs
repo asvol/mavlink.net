@@ -18,7 +18,7 @@ namespace Asv.Mavlink
         /// <param name="param3">PARAM3, see MAV_CMD enum</param>
         /// <param name="param4">PARAM4, see MAV_CMD enum</param>
         /// <returns></returns>
-        Task MissionItem(MavFrame frame, MavCmd cmd, bool current, bool autoContinue, float param1, float param2, float param3, float param4, int x, int y, float z, MavMissionType missionType, int attemptCount, CancellationToken cancel);
+        Task MissionItem(MavFrame frame, MavCmd cmd, bool current, bool autoContinue, float param1, float param2, float param3, float param4, float x, float y, float z, MavMissionType missionType, int attemptCount, CancellationToken cancel);
     }
 
 }

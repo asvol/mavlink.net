@@ -32,7 +32,7 @@ namespace Asv.Mavlink
         private readonly RxValue<StatustextPayload> _statusText = new RxValue<StatustextPayload>();
         private readonly RxValue<GeoPoint> _relGps = new RxValue<GeoPoint>();
         private readonly RxValue<GeoPoint> _globGps = new RxValue<GeoPoint>();
-        private IObservable<IPacketV2<IPayload>> _inputPackets;
+        private readonly IObservable<IPacketV2<IPayload>> _inputPackets;
         private readonly CancellationTokenSource _disposeCancel = new CancellationTokenSource();
         private readonly RxValue<bool> _armed = new RxValue<bool>();
 
