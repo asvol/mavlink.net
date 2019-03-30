@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace Asv.Mavlink.Port
+namespace Asv.Mavlink
 {
     public class UdpPortConfig
     {
@@ -62,6 +62,8 @@ namespace Asv.Mavlink.Port
             }
             
         }
+
+        public override PortType PortType => PortType.Udp;
 
         protected override Task InternalSend(byte[] data, int count, CancellationToken cancel)
         {

@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Asv.Mavlink.Port
+namespace Asv.Mavlink
 {
     public enum PortState
     {
@@ -12,8 +12,18 @@ namespace Asv.Mavlink.Port
         Connected
     }
 
+    public enum PortType
+    {
+        Serial,
+        Udp,
+    }
+
+
     public interface IPort:IObservable<byte[]>,IDisposable
     {
+        long RxBytes { get; }
+        long TxBytes { get; }
+        PortType PortType { get; }
         TimeSpan ReconnectTimeout { get; set; }
         IRxValue<bool> IsEnabled { get; }
         IRxValue<PortState> State { get; }

@@ -4,7 +4,7 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Asv.Mavlink.Port
+namespace Asv.Mavlink
 {
     public abstract class PortBase:IPort
     {
@@ -14,21 +14,30 @@ namespace Asv.Mavlink.Port
         private readonly RxValue<PortState> _portStateStream = new RxValue<PortState>();
         private readonly RxValue<bool> _enableStream = new RxValue<bool>();
         private readonly Subject<byte[]> _outputData = new Subject<byte[]>();
+        private long _rxBytes;
+        private long _txBytes;
 
         public IRxValue<bool> IsEnabled => _enableStream;
+
+        public long RxBytes => Interlocked.Read(ref _rxBytes);
+
+        public long TxBytes => Interlocked.Read(ref _txBytes);
+
+        public abstract PortType PortType { get; }
         public TimeSpan ReconnectTimeout { get; set; } = TimeSpan.FromSeconds(5);
         public IRxValue<PortState> State => _portStateStream;
 
         public async Task Send(byte[] data, int count, CancellationToken cancel)
         {
+            if (!IsEnabled.Value) return;
             try
             {
                 await InternalSend(data,count, cancel).ConfigureAwait(false);
+                Interlocked.Add(ref _txBytes, count);
             }
             catch (Exception exception)
             {
                 InternalOnError(exception);
-                throw;
             }
         }
 
@@ -37,7 +46,7 @@ namespace Asv.Mavlink.Port
         protected PortBase()
         {
             _enableStream.Where(_ => _).Subscribe(_=>TryConnect(), _disposedCancel.Token);
-        }
+        }   
 
         public void Enable()
         {
@@ -79,6 +88,10 @@ namespace Asv.Mavlink.Port
             {
                 InternalOnError(e);
             }
+            finally
+            {
+                Interlocked.Exchange(ref _isEvaluating, 0);
+            }
         }
 
         protected abstract Task InternalSend(byte[] data, int count, CancellationToken cancel);
@@ -91,6 +104,7 @@ namespace Asv.Mavlink.Port
         {
             try
             {
+                Interlocked.Add(ref _rxBytes, data.Length);
                 _outputData.OnNext(data);
             }
             catch (Exception ex)

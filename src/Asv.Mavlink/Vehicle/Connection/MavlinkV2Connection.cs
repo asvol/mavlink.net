@@ -3,7 +3,6 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.Decoder;
-using Asv.Mavlink.Port;
 
 namespace Asv.Mavlink
 {

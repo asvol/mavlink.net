@@ -8,7 +8,6 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
-using Asv.Mavlink.Port;
 using Asv.Mavlink.V2.Ardupilotmega;
 using Asv.Mavlink.V2.Common;
 using Asv.Mavlink.V2.Icarous;

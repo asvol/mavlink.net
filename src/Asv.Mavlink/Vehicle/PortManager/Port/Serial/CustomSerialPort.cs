@@ -1,7 +1,6 @@
 using System.IO.Ports;
 using System.Threading;
 using System.Threading.Tasks;
-using Asv.Mavlink.Port;
 
 namespace Asv.Mavlink
 {
@@ -15,6 +14,8 @@ namespace Asv.Mavlink
             _config = config;
         }
 
+        public override PortType PortType => PortType.Serial;
+
         protected override Task InternalSend(byte[] data, int count, CancellationToken cancel)
         {
             return _serial?.BaseStream.WriteAsync(data, 0, count,cancel);
@@ -22,8 +23,12 @@ namespace Asv.Mavlink
 
         protected override void InternalStop()
         {
-            _serial?.Dispose();
-            if (_serial != null) _serial.DataReceived -= _serial_DataReceived;
+            if (_serial != null)
+            {
+                _serial.DataReceived -= _serial_DataReceived;
+                if (_serial.IsOpen) _serial?.Close();
+                _serial.Dispose();
+            }
         }
 
         protected override void InternalStart()
