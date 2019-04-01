@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -64,6 +66,7 @@ namespace Asv.Mavlink
     {
         private readonly object _sync = new object();
         private readonly List<PortWrapper> _ports = new List<PortWrapper>();
+        private readonly Subject<Unit> _configChangedSubject = new Subject<Unit>();
 
         public PortManager()
         {
@@ -93,8 +96,9 @@ namespace Asv.Mavlink
                 {
                     port.Disable();
                 }
-                _ports.Add(new PortWrapper(port, _ports.Count.ToString(), settings, OnRecv));
+                _ports.Add(new PortWrapper(port, Guid.NewGuid().ToString(), settings, OnRecv));
             }
+            _configChangedSubject.OnNext(Unit.Default);
         }
 
         private void OnRecv(PortWrapper sender, byte[] data,CancellationToken cancel)
@@ -125,6 +129,7 @@ namespace Asv.Mavlink
                 item.Port.Enable();
                 item.Settings.IsEnabled = true;
             }
+            _configChangedSubject.OnNext(Unit.Default);
         }
 
         public void Disable(string portId)
@@ -136,6 +141,7 @@ namespace Asv.Mavlink
                 item.Port.Disable();
                 item.Settings.IsEnabled = false;
             }
+            _configChangedSubject.OnNext(Unit.Default);
         }
 
         public void Load(PortManagerSettings settings)
@@ -159,6 +165,13 @@ namespace Asv.Mavlink
                 _ports.Remove(item);
                 return true;
             }
+        }
+
+        public IObservable<Unit> OnConfigChanged => _configChangedSubject;
+
+        public void Dispose()
+        {
+            _configChangedSubject?.Dispose();
         }
     }
 }

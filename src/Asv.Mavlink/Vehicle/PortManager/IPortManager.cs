@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Reactive;
 
 namespace Asv.Mavlink
 {
-    public interface IPortManager
+    public interface IPortManager:IDisposable
     {
         IPortInfo[] Ports { get; }
         void Add(PortSettings settings);
         bool Remove(string portId);
+        IObservable<Unit> OnConfigChanged { get; }
         void Load(PortManagerSettings settings);
         PortManagerSettings Save();
         void Enable(string portId);
