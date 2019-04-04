@@ -10,8 +10,6 @@ namespace Asv.Mavlink
 {
     public interface IVehicle:IDisposable
     {
-        IRxValue<Exception> PortError {get; }
-        IRxValue<DeserizliaePackageException> OnPacketErrors { get; }
         IRawTelemetry Rtt { get; }
         IVehicleParameterProtocol Params { get; }
         IVehicleCommandProtocol Commands { get; }

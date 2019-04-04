@@ -20,7 +20,6 @@ namespace Asv.Mavlink
 {
     public class VehicleConfig
     {
-        public string ConnectionString { get; set; } = "0.0.0.0:14560";
         public int HeartbeatTimeoutMs { get; set; } = 2000;
         public byte SystemId { get; set; } = 254;
         public byte ComponentId { get; set; } = 254;
@@ -33,46 +32,29 @@ namespace Asv.Mavlink
 
     public class Vehicle : IVehicle
     {
-        private readonly VehicleConfig _config;
-        private readonly MavlinkV2Connection _mavlinkConnection;
-        private readonly IPort _port;
+        private readonly IMavlinkV2Connection _mavlinkConnection;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly RawTelemetry _rtt;
         private readonly VehicleParameterProtocol _params;
         private readonly VehicleCommandProtocol _vehicleCommands;
         private readonly VehicleMissionProtocol _mission;
         private readonly OffboardMode _offboard;
-        private readonly RxValue<DeserizliaePackageException> _packetErrors = new RxValue<DeserizliaePackageException>();
-        private readonly IDisposable _packetErrorSubscribe;
 
-        public Vehicle(VehicleConfig config)
+        public Vehicle(IMavlinkV2Connection connection, VehicleConfig config)
         {
+            if (connection == null) throw new ArgumentNullException(nameof(connection));
             if (config == null) throw new ArgumentNullException(nameof(config));
-
-            _config = config;
-            _port = PortFactory.Create(config.ConnectionString);
-            _mavlinkConnection = new MavlinkV2Connection(_port, _ =>
-            {
-                _.RegisterCommonDialect();
-                _.RegisterArdupilotmegaDialect();
-                _.RegisterIcarousDialect();
-                _.RegisterUavionixDialect();
-            });
-            _mavlinkConnection.Port.Enable();
-            _rtt = new RawTelemetry(_mavlinkConnection,new RawTelemetryConfig { ComponentId = _config.ComponentId ,HeartbeatTimeoutMs = _config.HeartbeatTimeoutMs,SystemId = _config.SystemId});
-            _params = new VehicleParameterProtocol(_mavlinkConnection,new VehicleParameterProtocolConfig { ComponentId = _config.ComponentId,  SystemId = _config.SystemId, ReadWriteTimeoutMs = _config.ReadParamTimeoutMs,TimeoutToReadAllParamsMs = _config.TimeoutToReadAllParamsMs});
-            _vehicleCommands = new VehicleCommandProtocol(_mavlinkConnection,new CommandProtocolConfig { ComponentId = _config.ComponentId,CommandTimeoutMs = _config.CommandTimeoutMs,SystemId = _config.SystemId});
+            _mavlinkConnection = connection;
+            var config1 = config;
+            _rtt = new RawTelemetry(_mavlinkConnection,new RawTelemetryConfig { ComponentId = config1.ComponentId ,HeartbeatTimeoutMs = config1.HeartbeatTimeoutMs,SystemId = config1.SystemId});
+            _params = new VehicleParameterProtocol(_mavlinkConnection,new VehicleParameterProtocolConfig { ComponentId = config1.ComponentId,  SystemId = config1.SystemId, ReadWriteTimeoutMs = config1.ReadParamTimeoutMs,TimeoutToReadAllParamsMs = config1.TimeoutToReadAllParamsMs});
+            _vehicleCommands = new VehicleCommandProtocol(_mavlinkConnection,new CommandProtocolConfig { ComponentId = config1.ComponentId,CommandTimeoutMs = config1.CommandTimeoutMs,SystemId = config1.SystemId});
             _mission = new VehicleMissionProtocol(_mavlinkConnection,
-                new VehicleMissionProtocolConfig {ComponentId = _config.ComponentId, SystemId = _config.SystemId});
+                new VehicleMissionProtocolConfig {ComponentId = config1.ComponentId, SystemId = config1.SystemId});
             _offboard = new OffboardMode(_mavlinkConnection, new OffboardModeConfig());
-            _packetErrorSubscribe = _packetErrors.Subscribe(_packetErrors);
         }
 
         protected IMavlinkV2Connection Connection => _mavlinkConnection;
-
-
-        public IRxValue<Exception> PortError => _port.Error;
-        public IRxValue<DeserizliaePackageException> OnPacketErrors => _packetErrors;
 
         public IRawTelemetry Rtt => _rtt;
         public IVehicleParameterProtocol Params => _params;
@@ -89,9 +71,6 @@ namespace Asv.Mavlink
             IsDisposed = true;
             try
             {
-                _packetErrorSubscribe?.Dispose();
-                _port?.Dispose();
-                _mavlinkConnection?.Dispose();
                 _rtt.Dispose();
                 _params.Dispose();
                 _vehicleCommands.Dispose();

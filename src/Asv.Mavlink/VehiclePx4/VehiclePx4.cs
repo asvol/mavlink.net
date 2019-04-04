@@ -10,7 +10,7 @@ namespace Asv.Mavlink
         private readonly VehicleConfig _config;
         private readonly RxValue<Px4VehicleMode> _px4Mode = new RxValue<Px4VehicleMode>();
 
-        public VehiclePx4(VehicleConfig config) : base(config)
+        public VehiclePx4(IMavlinkV2Connection conn, VehicleConfig config) : base(conn, config)
         {
             _config = config;
             Connection

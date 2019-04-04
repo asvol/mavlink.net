@@ -67,6 +67,7 @@ namespace Asv.Mavlink
 
         protected override Task InternalSend(byte[] data, int count, CancellationToken cancel)
         {
+            if (_udp?.Client == null || _udp.Client.Connected == false) return Task.CompletedTask;
             return _udp.SendAsync(data, count);
         }
 

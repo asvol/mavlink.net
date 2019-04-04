@@ -67,6 +67,7 @@ namespace Asv.Mavlink
         private readonly object _sync = new object();
         private readonly List<PortWrapper> _ports = new List<PortWrapper>();
         private readonly Subject<Unit> _configChangedSubject = new Subject<Unit>();
+        private readonly Subject<byte[]> _onRecv = new Subject<byte[]>();
 
         public PortManager()
         {
@@ -103,10 +104,13 @@ namespace Asv.Mavlink
 
         private void OnRecv(PortWrapper sender, byte[] data,CancellationToken cancel)
         {
+            PortWrapper[] ports;
             lock (_sync)
             {
-                Task.WaitAll(_ports.Where(_ => _ != sender).Select(_ => _.Port.Send(data, data.Length, cancel)).ToArray(),cancel);
+                ports = _ports.Where(_ => _ != sender).Where(_ => _.Port.IsEnabled.Value).ToArray();
             }
+            _onRecv.OnNext(data);
+            Task.WaitAll(ports.Select(_ => _.Port.Send(data, data.Length, cancel)).ToArray(), cancel);
         }
 
         public PortManagerSettings Save()
@@ -172,6 +176,22 @@ namespace Asv.Mavlink
         public void Dispose()
         {
             _configChangedSubject?.Dispose();
+            _onRecv?.Dispose();
+        }
+
+        public IDisposable Subscribe(IObserver<byte[]> observer)
+        {
+            return _onRecv.Subscribe(observer);
+        }
+
+        public Task Send(byte[] data, int count, CancellationToken cancel)
+        {
+            PortWrapper[] ports;
+            lock (_sync)
+            {
+                ports = _ports.Where(_ => _.Port.IsEnabled.Value).ToArray();
+            }
+            return Task.WhenAll(ports.Select(_ => _.Port.Send(data, data.Length, cancel)));
         }
     }
 }

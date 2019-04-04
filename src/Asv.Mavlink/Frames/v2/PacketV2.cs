@@ -10,6 +10,7 @@ namespace Asv.Mavlink
         public byte IncompatFlags { get; set; }
         public byte CompatFlags { get; set; }
         public byte Sequence { get; set; }
+        ///
         public byte SystemId { get; set; }
         public byte ComponenId { get; set; }
         public abstract TPayload Payload { get; }

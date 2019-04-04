@@ -3,7 +3,7 @@ using System.Reactive;
 
 namespace Asv.Mavlink
 {
-    public interface IPortManager:IDisposable
+    public interface IPortManager: IDataStream,IDisposable
     {
         IPortInfo[] Ports { get; }
         void Add(PortSettings settings);

@@ -19,7 +19,7 @@ namespace Asv.Mavlink
     }
 
 
-    public interface IPort:IObservable<byte[]>,IDisposable
+    public interface IPort: IDataStream, IDisposable
     {
         long RxBytes { get; }
         long TxBytes { get; }
@@ -30,7 +30,6 @@ namespace Asv.Mavlink
         IRxValue<Exception> Error { get; }
         void Enable();
         void Disable();
-        Task Send(byte[] data, int count,CancellationToken cancel);
     }
 
     public static class PortFactory
