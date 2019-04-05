@@ -106,6 +106,7 @@
     <Compile Include="Dialects\test.cs" />
     <Compile Include="Dialects\uAvionix.cs" />
     <Compile Include="Frames\ISerializable.cs" />
+    <Compile Include="Gcs\GroundControlStation.cs" />
     <Compile Include="Gcs\IGroundControlStation.cs" />
     <Compile Include="Tools\GeoMath\Extension.cs" />
     <Compile Include="Tools\GeoMath\GeoMath.cs" />

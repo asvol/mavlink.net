@@ -175,6 +175,18 @@ namespace Asv.Mavlink
 
         public void Dispose()
         {
+            PortWrapper[] ports;
+            lock (_sync)
+            {
+                ports = _ports.Where(_ => _.Port.IsEnabled.Value).ToArray();
+                _ports.Clear();
+            }
+
+            foreach (var port in ports)
+            {
+                port.Dispose();
+            }
+            
             _configChangedSubject?.Dispose();
             _onRecv?.Dispose();
         }

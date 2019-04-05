@@ -1,20 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
-using System.Threading;
-using System.Threading.Tasks;
-using Asv.Mavlink.V2.Ardupilotmega;
-using Asv.Mavlink.V2.Common;
-using Asv.Mavlink.V2.Icarous;
-using Asv.Mavlink.V2.Uavionix;
-using Nito.AsyncEx;
 using NLog;
-using MavCmd = Asv.Mavlink.V2.Common.MavCmd;
 
 namespace Asv.Mavlink
 {
@@ -45,12 +30,11 @@ namespace Asv.Mavlink
             if (connection == null) throw new ArgumentNullException(nameof(connection));
             if (config == null) throw new ArgumentNullException(nameof(config));
             _mavlinkConnection = connection;
-            var config1 = config;
-            _rtt = new RawTelemetry(_mavlinkConnection,new RawTelemetryConfig { ComponentId = config1.ComponentId ,HeartbeatTimeoutMs = config1.HeartbeatTimeoutMs,SystemId = config1.SystemId});
-            _params = new VehicleParameterProtocol(_mavlinkConnection,new VehicleParameterProtocolConfig { ComponentId = config1.ComponentId,  SystemId = config1.SystemId, ReadWriteTimeoutMs = config1.ReadParamTimeoutMs,TimeoutToReadAllParamsMs = config1.TimeoutToReadAllParamsMs});
-            _vehicleCommands = new VehicleCommandProtocol(_mavlinkConnection,new CommandProtocolConfig { ComponentId = config1.ComponentId,CommandTimeoutMs = config1.CommandTimeoutMs,SystemId = config1.SystemId});
+            _rtt = new RawTelemetry(_mavlinkConnection,new RawTelemetryConfig { ComponentId = config.ComponentId ,HeartbeatTimeoutMs = config.HeartbeatTimeoutMs,SystemId = config.SystemId});
+            _params = new VehicleParameterProtocol(_mavlinkConnection,new VehicleParameterProtocolConfig { ComponentId = config.ComponentId,  SystemId = config.SystemId, ReadWriteTimeoutMs = config.ReadParamTimeoutMs,TimeoutToReadAllParamsMs = config.TimeoutToReadAllParamsMs});
+            _vehicleCommands = new VehicleCommandProtocol(_mavlinkConnection,new CommandProtocolConfig { ComponentId = config.ComponentId,CommandTimeoutMs = config.CommandTimeoutMs,SystemId = config.SystemId});
             _mission = new VehicleMissionProtocol(_mavlinkConnection,
-                new VehicleMissionProtocolConfig {ComponentId = config1.ComponentId, SystemId = config1.SystemId});
+                new VehicleMissionProtocolConfig {ComponentId = config.ComponentId, SystemId = config.SystemId});
             _offboard = new OffboardMode(_mavlinkConnection, new OffboardModeConfig());
         }
 
@@ -61,7 +45,6 @@ namespace Asv.Mavlink
         public IVehicleCommandProtocol Commands => _vehicleCommands;
         public IVehicleMissionProtocol Mission => _mission;
         public IOffboardMode Offboard => _offboard;
-
 
         public bool IsDisposed { get; private set; }
 
