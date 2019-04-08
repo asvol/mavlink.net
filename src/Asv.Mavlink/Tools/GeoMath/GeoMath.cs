@@ -43,7 +43,7 @@ namespace Asv.Mavlink
             return RadiansToDegrees(tan % (2 * Math.PI));
         }
 
-        public static double Azimuth(GeoPoint a, GeoPoint b)
+        public static double Azimuth(this GeoPoint a, GeoPoint b)
         {
             return Azimuth(a.Latitude, a.Longitude, b.Latitude, b.Longitude);
         }
@@ -214,7 +214,7 @@ namespace Asv.Mavlink
         /// calculated point.
         /// </returns>
         /// <remarks>The antemeridian is not considered.</remarks>
-        public static GeoPoint RadialPoint(GeoPoint point, double distance, double radial)
+        public static GeoPoint RadialPoint(this GeoPoint point, double distance, double radial)
         {
             var a = RadialPoint(point.Latitude, point.Longitude, distance, radial);
             if (point.Altitude.HasValue)
@@ -304,6 +304,16 @@ namespace Asv.Mavlink
             }
 
             
+        }
+
+        /// <summary>
+        /// Возвращает точку, которая находится на луче, начало которого в точке <paramref name="p1"/>
+        /// Луч проходит через точку p2. Расстояние между p1 и возвращаемой точкой равно указанному <paramref name="distance"/>
+        /// <param name="distance"> Расстояние в метрах</param>
+        /// </summary>
+        public static GeoPoint VectorMove(this GeoPoint p1, GeoPoint p2, int distance)
+        {
+            return p1.RadialPoint(distance, p1.Azimuth(p2));
         }
     }
 }
