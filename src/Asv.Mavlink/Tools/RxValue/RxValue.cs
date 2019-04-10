@@ -22,7 +22,7 @@ namespace Asv.Mavlink
             }
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             _subject.Dispose();
         }
