@@ -7,8 +7,8 @@ namespace Asv.Mavlink
         TValue Value { get; }
     }
 
-    public interface IRxEditableValue<TValue> : IObservable<TValue>
+    public interface IRxEditableValue<TValue> : IRxValue<TValue>,IObserver<TValue>
     {
-        TValue Value { get; set; }
+        
     }
 }

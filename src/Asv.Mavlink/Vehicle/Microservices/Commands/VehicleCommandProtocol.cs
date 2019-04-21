@@ -9,7 +9,7 @@ namespace Asv.Mavlink
 {
     public class CommandProtocolConfig: MicroserviceConfigBase
     {
-        public int CommandTimeoutMs { get; set; } = 1000;
+        public int CommandTimeoutMs { get; set; } = 5000;
     }
 
     public class VehicleCommandProtocol : IVehicleCommandProtocol,IDisposable
@@ -72,8 +72,11 @@ namespace Asv.Mavlink
                         var eve = new AsyncAutoResetEvent(false);
                         subscribe = _connection.Where(FilterVehicle).Where(_ => _.MessageId == CommandAckPacket.PacketMessageId)
                             .Cast<CommandAckPacket>()
-                            .FirstAsync(_ => _.Payload.TargetComponent == _config.ComponentId &&
-                                             _.Payload.TargetSystem == _config.SystemId).Subscribe(_ =>
+                            .FirstAsync(_ => _.Payload.Command == command)
+                            //   21.04.2019 comment  this filter, because work in progress https://mavlink.io/en/messages/common.html#COMMAND_ACK
+                            //  .FirstAsync(_ => _.Payload.TargetComponent == _config.ComponentId &&
+                            //  _.Payload.TargetSystem == _config.SystemId)
+                            .Subscribe(_ =>
                                              {
                                                  result = _;
                                                  eve.Set();
@@ -137,8 +140,11 @@ namespace Asv.Mavlink
                         var eve = new AsyncAutoResetEvent(false);
                         subscribe = _connection.Where(FilterVehicle).Where(_ => _.MessageId == CommandAckPacket.PacketMessageId)
                             .Cast<CommandAckPacket>()
-                            .FirstAsync(_ => _.Payload.TargetComponent == _config.ComponentId &&
-                                             _.Payload.TargetSystem == _config.SystemId).Subscribe(_ =>
+                            .FirstAsync(_=>_.Payload.Command == command)
+                            //   21.04.2019 comment  this filter, because work in progress https://mavlink.io/en/messages/common.html#COMMAND_ACK
+                            //  .FirstAsync(_ => _.Payload.TargetComponent == _config.ComponentId &&
+                            //  _.Payload.TargetSystem == _config.SystemId)
+                            .Subscribe(_ =>
                                              {
                                                  result = _;
                                                  eve.Set();

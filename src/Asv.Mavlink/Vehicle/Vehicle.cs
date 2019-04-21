@@ -10,7 +10,7 @@ namespace Asv.Mavlink
         public byte ComponentId { get; set; } = 254;
         public byte TargetSystemId { get; } = 1;
         public byte TargetComponentId { get; } = 1;
-        public int CommandTimeoutMs { get; set; } = 1000;
+        public int CommandTimeoutMs { get; set; } = 5000;
         public int TimeoutToReadAllParamsMs { get; set; } = 10000;
         public int ReadParamTimeoutMs { get; set; } = 10000;
     }
