@@ -4,7 +4,7 @@ using Asv.Mavlink.V2.Common;
 
 namespace Asv.Mavlink
 {
-    public interface IVehicleMissionProtocol
+    public interface IMavlinkMissionMicroservice
     {
         /// <summary>
         /// 

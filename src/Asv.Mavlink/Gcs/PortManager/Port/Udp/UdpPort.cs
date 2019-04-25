@@ -31,13 +31,13 @@ namespace Asv.Mavlink
             };
 
             var rhost = coll["rhost"];
-            if (rhost != null)
+            if (!rhost.IsNullOrWhiteSpace())
             {
                 opt.RemoteHost = IPAddress.Parse(rhost).ToString();
             }
 
             var rport = coll["rport"];
-            if (rport != null)
+            if (!rport.IsNullOrWhiteSpace())
             {
                 opt.RemotePort = int.Parse(rport);
             }

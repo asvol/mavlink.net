@@ -9,12 +9,12 @@ namespace Asv.Mavlink
         
     }
 
-    public class OffboardMode : IOffboardMode
+    public class MavlinkOffboardMode : IMavlinkOffboardMode
     {
         private readonly IMavlinkV2Connection _connection;
         private readonly OffboardModeConfig _config;
 
-        public OffboardMode(IMavlinkV2Connection connection, OffboardModeConfig config)
+        public MavlinkOffboardMode(IMavlinkV2Connection connection, OffboardModeConfig config)
         {
             _connection = connection;
             _config = config;
@@ -50,6 +50,11 @@ namespace Asv.Mavlink
                 }
             };
             await _connection.Send(packet, cancel).ConfigureAwait(false);
+        }
+
+        public void Dispose()
+        {
+            
         }
     }
 }

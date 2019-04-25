@@ -142,6 +142,15 @@ namespace Asv.Mavlink {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Timeout to execute &apos;{0}&apos; (wait {1:g} time).
+        /// </summary>
+        internal static string VehicleBase_WaitCompleteWithDefaultTimeout_Timeout_to_execute {
+            get {
+                return ResourceManager.GetString("VehicleBase_WaitCompleteWithDefaultTimeout_Timeout_to_execute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unknown STX value. Need {0}. Get {1}.
         /// </summary>
         internal static string WheelKnownConstant_VerifyStx_Unknown_STX_value {

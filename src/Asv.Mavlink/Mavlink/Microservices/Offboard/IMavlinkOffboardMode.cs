@@ -1,10 +1,11 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.V2.Common;
 
 namespace Asv.Mavlink
 {
-    public interface IOffboardMode
+    public interface IMavlinkOffboardMode:IDisposable
     {
         /// <summary>
         /// 
@@ -33,7 +34,7 @@ namespace Asv.Mavlink
 
     public static class OffboardModeHelper
     {
-        public static Task SetPositionTargetLocalNed(this IOffboardMode src, uint timeBootMs, MavFrame coordinateFrame, float? x,
+        public static Task SetPositionTargetLocalNed(this IMavlinkOffboardMode src, uint timeBootMs, MavFrame coordinateFrame, float? x,
             float? y, float? z, float? vx, float? vy, float? vz, float? afx, float? afy, float? afz, float? yaw, float? yawRate,
             CancellationToken cancel)
         {

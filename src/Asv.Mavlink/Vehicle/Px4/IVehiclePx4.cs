@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Asv.Mavlink
 {
-    public interface IVehiclePx4:IVehicle
+    public interface IVehiclePx4:IMavlinkV2Protocol
     {
         IRxValue<Px4VehicleMode> Mode { get; }
 

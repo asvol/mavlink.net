@@ -11,13 +11,13 @@ namespace Asv.Mavlink
 
     }
 
-    public class VehicleMissionProtocol : IVehicleMissionProtocol,IDisposable
+    public class MavlinkMissionMicroservice : IMavlinkMissionMicroservice,IDisposable
     {
         private readonly IMavlinkV2Connection _mavlink;
         private readonly VehicleMissionProtocolConfig _config;
         private int _seq = 0;
 
-        public VehicleMissionProtocol(IMavlinkV2Connection mavlink, VehicleMissionProtocolConfig config)
+        public MavlinkMissionMicroservice(IMavlinkV2Connection mavlink, VehicleMissionProtocolConfig config)
         {
             if (mavlink == null) throw new ArgumentNullException(nameof(mavlink));
             if (config == null) throw new ArgumentNullException(nameof(config));

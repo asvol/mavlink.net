@@ -5,7 +5,7 @@ using Asv.Mavlink.V2.Common;
 
 namespace Asv.Mavlink
 {
-    public class VehiclePx4 : Vehicle, IVehiclePx4
+    public class VehiclePx4 : MavlinkV2Protocol, IVehiclePx4
     {
         private readonly VehicleConfig _config;
         private readonly RxValue<Px4VehicleMode> _px4Mode = new RxValue<Px4VehicleMode>();

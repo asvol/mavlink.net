@@ -22,7 +22,7 @@ namespace Asv.Mavlink
         public int ReadWriteTimeoutMs { get; set; } = 10000;
     }
 
-    public class VehicleParameterProtocol : IVehicleParameterProtocol,IDisposable
+    public class MavlinkParameterMicroservice : IMavlinkParameterMicroservice,IDisposable
     {
         private readonly IMavlinkV2Connection _connection;
         private readonly VehicleParameterProtocolConfig _config;
@@ -31,7 +31,7 @@ namespace Asv.Mavlink
         private readonly RxValue<int?> _paramsCount = new RxValue<int?>();
         private IDisposable _paramsSubscribe;
 
-        public VehicleParameterProtocol(IMavlinkV2Connection connection, VehicleParameterProtocolConfig config)
+        public MavlinkParameterMicroservice(IMavlinkV2Connection connection, VehicleParameterProtocolConfig config)
         {
             if (connection == null) throw new ArgumentNullException(nameof(connection));
             if (config == null) throw new ArgumentNullException(nameof(config));

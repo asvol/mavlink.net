@@ -12,10 +12,10 @@ namespace Asv.Mavlink
         public byte ComponentId { get; set; } = 254;
         public byte TargetSystemId { get; } = 1;
         public byte TargetComponenId { get; } = 1;
-        public int HeartbeatTimeoutMs { get; set; } = 2000;
+        
     }
 
-    public class RawTelemetry : IRawTelemetry,IDisposable
+    public class MavlinkTelemetry : IMavlinkTelemetry,IDisposable
     {
         private readonly RawTelemetryConfig _config;
         private readonly RxValue<HeartbeatPayload> _heartBeat = new RxValue<HeartbeatPayload>();
@@ -28,20 +28,13 @@ namespace Asv.Mavlink
         private readonly RxValue<AltitudePayload> _altitude = new RxValue<AltitudePayload>();
         private readonly RxValue<ExtendedSysStatePayload> _extendedSysState = new RxValue<ExtendedSysStatePayload>();
         private readonly RxValue<HomePositionPayload> _home = new RxValue<HomePositionPayload>();
-        private readonly RxValue<GeoPoint> _homePos = new RxValue<GeoPoint>();
         private readonly RxValue<StatustextPayload> _statusText = new RxValue<StatustextPayload>();
-        private readonly RxValue<GeoPoint> _relGps = new RxValue<GeoPoint>();
-        private readonly RxValue<GeoPoint> _globGps = new RxValue<GeoPoint>();
         private readonly IObservable<IPacketV2<IPayload>> _inputPackets;
         private readonly CancellationTokenSource _disposeCancel = new CancellationTokenSource();
-        private readonly RxValue<bool> _armed = new RxValue<bool>();
 
-
-        private readonly LinkIndicator _link = new LinkIndicator();
         private readonly RxValue<int> _packetRate = new RxValue<int>();
-        private DateTime _lastHearteat;
 
-        public RawTelemetry(IMavlinkV2Connection connection, RawTelemetryConfig config)
+        public MavlinkTelemetry(IMavlinkV2Connection connection, RawTelemetryConfig config)
         {
             _config = config;
             _inputPackets = connection.Where(FilterVehicle);
@@ -59,9 +52,8 @@ namespace Asv.Mavlink
             HandleHome();
         }
 
-        public IRxValue<LinkState> Link => _link;
+        
         public IRxValue<int> PacketRateHz => _packetRate;
-
         public IRxValue<HeartbeatPayload> RawHeartbeat => _heartBeat;
         public IRxValue<SysStatusPayload> RawSysStatus => _sysStatus;
         public IRxValue<GpsRawIntPayload> RawGpsRawInt => _gpsRawInt;
@@ -71,12 +63,9 @@ namespace Asv.Mavlink
         public IRxValue<BatteryStatusPayload> RawBatteryStatus => _batteryStatus;
         public IRxValue<AttitudePayload> RawAttitude => _attitude;
         public IRxValue<VfrHudPayload> RawVfrHud => _vfrHud;
-        public IRxValue<GeoPoint> RelGps => _relGps;
-        public IRxValue<GeoPoint> GlobGps => _globGps;
         public IRxValue<HomePositionPayload> RawHome => _home;
         public IRxValue<StatustextPayload> RawStatusText => _statusText;
-        public IRxValue<GeoPoint> Home => _homePos;
-        public IRxValue<bool> Armed => _armed;
+        
 
 
         private void HandleHome()
@@ -86,9 +75,7 @@ namespace Asv.Mavlink
                 .Cast<HomePositionPacket>()
                 .Select(_ => _.Payload)
                 .Subscribe(_home, _disposeCancel.Token);
-            _home
-                .Select(_ => new GeoPoint(_.Latitude / 10000000D, _.Longitude / 10000000D, _.Altitude / 1000D))
-                .Subscribe(_homePos, _disposeCancel.Token);
+           
 
             _disposeCancel.Token.Register(() => _home.Dispose());
         }
@@ -160,13 +147,7 @@ namespace Asv.Mavlink
                 .Cast<GpsRawIntPacket>()
                 .Select(_ => _.Payload);
             s.Subscribe(_gpsRawInt, _disposeCancel.Token);
-            s.Select(_ => new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, (_.Alt / 1000D) - Home.Value.Altitude ?? 0)).Subscribe(_relGps, _disposeCancel.Token);
-            s.Select(_ => new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, _.Alt / 1000D)).Subscribe(_globGps, _disposeCancel.Token);
-
             _disposeCancel.Token.Register(() => _gpsRawInt.Dispose());
-            _disposeCancel.Token.Register(() => _relGps.Dispose());
-            _disposeCancel.Token.Register(() => _globGps.Dispose());
-
         }
 
         private void HandleSystemStatus()
@@ -186,24 +167,8 @@ namespace Asv.Mavlink
             _disposeCancel.Token.Register(() => _statusText.Dispose());
         }
 
-        private void CheckConnection(long value)
-        {
-            if (DateTime.Now - _lastHearteat > TimeSpan.FromMilliseconds(_config.HeartbeatTimeoutMs))
-            {
-                _link.Downgrade();
-            }
-        }
 
-        private void OnHeartBeat(HeartbeatPacket heartbeatPacket)
-        {
-            _lastHearteat = DateTime.Now;
-            _link.Upgrade();
-            _heartBeat.OnNext(heartbeatPacket.Payload);
-            _armed.OnNext(heartbeatPacket.Payload.BaseMode.HasFlag(MavModeFlag.MavModeFlagSafetyArmed));
-
-            _disposeCancel.Token.Register(() => _armed.Dispose());
-            _disposeCancel.Token.Register(() => _heartBeat.Dispose());
-        }
+       
 
         private void HandleStatistic()
         {
@@ -219,10 +184,9 @@ namespace Asv.Mavlink
             _inputPackets
                 .Where(_ => _.MessageId == HeartbeatPacket.PacketMessageId)
                 .Cast<HeartbeatPacket>()
-                .Subscribe(OnHeartBeat, _disposeCancel.Token);
-            Observable
-                .Timer(TimeSpan.FromMilliseconds(config.HeartbeatTimeoutMs), TimeSpan.FromMilliseconds(config.HeartbeatTimeoutMs))
-                .Subscribe(CheckConnection, _disposeCancel.Token);
+                .Select(_=>_.Payload)
+                .Subscribe(_heartBeat, _disposeCancel.Token);
+            _disposeCancel.Token.Register(() => _heartBeat.Dispose());
         }
 
         private bool FilterVehicle(IPacketV2<IPayload> packetV2)

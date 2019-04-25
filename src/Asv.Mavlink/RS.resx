@@ -128,4 +128,7 @@
     <data name="Vehicle_ConvertToMavlinkUnionToParamValue_NeedMoreByte" xml:space="preserve">
     <value>Author of this library doesn't know, how how to read 8 byte from float (4 byte) field</value>
   </data>
+    <data name="VehicleBase_WaitCompleteWithDefaultTimeout_Timeout_to_execute" xml:space="preserve">
+    <value>Timeout to execute '{0}' (wait {1:g} time)</value>
+  </data>
 </root>

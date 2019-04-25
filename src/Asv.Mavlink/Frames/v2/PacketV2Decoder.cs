@@ -11,7 +11,7 @@ namespace Asv.Mavlink.Decoder
         private int _bufferIndex;
         private int _bufferStopIndex;
         private readonly Dictionary<int, Func<IPacketV2<IPayload>>> _dict = new Dictionary<int, Func<IPacketV2<IPayload>>>();
-        private readonly Subject<DeserizliaePackageException> _decodeErrorSubject = new Subject<DeserizliaePackageException>();
+        private readonly Subject<DeserializePackageException> _decodeErrorSubject = new Subject<DeserializePackageException>();
         private readonly Subject<IPacketV2<IPayload>> _packetSubject = new Subject<IPacketV2<IPayload>>();
 
         private enum DecodeStep
@@ -127,14 +127,14 @@ namespace Asv.Mavlink.Decoder
             }
             catch (Exception exception)
             {
-                _decodeErrorSubject.OnNext(new DeserizliaePackageException(messageId, string.Format(RS.DecoderV2_TryDecodePacket_Error_for_deserialize_mavlink_V2, messageId,exception.Message) , exception) );
+                _decodeErrorSubject.OnNext(new DeserializePackageException(messageId, string.Format(RS.DecoderV2_TryDecodePacket_Error_for_deserialize_mavlink_V2, messageId,exception.Message) , exception) );
             }
             _packetSubject.OnNext(packet);
         }
 
 
 
-        public IObservable<DeserizliaePackageException> OutError => _decodeErrorSubject;
+        public IObservable<DeserializePackageException> OutError => _decodeErrorSubject;
 
         public void Register(Func<IPacketV2<IPayload>> factory)
         {

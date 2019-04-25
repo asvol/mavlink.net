@@ -12,12 +12,12 @@ namespace Asv.Mavlink
         public int CommandTimeoutMs { get; set; } = 5000;
     }
 
-    public class VehicleCommandProtocol : IVehicleCommandProtocol,IDisposable
+    public class MavlinkCommandMicroservice : IMavlinkCommandMicroservice,IDisposable
     {
         private readonly IMavlinkV2Connection _connection;
         private readonly CommandProtocolConfig _config;
 
-        public VehicleCommandProtocol(IMavlinkV2Connection connection, CommandProtocolConfig config)
+        public MavlinkCommandMicroservice(IMavlinkV2Connection connection, CommandProtocolConfig config)
         {
             if (connection == null) throw new ArgumentNullException(nameof(connection));
             if (config == null) throw new ArgumentNullException(nameof(config));

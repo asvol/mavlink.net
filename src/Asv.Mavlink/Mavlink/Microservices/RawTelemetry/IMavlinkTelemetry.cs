@@ -2,15 +2,10 @@
 
 namespace Asv.Mavlink
 {
-    public interface IRawTelemetry
+    public interface IMavlinkTelemetry
     {
-        IRxValue<LinkState> Link { get; }
-        IRxValue<int> PacketRateHz { get; }
-        IRxValue<GeoPoint> RelGps { get; }
-        IRxValue<GeoPoint> GlobGps { get; }
-        IRxValue<GeoPoint> Home { get; }
-        IRxValue<bool> Armed { get; }
 
+        IRxValue<int> PacketRateHz { get; }
         IRxValue<HeartbeatPayload> RawHeartbeat { get; }
         IRxValue<SysStatusPayload> RawSysStatus { get; }
         IRxValue<GpsRawIntPayload> RawGpsRawInt { get; }

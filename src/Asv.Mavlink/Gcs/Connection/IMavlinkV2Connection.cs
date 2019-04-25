@@ -11,7 +11,7 @@ namespace Asv.Mavlink
         long RxPackets { get; }
         long TxPackets { get; }
         long SkipPackets { get; }
-        IObservable<DeserizliaePackageException> DeserializePackageErrors { get; }
+        IObservable<DeserializePackageException> DeserializePackageErrors { get; }
         Task Send(IPacketV2<IPayload> packet, CancellationToken cancel);
     }
 }

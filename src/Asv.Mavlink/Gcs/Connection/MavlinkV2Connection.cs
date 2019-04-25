@@ -40,7 +40,7 @@ namespace Asv.Mavlink
         public long RxPackets => Interlocked.Read(ref _rxPackets);
         public long TxPackets => Interlocked.Read(ref _txPackets);
         public long SkipPackets => Interlocked.Read(ref _skipPackets);
-        public IObservable<DeserizliaePackageException> DeserializePackageErrors => _decoder.OutError;
+        public IObservable<DeserializePackageException> DeserializePackageErrors => _decoder.OutError;
         public IDataStream DataStream { get; }
 
         public Task Send(IPacketV2<IPayload> packet, CancellationToken cancel)
