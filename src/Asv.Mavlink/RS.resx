@@ -131,4 +131,7 @@
     <data name="VehicleBase_WaitCompleteWithDefaultTimeout_Timeout_to_execute" xml:space="preserve">
     <value>Timeout to execute '{0}' (wait {1:g} time)</value>
   </data>
+    <data name="VehicleArdupilot_GoTo_Altitude_of_end_point_is_null" xml:space="preserve">
+    <value>Altitude of end point is null</value>
+  </data>
 </root>

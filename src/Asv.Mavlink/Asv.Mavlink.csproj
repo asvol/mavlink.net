@@ -118,7 +118,7 @@
     <Compile Include="Vehicle\Px4\VehiclePx4.cs" />
     <Compile Include="Gcs\Connection\IDataStream.cs" />
     <Compile Include="Gcs\Connection\IMavlinkV2Connection.cs" />
-    <Compile Include="Mavlink\Microservices\Mode\IMavlinkModeProtocol.cs" />
+    <Compile Include="Mavlink\Microservices\Custom\IMavlinkCommon.cs" />
     <Compile Include="Mavlink\Microservices\Commands\MavlinkCommandMicroservice.cs" />
     <Compile Include="Mavlink\Microservices\Commands\IMavlinkCommandMicroservice.cs" />
     <Compile Include="Mavlink\Microservices\MicroserviceConfigBase.cs" />
@@ -169,7 +169,7 @@
     <Compile Include="Vehicle\Px4\IVehiclePx4.cs" />
     <Compile Include="Vehicle\Px4\PxModeMap.cs" />
     <Compile Include="Mavlink\Microservices\RawTelemetry\MavlinkTelemetry.cs" />
-    <Compile Include="Mavlink\Microservices\Mode\ModeProtocol.cs" />
+    <Compile Include="Mavlink\Microservices\Custom\MavlinkCommon.cs" />
     <Compile Include="Mavlink\MavlinkV2Protocol.cs" />
     <Compile Include="Mavlink\Microservices\Commands\VehicleDoRepositionHelper.cs" />
     <Compile Include="Vehicle\VehicleBase.cs" />

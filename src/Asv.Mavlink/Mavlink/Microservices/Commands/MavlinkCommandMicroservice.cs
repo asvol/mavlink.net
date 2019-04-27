@@ -171,6 +171,28 @@ namespace Asv.Mavlink
             return result.Payload;
         }
 
+
+        public async Task<AutopilotVersionPayload> GetAutopilotVersion(CancellationToken cancel)
+        {
+            var packet = new CommandLongPacket
+            {
+                ComponenId = _config.ComponentId,
+                SystemId = _config.SystemId,
+                Payload =
+                {
+                    Command = MavCmd.MavCmdRequestAutopilotCapabilities,
+                    TargetComponent = _config.TargetComponenId,
+                    TargetSystem = _config.TargetSystemId,
+                    Confirmation = 0,
+                    Param1 = 1,
+                }
+            };
+
+            var result = await _connection.SendAndWaitAnswer<AutopilotVersionPacket, AutopilotVersionPayload>(packet, _config.TargetSystemId,_config.TargetComponenId,cancel);
+            return result.Payload;
+        }
+
+
         public void Dispose()
         {
             

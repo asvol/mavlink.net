@@ -13,6 +13,6 @@ namespace Asv.Mavlink
         IMavlinkCommandMicroservice Commands { get; }
         IMavlinkMissionMicroservice Mission { get; }
         IMavlinkOffboardMode Offboard { get; }
-        IMavlinkModeProtocol Mode { get; }
+        IMavlinkCommon Common { get; }
     }
 }

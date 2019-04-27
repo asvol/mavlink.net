@@ -23,7 +23,7 @@ namespace Asv.Mavlink
         private readonly MavlinkCommandMicroservice _mavlinkCommands;
         private readonly MavlinkMissionMicroservice _mission;
         private readonly MavlinkOffboardMode _mavlinkOffboard;
-        private readonly ModeProtocol _mode;
+        private readonly MavlinkCommon _mode;
 
         public MavlinkV2Protocol(IMavlinkV2Connection connection, VehicleConfig config)
         {
@@ -36,7 +36,7 @@ namespace Asv.Mavlink
             _mission = new MavlinkMissionMicroservice(_mavlinkConnection,
                 new VehicleMissionProtocolConfig {ComponentId = config.ComponentId, SystemId = config.SystemId});
             _mavlinkOffboard = new MavlinkOffboardMode(_mavlinkConnection, new OffboardModeConfig { ComponentId = config.ComponentId,SystemId = config.SystemId});
-            _mode = new ModeProtocol(_mavlinkConnection,new MicroserviceConfigBase { ComponentId = config.ComponentId, SystemId = config.SystemId});
+            _mode = new MavlinkCommon(_mavlinkConnection,new MicroserviceConfigBase { ComponentId = config.ComponentId, SystemId = config.SystemId});
         }
 
         protected IMavlinkV2Connection Connection => _mavlinkConnection;
@@ -46,7 +46,7 @@ namespace Asv.Mavlink
         public IMavlinkCommandMicroservice Commands => _mavlinkCommands;
         public IMavlinkMissionMicroservice Mission => _mission;
         public IMavlinkOffboardMode Offboard => _mavlinkOffboard;
-        public IMavlinkModeProtocol Mode => _mode;
+        public IMavlinkCommon Common => _mode;
 
         public bool IsDisposed { get; private set; }
 

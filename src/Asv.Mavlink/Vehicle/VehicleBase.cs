@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.V2.Common;
+using NLog;
 
 namespace Asv.Mavlink
 {
@@ -15,6 +16,9 @@ namespace Asv.Mavlink
 
     public abstract class VehicleBase : IVehicle
     {
+        public static Logger Logger = LogManager.GetCurrentClassLogger();
+        private AutopilotVersionPayload _autopilotVersion;
+
         private readonly IMavlinkV2Protocol _mavlink;
         private readonly VehicleBaseConfig _config;
 
@@ -39,6 +43,7 @@ namespace Asv.Mavlink
             InitGps();
             InitHome();
             InitArmed();
+            InitBattery();
             return Task.CompletedTask;
         }
 
@@ -75,6 +80,11 @@ namespace Asv.Mavlink
             }
         }
 
+        protected Task<AutopilotVersionPayload> GetAutopilotVersion(CancellationToken cancel)
+        {
+            return _autopilotVersion != null ? Task.FromResult(_autopilotVersion) : _mavlink.Commands.GetAutopilotVersion(cancel);
+        }
+
 
         /// <summary>
         /// Check is current mode can used for remote control from GCS with GPS positioning. It depend from vehicle types 
@@ -89,7 +99,6 @@ namespace Asv.Mavlink
         /// <param name="cancel"></param>
         /// <returns></returns>
         protected abstract Task EnsureInGuidedMode(CancellationToken cancel);
-
 
         #region Attitude
 
@@ -161,15 +170,15 @@ namespace Asv.Mavlink
 
         #region GPS
 
-        private readonly RxValue<GeoPoint> _relGps = new RxValue<GeoPoint>();
+        private readonly RxValue<GeoPoint?> _relGps = new RxValue<GeoPoint?>();
         private readonly RxValue<GeoPoint> _globGps = new RxValue<GeoPoint>();
 
-        public IRxValue<GeoPoint> RelGps => _relGps;
+        public IRxValue<GeoPoint?> RelGps => _relGps;
         public IRxValue<GeoPoint> GlobGps => _globGps;
 
         protected virtual void InitGps()
         {
-            _mavlink.Rtt.RawGpsRawInt.Select(_ => new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, (_.Alt / 1000D) - Home.Value.Altitude ?? 0)).Subscribe(_relGps, _disposeCancel.Token);
+            _mavlink.Rtt.RawGpsRawInt.Where(_=>Home.Value.HasValue).Select(_ =>(GeoPoint?) new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, (_.Alt / 1000D) - (Home.Value.Value.Altitude ?? 0))).Subscribe(_relGps, _disposeCancel.Token);
             _mavlink.Rtt.RawGpsRawInt.Select(_ => new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, _.Alt / 1000D)).Subscribe(_globGps, _disposeCancel.Token);
             _disposeCancel.Token.Register(() => _relGps.Dispose());
             _disposeCancel.Token.Register(() => _globGps.Dispose());
@@ -179,8 +188,8 @@ namespace Asv.Mavlink
 
         #region Home
 
-        private readonly RxValue<GeoPoint> _home = new RxValue<GeoPoint>();
-        public IRxValue<GeoPoint> Home => _home;
+        private readonly RxValue<GeoPoint?> _home = new RxValue<GeoPoint?>();
+        public IRxValue<GeoPoint?> Home => _home;
         protected virtual void InitHome()
         {
             _mavlink.Rtt.RawHome
@@ -214,14 +223,13 @@ namespace Asv.Mavlink
         #region Battery
 
         private readonly RxValue<double?> _batteryCharge = new RxValue<double?>();
+        
         public IRxValue<double?> BatteryCharge => _batteryCharge;
         protected virtual void InitBattery()
         {
             _mavlink.Rtt.RawBatteryStatus.Select(_ => _.BatteryRemaining < 0 ? default(double?) : (_.BatteryRemaining / 100.0d)).Subscribe(_batteryCharge,_disposeCancel.Token);
             _disposeCancel.Token.Register(() => _batteryCharge.Dispose());
         }
-
-
 
         #endregion
 
@@ -231,13 +239,13 @@ namespace Asv.Mavlink
         {
             await EnsureInGuidedMode(cancel);
             await ArmDisarm(true, cancel);
-            var res = await _mavlink.Commands.CommandLong(MavCmd.MavCmdNavTakeoff, float.NaN, float.NaN, float.NaN, float.NaN, (float)_home.Value.Latitude, (float)_home.Value.Longitude, (float)altitude, 3, cancel);
+            var res = await _mavlink.Commands.CommandLong(MavCmd.MavCmdNavTakeoff, float.NaN, float.NaN, float.NaN, float.NaN, (float)_globGps.Value.Latitude, (float)_globGps.Value.Longitude, (float)altitude, 3, cancel);
             ValidateCommandResult(res);
         }
 
-        
-
         #endregion
+
+        public abstract Task GoTo(GeoPoint location, CancellationToken cancel);
 
     }
 }

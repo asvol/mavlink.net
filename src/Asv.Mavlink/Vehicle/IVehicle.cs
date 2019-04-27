@@ -13,9 +13,9 @@ namespace Asv.Mavlink
 
         IRxValue<LinkState> Link { get; }
         IRxValue<int> PacketRateHz { get; }
-        IRxValue<GeoPoint> RelGps { get; }
+        IRxValue<GeoPoint?> RelGps { get; }
         IRxValue<GeoPoint> GlobGps { get; }
-        IRxValue<GeoPoint> Home { get; }
+        IRxValue<GeoPoint?> Home { get; }
         
         IRxValue<bool> IsArmed { get; }
         Task ArmDisarm(bool isArming, CancellationToken cancel);
@@ -30,6 +30,9 @@ namespace Asv.Mavlink
         IRxValue<double> YawSpeed { get; }
 
         Task TakeOff(double altitude, CancellationToken cancel);
+        Task GoTo(GeoPoint location, CancellationToken cancel);
+
+
     }
 
     
