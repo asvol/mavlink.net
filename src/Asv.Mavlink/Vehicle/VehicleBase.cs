@@ -245,7 +245,8 @@ namespace Asv.Mavlink
 
         #endregion
 
-        public abstract Task GoTo(GeoPoint location, CancellationToken cancel);
+        public abstract Task GoToRel(GeoPoint location, CancellationToken cancel);
+        public abstract Task GoToGlob(GeoPoint location, CancellationToken cancel);
 
     }
 }

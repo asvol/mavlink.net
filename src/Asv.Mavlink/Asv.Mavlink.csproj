@@ -114,7 +114,7 @@
     <Compile Include="Tools\GeoMath\GeoPoint.cs" />
     <Compile Include="Tools\StringExtensions.cs" />
     <Compile Include="Vehicle\IVehicle.cs" />
-    <Compile Include="Vehicle\Ardupilot\IVehicleArdupilot.cs" />
+    <Compile Include="Vehicle\Ardupilot\VehicleArdupilot.cs" />
     <Compile Include="Vehicle\Px4\VehiclePx4.cs" />
     <Compile Include="Gcs\Connection\IDataStream.cs" />
     <Compile Include="Gcs\Connection\IMavlinkV2Connection.cs" />

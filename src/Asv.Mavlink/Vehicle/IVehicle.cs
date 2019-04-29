@@ -30,7 +30,9 @@ namespace Asv.Mavlink
         IRxValue<double> YawSpeed { get; }
 
         Task TakeOff(double altitude, CancellationToken cancel);
-        Task GoTo(GeoPoint location, CancellationToken cancel);
+
+        Task GoToRel(GeoPoint location, CancellationToken cancel);
+        Task GoToGlob(GeoPoint location, CancellationToken cancel);
 
 
     }
