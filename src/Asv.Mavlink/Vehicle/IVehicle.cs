@@ -29,6 +29,10 @@ namespace Asv.Mavlink
         IRxValue<double> RollSpeed { get; }
         IRxValue<double> YawSpeed { get; }
 
+        IRxValue<GpsInfo> GpsInfo { get; }
+
+        IRxValue<double> GroundVelocity { get; }
+
         Task TakeOff(double altitude, CancellationToken cancel);
 
         Task GoToRel(GeoPoint location, CancellationToken cancel);

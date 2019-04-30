@@ -70,6 +70,123 @@ namespace Asv.Mavlink {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to At this confidence level, positional measurements are considered accurate enough to meet all but the most sensitive applications..
+        /// </summary>
+        internal static string GpsInfoHelper_GetDescription_Excellent {
+            get {
+                return ResourceManager.GetString("GpsInfoHelper_GetDescription_Excellent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Represents a low confidence level. Positional measurements should be discarded or used only to indicate a very rough estimate of the current location..
+        /// </summary>
+        internal static string GpsInfoHelper_GetDescription_Fair {
+            get {
+                return ResourceManager.GetString("GpsInfoHelper_GetDescription_Fair", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Represents a level that marks the minimum appropriate for making accurate decisions. Positional measurements could be used to make reliable in-route navigation suggestions to the user..
+        /// </summary>
+        internal static string GpsInfoHelper_GetDescription_Good {
+            get {
+                return ResourceManager.GetString("GpsInfoHelper_GetDescription_Good", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Highest possible confidence level to be used for applications demanding the highest possible precision at all times..
+        /// </summary>
+        internal static string GpsInfoHelper_GetDescription_Ideal {
+            get {
+                return ResourceManager.GetString("GpsInfoHelper_GetDescription_Ideal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Positional measurements could be used for calculations, but the fix quality could still be improved. A more open view of the sky is recommended..
+        /// </summary>
+        internal static string GpsInfoHelper_GetDescription_Moderate {
+            get {
+                return ResourceManager.GetString("GpsInfoHelper_GetDescription_Moderate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to At this level, measurements are inaccurate by as much as 300 meters with a 6-meter accurate device (50 DOP × 6 meters) and should be discarded..
+        /// </summary>
+        internal static string GpsInfoHelper_GetDescription_Poor {
+            get {
+                return ResourceManager.GetString("GpsInfoHelper_GetDescription_Poor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unknown.
+        /// </summary>
+        internal static string GpsInfoHelper_GetDescription_Unknown {
+            get {
+                return ResourceManager.GetString("GpsInfoHelper_GetDescription_Unknown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Excellent.
+        /// </summary>
+        internal static string GpsInfoHelper_GetDisplayName_Excellent {
+            get {
+                return ResourceManager.GetString("GpsInfoHelper_GetDisplayName_Excellent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fair.
+        /// </summary>
+        internal static string GpsInfoHelper_GetDisplayName_Fair {
+            get {
+                return ResourceManager.GetString("GpsInfoHelper_GetDisplayName_Fair", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Good.
+        /// </summary>
+        internal static string GpsInfoHelper_GetDisplayName_Good {
+            get {
+                return ResourceManager.GetString("GpsInfoHelper_GetDisplayName_Good", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ideal.
+        /// </summary>
+        internal static string GpsInfoHelper_GetDisplayName_Ideal {
+            get {
+                return ResourceManager.GetString("GpsInfoHelper_GetDisplayName_Ideal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Moderate.
+        /// </summary>
+        internal static string GpsInfoHelper_GetDisplayName_Moderate {
+            get {
+                return ResourceManager.GetString("GpsInfoHelper_GetDisplayName_Moderate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Poor.
+        /// </summary>
+        internal static string GpsInfoHelper_GetDisplayName_Poor {
+            get {
+                return ResourceManager.GetString("GpsInfoHelper_GetDisplayName_Poor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Mavlink packet version v2 with MessageId=&apos;{0}&apos; not found in decoder.
         /// </summary>
         internal static string MessageIdNotFoundException_MessageIdNotFoundException {
