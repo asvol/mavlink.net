@@ -253,10 +253,30 @@ namespace Asv.Mavlink
             ValidateCommandResult(res);
         }
 
+        public Task GoToGlob(GeoPoint location, CancellationToken cancel, double? yawDeg = null)
+        {
+            return GoTo(location, MavFrame.MavFrameGlobalInt, cancel, yawDeg);
+        }
+
+        public Task GoToRel(GeoPoint location, CancellationToken cancel, double? yawDeg = null)
+        {
+             return GoTo(location, MavFrame.MavFrameGlobalRelativeAltInt, cancel, yawDeg);
+        }
+
+        private async Task GoTo(GeoPoint location, MavFrame frame, CancellationToken cancel, double? yawDeg = null, double? vx = null, double? vy = null, double? vz = null)
+        {
+            await EnsureInGuidedMode(cancel);
+            if (location.Altitude.HasValue == false)
+            {
+                throw new MavlinkException(RS.VehicleArdupilot_GoTo_Altitude_of_end_point_is_null);
+            }
+
+            var yaw = yawDeg.HasValue ? (float?) GeoMath.DegreesToRadians(yawDeg.Value) : null;
+            await _mavlink.Common.SetPositionTargetGlobalInt(0, frame,cancel, (int)(location.Latitude * 10000000), (int)(location.Longitude * 10000000), (float)location.Altitude.Value, yaw: yaw);
+        }
+
         #endregion
 
-        public abstract Task GoToRel(GeoPoint location, CancellationToken cancel);
-        public abstract Task GoToGlob(GeoPoint location, CancellationToken cancel);
 
     }
 }

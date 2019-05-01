@@ -35,8 +35,8 @@ namespace Asv.Mavlink
 
         Task TakeOff(double altitude, CancellationToken cancel);
 
-        Task GoToRel(GeoPoint location, CancellationToken cancel);
-        Task GoToGlob(GeoPoint location, CancellationToken cancel);
+        Task GoToRel(GeoPoint location, CancellationToken cancel, double? yawDeg = null);
+        Task GoToGlob(GeoPoint location, CancellationToken cancel, double? yawDeg = null);
 
 
     }

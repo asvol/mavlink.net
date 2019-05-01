@@ -39,34 +39,7 @@ namespace Asv.Mavlink
             }
         }
 
-        public override async Task GoToGlob(GeoPoint location,CancellationToken cancel)
-        {
-            await EnsureInGuidedMode(cancel);
-            if (location.Altitude.HasValue == false)
-            {
-                throw new MavlinkException(RS.VehicleArdupilot_GoTo_Altitude_of_end_point_is_null);
-            }
-
-            var mask = PositionTargetTypemask.PositionTargetTypemaskXIgnore |
-                       PositionTargetTypemask.PositionTargetTypemaskYIgnore |
-                       PositionTargetTypemask.PositionTargetTypemaskZIgnore | 
-                       PositionTargetTypemask.PositionTargetTypemaskYawIgnore;
-
-            var invertMask = (ushort) ~mask;
-
-            await _mavlink.Common.SetPositionTargetGlobalInt(0, MavFrame.MavFrameGlobalInt, (int) (location.Latitude*10000000), (int) (location.Longitude*10000000), (float) location.Altitude.Value,0,0,0,0,0,0, (float)GeoMath.DegreesToRadians(90), Single.NaN, (PositionTargetTypemask) invertMask, cancel);
-        }
-
-
-        public override async Task GoToRel(GeoPoint location, CancellationToken cancel)
-        {
-            await EnsureInGuidedMode(cancel);
-            if (location.Altitude.HasValue == false)
-            {
-                throw new MavlinkException(RS.VehicleArdupilot_GoTo_Altitude_of_end_point_is_null);
-            }
-            await _mavlink.Common.SetPositionTargetGlobalInt(0, MavFrame.MavFrameGlobalRelativeAltInt, (int)(location.Latitude * 10000000), (int)(location.Longitude * 10000000), (float)location.Altitude.Value, 0, 0, 0, 0, 0, 0, Single.NaN, Single.NaN, (PositionTargetTypemask)65528, cancel);
-        }
+        
 
     }
 }

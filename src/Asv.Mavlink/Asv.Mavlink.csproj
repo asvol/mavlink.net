@@ -179,6 +179,9 @@
     <Folder Include="Frames\v1\" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="RS.ru.resx">
+      <LastGenOutput>RS.ru-ru.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="RS.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>RS.Designer.cs</LastGenOutput>
