@@ -44,6 +44,7 @@ namespace Asv.Mavlink
             InitHome();
             InitArmed();
             InitBattery();
+            InitAltitude();
             return Task.CompletedTask;
         }
 
@@ -168,29 +169,41 @@ namespace Asv.Mavlink
 
         #endregion
 
+        #region Altitude
+
+        private readonly RxValue<double> _altitudeRelative = new RxValue<double>();
+        public IRxValue<double> AltitudeAboveHome => _altitudeRelative;
+
+        private void InitAltitude()
+        {
+            _mavlink.Rtt.RawGlobalPositionInt.Select(_=>_.RelativeAlt/1000D).Subscribe(_altitudeRelative, _disposeCancel.Token);
+            _disposeCancel.Token.Register(() => _altitudeRelative.Dispose());
+        }
+
+       
+
+        #endregion
+
         #region GPS
 
         private readonly RxValue<GpsInfo>  _gpsInfo = new RxValue<GpsInfo>();
-        private readonly RxValue<GeoPoint?> _relGps = new RxValue<GeoPoint?>();
         private readonly RxValue<double> _gVelocity = new RxValue<double>();
         private readonly RxValue<GeoPoint> _globGps = new RxValue<GeoPoint>();
 
-        public IRxValue<GeoPoint?> RelGps => _relGps;
-        public IRxValue<GeoPoint> GlobGps => _globGps;
+        public IRxValue<GeoPoint> GpsLocation => _globGps;
         public IRxValue<GpsInfo> GpsInfo => _gpsInfo;
         public IRxValue<double> GroundVelocity => _gVelocity;
         
 
         protected virtual void InitGps()
         {
-            _mavlink.Rtt.RawGpsRawInt.Where(_=>Home.Value.HasValue).Select(_ =>(GeoPoint?) new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, (_.Alt / 1000D) - (Home.Value.Value.Altitude ?? 0))).Subscribe(_relGps, _disposeCancel.Token);
+            
             _mavlink.Rtt.RawGpsRawInt.Select(_ => new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, _.Alt / 1000D)).Subscribe(_globGps, _disposeCancel.Token);
             _mavlink.Rtt.RawGpsRawInt.Select(_ => new GpsInfo(_)).Subscribe(_gpsInfo, _disposeCancel.Token);
             _mavlink.Rtt.RawGpsRawInt.Select(_ => _.Vel / 100D).Subscribe(_gVelocity, _disposeCancel.Token);
 
             _disposeCancel.Token.Register(() => _gVelocity.Dispose());
             _disposeCancel.Token.Register(() => _gpsInfo.Dispose());
-            _disposeCancel.Token.Register(() => _relGps.Dispose());
             _disposeCancel.Token.Register(() => _globGps.Dispose());
         }
 
@@ -198,8 +211,8 @@ namespace Asv.Mavlink
 
         #region Home
 
-        private readonly RxValue<GeoPoint?> _home = new RxValue<GeoPoint?>();
-        public IRxValue<GeoPoint?> Home => _home;
+        private readonly RxValue<GeoPoint> _home = new RxValue<GeoPoint>();
+        public IRxValue<GeoPoint> Home => _home;
         protected virtual void InitHome()
         {
             _mavlink.Rtt.RawHome
@@ -234,6 +247,7 @@ namespace Asv.Mavlink
 
         private readonly RxValue<double?> _batteryCharge = new RxValue<double?>();
         
+
         public IRxValue<double?> BatteryCharge => _batteryCharge;
         protected virtual void InitBattery()
         {
@@ -258,6 +272,11 @@ namespace Asv.Mavlink
             return GoTo(location, MavFrame.MavFrameGlobalInt, cancel, yawDeg);
         }
 
+        public virtual Task DoRtl(CancellationToken cancel)
+        {
+            throw new NotImplementedException();
+        }
+        
         public Task GoToRel(GeoPoint location, CancellationToken cancel, double? yawDeg = null)
         {
              return GoTo(location, MavFrame.MavFrameGlobalRelativeAltInt, cancel, yawDeg);

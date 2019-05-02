@@ -6,10 +6,11 @@ namespace Asv.Mavlink
     [Serializable]
     public class CommandException : MavlinkException
     {
+        public CommandAckPayload Result { get; }
+
         public CommandException(CommandAckPayload result):base(GetMessage(result))
         {
-            
-
+            Result = result;
         }
 
         private static string GetMessage(CommandAckPayload result)

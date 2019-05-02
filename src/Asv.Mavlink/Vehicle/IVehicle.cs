@@ -13,9 +13,12 @@ namespace Asv.Mavlink
 
         IRxValue<LinkState> Link { get; }
         IRxValue<int> PacketRateHz { get; }
-        IRxValue<GeoPoint?> RelGps { get; }
-        IRxValue<GeoPoint> GlobGps { get; }
-        IRxValue<GeoPoint?> Home { get; }
+
+        IRxValue<GeoPoint> GpsLocation { get; }
+        IRxValue<GpsInfo> GpsInfo { get; }
+
+        IRxValue<double> AltitudeAboveHome { get; }
+        IRxValue<GeoPoint> Home { get; }
         
         IRxValue<bool> IsArmed { get; }
         Task ArmDisarm(bool isArming, CancellationToken cancel);
@@ -29,7 +32,7 @@ namespace Asv.Mavlink
         IRxValue<double> RollSpeed { get; }
         IRxValue<double> YawSpeed { get; }
 
-        IRxValue<GpsInfo> GpsInfo { get; }
+        
 
         IRxValue<double> GroundVelocity { get; }
 
@@ -39,6 +42,7 @@ namespace Asv.Mavlink
         Task GoToGlob(GeoPoint location, CancellationToken cancel, double? yawDeg = null);
 
 
+        Task DoRtl(CancellationToken cancel);
     }
 
     

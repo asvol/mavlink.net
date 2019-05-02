@@ -29,6 +29,7 @@ namespace Asv.Mavlink
         private readonly RxValue<ExtendedSysStatePayload> _extendedSysState = new RxValue<ExtendedSysStatePayload>();
         private readonly RxValue<HomePositionPayload> _home = new RxValue<HomePositionPayload>();
         private readonly RxValue<StatustextPayload> _statusText = new RxValue<StatustextPayload>();
+        private readonly RxValue<GlobalPositionIntPayload> _globalPositionInt = new RxValue<GlobalPositionIntPayload>();
         private readonly IObservable<IPacketV2<IPayload>> _inputPackets;
         private readonly CancellationTokenSource _disposeCancel = new CancellationTokenSource();
 
@@ -50,9 +51,12 @@ namespace Asv.Mavlink
             HandleAltitude();
             HandleExtendedSysState();
             HandleHome();
+            HandleGlobalPositionInt();
         }
 
-        
+       
+
+
         public IRxValue<int> PacketRateHz => _packetRate;
         public IRxValue<HeartbeatPayload> RawHeartbeat => _heartBeat;
         public IRxValue<SysStatusPayload> RawSysStatus => _sysStatus;
@@ -65,8 +69,18 @@ namespace Asv.Mavlink
         public IRxValue<VfrHudPayload> RawVfrHud => _vfrHud;
         public IRxValue<HomePositionPayload> RawHome => _home;
         public IRxValue<StatustextPayload> RawStatusText => _statusText;
-        
+        public IRxValue<GlobalPositionIntPayload> RawGlobalPositionInt => _globalPositionInt;
 
+        private void HandleGlobalPositionInt()
+        {
+            _inputPackets
+                .Where(_ => _.MessageId == GlobalPositionIntPacket.PacketMessageId)
+                .Cast<GlobalPositionIntPacket>()
+                .Select(_ => _.Payload)
+                .Subscribe(_globalPositionInt, _disposeCancel.Token);
+            _disposeCancel.Token.Register(() => _globalPositionInt.Dispose());
+
+        }
 
         private void HandleHome()
         {
@@ -188,6 +202,8 @@ namespace Asv.Mavlink
                 .Subscribe(_heartBeat, _disposeCancel.Token);
             _disposeCancel.Token.Register(() => _heartBeat.Dispose());
         }
+
+
 
         private bool FilterVehicle(IPacketV2<IPayload> packetV2)
         {

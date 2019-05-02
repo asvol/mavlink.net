@@ -39,7 +39,29 @@ namespace Asv.Mavlink
             }
         }
 
-        
+        public override Task DoRtl(CancellationToken cancel)
+        {
+            return _mavlink.Common.SetMode(1, 6, cancel);
+        }
 
+
+        public override async Task TakeOff(double altitude, CancellationToken cancel)
+        {
+            try
+            {
+                await base.TakeOff(altitude, cancel);
+            }
+            catch (CommandException e)
+            {
+                if (e.Result.Result == MavResult.MavResultFailed)
+                {
+                    // IGNORE this. I don't know why, but the Ardupilot always send failed
+                    return;
+                }
+
+                throw;
+            }
+            
+        }
     }
 }

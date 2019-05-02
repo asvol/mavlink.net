@@ -17,5 +17,6 @@ namespace Asv.Mavlink
         IRxValue<VfrHudPayload> RawVfrHud { get; }
         IRxValue<HomePositionPayload> RawHome { get; }
         IRxValue<StatustextPayload> RawStatusText { get; }
+        IRxValue<GlobalPositionIntPayload> RawGlobalPositionInt { get; }
     }
 }

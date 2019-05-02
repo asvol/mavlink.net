@@ -10,7 +10,7 @@ namespace Asv.Mavlink
         /// <summary>
         /// ID of message sender system/aircraft
         /// </summary>
-        int SystemId { get;  }
+        int SystemId { get; }
         /// <summary>
         /// ID of the message sender component
         /// </summary>
@@ -24,7 +24,7 @@ namespace Asv.Mavlink
         /// Type of the system (quadrotor, helicopter, etc.). Components use the same type as their associated system.
         /// OriginName: type, Units: , IsExtended: false
         /// </summary>
-        MavType Type  { get; } 
+        MavType Type  { get; }
         /// <summary>
         /// Autopilot type / class.
         /// OriginName: autopilot, Units: , IsExtended: false
