@@ -23,7 +23,7 @@ namespace Asv.Mavlink
         private readonly VehicleBaseConfig _config;
 
 
-        private readonly CancellationTokenSource _disposeCancel = new CancellationTokenSource();
+        protected readonly CancellationTokenSource DisposeCancel = new CancellationTokenSource();
         private int _isDisposed;
 
 
@@ -45,14 +45,17 @@ namespace Asv.Mavlink
             InitArmed();
             InitBattery();
             InitAltitude();
+            InitStatus();
+            InitMode();
             return Task.CompletedTask;
         }
+
 
         public virtual void Dispose()
         {
             if (Interlocked.CompareExchange(ref _isDisposed,1,0) == 1) return;
-            _disposeCancel?.Cancel(false);
-            _disposeCancel?.Dispose();
+            DisposeCancel?.Cancel(false);
+            DisposeCancel?.Dispose();
             _mavlink?.Dispose();
         }
 
@@ -86,6 +89,18 @@ namespace Asv.Mavlink
             return _autopilotVersion != null ? Task.FromResult(_autopilotVersion) : _mavlink.Commands.GetAutopilotVersion(cancel);
         }
 
+        #region Mode
+
+        private readonly RxValue<VehicleMode> _mode = new RxValue<VehicleMode>();
+        public IRxValue<VehicleMode> Mode => _mode;
+
+        protected abstract VehicleMode InterpretateMode(HeartbeatPayload heartbeat);
+
+        private void InitMode()
+        {
+            _mavlink.Rtt.RawHeartbeat.Select(InterpretateMode).Subscribe(_mode, DisposeCancel.Token);
+            DisposeCancel.Token.Register(() => _dropRateComm.Dispose());
+        }
 
         /// <summary>
         /// Check is current mode can used for remote control from GCS with GPS positioning. It depend from vehicle types 
@@ -100,6 +115,11 @@ namespace Asv.Mavlink
         /// <param name="cancel"></param>
         /// <returns></returns>
         protected abstract Task EnsureInGuidedMode(CancellationToken cancel);
+
+        #endregion
+
+
+        
 
         #region Attitude
 
@@ -119,23 +139,23 @@ namespace Asv.Mavlink
         public IRxValue<double> PitchSpeed => _pitchSpeed;
         public IRxValue<double> RollSpeed => _rollSpeed;
         public IRxValue<double> YawSpeed => _yawSpeed;
-       
+
 
         protected virtual void InitAttitude()
         {
-            _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Pitch).Subscribe(_pitch, _disposeCancel.Token);
-            _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Roll).Subscribe(_roll, _disposeCancel.Token);
-            _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Yaw).Subscribe(_yaw, _disposeCancel.Token);
-            _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Pitchspeed).Subscribe(_pitchSpeed, _disposeCancel.Token);
-            _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Rollspeed).Subscribe(_rollSpeed, _disposeCancel.Token);
-            _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Yawspeed).Subscribe(_yawSpeed, _disposeCancel.Token);
+            _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Pitch).Subscribe(_pitch, DisposeCancel.Token);
+            _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Roll).Subscribe(_roll, DisposeCancel.Token);
+            _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Yaw).Subscribe(_yaw, DisposeCancel.Token);
+            _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Pitchspeed).Subscribe(_pitchSpeed, DisposeCancel.Token);
+            _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Rollspeed).Subscribe(_rollSpeed, DisposeCancel.Token);
+            _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Yawspeed).Subscribe(_yawSpeed, DisposeCancel.Token);
 
-            _disposeCancel.Token.Register(() => _pitch.Dispose());
-            _disposeCancel.Token.Register(() => _roll.Dispose());
-            _disposeCancel.Token.Register(() => _yaw.Dispose());
-            _disposeCancel.Token.Register(() => _pitchSpeed.Dispose());
-            _disposeCancel.Token.Register(() => _rollSpeed.Dispose());
-            _disposeCancel.Token.Register(() => _yawSpeed.Dispose());
+            DisposeCancel.Token.Register(() => _pitch.Dispose());
+            DisposeCancel.Token.Register(() => _roll.Dispose());
+            DisposeCancel.Token.Register(() => _yaw.Dispose());
+            DisposeCancel.Token.Register(() => _pitchSpeed.Dispose());
+            DisposeCancel.Token.Register(() => _rollSpeed.Dispose());
+            DisposeCancel.Token.Register(() => _yawSpeed.Dispose());
 
 
         }
@@ -150,13 +170,13 @@ namespace Asv.Mavlink
 
         private void InitLink()
         {
-            Observable.Timer(TimeSpan.FromSeconds(1),TimeSpan.FromSeconds(1)).Subscribe(CheckConnection,_disposeCancel.Token);
+            Observable.Timer(TimeSpan.FromSeconds(1),TimeSpan.FromSeconds(1)).Subscribe(CheckConnection,DisposeCancel.Token);
             _mavlink.Rtt.RawHeartbeat.Subscribe(_ =>
             {
                 _lastHeartbeat = DateTime.Now;
                 _link.Upgrade();
-            }, _disposeCancel.Token);
-            _disposeCancel.Token.Register(() => _link.Dispose());
+            }, DisposeCancel.Token);
+            DisposeCancel.Token.Register(() => _link.Dispose());
         }
 
         private void CheckConnection(long value)
@@ -176,8 +196,8 @@ namespace Asv.Mavlink
 
         private void InitAltitude()
         {
-            _mavlink.Rtt.RawGlobalPositionInt.Select(_=>_.RelativeAlt/1000D).Subscribe(_altitudeRelative, _disposeCancel.Token);
-            _disposeCancel.Token.Register(() => _altitudeRelative.Dispose());
+            _mavlink.Rtt.RawGlobalPositionInt.Select(_=>_.RelativeAlt/1000D).Subscribe(_altitudeRelative, DisposeCancel.Token);
+            DisposeCancel.Token.Register(() => _altitudeRelative.Dispose());
         }
 
        
@@ -198,13 +218,13 @@ namespace Asv.Mavlink
         protected virtual void InitGps()
         {
             
-            _mavlink.Rtt.RawGpsRawInt.Select(_ => new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, _.Alt / 1000D)).Subscribe(_globGps, _disposeCancel.Token);
-            _mavlink.Rtt.RawGpsRawInt.Select(_ => new GpsInfo(_)).Subscribe(_gpsInfo, _disposeCancel.Token);
-            _mavlink.Rtt.RawGpsRawInt.Select(_ => _.Vel / 100D).Subscribe(_gVelocity, _disposeCancel.Token);
+            _mavlink.Rtt.RawGpsRawInt.Select(_ => new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, _.Alt / 1000D)).Subscribe(_globGps, DisposeCancel.Token);
+            _mavlink.Rtt.RawGpsRawInt.Select(_ => new GpsInfo(_)).Subscribe(_gpsInfo, DisposeCancel.Token);
+            _mavlink.Rtt.RawGpsRawInt.Select(_ => _.Vel / 100D).Subscribe(_gVelocity, DisposeCancel.Token);
 
-            _disposeCancel.Token.Register(() => _gVelocity.Dispose());
-            _disposeCancel.Token.Register(() => _gpsInfo.Dispose());
-            _disposeCancel.Token.Register(() => _globGps.Dispose());
+            DisposeCancel.Token.Register(() => _gVelocity.Dispose());
+            DisposeCancel.Token.Register(() => _gpsInfo.Dispose());
+            DisposeCancel.Token.Register(() => _globGps.Dispose());
         }
 
         #endregion
@@ -217,7 +237,7 @@ namespace Asv.Mavlink
         {
             _mavlink.Rtt.RawHome
                 .Select(_ => new GeoPoint(_.Latitude / 10000000D, _.Longitude / 10000000D, _.Altitude / 1000D));
-            _disposeCancel.Token.Register(() => _home.Dispose());
+            DisposeCancel.Token.Register(() => _home.Dispose());
         }
 
         #endregion
@@ -228,8 +248,8 @@ namespace Asv.Mavlink
         public IRxValue<bool> IsArmed => _isArmed;
         protected virtual void InitArmed()
         {
-            _mavlink.Rtt.RawHeartbeat.Select(_ => _.BaseMode.HasFlag(MavModeFlag.MavModeFlagSafetyArmed)).Subscribe(_isArmed, _disposeCancel.Token);
-            _disposeCancel.Token.Register(() => _isArmed.Dispose());
+            _mavlink.Rtt.RawHeartbeat.Select(_ => _.BaseMode.HasFlag(MavModeFlag.MavModeFlagSafetyArmed)).Subscribe(_isArmed, DisposeCancel.Token);
+            DisposeCancel.Token.Register(() => _isArmed.Dispose());
         }
 
         public virtual async Task ArmDisarm(bool isArming,CancellationToken cancel)
@@ -246,13 +266,26 @@ namespace Asv.Mavlink
         #region Battery
 
         private readonly RxValue<double?> _batteryCharge = new RxValue<double?>();
-        
-
         public IRxValue<double?> BatteryCharge => _batteryCharge;
+
+        private readonly RxValue<double?> _currentBattery = new RxValue<double?>();
+        public IRxValue<double?> CurrentBattery => _currentBattery;
+
+        private readonly RxValue<double> _voltageBattery = new RxValue<double>();
+        public IRxValue<double> VoltageBattery => _voltageBattery;
+
         protected virtual void InitBattery()
         {
-            _mavlink.Rtt.RawBatteryStatus.Select(_ => _.BatteryRemaining < 0 ? default(double?) : (_.BatteryRemaining / 100.0d)).Subscribe(_batteryCharge,_disposeCancel.Token);
-            _disposeCancel.Token.Register(() => _batteryCharge.Dispose());
+            /// TODO: add _mavlink.Rtt.RawBatteryStatus
+
+            _mavlink.Rtt.RawSysStatus.Select(_ => _.BatteryRemaining < 0 ? default(double?) : (_.BatteryRemaining / 100.0d)).Subscribe(_batteryCharge,DisposeCancel.Token);
+            _mavlink.Rtt.RawSysStatus.Select(_ => _.CurrentBattery < 0 ? default(double?) : (_.CurrentBattery / 1000.0d)).Subscribe(_currentBattery, DisposeCancel.Token);
+            _mavlink.Rtt.RawSysStatus.Select(_ => _.VoltageBattery / 1000.0d).Subscribe(_voltageBattery, DisposeCancel.Token);
+
+            DisposeCancel.Token.Register(() => _batteryCharge.Dispose());
+            DisposeCancel.Token.Register(() => _currentBattery.Dispose());
+            DisposeCancel.Token.Register(() => _voltageBattery.Dispose());
+
         }
 
         #endregion
@@ -266,6 +299,10 @@ namespace Asv.Mavlink
             var res = await _mavlink.Commands.CommandLong(MavCmd.MavCmdNavTakeoff, float.NaN, float.NaN, float.NaN, float.NaN, (float)_globGps.Value.Latitude, (float)_globGps.Value.Longitude, (float)altitude, 3, cancel);
             ValidateCommandResult(res);
         }
+
+        #endregion
+
+        #region GoTo
 
         public Task GoToGlob(GeoPoint location, CancellationToken cancel, double? yawDeg = null)
         {
@@ -297,5 +334,38 @@ namespace Asv.Mavlink
         #endregion
 
 
+        
+
+        #region Status
+
+        private readonly RxValue<VehicleStatusMessage> _textStatus = new RxValue<VehicleStatusMessage>();
+        public IRxValue<VehicleStatusMessage> TextStatus => _textStatus;
+
+        private readonly RxValue<double> _cpuLoad = new RxValue<double>();
+        public IRxValue<double> CpuLoad => _cpuLoad;
+
+        private readonly RxValue<double> _dropRateComm = new RxValue<double>();
+        public IRxValue<double> DropRateCommunication => _dropRateComm;
+
+        private void InitStatus()
+        {
+            _mavlink.Rtt.RawStatusText.Select(_ => new VehicleStatusMessage { Text = new string(_.Text), Type = _.Severity  }).Subscribe(_textStatus,DisposeCancel.Token);
+            _mavlink.Rtt.RawSysStatus.Select(_=>_.Load/1000D).Subscribe(_cpuLoad, DisposeCancel.Token);
+            _mavlink.Rtt.RawSysStatus.Select(_ => _.DropRateComm / 1000D).Subscribe(_dropRateComm, DisposeCancel.Token);
+            
+
+            DisposeCancel.Token.Register(() => _textStatus.Dispose());
+            DisposeCancel.Token.Register(() => _cpuLoad.Dispose());
+            DisposeCancel.Token.Register(() => _dropRateComm.Dispose());
+        }
+
+        #endregion
+    }
+
+    public class VehicleMode
+    {
+        public MavModeFlag BaseMode { get; set; }
+        public uint CustomMode { get; set; }
+        public string Name { get; set; }
     }
 }

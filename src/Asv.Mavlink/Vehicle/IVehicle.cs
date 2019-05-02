@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Asv.Mavlink.V2.Common;
 
 namespace Asv.Mavlink
 {
@@ -23,6 +24,8 @@ namespace Asv.Mavlink
         IRxValue<bool> IsArmed { get; }
         Task ArmDisarm(bool isArming, CancellationToken cancel);
 
+        IRxValue<double?> CurrentBattery { get; }
+        IRxValue<double> VoltageBattery { get; }
         IRxValue<double?> BatteryCharge { get; }
 
         IRxValue<double> Pitch { get; }
@@ -32,9 +35,14 @@ namespace Asv.Mavlink
         IRxValue<double> RollSpeed { get; }
         IRxValue<double> YawSpeed { get; }
 
-        
+        IRxValue<VehicleStatusMessage> TextStatus { get; }
+        IRxValue<double> CpuLoad { get; }
+        IRxValue<double> DropRateCommunication { get; }
 
         IRxValue<double> GroundVelocity { get; }
+
+
+        IRxValue<VehicleMode> Mode { get; }
 
         Task TakeOff(double altitude, CancellationToken cancel);
 
@@ -45,5 +53,9 @@ namespace Asv.Mavlink
         Task DoRtl(CancellationToken cancel);
     }
 
-    
+    public class VehicleStatusMessage
+    {
+        public string Text { get; set; }
+        public MavSeverity Type { get; set; }
+    }
 }
