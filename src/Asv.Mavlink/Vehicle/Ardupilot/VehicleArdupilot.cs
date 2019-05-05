@@ -36,9 +36,9 @@ namespace Asv.Mavlink
             _config = config;
         }
 
-        public override async Task Init(CancellationToken cancel)
+        public override void StartListen()
         {
-            await base.Init(cancel);
+            base.StartListen();
             InitFirmware();
         }
 
@@ -90,28 +90,28 @@ namespace Asv.Mavlink
                     {
                         BaseMode = heartbeat.BaseMode,
                         CustomMode = heartbeat.CustomMode,
-                        Name = ((PlaneMode)(heartbeat.CustomMode)).ToString("G"),
+                        Name = ((PlaneMode)(heartbeat.CustomMode)).ToString("G").Replace(nameof(PlaneMode),string.Empty),
                     };
                 case FirmwareType.ArduCopter2:
                     return new VehicleMode
                     {
                         BaseMode = heartbeat.BaseMode,
                         CustomMode = heartbeat.CustomMode,
-                        Name = ((CopterMode)(heartbeat.CustomMode)).ToString("G"),
+                        Name = ((CopterMode)(heartbeat.CustomMode)).ToString("G").Replace(nameof(CopterMode), string.Empty),
                     };
                 case FirmwareType.ArduRover:
                     return new VehicleMode
                     {
                         BaseMode = heartbeat.BaseMode,
                         CustomMode = heartbeat.CustomMode,
-                        Name = ((RoverMode)(heartbeat.CustomMode)).ToString("G"),
+                        Name = ((RoverMode)(heartbeat.CustomMode)).ToString("G").Replace(nameof(RoverMode), string.Empty),
                     };
                 case FirmwareType.ArduSub:
                     return new VehicleMode
                     {
                         BaseMode = heartbeat.BaseMode,
                         CustomMode = heartbeat.CustomMode,
-                        Name = ((SubMode)(heartbeat.CustomMode)).ToString("G"),
+                        Name = ((SubMode)(heartbeat.CustomMode)).ToString("G").Replace(nameof(SubMode), string.Empty),
                     };
                 
                 case FirmwareType.ArduTracker:
@@ -119,7 +119,7 @@ namespace Asv.Mavlink
                     {
                         BaseMode = heartbeat.BaseMode,
                         CustomMode = heartbeat.CustomMode,
-                        Name = ((TrackerMode)(heartbeat.CustomMode)).ToString("G"),
+                        Name = ((TrackerMode)(heartbeat.CustomMode)).ToString("G").Replace(nameof(TrackerMode), string.Empty),
                     };
                 case FirmwareType.Unknown:
                     return new VehicleMode

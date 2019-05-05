@@ -107,7 +107,15 @@ namespace Asv.Mavlink
             PortWrapper[] ports;
             lock (_sync)
             {
-                ports = _ports.Where(_ => _ != sender).Where(_ => _.Port.IsEnabled.Value).ToArray();
+                // repeat
+                ports = _ports
+                    // exclude self
+                    .Where(_ => _.Id != sender.Id)
+                    // exclude disabled
+                    .Where(_ => _.Port.IsEnabled.Value)
+                    // only connected
+                    .Where(_ => _.Port.State.Value == PortState.Connected)
+                    .ToArray();
             }
             _onRecv.OnNext(data);
             Task.WaitAll(ports.Select(_ => _.Port.Send(data, data.Length, cancel)).ToArray(), cancel);

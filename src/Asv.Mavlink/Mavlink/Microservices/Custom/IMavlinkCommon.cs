@@ -8,7 +8,16 @@ namespace Asv.Mavlink
     public interface IMavlinkCommon:IDisposable
     {
         Task SetMode(uint baseMode, uint customMode, CancellationToken cancel);
-
+        /// <summary>
+        /// Request a data stream.
+        /// DEPRECATED: Replaced by SET_MESSAGE_INTERVAL (2015-08).
+        /// 
+        /// </summary>
+        /// <param name="streamId"></param>
+        /// <param name="rateHz"></param>
+        /// <param name="startStop"></param>
+        /// <returns></returns>
+        Task RequestDataStream(int streamId,int rateHz,bool startStop, CancellationToken cancel);
 
 
         /// <summary>

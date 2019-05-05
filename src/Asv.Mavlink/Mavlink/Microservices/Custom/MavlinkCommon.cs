@@ -33,6 +33,24 @@ namespace Asv.Mavlink
             return _connection.Send(packet, cancel);
         }
 
+        public Task RequestDataStream(int streamId, int rateHz, bool startStop,CancellationToken cancel)
+        {
+            var packet = new RequestDataStreamPacket
+            {
+                ComponenId = _config.ComponentId,
+                SystemId = _config.SystemId,
+                Payload =
+                {
+                    TargetSystem = _config.TargetSystemId,
+                    TargetComponent = _config.TargetComponenId,
+                    ReqStreamId = (byte) streamId,
+                    ReqMessageRate = (byte) rateHz,
+                    StartStop = (byte) (startStop ? 1:0),
+                }
+            };
+            return _connection.Send(packet, cancel);
+        }
+
         public Task SetPositionTargetGlobalInt(uint timeBootMs, MavFrame coordinateFrame, int latInt, int lonInt, float alt,
             float vx, float vy, float vz, float afx, float afy, float afz, float yaw,
             float yawRate, PositionTargetTypemask typeMask, CancellationToken cancel)

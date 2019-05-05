@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Asv.Mavlink
 {
-    public abstract class PortBase:IPort
+    public abstract class PortBase : IPort
     {
         private readonly CancellationTokenSource _disposedCancel = new CancellationTokenSource();
         private int _isEvaluating;
@@ -30,9 +30,10 @@ namespace Asv.Mavlink
         public async Task Send(byte[] data, int count, CancellationToken cancel)
         {
             if (!IsEnabled.Value) return;
+            if (_portStateStream.Value != PortState.Connected) return;
             try
             {
-                await InternalSend(data,count, cancel).ConfigureAwait(false);
+                await InternalSend(data, count, cancel).ConfigureAwait(false);
                 Interlocked.Add(ref _txBytes, count);
             }
             catch (Exception exception)
@@ -45,8 +46,8 @@ namespace Asv.Mavlink
 
         protected PortBase()
         {
-            _enableStream.Where(_ => _).Subscribe(_=>TryConnect(), _disposedCancel.Token);
-        }   
+            _enableStream.Where(_ => _).Subscribe(_ => TryConnect(), _disposedCancel.Token);
+        }
 
         public void Enable()
         {
@@ -76,10 +77,10 @@ namespace Asv.Mavlink
         private void TryConnect()
         {
             if (Interlocked.CompareExchange(ref _isEvaluating, 1, 0) != 0) return;
-            if (!_enableStream.Value) return;
-            if (_disposedCancel.IsCancellationRequested) return;
             try
             {
+                if (!_enableStream.Value) return;
+                if (_disposedCancel.IsCancellationRequested) return;
                 _portStateStream.OnNext(PortState.Connecting);
                 InternalStart();
                 _portStateStream.OnNext(PortState.Connected);
@@ -109,7 +110,7 @@ namespace Asv.Mavlink
             }
             catch (Exception ex)
             {
-                
+
             }
             finally
             {

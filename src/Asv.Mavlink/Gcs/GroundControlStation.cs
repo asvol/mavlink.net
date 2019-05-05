@@ -11,8 +11,15 @@ using Asv.Mavlink.V2.Uavionix;
 
 namespace Asv.Mavlink
 {
+    public class GroundControlStationConfig
+    {
+        public int SystemId { get; set; } = 254;
+        public int ComponentId { get; set; } = 254;
+    }
+
     public class GroundControlStation : IGroundControlStation
     {
+        private readonly GroundControlStationConfig _config;
         private readonly TimeSpan _linkTimeout = TimeSpan.FromSeconds(1);
         private readonly CancellationTokenSource _cancel = new CancellationTokenSource();
         private readonly List<MavlinkDevice> _info = new List<MavlinkDevice>();
@@ -67,8 +74,11 @@ namespace Asv.Mavlink
             }
         }
 
-        public GroundControlStation()
+        public GroundControlStation(GroundControlStationConfig config)
         {
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            _config = config;
+
             MavlinkV2 = new MavlinkV2Connection(Ports, _ =>
             {
                 _.RegisterCommonDialect();
@@ -80,6 +90,29 @@ namespace Asv.Mavlink
             _cancel.Token.Register(() => _lostDeviceSubject.Dispose());
             MavlinkV2.Where(_=>_.MessageId == HeartbeatPacket.PacketMessageId).Cast<HeartbeatPacket>().Subscribe(DeviceFounder, _cancel.Token);
             Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(_=>RemoveOldDevice(), _cancel.Token);
+
+            Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(_=>SendHeartBeat(),_cancel.Token);
+        }
+
+        private void SendHeartBeat()
+        {
+            var packet = new HeartbeatPacket
+            {
+                ComponenId = (byte) _config.ComponentId,
+                SystemId = (byte) _config.SystemId,
+                Sequence = 0,
+                Payload =
+                {
+                    Autopilot = MavAutopilot.MavAutopilotInvalid,
+                    BaseMode = 0,
+                    CustomMode = 0,
+                    MavlinkVersion = 3,
+                    SystemStatus = MavState.MavStateActive,
+                    Type = MavType.MavTypeGcs,
+
+                }
+            };
+            MavlinkV2.Send(packet, CancellationToken.None);
         }
 
         private void RemoveOldDevice()

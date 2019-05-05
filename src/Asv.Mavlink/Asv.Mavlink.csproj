@@ -109,6 +109,7 @@
     <Compile Include="Frames\ISerializable.cs" />
     <Compile Include="Gcs\GroundControlStation.cs" />
     <Compile Include="Gcs\IGroundControlStation.cs" />
+    <Compile Include="Gcs\PortManager\Port\PortBaseV2.cs" />
     <Compile Include="Tools\GeoMath\Extension.cs" />
     <Compile Include="Tools\GeoMath\GeoMath.cs" />
     <Compile Include="Tools\GeoMath\GeoPoint.cs" />

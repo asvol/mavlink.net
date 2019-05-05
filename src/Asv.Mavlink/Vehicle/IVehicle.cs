@@ -5,12 +5,20 @@ using Asv.Mavlink.V2.Common;
 
 namespace Asv.Mavlink
 {
-    
+    public enum VehicleInitState
+    {
+        WaitConnection,
+        Failed,
+        InProgress,
+        Complete
+    }
 
 
     public interface IVehicle:IDisposable
     {
-        Task Init(CancellationToken cancel);
+        IRxValue<VehicleInitState> InitState { get; }
+
+        void StartListen();
 
         IRxValue<LinkState> Link { get; }
         IRxValue<int> PacketRateHz { get; }

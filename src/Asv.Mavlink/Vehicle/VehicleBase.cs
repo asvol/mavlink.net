@@ -12,6 +12,7 @@ namespace Asv.Mavlink
     {
         public int HeartbeatTimeoutMs { get; set; } = 2000;
         public int CommandTimeoutMs { get; set; } = 10000;
+        public int RequestInitDataDelayAfterFailMs { get; set; } = 5000;
     }
 
     public abstract class VehicleBase : IVehicle
@@ -36,8 +37,11 @@ namespace Asv.Mavlink
         public IRxValue<int> PacketRateHz => _mavlink.Rtt.PacketRateHz;
 
 
-        public virtual Task Init(CancellationToken cancel)
+        
+
+        public virtual void StartListen()
         {
+            InitRequestVehicleInfo();
             InitAttitude();
             InitLink();
             InitGps();
@@ -47,9 +51,53 @@ namespace Asv.Mavlink
             InitAltitude();
             InitStatus();
             InitMode();
-            return Task.CompletedTask;
         }
 
+
+
+        #region Request init info
+
+        private readonly RxValue<VehicleInitState> _initState = new RxValue<VehicleInitState>();
+        public IRxValue<VehicleInitState> InitState => _initState;
+
+        private int _isRequestInfoIsInProgressOrAlreadySuccess;
+        private bool _needToRequestAgain = true;
+        private void InitRequestVehicleInfo()
+        {
+            _initState.OnNext(VehicleInitState.WaitConnection);
+            _link.DistinctUntilChanged().Where(_ => _ == LinkState.Disconnected).Subscribe(_ => _needToRequestAgain = true,DisposeCancel.Token);
+            _link.DistinctUntilChanged().Where(_ => _needToRequestAgain).Where(_ => _ == LinkState.Connected)
+                // only one time
+                .Subscribe(_ => Task.Factory.StartNew(TryToRequestData,TaskCreationOptions.LongRunning), DisposeCancel.Token);
+        }
+
+        private async void TryToRequestData()
+        {
+            if (Interlocked.CompareExchange(ref _isRequestInfoIsInProgressOrAlreadySuccess,1,0) == 1) return;
+            _initState.OnNext(VehicleInitState.InProgress);
+            try
+            {
+                Logger.Info($"Request ALL data stream from vehicle");
+                await _mavlink.Common.RequestDataStream(0, 2, true, DisposeCancel.Token);
+                //await _mavlink.Params.ReadAllParams(DisposeCancel.Token,);
+                _initState.OnNext(VehicleInitState.Complete);
+                _needToRequestAgain = false;
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e, $"Error to read all vehicle info:{e.Message}");
+                _initState.OnNext(VehicleInitState.Failed);
+                Observable.Timer(TimeSpan.FromMilliseconds(_config.RequestInitDataDelayAfterFailMs))
+                    .Subscribe(_ => TryToRequestData(), DisposeCancel.Token);
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _isRequestInfoIsInProgressOrAlreadySuccess, 0);
+            }
+            
+        }
+
+        #endregion
 
         public virtual void Dispose()
         {
@@ -143,8 +191,8 @@ namespace Asv.Mavlink
 
         protected virtual void InitAttitude()
         {
-            _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Pitch).Subscribe(_pitch, DisposeCancel.Token);
-            _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Roll).Subscribe(_roll, DisposeCancel.Token);
+            _mavlink.Rtt.RawAttitude.Select(_ => (double)GeoMath.RadiansToDegrees(_.Pitch)).Subscribe(_pitch, DisposeCancel.Token);
+            _mavlink.Rtt.RawAttitude.Select(_ => (double) GeoMath.RadiansToDegrees(_.Roll)).Subscribe(_roll, DisposeCancel.Token);
             _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Yaw).Subscribe(_yaw, DisposeCancel.Token);
             _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Pitchspeed).Subscribe(_pitchSpeed, DisposeCancel.Token);
             _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Rollspeed).Subscribe(_rollSpeed, DisposeCancel.Token);
@@ -345,6 +393,7 @@ namespace Asv.Mavlink
         public IRxValue<double> CpuLoad => _cpuLoad;
 
         private readonly RxValue<double> _dropRateComm = new RxValue<double>();
+        
         public IRxValue<double> DropRateCommunication => _dropRateComm;
 
         private void InitStatus()

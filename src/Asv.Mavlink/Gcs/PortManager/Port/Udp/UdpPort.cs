@@ -23,7 +23,7 @@ namespace Asv.Mavlink
             }
 
             var coll = HttpUtility.ParseQueryString(uri.Query);
-            
+
             opt = new UdpPortConfig
             {
                 LocalHost = IPAddress.Parse(uri.Host).ToString(),
@@ -55,12 +55,12 @@ namespace Asv.Mavlink
 
         public UdpPort(UdpPortConfig config)
         {
-            _recvEndPoint = new IPEndPoint(IPAddress.Parse(config.LocalHost),config.LocalPort);
+            _recvEndPoint = new IPEndPoint(IPAddress.Parse(config.LocalHost), config.LocalPort);
             if (!config.RemoteHost.IsNullOrWhiteSpace() && config.RemotePort != 0)
             {
                 _sendEndPoint = new IPEndPoint(IPAddress.Parse(config.RemoteHost), config.RemotePort);
             }
-            
+
         }
 
         public override PortType PortType => PortType.Udp;
@@ -85,7 +85,20 @@ namespace Asv.Mavlink
                 _udp.Connect(_sendEndPoint);
             }
             _stop = new CancellationTokenSource();
-            Task.Factory.StartNew(ListenAsync, _stop.Token, TaskCreationOptions.LongRunning);
+            var recvThread = new Thread(ListenAsync);
+            _stop.Token.Register(() =>
+            {
+                try
+                {
+                    recvThread.Abort();
+                }
+                catch (Exception e)
+                {
+                    // ignore
+                }
+            });
+            recvThread.Start();
+            
         }
 
         private void ListenAsync(object obj)
@@ -96,12 +109,11 @@ namespace Asv.Mavlink
                 while (true)
                 {
                     var bytes = _udp.Receive(ref anyEp);
-                    if (_lastRecvEndpoint == null )
+                    if (_lastRecvEndpoint == null)
                     {
                         _lastRecvEndpoint = anyEp;
                         _udp.Connect(_lastRecvEndpoint);
                     }
-
                     InternalOnData(bytes);
                 }
             }

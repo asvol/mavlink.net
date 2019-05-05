@@ -12,6 +12,7 @@ namespace Asv.Mavlink
         public Parity Parity { get; set; } = Parity.None;
         public StopBits StopBits { get; set; } = StopBits.One;
         public string PortName { get; set; }
+        public int WriteTimeout { get; set; } = 1000;
 
         public static bool TryParseFromUri(Uri uri, out SerialPortConfig opt)
         {
@@ -25,6 +26,7 @@ namespace Asv.Mavlink
             opt = new SerialPortConfig
             {
                 PortName = uri.LocalPath,
+                WriteTimeout = int.Parse(coll["wrt"] ?? "1000"),
                 BoundRate = int.Parse(coll["br"] ?? "57600"),
                 Parity = (Parity)Enum.Parse(typeof(Parity), coll["parity"] ?? Parity.None.ToString()),
                 DataBits = int.Parse(coll["dataBits"] ?? "8"),

@@ -24,7 +24,7 @@ namespace Asv.Mavlink
         private readonly MavlinkMissionMicroservice _mission;
         private readonly MavlinkOffboardMode _mavlinkOffboard;
         private readonly MavlinkCommon _mode;
-
+        
         public MavlinkV2Protocol(IMavlinkV2Connection connection, VehicleConfig config)
         {
             if (connection == null) throw new ArgumentNullException(nameof(connection));
