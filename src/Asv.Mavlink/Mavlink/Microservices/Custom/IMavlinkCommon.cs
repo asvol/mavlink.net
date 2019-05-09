@@ -7,6 +7,10 @@ namespace Asv.Mavlink
 {
     public interface IMavlinkCommon:IDisposable
     {
+
+        
+
+
         Task SetMode(uint baseMode, uint customMode, CancellationToken cancel);
         /// <summary>
         /// Request a data stream.

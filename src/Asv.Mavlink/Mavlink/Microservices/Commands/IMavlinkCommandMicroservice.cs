@@ -55,7 +55,17 @@ namespace Asv.Mavlink
     }
 
 
-   
+    public static class MavlinkCommandHelper
+    {
+        public static Task GetHomePosition(this IMavlinkCommandMicroservice src, CancellationToken cancel)
+        {
+            return src.CommandLong(MavCmd.MavCmdGetHomePosition, float.NaN, float.NaN, float.NaN, float.NaN, float.NaN,
+                float.NaN, float.NaN, 1, cancel);
+        }
+    }
 
-    
+
+
+
+
 }

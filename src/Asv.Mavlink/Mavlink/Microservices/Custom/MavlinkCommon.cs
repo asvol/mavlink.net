@@ -17,6 +17,8 @@ namespace Asv.Mavlink
             _config = config;
         }
 
+        
+
         public Task SetMode(uint baseMode, uint customMode, CancellationToken cancel)
         {
             var packet = new SetModePacket()

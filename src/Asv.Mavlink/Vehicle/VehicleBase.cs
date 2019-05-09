@@ -79,6 +79,8 @@ namespace Asv.Mavlink
             {
                 Logger.Info($"Request ALL data stream from vehicle");
                 await _mavlink.Common.RequestDataStream(0, 2, true, DisposeCancel.Token);
+                Logger.Info($"Request home position");
+                await _mavlink.Commands.GetHomePosition(CancellationToken.None);
                 //await _mavlink.Params.ReadAllParams(DisposeCancel.Token,);
                 _initState.OnNext(VehicleInitState.Complete);
                 _needToRequestAgain = false;
@@ -193,7 +195,7 @@ namespace Asv.Mavlink
         {
             _mavlink.Rtt.RawAttitude.Select(_ => (double)GeoMath.RadiansToDegrees(_.Pitch)).Subscribe(_pitch, DisposeCancel.Token);
             _mavlink.Rtt.RawAttitude.Select(_ => (double) GeoMath.RadiansToDegrees(_.Roll)).Subscribe(_roll, DisposeCancel.Token);
-            _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Yaw).Subscribe(_yaw, DisposeCancel.Token);
+            _mavlink.Rtt.RawAttitude.Select(_ => (double)GeoMath.RadiansToDegrees(_.Yaw)).Subscribe(_yaw, DisposeCancel.Token);
             _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Pitchspeed).Subscribe(_pitchSpeed, DisposeCancel.Token);
             _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Rollspeed).Subscribe(_rollSpeed, DisposeCancel.Token);
             _mavlink.Rtt.RawAttitude.Select(_ => (double)_.Yawspeed).Subscribe(_yawSpeed, DisposeCancel.Token);
@@ -279,12 +281,13 @@ namespace Asv.Mavlink
 
         #region Home
 
-        private readonly RxValue<GeoPoint> _home = new RxValue<GeoPoint>();
-        public IRxValue<GeoPoint> Home => _home;
+        private readonly RxValue<GeoPoint?> _home = new RxValue<GeoPoint?>();
+        public IRxValue<GeoPoint?> Home => _home;
         protected virtual void InitHome()
         {
             _mavlink.Rtt.RawHome
-                .Select(_ => new GeoPoint(_.Latitude / 10000000D, _.Longitude / 10000000D, _.Altitude / 1000D));
+                .Select(_ => (GeoPoint?) new GeoPoint(_.Latitude / 10000000D, _.Longitude / 10000000D, _.Altitude / 1000D))
+                .Subscribe(_home,DisposeCancel.Token);
             DisposeCancel.Token.Register(() => _home.Dispose());
         }
 
@@ -293,6 +296,11 @@ namespace Asv.Mavlink
         #region Arm
 
         private readonly RxValue<bool> _isArmed = new RxValue<bool>();
+        public Task RequestHome(CancellationToken cancel)
+        {
+            return _mavlink.Commands.GetHomePosition(cancel);
+        }
+
         public IRxValue<bool> IsArmed => _isArmed;
         protected virtual void InitArmed()
         {

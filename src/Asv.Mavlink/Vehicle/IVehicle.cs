@@ -27,8 +27,10 @@ namespace Asv.Mavlink
         IRxValue<GpsInfo> GpsInfo { get; }
 
         IRxValue<double> AltitudeAboveHome { get; }
-        IRxValue<GeoPoint> Home { get; }
-        
+
+        IRxValue<GeoPoint?> Home { get; }
+        Task RequestHome(CancellationToken cancel);
+
         IRxValue<bool> IsArmed { get; }
         Task ArmDisarm(bool isArming, CancellationToken cancel);
 
@@ -59,6 +61,7 @@ namespace Asv.Mavlink
 
 
         Task DoRtl(CancellationToken cancel);
+        
     }
 
     public class VehicleStatusMessage

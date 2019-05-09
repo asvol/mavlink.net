@@ -88,7 +88,7 @@ namespace Asv.Mavlink
                 .Where(_ => _.MessageId == HomePositionPacket.PacketMessageId)
                 .Cast<HomePositionPacket>()
                 .Select(_ => _.Payload)
-                .Subscribe(_home, _disposeCancel.Token);
+                .Subscribe(_=>_home.OnNext(_), _disposeCancel.Token);
            
 
             _disposeCancel.Token.Register(() => _home.Dispose());
