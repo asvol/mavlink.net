@@ -29,9 +29,11 @@ namespace Asv.Mavlink
         IRxValue<double> AltitudeAboveHome { get; }
 
         IRxValue<GeoPoint?> Home { get; }
+        IRxValue<double?> HomeDistance { get; }
         Task RequestHome(CancellationToken cancel);
 
         IRxValue<bool> IsArmed { get; }
+        IRxValue<TimeSpan> ArmedTime { get; }
         Task ArmDisarm(bool isArming, CancellationToken cancel);
 
         IRxValue<double?> CurrentBattery { get; }
@@ -50,8 +52,7 @@ namespace Asv.Mavlink
         IRxValue<double> DropRateCommunication { get; }
 
         IRxValue<double> GroundVelocity { get; }
-
-
+        
         IRxValue<VehicleMode> Mode { get; }
 
         Task TakeOff(double altitude, CancellationToken cancel);

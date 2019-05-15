@@ -282,12 +282,21 @@ namespace Asv.Mavlink
         #region Home
 
         private readonly RxValue<GeoPoint?> _home = new RxValue<GeoPoint?>();
+        private readonly RxValue<double?> _homeDistance = new RxValue<double?>();
         public IRxValue<GeoPoint?> Home => _home;
+        public IRxValue<double?> HomeDistance => _homeDistance;
         protected virtual void InitHome()
         {
             _mavlink.Rtt.RawHome
                 .Select(_ => (GeoPoint?) new GeoPoint(_.Latitude / 10000000D, _.Longitude / 10000000D, _.Altitude / 1000D))
                 .Subscribe(_home,DisposeCancel.Token);
+            DisposeCancel.Token.Register(() => _homeDistance.Dispose());
+
+            this.GpsLocation
+                .Where(_=>_home.Value.HasValue)
+                // ReSharper disable once PossibleInvalidOperationException
+                .Select(_ => (double?)GeoMath.Distance(_home.Value.Value,_))
+                .Subscribe(_homeDistance, DisposeCancel.Token);
             DisposeCancel.Token.Register(() => _home.Dispose());
         }
 
@@ -296,14 +305,33 @@ namespace Asv.Mavlink
         #region Arm
 
         private readonly RxValue<bool> _isArmed = new RxValue<bool>();
+        private readonly RxValue<TimeSpan> _armedTime = new RxValue<TimeSpan>();
         public Task RequestHome(CancellationToken cancel)
         {
             return _mavlink.Commands.GetHomePosition(cancel);
         }
 
         public IRxValue<bool> IsArmed => _isArmed;
+        public IRxValue<TimeSpan> ArmedTime => _armedTime;
+        private long _lastArmedTime;
         protected virtual void InitArmed()
         {
+            var timer = Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Where(_=>IsArmed.Value).Subscribe(_ =>
+            {
+                var lastBin = Interlocked.Read(ref _lastArmedTime);
+                if (lastBin == 0)
+                {
+                    _armedTime.OnNext(TimeSpan.Zero);
+                    return;
+                }
+                var last = DateTime.FromBinary(lastBin);
+                var now = DateTime.Now;
+                var delay = (now - last);
+                _armedTime.OnNext(delay);
+            });
+            _isArmed.DistinctUntilChanged().Where(_ => _isArmed.Value).Subscribe(_ => Interlocked.Exchange(ref _lastArmedTime,DateTime.Now.ToBinary()) ,DisposeCancel.Token);
+            DisposeCancel.Token.Register(() => timer.Dispose());
+
             _mavlink.Rtt.RawHeartbeat.Select(_ => _.BaseMode.HasFlag(MavModeFlag.MavModeFlagSafetyArmed)).Subscribe(_isArmed, DisposeCancel.Token);
             DisposeCancel.Token.Register(() => _isArmed.Dispose());
         }
@@ -402,6 +430,7 @@ namespace Asv.Mavlink
 
         private readonly RxValue<double> _dropRateComm = new RxValue<double>();
         
+
         public IRxValue<double> DropRateCommunication => _dropRateComm;
 
         private void InitStatus()
