@@ -113,6 +113,7 @@
     <Compile Include="Tools\GeoMath\Extension.cs" />
     <Compile Include="Tools\GeoMath\GeoMath.cs" />
     <Compile Include="Tools\GeoMath\GeoPoint.cs" />
+    <Compile Include="Tools\RxValue\CancellationWrapper.cs" />
     <Compile Include="Tools\StringExtensions.cs" />
     <Compile Include="Vehicle\GpsInfo.cs" />
     <Compile Include="Vehicle\IVehicle.cs" />
