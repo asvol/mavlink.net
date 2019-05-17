@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Asv.Mavlink.V2.Ardupilotmega;
 using Asv.Mavlink.V2.Common;
 using NLog;
+using MavCmd = Asv.Mavlink.V2.Common.MavCmd;
 
 namespace Asv.Mavlink
 {
@@ -153,6 +154,40 @@ namespace Asv.Mavlink
             return _mavlink.Common.SetMode(1, 6, cancel);
         }
 
+        public override async Task SetRoi(GeoPoint location, CancellationToken cancel)
+        {
+            _roi.OnNext(location);
+            try
+            {
+                // just send, because AEDUPILOT does not send mavcmd ack
+                await _mavlink.Commands.SendCommandLong(MavCmd.MavCmdDoSetRoiLocation, 0, 0, 0, 0, 0, 0, 0, 1, CancellationToken.None);
+                await _mavlink.Commands.SendCommandLong(MavCmd.MavCmdDoSetRoi, (int)MavRoi.MavRoiLocation, 0, 0, 0, (float)location.Latitude, (float)location.Longitude, (float)location.Altitude, 3, CancellationToken.None);
+            }
+            catch (Exception)
+            {
+                _roi.OnNext(null);
+                throw;
+            }
+            
+        }
+
+        public override async Task ClearRoi(CancellationToken cancel)
+        {
+            var old = _roi.Value;
+            _roi.OnNext(null);
+            try
+            {
+                // just send, because ARDUPILOT does not send mavcmd ack
+                await _mavlink.Commands.SendCommandLong(MavCmd.MavCmdDoSetRoiNone, 0, 0, 0, 0, 0, 0, 0, 1, CancellationToken.None);
+                //await _mavlink.Commands.SendCommandLong(MavCmd.MavCmdDoSetRoiNone, (int)MavRoi.MavRoiLocation, 0, 0, 0, 0, 0, 0, 1, CancellationToken.None);
+            }
+            catch (Exception)
+            {
+                _roi.OnNext(old);
+                throw;
+            }
+
+        }
 
         public override async Task TakeOff(double altitude, CancellationToken cancel)
         {

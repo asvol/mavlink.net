@@ -43,6 +43,7 @@ namespace Asv.Mavlink
         IRxValue<double> Pitch { get; }
         IRxValue<double> Roll { get; }
         IRxValue<double> Yaw { get; }
+        
         IRxValue<double> PitchSpeed { get; }
         IRxValue<double> RollSpeed { get; }
         IRxValue<double> YawSpeed { get; }
@@ -54,15 +55,22 @@ namespace Asv.Mavlink
         IRxValue<double> GroundVelocity { get; }
         
         IRxValue<VehicleMode> Mode { get; }
+        
 
         Task TakeOff(double altitude, CancellationToken cancel);
 
         Task GoToRel(GeoPoint location, CancellationToken cancel, double? yawDeg = null);
+
+        IRxValue<GeoPoint?> GoToTarget { get; }
         Task GoToGlob(GeoPoint location, CancellationToken cancel, double? yawDeg = null);
 
-
         Task DoRtl(CancellationToken cancel);
+
+        Task SetRoi(GeoPoint location, CancellationToken cancel);
+        IRxValue<GeoPoint?> Roi { get; }
         
+        Task ClearRoi(CancellationToken cancel);
+
     }
 
     public class VehicleStatusMessage

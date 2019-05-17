@@ -44,15 +44,18 @@ namespace Asv.Mavlink
             InitRequestVehicleInfo();
             InitAttitude();
             InitLink();
+            InitRoi();
             InitGps();
             InitHome();
             InitArmed();
             InitBattery();
             InitAltitude();
+            InitGoTo();
             InitStatus();
             InitMode();
         }
 
+       
 
 
         #region Request init info
@@ -186,6 +189,9 @@ namespace Asv.Mavlink
         public IRxValue<double> Pitch => _pitch;
         public IRxValue<double> Roll => _roll;
         public IRxValue<double> Yaw => _yaw;
+
+        
+
         public IRxValue<double> PitchSpeed => _pitchSpeed;
         public IRxValue<double> RollSpeed => _rollSpeed;
         public IRxValue<double> YawSpeed => _yawSpeed;
@@ -211,6 +217,33 @@ namespace Asv.Mavlink
         }
 
         #endregion
+
+        #region ROI
+
+        public virtual async Task SetRoi(GeoPoint location, CancellationToken cancel)
+        {
+            var res = await _mavlink.Commands.CommandLong(MavCmd.MavCmdDoSetRoi, (int)MavRoi.MavRoiLocation, 0, 0, 0, (float)location.Latitude, (float)location.Longitude, (float)location.Altitude, 3, CancellationToken.None);
+            ValidateCommandResult(res);
+            _roi.OnNext(location);
+        }
+
+        protected virtual void InitRoi()
+        {
+            DisposeCancel.Token.Register(() => _roi.Dispose());
+        }
+
+        protected readonly RxValue<GeoPoint?> _roi = new RxValue<GeoPoint?>();
+        public IRxValue<GeoPoint?> Roi => _roi;
+
+        public virtual async Task ClearRoi(CancellationToken cancel)
+        {
+            var res = await _mavlink.Commands.CommandLong(MavCmd.MavCmdDoSetRoiNone, (int)MavRoi.MavRoiLocation, 0, 0, 0, 0, 0, 0, 3, CancellationToken.None);
+            ValidateCommandResult(res);
+            _roi.OnNext(null);
+        }
+
+        #endregion
+
 
         #region Link
 
@@ -403,6 +436,14 @@ namespace Asv.Mavlink
              return GoTo(location, MavFrame.MavFrameGlobalRelativeAltInt, cancel, yawDeg);
         }
 
+        private readonly RxValue<GeoPoint?> _goToTarget = new RxValue<GeoPoint?>();
+        public IRxValue<GeoPoint?> GoToTarget => _goToTarget;
+
+        private void InitGoTo()
+        {
+            DisposeCancel.Token.Register(() => _goToTarget.Dispose());
+        }
+
         private async Task GoTo(GeoPoint location, MavFrame frame, CancellationToken cancel, double? yawDeg = null, double? vx = null, double? vy = null, double? vz = null)
         {
             await EnsureInGuidedMode(cancel);
@@ -413,6 +454,7 @@ namespace Asv.Mavlink
 
             var yaw = yawDeg.HasValue ? (float?) GeoMath.DegreesToRadians(yawDeg.Value) : null;
             await _mavlink.Common.SetPositionTargetGlobalInt(0, frame,cancel, (int)(location.Latitude * 10000000), (int)(location.Longitude * 10000000), (float)location.Altitude.Value, yaw: yaw);
+            _goToTarget.OnNext(location);
         }
 
         #endregion
@@ -429,7 +471,6 @@ namespace Asv.Mavlink
         public IRxValue<double> CpuLoad => _cpuLoad;
 
         private readonly RxValue<double> _dropRateComm = new RxValue<double>();
-        
 
         public IRxValue<double> DropRateCommunication => _dropRateComm;
 

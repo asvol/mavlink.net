@@ -33,6 +33,34 @@ namespace Asv.Mavlink
             return true;
         }
 
+        public Task SendCommandInt(MavCmd command, MavFrame frame, bool current, bool autocontinue,
+            float param1, float param2,
+            float param3, float param4, int x, int y, float z, int attemptCount, CancellationToken cancel)
+        {
+            var packet = new CommandIntPacket()
+            {
+                ComponenId = _config.ComponentId,
+                SystemId = _config.SystemId,
+                Payload =
+                {
+                    Command = command,
+                    TargetComponent = _config.TargetComponenId,
+                    TargetSystem = _config.TargetSystemId,
+                    Frame = frame,
+                    Param1 = param1,
+                    Param2 = param2,
+                    Param3 = param3,
+                    Param4 = param4,
+                    Current = (byte) (current ? 1:0),
+                    Autocontinue = (byte) (autocontinue ? 1:0),
+                    X = x,
+                    Y = y,
+                    Z = z,
+                }
+            };
+            return _connection.Send(packet, cancel);
+        }
+
         public async Task<CommandAckPayload> CommandInt(MavCmd command, MavFrame frame, bool current, bool autocontinue, float param1, float param2,
             float param3, float param4, int x, int y, float z, int attemptCount, CancellationToken cancel)
         {
@@ -101,6 +129,31 @@ namespace Asv.Mavlink
             }
             if (result == null) throw new TimeoutException(string.Format("Timeout to execute command '{0:G}' with '{1}' attempts (timeout {1} times by {2:g} )", command, currentAttept, TimeSpan.FromMilliseconds(_config.CommandTimeoutMs)));
             return result.Payload;
+        }
+
+        public Task SendCommandLong(MavCmd command, float param1, float param2, float param3,
+            float param4, float param5, float param6, float param7, int attemptCount, CancellationToken cancel)
+        {
+            var packet = new CommandLongPacket
+            {
+                ComponenId = _config.ComponentId,
+                SystemId = _config.SystemId,
+                Payload =
+                {
+                    Command = command,
+                    TargetComponent = _config.TargetComponenId,
+                    TargetSystem = _config.TargetSystemId,
+                    Confirmation = 0,
+                    Param1 = param1,
+                    Param2 = param2,
+                    Param3 = param3,
+                    Param4 = param4,
+                    Param5 = param5,
+                    Param6 = param6,
+                    Param7 = param7,
+                }
+            };
+            return _connection.Send(packet, cancel);
         }
 
         public async Task<CommandAckPayload> CommandLong(MavCmd command, float param1, float param2, float param3, float param4, float param5, float param6, float param7, int attemptCount, CancellationToken cancel)
