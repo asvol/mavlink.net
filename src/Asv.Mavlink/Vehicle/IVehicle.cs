@@ -63,6 +63,7 @@ namespace Asv.Mavlink
 
         IRxValue<GeoPoint?> GoToTarget { get; }
         Task GoToGlob(GeoPoint location, CancellationToken cancel, double? yawDeg = null);
+        Task GoToGlobAndWait(GeoPoint location, IProgress<double> progress, double precision, CancellationToken cancel);
 
         Task DoRtl(CancellationToken cancel);
 
@@ -71,6 +72,7 @@ namespace Asv.Mavlink
         
         Task ClearRoi(CancellationToken cancel);
 
+        
     }
 
     public class VehicleStatusMessage

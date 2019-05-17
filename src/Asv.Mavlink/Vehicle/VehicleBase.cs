@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -424,6 +425,42 @@ namespace Asv.Mavlink
         public Task GoToGlob(GeoPoint location, CancellationToken cancel, double? yawDeg = null)
         {
             return GoTo(location, MavFrame.MavFrameGlobalInt, cancel, yawDeg);
+        }
+
+        public async Task GoToGlobAndWait(GeoPoint location, IProgress<double> progress, double precision, CancellationToken cancel)
+        {
+            await GoToGlob(location, cancel);
+            progress = progress ?? new Progress<double>();
+            var startLocation = this.GpsLocation.Value;
+            var startDistance = Math.Abs(GeoMath.Distance(location, startLocation));
+
+            Logger.Info("GoToAndWait {0} with precision {2:F1} m. Distance to target {3:F1}", location, precision, startDistance);
+            progress.Report(0);
+            if (startDistance <= precision)
+            {
+                Logger.Debug("Already in target, nothing to do", startLocation);
+                progress.Report(1);
+                return;
+            }
+
+            var sw = new Stopwatch();
+            sw.Start();
+            Logger.Debug("Send command GoTo to vehicle", startLocation);
+            await this.GoToGlob(location, cancel).ConfigureAwait(false);
+            double dist = 0;
+            while (!cancel.IsCancellationRequested)
+            {
+                var loc = this.GpsLocation.Value;
+                dist = Math.Abs(GeoMath.Distance(location, loc));
+                var prog = 1 - dist / startDistance;
+                Logger.Trace("Distance to target {0:F1}, location: {1}, progress {2:P2}", dist, loc, prog);
+                progress.Report(prog);
+                if (dist <= precision) break;
+                await Task.Delay(TimeSpan.FromSeconds(1), cancel).ConfigureAwait(false);
+            }
+            sw.Stop();
+            Logger.Info($"Complete {sw.Elapsed:hh\\:mm\\:ss} location error {dist:F1} m");
+            progress.Report(1);
         }
 
         public virtual Task DoRtl(CancellationToken cancel)
