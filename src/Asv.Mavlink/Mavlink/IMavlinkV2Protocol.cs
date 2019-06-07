@@ -8,6 +8,10 @@ namespace Asv.Mavlink
     /// </summary>
     public interface IMavlinkV2Protocol:IDisposable
     {
+        int SystemId { get; }
+        int ComponentId { get; }
+        int TargetComponentId { get; }
+        int TargetSystemId { get; }
         IMavlinkTelemetry Rtt { get; }
         IMavlinkParameterMicroservice Params { get; }
         IMavlinkCommandMicroservice Commands { get; }

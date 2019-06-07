@@ -29,6 +29,10 @@ namespace Asv.Mavlink
         {
             if (connection == null) throw new ArgumentNullException(nameof(connection));
             if (config == null) throw new ArgumentNullException(nameof(config));
+            SystemId = config.SystemId;
+            ComponentId = config.ComponentId;
+            TargetComponentId = config.TargetComponentId;
+            TargetSystemId = config.TargetSystemId;
             _mavlinkConnection = connection;
             _rtt = new MavlinkTelemetry(_mavlinkConnection,new RawTelemetryConfig { ComponentId = config.ComponentId , SystemId = config.SystemId});
             _params = new MavlinkParameterMicroservice(_mavlinkConnection,new VehicleParameterProtocolConfig { ComponentId = config.ComponentId,  SystemId = config.SystemId, ReadWriteTimeoutMs = config.ReadParamTimeoutMs,TimeoutToReadAllParamsMs = config.TimeoutToReadAllParamsMs});
@@ -41,6 +45,10 @@ namespace Asv.Mavlink
 
         protected IMavlinkV2Connection Connection => _mavlinkConnection;
 
+        public int SystemId {get; }
+        public int ComponentId { get; }
+        public int TargetComponentId { get; }
+        public int TargetSystemId { get; }
         public IMavlinkTelemetry Rtt => _rtt;
         public IMavlinkParameterMicroservice Params => _params;
         public IMavlinkCommandMicroservice Commands => _mavlinkCommands;

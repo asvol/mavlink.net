@@ -35,7 +35,7 @@ namespace Asv.Mavlink
                 _subject.OnNext(value);
             }
         }
-
+        
         public void OnError(Exception error)
         {
             _subject.OnError(error);

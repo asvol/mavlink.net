@@ -18,7 +18,7 @@ namespace Asv.Mavlink
 
     public abstract class VehicleBase : IVehicle
     {
-        public static Logger Logger = LogManager.GetCurrentClassLogger();
+        public static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private AutopilotVersionPayload _autopilotVersion;
 
         private readonly IMavlinkV2Protocol _mavlink;
@@ -37,8 +37,12 @@ namespace Asv.Mavlink
 
         public IRxValue<int> PacketRateHz => _mavlink.Rtt.PacketRateHz;
 
+        public int SystemId => _mavlink.SystemId;
+        public int ComponentId => _mavlink.ComponentId;
+        public int TargetComponentId => _mavlink.TargetComponentId;
+        public int TargetSystemId => _mavlink.TargetSystemId;
 
-        
+
 
         public virtual void StartListen()
         {
@@ -62,6 +66,9 @@ namespace Asv.Mavlink
         #region Request init info
 
         private readonly RxValue<VehicleInitState> _initState = new RxValue<VehicleInitState>();
+
+       
+
         public IRxValue<VehicleInitState> InitState => _initState;
 
         private int _isRequestInfoIsInProgressOrAlreadySuccess;
@@ -74,6 +81,8 @@ namespace Asv.Mavlink
                 // only one time
                 .Subscribe(_ => Task.Factory.StartNew(TryToRequestData,TaskCreationOptions.LongRunning), DisposeCancel.Token);
         }
+
+
 
         private async void TryToRequestData()
         {
@@ -107,6 +116,7 @@ namespace Asv.Mavlink
 
         public virtual void Dispose()
         {
+            Logger.Trace("Dispose vehicle");
             if (Interlocked.CompareExchange(ref _isDisposed,1,0) == 1) return;
             DisposeCancel?.Cancel(false);
             DisposeCancel?.Dispose();
@@ -223,7 +233,9 @@ namespace Asv.Mavlink
 
         public virtual async Task SetRoi(GeoPoint location, CancellationToken cancel)
         {
+            Logger.Info($"=> SetRoi(location:{location.ToString()})");
             var res = await _mavlink.Commands.CommandLong(MavCmd.MavCmdDoSetRoi, (int)MavRoi.MavRoiLocation, 0, 0, 0, (float)location.Latitude, (float)location.Longitude, (float)location.Altitude, 3, CancellationToken.None);
+            Logger.Info($"<= SetRoi(location:{location.ToString()}): '{res.Result}'(porgress:{res.Progress};resultParam2:{res.ResultParam2})");
             ValidateCommandResult(res);
             _roi.OnNext(location);
         }
@@ -238,7 +250,9 @@ namespace Asv.Mavlink
 
         public virtual async Task ClearRoi(CancellationToken cancel)
         {
+            Logger.Info($"=> ClearRoi()");
             var res = await _mavlink.Commands.CommandLong(MavCmd.MavCmdDoSetRoiNone, (int)MavRoi.MavRoiLocation, 0, 0, 0, 0, 0, 0, 3, CancellationToken.None);
+            Logger.Info($"<= ClearRoi(): '{res.Result}'(porgress:{res.Progress};resultParam2:{res.ResultParam2})");
             ValidateCommandResult(res);
             _roi.OnNext(null);
         }
@@ -257,6 +271,7 @@ namespace Asv.Mavlink
             Observable.Timer(TimeSpan.FromSeconds(1),TimeSpan.FromSeconds(1)).Subscribe(CheckConnection,DisposeCancel.Token);
             _mavlink.Rtt.RawHeartbeat.Subscribe(_ =>
             {
+                if (DisposeCancel.IsCancellationRequested) return;
                 _lastHeartbeat = DateTime.Now;
                 _link.Upgrade();
             }, DisposeCancel.Token);
@@ -373,8 +388,9 @@ namespace Asv.Mavlink
         public virtual async Task ArmDisarm(bool isArming,CancellationToken cancel)
         {
             if (_isArmed.Value == isArming) return;
-
+            Logger.Info($"=> ArmDisarm(isArming:{isArming})");
             var result = await _mavlink.Commands.CommandLong(MavCmd.MavCmdComponentArmDisarm, isArming ? 1 : 0, float.NaN, float.NaN, float.NaN, float.NaN, float.NaN, float.NaN, 3, cancel);
+            Logger.Info($"=> ArmDisarm(isArming:{isArming}): '{result.Result}'(porgress:{result.Progress};resultParam2:{result.ResultParam2})");
             ValidateCommandResult(result);
             await WaitCompleteWithDefaultTimeout(() => _isArmed.Value, "Arm/Disarm", cancel);
         }
@@ -412,9 +428,11 @@ namespace Asv.Mavlink
 
         public virtual async Task TakeOff(double altitude, CancellationToken cancel)
         {
+            Logger.Info($"=> TakeOff(altitude:{altitude:F2})");
             await EnsureInGuidedMode(cancel);
             await ArmDisarm(true, cancel);
             var res = await _mavlink.Commands.CommandLong(MavCmd.MavCmdNavTakeoff, float.NaN, float.NaN, float.NaN, float.NaN, (float)_globGps.Value.Latitude, (float)_globGps.Value.Longitude, (float)altitude, 3, cancel);
+            Logger.Info($"<= TakeOff(altitude:{altitude:F2}): '{res.Result}'(porgress:{res.Progress};resultParam2:{res.ResultParam2})");
             ValidateCommandResult(res);
         }
 

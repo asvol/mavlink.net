@@ -16,6 +16,11 @@ namespace Asv.Mavlink
 
     public interface IVehicle:IDisposable
     {
+        int SystemId { get; }
+        int ComponentId { get; }
+        int TargetComponentId { get; }
+        int TargetSystemId { get; }
+
         IRxValue<VehicleInitState> InitState { get; }
 
         void StartListen();
