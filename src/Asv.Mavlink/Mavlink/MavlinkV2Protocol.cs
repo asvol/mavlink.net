@@ -7,8 +7,8 @@ namespace Asv.Mavlink
     {
         public byte SystemId { get; set; } = 254;
         public byte ComponentId { get; set; } = 254;
-        public byte TargetSystemId { get; } = 1;
-        public byte TargetComponentId { get; } = 1;
+        public byte TargetSystemId { get; set; } = 1;
+        public byte TargetComponentId { get; set; } = 1;
         public int CommandTimeoutMs { get; set; } = 5000;
         public int TimeoutToReadAllParamsMs { get; set; } = 10000;
         public int ReadParamTimeoutMs { get; set; } = 10000;
@@ -34,13 +34,13 @@ namespace Asv.Mavlink
             TargetComponentId = config.TargetComponentId;
             TargetSystemId = config.TargetSystemId;
             _mavlinkConnection = connection;
-            _rtt = new MavlinkTelemetry(_mavlinkConnection,new RawTelemetryConfig { ComponentId = config.ComponentId , SystemId = config.SystemId});
-            _params = new MavlinkParameterMicroservice(_mavlinkConnection,new VehicleParameterProtocolConfig { ComponentId = config.ComponentId,  SystemId = config.SystemId, ReadWriteTimeoutMs = config.ReadParamTimeoutMs,TimeoutToReadAllParamsMs = config.TimeoutToReadAllParamsMs});
-            _mavlinkCommands = new MavlinkCommandMicroservice(_mavlinkConnection,new CommandProtocolConfig { ComponentId = config.ComponentId,CommandTimeoutMs = config.CommandTimeoutMs,SystemId = config.SystemId});
+            _rtt = new MavlinkTelemetry(_mavlinkConnection,new RawTelemetryConfig {TargetSystemId  = config.TargetSystemId, TargetComponenId = config.TargetComponentId, ComponentId = config.ComponentId , SystemId = config.SystemId});
+            _params = new MavlinkParameterMicroservice(_mavlinkConnection,new VehicleParameterProtocolConfig { TargetSystemId = config.TargetSystemId, TargetComponenId = config.TargetComponentId, ComponentId = config.ComponentId,  SystemId = config.SystemId, ReadWriteTimeoutMs = config.ReadParamTimeoutMs,TimeoutToReadAllParamsMs = config.TimeoutToReadAllParamsMs});
+            _mavlinkCommands = new MavlinkCommandMicroservice(_mavlinkConnection,new CommandProtocolConfig { TargetSystemId = config.TargetSystemId, TargetComponenId = config.TargetComponentId, ComponentId = config.ComponentId,CommandTimeoutMs = config.CommandTimeoutMs,SystemId = config.SystemId});
             _mission = new MavlinkMissionMicroservice(_mavlinkConnection,
-                new VehicleMissionProtocolConfig {ComponentId = config.ComponentId, SystemId = config.SystemId});
-            _mavlinkOffboard = new MavlinkOffboardMode(_mavlinkConnection, new OffboardModeConfig { ComponentId = config.ComponentId,SystemId = config.SystemId});
-            _mode = new MavlinkCommon(_mavlinkConnection,new MicroserviceConfigBase { ComponentId = config.ComponentId, SystemId = config.SystemId});
+                new VehicleMissionProtocolConfig { TargetSystemId = config.TargetSystemId, TargetComponenId = config.TargetComponentId, ComponentId = config.ComponentId, SystemId = config.SystemId});
+            _mavlinkOffboard = new MavlinkOffboardMode(_mavlinkConnection, new OffboardModeConfig { TargetSystemId = config.TargetSystemId, TargetComponenId = config.TargetComponentId, ComponentId = config.ComponentId,SystemId = config.SystemId});
+            _mode = new MavlinkCommon(_mavlinkConnection,new MicroserviceConfigBase { TargetSystemId = config.TargetSystemId, TargetComponenId = config.TargetComponentId, ComponentId = config.ComponentId, SystemId = config.SystemId});
         }
 
         protected IMavlinkV2Connection Connection => _mavlinkConnection;

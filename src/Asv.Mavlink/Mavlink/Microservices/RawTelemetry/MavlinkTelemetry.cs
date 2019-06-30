@@ -10,8 +10,8 @@ namespace Asv.Mavlink
     {
         public byte SystemId { get; set; } = 254;
         public byte ComponentId { get; set; } = 254;
-        public byte TargetSystemId { get; } = 1;
-        public byte TargetComponenId { get; } = 1;
+        public byte TargetSystemId { get; set; } = 1;
+        public byte TargetComponenId { get; set; } = 1;
         
     }
 
