@@ -29,15 +29,17 @@ namespace Asv.Mavlink.Server
 
         public StatusTextLogger(IMavlinkV2Connection connection,IPacketSequenceCalculator seq,MavlinkServerIdentity identity, StatusTextLoggerConfig config)
         {
-            _logger.Debug($"Create status logger for [sys:{_identity.SystemId}, com:{_identity.ComponenId}] with send rate:{_config.MaxSendRateHz} Hz, buffer size: {_config.MaxQueueSize}");
-
             if (connection == null) throw new ArgumentNullException(nameof(connection));
             if (seq == null) throw new ArgumentNullException(nameof(seq));
             if (config == null) throw new ArgumentNullException(nameof(config));
+            
             _connection = connection;
             _seq = seq;
             _identity = identity;
             _config = config;
+
+            _logger.Debug($"Create status logger for [sys:{identity.SystemId}, com:{identity.ComponenId}] with send rate:{config.MaxSendRateHz} Hz, buffer size: {config.MaxQueueSize}");
+
             Observable.Timer(TimeSpan.FromSeconds(1.0 / _config.MaxSendRateHz),
                 TimeSpan.FromSeconds(1.0 / _config.MaxSendRateHz)).Subscribe(TrySend, _disposeCancel.Token);
         }
@@ -89,6 +91,7 @@ namespace Asv.Mavlink.Server
 
         public void Dispose()
         {
+            _disposeCancel?.Cancel(false);
             _disposeCancel?.Dispose();
         }
     }

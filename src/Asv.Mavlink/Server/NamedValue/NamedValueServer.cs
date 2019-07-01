@@ -5,7 +5,7 @@ using Asv.Mavlink.V2.Common;
 
 namespace Asv.Mavlink.Server
 {
-    public interface INamedValueServer
+    public interface INamedValueServer:IDisposable
     {
         Task SendFloat(string name, float value);
         Task SendInteger(string name, int value);
@@ -76,6 +76,11 @@ namespace Asv.Mavlink.Server
             return _connection.Send(packet, _disposableCancel.Token);
         }
 
+        public void Dispose()
+        {
+            _disposableCancel?.Cancel(false);
+            _disposableCancel?.Dispose();
+        }
     }
 
     

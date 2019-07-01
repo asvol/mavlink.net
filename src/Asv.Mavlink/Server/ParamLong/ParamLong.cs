@@ -10,9 +10,9 @@ using NLog;
 
 namespace Asv.Mavlink.Server
 {
-    public delegate Task<MavResult> CommandLongDelegate(float param1, float param2, float param3, float param4, float param5, float param6, float param7);
+    public delegate Task<MavResult> CommandLongDelegate(float param1, float param2, float param3, float param4, float param5, float param6, float param7,CancellationToken cancel);
 
-    public interface IParamLongServer
+    public interface ICommandLongServer:IDisposable
     {
         CommandLongDelegate this[MavCmd cmd] { set; }
     }
@@ -20,7 +20,7 @@ namespace Asv.Mavlink.Server
     
     
 
-    public class ParamLongServer: IParamLongServer
+    public class CommandLongServer: ICommandLongServer
     {
         private readonly IMavlinkV2Connection _connection;
         private readonly IPacketSequenceCalculator _seq;
@@ -30,7 +30,7 @@ namespace Asv.Mavlink.Server
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private int _isBusy;
 
-        public ParamLongServer(IMavlinkV2Connection connection, IPacketSequenceCalculator seq,MavlinkServerIdentity identity)
+        public CommandLongServer(IMavlinkV2Connection connection, IPacketSequenceCalculator seq,MavlinkServerIdentity identity)
         {
             _connection = connection;
             _seq = seq;
@@ -65,7 +65,7 @@ namespace Asv.Mavlink.Server
                 _logger.Info($"Command {obj.Payload.Command}(Param1:{obj.Payload.Param1},Param2:{obj.Payload.Param2},Param3:{obj.Payload.Param3},Param4:{obj.Payload.Param4},Param5:{obj.Payload.Param5},Param6:{obj.Payload.Param6},Param7:{obj.Payload.Param7})");
 
                 var result = await callback(obj.Payload.Param1, obj.Payload.Param2, obj.Payload.Param3,
-                    obj.Payload.Param4, obj.Payload.Param5, obj.Payload.Param6, obj.Payload.Param7);
+                    obj.Payload.Param4, obj.Payload.Param5, obj.Payload.Param6, obj.Payload.Param7,_disposeCancel.Token);
                 SafeSendCommandAck(obj.Payload.Command, result, obj.SystemId, obj.ComponenId);
                 
             }
@@ -114,5 +114,10 @@ namespace Asv.Mavlink.Server
         }
 
 
+        public void Dispose()
+        {
+            _disposeCancel?.Cancel(false);
+            _disposeCancel?.Dispose();
+        }
     }
 }

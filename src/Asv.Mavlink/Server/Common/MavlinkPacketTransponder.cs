@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using System.Threading;
 using Asv.Mavlink.V2.Common;
+using Nito.AsyncEx;
 using NLog;
 
 namespace Asv.Mavlink.Server
@@ -16,7 +17,7 @@ namespace Asv.Mavlink.Server
         private readonly object _sync = new object();
         private IDisposable _timerSubscribe;
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-        private readonly ReaderWriterLockSlim _dataLock = new ReaderWriterLockSlim();
+        private readonly AsyncReaderWriterLock _dataLock = new AsyncReaderWriterLock();
         private CancellationTokenSource _disposeCancellation = new CancellationTokenSource();
         private int _isSending;
         private readonly byte[] _payloadContent;
@@ -31,8 +32,8 @@ namespace Asv.Mavlink.Server
             _connection = connection;
             _identityConfig = identityConfig;
             _seq = seq;
-            _payloadContent = new byte[new TPacket().Payload.GetMaxByteSize()];
-            _payloadSize = 0;
+            _payloadContent = new byte[new TPacket().Payload.GetMaxByteSize()+1];
+            _payloadSize = new TPacket().Payload.GetMaxByteSize();
         }
 
         public void Start(TimeSpan rate)
@@ -57,9 +58,12 @@ namespace Asv.Mavlink.Server
                 LogSkipped();
                 return;
             }
+
+            IDisposable dispose = null;
             try
             {
-                _dataLock.EnterReadLock();
+
+                dispose = await _dataLock.ReaderLockAsync();
                 var packet = new HeartbeatPacket
                 {
                     CompatFlags = 0,
@@ -79,7 +83,7 @@ namespace Asv.Mavlink.Server
             }
             finally
             {
-                _dataLock.ExitReadLock();
+                dispose?.Dispose();
                 Interlocked.Exchange(ref _isSending, 0);
             }
         }
@@ -94,7 +98,7 @@ namespace Asv.Mavlink.Server
         private void LogSuccess()
         {
             if (_state.Value == PacketTransponderState.Ok) return;
-            _state.OnNext(PacketTransponderState.ErrorToSend);
+            _state.OnNext(PacketTransponderState.Ok);
             _logger.Debug($"{new TPacket().Name} start stream");
         }
 
@@ -121,9 +125,10 @@ namespace Asv.Mavlink.Server
 
         public void Set(Action<TPayload> changeCallback)
         {
+            IDisposable locker = null;
             try
             {
-                _dataLock.EnterWriteLock();
+                locker = _dataLock.WriterLock();
                 var payload = new TPayload();
                 changeCallback(payload);
                 _payloadSize = payload.Serialize(_payloadContent, 0);
@@ -134,7 +139,7 @@ namespace Asv.Mavlink.Server
             }
             finally
             {
-                _dataLock.ExitWriteLock();
+                locker?.Dispose();
             }
         }
 

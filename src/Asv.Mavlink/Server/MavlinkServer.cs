@@ -1,11 +1,13 @@
-﻿namespace Asv.Mavlink.Server
+﻿using System;
+
+namespace Asv.Mavlink.Server
 {
-    public interface IMavlinkServer
+    public interface IMavlinkServer:IDisposable
     {
         IMavlinkHeartbeatServer Heartbeat { get; }
         IStatusTextLogger StatusText { get; }
         INamedValueServer NamedValue { get; }
-        IParamLongServer ParamLong { get; }
+        ICommandLongServer CommandLong { get; }
     }
 
     public class MavlinkServerBase:IMavlinkServer
@@ -24,12 +26,17 @@
                 MaxSendRateHz = 10
             });
             NamedValue = new NamedValueServer(connection,_seq,identity);
-            ParamLong = new ParamLongServer(connection,_seq,identity);
+            CommandLong = new CommandLongServer(connection,_seq,identity);
         }
 
         public IMavlinkHeartbeatServer Heartbeat { get; }
         public IStatusTextLogger StatusText { get; }
         public INamedValueServer NamedValue { get; }
-        public IParamLongServer ParamLong { get; }
+        public ICommandLongServer CommandLong { get; }
+
+        public void Dispose()
+        {
+            StatusText?.Dispose();
+        }
     }
 }
