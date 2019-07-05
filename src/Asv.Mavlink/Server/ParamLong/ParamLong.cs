@@ -10,7 +10,20 @@ using NLog;
 
 namespace Asv.Mavlink.Server
 {
-    public delegate Task<MavResult> CommandLongDelegate(float param1, float param2, float param3, float param4, float param5, float param6, float param7,CancellationToken cancel);
+    public class CommandLongResult
+    {
+        public CommandLongResult(MavResult resultCode, int resultValue = 0)
+        {
+            ResultCode = resultCode;
+            ResultValue = resultValue;
+        }
+
+        public MavResult ResultCode { get; }
+        public int ResultValue { get; }
+    }
+
+
+    public delegate Task<CommandLongResult> CommandLongDelegate(float param1, float param2, float param3, float param4, float param5, float param6, float param7, CancellationToken cancel);
 
     public interface ICommandLongServer:IDisposable
     {
@@ -65,8 +78,8 @@ namespace Asv.Mavlink.Server
                 _logger.Info($"Command {obj.Payload.Command}(Param1:{obj.Payload.Param1},Param2:{obj.Payload.Param2},Param3:{obj.Payload.Param3},Param4:{obj.Payload.Param4},Param5:{obj.Payload.Param5},Param6:{obj.Payload.Param6},Param7:{obj.Payload.Param7})");
 
                 var result = await callback(obj.Payload.Param1, obj.Payload.Param2, obj.Payload.Param3,
-                    obj.Payload.Param4, obj.Payload.Param5, obj.Payload.Param6, obj.Payload.Param7,_disposeCancel.Token);
-                SafeSendCommandAck(obj.Payload.Command, result, obj.SystemId, obj.ComponenId);
+                    obj.Payload.Param4, obj.Payload.Param5, obj.Payload.Param6, obj.Payload.Param7, _disposeCancel.Token);
+                SafeSendCommandAck(obj.Payload.Command, result.ResultCode, obj.SystemId, obj.ComponenId,result.ResultValue);
                 
             }
             catch (Exception e)
@@ -82,7 +95,7 @@ namespace Asv.Mavlink.Server
             }
         }
 
-        private void SafeSendCommandAck(MavCmd cmd, MavResult result, byte systemId, byte componenId)
+        private void SafeSendCommandAck(MavCmd cmd, MavResult result, byte systemId, byte componenId, int resultParam2 = 0)
         {
             try
             {
@@ -97,6 +110,7 @@ namespace Asv.Mavlink.Server
                     {
                         Command = cmd,
                         Result = result,
+                        ResultParam2 = resultParam2,
                         TargetSystem = systemId,
                         TargetComponent = componenId
                     }

@@ -99,6 +99,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client\NamedValues\IMavlinkNamedValues.cs" />
     <Compile Include="Connection\Dialects\ardupilotmega.cs" />
     <Compile Include="Connection\Dialects\DataTypes.cs" />
     <Compile Include="Connection\Dialects\icarous.cs" />
@@ -126,24 +127,24 @@
     <Compile Include="Tools\GeoMath\GeoPoint.cs" />
     <Compile Include="Tools\RxValue\CancellationWrapper.cs" />
     <Compile Include="Tools\StringExtensions.cs" />
-    <Compile Include="Client\Vehicle\GpsInfo.cs" />
-    <Compile Include="Client\Vehicle\IVehicle.cs" />
-    <Compile Include="Client\Vehicle\Ardupilot\VehicleArdupilot.cs" />
-    <Compile Include="Client\Vehicle\Px4\VehiclePx4.cs" />
+    <Compile Include="Vehicle\GpsInfo.cs" />
+    <Compile Include="Vehicle\IVehicle.cs" />
+    <Compile Include="Vehicle\Ardupilot\VehicleArdupilot.cs" />
+    <Compile Include="Vehicle\Px4\VehiclePx4.cs" />
     <Compile Include="Connection\IDataStream.cs" />
     <Compile Include="Connection\IMavlinkV2Connection.cs" />
-    <Compile Include="Client\Microservices\Custom\IMavlinkCommon.cs" />
-    <Compile Include="Client\Microservices\Commands\MavlinkCommandMicroservice.cs" />
-    <Compile Include="Client\Microservices\Commands\IMavlinkCommandMicroservice.cs" />
+    <Compile Include="Client\Custom\IMavlinkCommon.cs" />
+    <Compile Include="Client\Commands\MavlinkCommandMicroservice.cs" />
+    <Compile Include="Client\Commands\IMavlinkCommandMicroservice.cs" />
     <Compile Include="Client\Microservices\MicroserviceConfigBase.cs" />
-    <Compile Include="Client\Microservices\Missions\IMavlinkMissionMicroservice.cs" />
-    <Compile Include="Client\Microservices\Missions\MavlinkMissionMicroservice.cs" />
-    <Compile Include="Client\Microservices\Offboard\IMavlinkOffboardMode.cs" />
-    <Compile Include="Client\Microservices\Offboard\MavlinkOffboardMode.cs" />
-    <Compile Include="Client\Microservices\Params\MavlinkParameterMicroservice.cs" />
-    <Compile Include="Client\Microservices\RawTelemetry\IMavlinkTelemetry.cs" />
-    <Compile Include="Client\Microservices\Params\MavParam.cs" />
-    <Compile Include="Client\Microservices\Params\IMavlinkParameterMicroservice.cs" />
+    <Compile Include="Client\Missions\IMavlinkMissionMicroservice.cs" />
+    <Compile Include="Client\Missions\MavlinkMissionMicroservice.cs" />
+    <Compile Include="Client\Offboard\IMavlinkOffboardMode.cs" />
+    <Compile Include="Client\Offboard\MavlinkOffboardMode.cs" />
+    <Compile Include="Client\Params\MavlinkParameterMicroservice.cs" />
+    <Compile Include="Client\RawTelemetry\IMavlinkTelemetry.cs" />
+    <Compile Include="Client\Params\MavParam.cs" />
+    <Compile Include="Client\Params\IMavlinkParameterMicroservice.cs" />
     <Compile Include="Gcs\PortManager\PortManager.cs" />
     <Compile Include="Gcs\PortManager\Port\IPort.cs" />
     <Compile Include="Client\IMavlinkClient.cs" />
@@ -180,13 +181,13 @@
     <Compile Include="Tools\SingleThreadTaskScheduler.cs" />
     <Compile Include="Gcs\PortManager\Port\PortBase.cs" />
     <Compile Include="Gcs\PortManager\Port\Udp\UdpPort.cs" />
-    <Compile Include="Client\Vehicle\Px4\IVehiclePx4.cs" />
-    <Compile Include="Client\Vehicle\Px4\PxModeMap.cs" />
-    <Compile Include="Client\Microservices\RawTelemetry\MavlinkTelemetry.cs" />
-    <Compile Include="Client\Microservices\Custom\MavlinkCommon.cs" />
+    <Compile Include="Vehicle\Px4\IVehiclePx4.cs" />
+    <Compile Include="Vehicle\Px4\PxModeMap.cs" />
+    <Compile Include="Client\RawTelemetry\MavlinkTelemetry.cs" />
+    <Compile Include="Client\Custom\MavlinkCommon.cs" />
     <Compile Include="Client\MavlinkClient.cs" />
-    <Compile Include="Client\Microservices\Commands\VehicleDoRepositionHelper.cs" />
-    <Compile Include="Client\Vehicle\VehicleBase.cs" />
+    <Compile Include="Client\Commands\VehicleDoRepositionHelper.cs" />
+    <Compile Include="Vehicle\VehicleBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Connection\Frames\v1\" />

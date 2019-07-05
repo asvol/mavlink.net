@@ -15,5 +15,6 @@ namespace Asv.Mavlink
         IMavlinkMissionMicroservice Mission { get; }
         IMavlinkOffboardMode Offboard { get; }
         IMavlinkCommon Common { get; }
+        IMavlinkNamedValues NamedValues { get; }
     }
 }

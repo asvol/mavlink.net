@@ -1,4 +1,5 @@
 ﻿using System;
+using Asv.Mavlink.Server;
 using NLog;
 
 namespace Asv.Mavlink
@@ -28,7 +29,8 @@ namespace Asv.Mavlink
         private readonly MavlinkMissionMicroservice _mission;
         private readonly MavlinkOffboardMode _mavlinkOffboard;
         private readonly MavlinkCommon _mode;
-        
+        private readonly NamedValueClient _namedValues;
+
         public MavlinkClient(IMavlinkV2Connection connection, MavlinkClientIdentity identity, MavlinkClientConfig config)
         {
             if (connection == null) throw new ArgumentNullException(nameof(connection));
@@ -41,6 +43,7 @@ namespace Asv.Mavlink
             _mission = new MavlinkMissionMicroservice(_mavlinkConnection,identity);
             _mavlinkOffboard = new MavlinkOffboardMode(_mavlinkConnection,identity);
             _mode = new MavlinkCommon(_mavlinkConnection,identity);
+            _namedValues = new NamedValueClient(_mavlinkConnection, identity);
         }
 
         protected IMavlinkV2Connection Connection => _mavlinkConnection;
@@ -51,6 +54,7 @@ namespace Asv.Mavlink
         public IMavlinkMissionMicroservice Mission => _mission;
         public IMavlinkOffboardMode Offboard => _mavlinkOffboard;
         public IMavlinkCommon Common => _mode;
+        public IMavlinkNamedValues NamedValues => _namedValues;
 
         public bool IsDisposed { get; private set; }
 
@@ -66,6 +70,7 @@ namespace Asv.Mavlink
                 _mission.Dispose();
                 _mavlinkOffboard?.Dispose();
                 _mode?.Dispose();
+                _namedValues?.Dispose();
             }
             catch (Exception e)
             {
