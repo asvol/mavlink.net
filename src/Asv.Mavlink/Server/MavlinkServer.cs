@@ -5,7 +5,7 @@ namespace Asv.Mavlink.Server
     public interface IMavlinkServer:IDisposable
     {
         IMavlinkHeartbeatServer Heartbeat { get; }
-        IStatusTextLogger StatusText { get; }
+        IStatusTextServer StatusText { get; }
         INamedValueServer NamedValue { get; }
         ICommandLongServer CommandLong { get; }
     }
@@ -20,7 +20,7 @@ namespace Asv.Mavlink.Server
             {
                 HeartbeatRateMs = 1000
             });
-            StatusText = new StatusTextLogger(connection,_seq, identity,new StatusTextLoggerConfig
+            StatusText = new StatusTextServer(connection,_seq, identity,new StatusTextLoggerConfig
             {
                 MaxQueueSize = 100,
                 MaxSendRateHz = 10
@@ -30,7 +30,7 @@ namespace Asv.Mavlink.Server
         }
 
         public IMavlinkHeartbeatServer Heartbeat { get; }
-        public IStatusTextLogger StatusText { get; }
+        public IStatusTextServer StatusText { get; }
         public INamedValueServer NamedValue { get; }
         public ICommandLongServer CommandLong { get; }
 

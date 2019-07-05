@@ -119,9 +119,9 @@
     <Compile Include="Server\Common\MavlinkServerIdentity.cs" />
     <Compile Include="Server\MavlinkServer.cs" />
     <Compile Include="Server\NamedValue\NamedValueServer.cs" />
-    <Compile Include="Server\ParamLong\ParamLong.cs" />
-    <Compile Include="Server\StatusText\IStatusTextLogger.cs" />
-    <Compile Include="Server\StatusText\StatusTextLogger.cs" />
+    <Compile Include="Server\CommandLong\CommandLong.cs" />
+    <Compile Include="Server\StatusText\IStatusTextServer.cs" />
+    <Compile Include="Server\StatusText\StatusTextServer.cs" />
     <Compile Include="Tools\GeoMath\Extension.cs" />
     <Compile Include="Tools\GeoMath\GeoMath.cs" />
     <Compile Include="Tools\GeoMath\GeoPoint.cs" />
@@ -191,6 +191,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Connection\Frames\v1\" />
+    <Folder Include="Server\ParamsExt\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="RS.ru.resx">

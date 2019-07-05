@@ -10,16 +10,22 @@ namespace Asv.Mavlink.Server
 
     public class MavlinkHeartbeatServer: IMavlinkHeartbeatServer,IDisposable
     {
+        private readonly MavlinkHeartbeatServerConfig _config;
         private readonly MavlinkPacketTransponder<HeartbeatPacket, HeartbeatPayload> _transponder;
         public MavlinkHeartbeatServer(IMavlinkV2Connection connection, IPacketSequenceCalculator seq, MavlinkServerIdentity identity, MavlinkHeartbeatServerConfig config)
         {
+            _config = config;
             _transponder = new MavlinkPacketTransponder<HeartbeatPacket,HeartbeatPayload>(connection, identity, seq);
-            _transponder.Start(TimeSpan.FromMilliseconds(config.HeartbeatRateMs));
         }
 
         public void Set(Action<HeartbeatPayload> changeCallback)
         {
             _transponder.Set(changeCallback);
+        }
+
+        public void Start()
+        {
+            _transponder.Start(TimeSpan.FromMilliseconds(_config.HeartbeatRateMs));
         }
 
 

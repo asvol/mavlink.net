@@ -30,9 +30,6 @@ namespace Asv.Mavlink.Server
         CommandLongDelegate this[MavCmd cmd] { set; }
     }
 
-    
-    
-
     public class CommandLongServer: ICommandLongServer
     {
         private readonly IMavlinkV2Connection _connection;

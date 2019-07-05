@@ -15,7 +15,7 @@ namespace Asv.Mavlink.Server
         public int MaxSendRateHz { get; set; } = 10;
     }
 
-    public class StatusTextLogger : IDisposable, IStatusTextLogger
+    public class StatusTextServer : IDisposable, IStatusTextServer
     {
         private readonly int _maxMessageSize = new StatustextPayload().Text.Length;
         private readonly IMavlinkV2Connection _connection;
@@ -27,7 +27,7 @@ namespace Asv.Mavlink.Server
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private int _isSending;
 
-        public StatusTextLogger(IMavlinkV2Connection connection,IPacketSequenceCalculator seq,MavlinkServerIdentity identity, StatusTextLoggerConfig config)
+        public StatusTextServer(IMavlinkV2Connection connection,IPacketSequenceCalculator seq,MavlinkServerIdentity identity, StatusTextLoggerConfig config)
         {
             if (connection == null) throw new ArgumentNullException(nameof(connection));
             if (seq == null) throw new ArgumentNullException(nameof(seq));
