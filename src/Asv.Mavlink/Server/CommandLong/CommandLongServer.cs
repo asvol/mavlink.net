@@ -1,35 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Asv.Mavlink.V2.Common;
 using NLog;
 
 namespace Asv.Mavlink.Server
 {
-    public class CommandLongResult
-    {
-        public CommandLongResult(MavResult resultCode, int resultValue = 0)
-        {
-            ResultCode = resultCode;
-            ResultValue = resultValue;
-        }
-
-        public MavResult ResultCode { get; }
-        public int ResultValue { get; }
-    }
-
-
-    public delegate Task<CommandLongResult> CommandLongDelegate(float param1, float param2, float param3, float param4, float param5, float param6, float param7, CancellationToken cancel);
-
-    public interface ICommandLongServer:IDisposable
-    {
-        CommandLongDelegate this[MavCmd cmd] { set; }
-    }
-
     public class CommandLongServer: ICommandLongServer
     {
         private readonly IMavlinkV2Connection _connection;
@@ -88,7 +66,7 @@ namespace Asv.Mavlink.Server
             }
             finally
             {
-                Interlocked.Exchange(ref _isBusy, 1);
+                Interlocked.Exchange(ref _isBusy, 0);
             }
         }
 

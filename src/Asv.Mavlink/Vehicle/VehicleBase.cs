@@ -35,7 +35,7 @@ namespace Asv.Mavlink
             _config = config;
         }
 
-        public IRxValue<int> PacketRateHz => _mavlink.Rtt.PacketRateHz;
+        public IRxValue<int> PacketRateHz => _mavlink.Heartbeat.PacketRateHz;
 
       
 
@@ -45,7 +45,6 @@ namespace Asv.Mavlink
         {
             InitRequestVehicleInfo();
             InitAttitude();
-            InitLink();
             InitRoi();
             InitGps();
             InitHome();
@@ -73,8 +72,8 @@ namespace Asv.Mavlink
         private void InitRequestVehicleInfo()
         {
             _initState.OnNext(VehicleInitState.WaitConnection);
-            _link.DistinctUntilChanged().Where(_ => _ == LinkState.Disconnected).Subscribe(_ => _needToRequestAgain = true,DisposeCancel.Token);
-            _link.DistinctUntilChanged().Where(_ => _needToRequestAgain).Where(_ => _ == LinkState.Connected)
+            Link.DistinctUntilChanged().Where(_ => _ == LinkState.Disconnected).Subscribe(_ => _needToRequestAgain = true,DisposeCancel.Token);
+            Link.DistinctUntilChanged().Where(_ => _needToRequestAgain).Where(_ => _ == LinkState.Connected)
                 // only one time
                 .Subscribe(_ => Task.Factory.StartNew(TryToRequestData,TaskCreationOptions.LongRunning), DisposeCancel.Token);
         }
@@ -159,7 +158,7 @@ namespace Asv.Mavlink
 
         private void InitMode()
         {
-            _mavlink.Rtt.RawHeartbeat.Select(InterpretateMode).Subscribe(_mode, DisposeCancel.Token);
+            _mavlink.Heartbeat.RawHeartbeat.Select(InterpretateMode).Subscribe(_mode, DisposeCancel.Token);
             DisposeCancel.Token.Register(() => _dropRateComm.Dispose());
         }
 
@@ -259,29 +258,7 @@ namespace Asv.Mavlink
 
         #region Link
 
-        private DateTime _lastHeartbeat;
-        private readonly LinkIndicator _link = new LinkIndicator(3);
-        public IRxValue<LinkState> Link => _link;
-
-        private void InitLink()
-        {
-            Observable.Timer(TimeSpan.FromSeconds(1),TimeSpan.FromSeconds(1)).Subscribe(CheckConnection,DisposeCancel.Token);
-            _mavlink.Rtt.RawHeartbeat.Subscribe(_ =>
-            {
-                if (DisposeCancel.IsCancellationRequested) return;
-                _lastHeartbeat = DateTime.Now;
-                _link.Upgrade();
-            }, DisposeCancel.Token);
-            DisposeCancel.Token.Register(() => _link.Dispose());
-        }
-
-        private void CheckConnection(long value)
-        {
-            if (DateTime.Now - _lastHeartbeat > TimeSpan.FromMilliseconds(_config.HeartbeatTimeoutMs))
-            {
-                _link.Downgrade();
-            }
-        }
+        public IRxValue<LinkState> Link => _mavlink.Heartbeat.Link;
 
         #endregion
 
@@ -378,7 +355,7 @@ namespace Asv.Mavlink
             _isArmed.DistinctUntilChanged().Where(_ => _isArmed.Value).Subscribe(_ => Interlocked.Exchange(ref _lastArmedTime,DateTime.Now.ToBinary()) ,DisposeCancel.Token);
             DisposeCancel.Token.Register(() => timer.Dispose());
 
-            _mavlink.Rtt.RawHeartbeat.Select(_ => _.BaseMode.HasFlag(MavModeFlag.MavModeFlagSafetyArmed)).Subscribe(_isArmed, DisposeCancel.Token);
+            _mavlink.Heartbeat.RawHeartbeat.Select(_ => _.BaseMode.HasFlag(MavModeFlag.MavModeFlagSafetyArmed)).Subscribe(_isArmed, DisposeCancel.Token);
             DisposeCancel.Token.Register(() => _isArmed.Dispose());
         }
 

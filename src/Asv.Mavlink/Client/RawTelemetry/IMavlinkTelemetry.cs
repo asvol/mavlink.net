@@ -4,9 +4,6 @@ namespace Asv.Mavlink
 {
     public interface IMavlinkTelemetry
     {
-
-        IRxValue<int> PacketRateHz { get; }
-        IRxValue<HeartbeatPayload> RawHeartbeat { get; }
         IRxValue<SysStatusPayload> RawSysStatus { get; }
         IRxValue<GpsRawIntPayload> RawGpsRawInt { get; }
         IRxValue<HighresImuPayload> RawHighresImu { get; }
@@ -18,5 +15,7 @@ namespace Asv.Mavlink
         IRxValue<HomePositionPayload> RawHome { get; }
         IRxValue<StatustextPayload> RawStatusText { get; }
         IRxValue<GlobalPositionIntPayload> RawGlobalPositionInt { get; }
+        
+        
     }
 }

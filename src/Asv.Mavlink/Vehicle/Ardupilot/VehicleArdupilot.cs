@@ -22,9 +22,6 @@ namespace Asv.Mavlink
     }
 
 
-
-
-
     public class VehicleArdupilot : VehicleBase
     {
         private readonly IMavlinkClient _mavlink;
@@ -48,7 +45,7 @@ namespace Asv.Mavlink
 
         private void InitFirmware()
         {
-            _mavlink.Rtt.RawHeartbeat.Select(SelectFirmware).Subscribe(_firmware, DisposeCancel.Token);
+            _mavlink.Heartbeat.RawHeartbeat.Select(SelectFirmware).Subscribe(_firmware, DisposeCancel.Token);
         }
 
         private FirmwareType SelectFirmware(HeartbeatPayload heartbeatPayload)
@@ -137,8 +134,8 @@ namespace Asv.Mavlink
         protected override  Task<bool> CheckGuidedMode(CancellationToken cancel)
         {
             return Task.FromResult(
-                _mavlink.Rtt.RawHeartbeat.Value.BaseMode.HasFlag(MavModeFlag.MavModeFlagCustomModeEnabled) &&
-                _mavlink.Rtt.RawHeartbeat.Value.CustomMode == 4);
+                _mavlink.Heartbeat.RawHeartbeat.Value.BaseMode.HasFlag(MavModeFlag.MavModeFlagCustomModeEnabled) &&
+                _mavlink.Heartbeat.RawHeartbeat.Value.CustomMode == 4);
         }
 
         protected override async Task EnsureInGuidedMode(CancellationToken cancel)
@@ -159,7 +156,7 @@ namespace Asv.Mavlink
             _roi.OnNext(location);
             try
             {
-                // just send, because AEDUPILOT does not send mavcmd ack
+                // just send, because ARDUPILOT does not send mavcmd ack
                 await _mavlink.Commands.SendCommandLong(MavCmd.MavCmdDoSetRoiLocation, 0, 0, 0, 0, 0, 0, 0, 1, CancellationToken.None);
                 await _mavlink.Commands.SendCommandLong(MavCmd.MavCmdDoSetRoi, (int)MavRoi.MavRoiLocation, 0, 0, 0, (float)location.Latitude, (float)location.Longitude, (float)location.Altitude, 3, CancellationToken.None);
             }

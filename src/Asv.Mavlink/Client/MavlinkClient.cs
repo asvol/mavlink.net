@@ -1,4 +1,5 @@
 ﻿using System;
+using Asv.Mavlink.Client;
 using Asv.Mavlink.Server;
 using NLog;
 
@@ -30,6 +31,7 @@ namespace Asv.Mavlink
         private readonly MavlinkOffboardMode _mavlinkOffboard;
         private readonly MavlinkCommon _mode;
         private readonly NamedValueClient _namedValues;
+        private readonly HeartbeatClient _heartbeat;
 
         public MavlinkClient(IMavlinkV2Connection connection, MavlinkClientIdentity identity, MavlinkClientConfig config)
         {
@@ -44,17 +46,19 @@ namespace Asv.Mavlink
             _mavlinkOffboard = new MavlinkOffboardMode(_mavlinkConnection,identity);
             _mode = new MavlinkCommon(_mavlinkConnection,identity);
             _namedValues = new NamedValueClient(_mavlinkConnection, identity);
+            _heartbeat = new HeartbeatClient(_mavlinkConnection,identity);
         }
 
         protected IMavlinkV2Connection Connection => _mavlinkConnection;
         public MavlinkClientIdentity Identity { get; }
+        public IHeartbeatClient Heartbeat => _heartbeat;
         public IMavlinkTelemetry Rtt => _rtt;
         public IMavlinkParameterMicroservice Params => _params;
         public IMavlinkCommandMicroservice Commands => _mavlinkCommands;
         public IMavlinkMissionMicroservice Mission => _mission;
         public IMavlinkOffboardMode Offboard => _mavlinkOffboard;
         public IMavlinkCommon Common => _mode;
-        public IMavlinkNamedValues NamedValues => _namedValues;
+        public IDebugClient Debug => _namedValues;
 
         public bool IsDisposed { get; private set; }
 
@@ -70,6 +74,7 @@ namespace Asv.Mavlink
                 _mission.Dispose();
                 _mavlinkOffboard?.Dispose();
                 _mode?.Dispose();
+                _heartbeat?.Dispose();
                 _namedValues?.Dispose();
             }
             catch (Exception e)

@@ -1,4 +1,5 @@
 ﻿using System;
+using Asv.Mavlink.Client;
 
 namespace Asv.Mavlink
 {
@@ -9,12 +10,13 @@ namespace Asv.Mavlink
     public interface IMavlinkClient:IDisposable
     {
         MavlinkClientIdentity Identity { get; }
+        IHeartbeatClient Heartbeat { get; }
         IMavlinkTelemetry Rtt { get; }
         IMavlinkParameterMicroservice Params { get; }
         IMavlinkCommandMicroservice Commands { get; }
         IMavlinkMissionMicroservice Mission { get; }
         IMavlinkOffboardMode Offboard { get; }
         IMavlinkCommon Common { get; }
-        IMavlinkNamedValues NamedValues { get; }
+        IDebugClient Debug { get; }
     }
 }

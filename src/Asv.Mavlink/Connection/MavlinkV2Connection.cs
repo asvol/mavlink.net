@@ -16,9 +16,16 @@ namespace Asv.Mavlink
         private long _rxPackets;
         private long _skipPackets;
 
-        public MavlinkV2Connection(string connectionString, Action<IPacketDecoder<IPacketV2<IPayload>>> register):this(PortFactory.Create(connectionString),register)
+        public MavlinkV2Connection(string connectionString, Action<IPacketDecoder<IPacketV2<IPayload>>> register):this(ConnectionStringConvert(connectionString),register)
         {
 
+        }
+
+        private static IDataStream ConnectionStringConvert(string connString)
+        {
+            var p =PortFactory.Create(connString);
+            p.Enable();
+            return p;
         }
 
         public MavlinkV2Connection(IDataStream dataStream, Action<IPacketDecoder<IPacketV2<IPayload>>> register)

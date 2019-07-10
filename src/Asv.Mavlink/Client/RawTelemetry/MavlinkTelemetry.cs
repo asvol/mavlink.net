@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
+using Asv.Mavlink.Client;
 using Asv.Mavlink.V2.Common;
 
 namespace Asv.Mavlink
@@ -11,7 +12,7 @@ namespace Asv.Mavlink
     public class MavlinkTelemetry : IMavlinkTelemetry,IDisposable
     {
         private readonly MavlinkClientIdentity _config;
-        private readonly RxValue<HeartbeatPayload> _heartBeat = new RxValue<HeartbeatPayload>();
+        
         private readonly RxValue<SysStatusPayload> _sysStatus = new RxValue<SysStatusPayload>();
         private readonly RxValue<GpsRawIntPayload> _gpsRawInt = new RxValue<GpsRawIntPayload>();
         private readonly RxValue<HighresImuPayload> _highresImu = new RxValue<HighresImuPayload>();
@@ -23,18 +24,19 @@ namespace Asv.Mavlink
         private readonly RxValue<HomePositionPayload> _home = new RxValue<HomePositionPayload>();
         private readonly RxValue<StatustextPayload> _statusText = new RxValue<StatustextPayload>();
         private readonly RxValue<GlobalPositionIntPayload> _globalPositionInt = new RxValue<GlobalPositionIntPayload>();
+        
+
         private readonly IObservable<IPacketV2<IPayload>> _inputPackets;
         private readonly CancellationTokenSource _disposeCancel = new CancellationTokenSource();
 
-        private readonly RxValue<int> _packetRate = new RxValue<int>();
+        
+        
 
         public MavlinkTelemetry(IMavlinkV2Connection connection, MavlinkClientIdentity config)
         {
             _config = config;
-            _inputPackets = connection.Where(FilterVehicle);
+            _inputPackets = connection.FilterVehicle(config);
 
-            HandleStatistic();
-            HandleHeartbeat(config);
             HandleSystemStatus();
             HandleGps();
             HandleHighresImu();
@@ -46,12 +48,7 @@ namespace Asv.Mavlink
             HandleHome();
             HandleGlobalPositionInt();
         }
-
-       
-
-
-        public IRxValue<int> PacketRateHz => _packetRate;
-        public IRxValue<HeartbeatPayload> RawHeartbeat => _heartBeat;
+        
         public IRxValue<SysStatusPayload> RawSysStatus => _sysStatus;
         public IRxValue<GpsRawIntPayload> RawGpsRawInt => _gpsRawInt;
         public IRxValue<HighresImuPayload> RawHighresImu => _highresImu;
@@ -63,6 +60,7 @@ namespace Asv.Mavlink
         public IRxValue<HomePositionPayload> RawHome => _home;
         public IRxValue<StatustextPayload> RawStatusText => _statusText;
         public IRxValue<GlobalPositionIntPayload> RawGlobalPositionInt => _globalPositionInt;
+        
 
         private void HandleGlobalPositionInt()
         {
@@ -172,37 +170,6 @@ namespace Asv.Mavlink
 
             _disposeCancel.Token.Register(() => _sysStatus.Dispose());
             _disposeCancel.Token.Register(() => _statusText.Dispose());
-        }
-
-
-       
-
-        private void HandleStatistic()
-        {
-            _inputPackets
-                .Select(_ => 1)
-                .Buffer(TimeSpan.FromSeconds(1))
-                .Select(_ => _.Sum()).Subscribe(_packetRate, _disposeCancel.Token);
-            _disposeCancel.Token.Register(() => _packetRate.Dispose());
-        }
-
-        private void HandleHeartbeat(MavlinkClientIdentity config)
-        {
-            _inputPackets
-                .Where(_ => _.MessageId == HeartbeatPacket.PacketMessageId)
-                .Cast<HeartbeatPacket>()
-                .Select(_=>_.Payload)
-                .Subscribe(_heartBeat, _disposeCancel.Token);
-            _disposeCancel.Token.Register(() => _heartBeat.Dispose());
-        }
-
-
-
-        private bool FilterVehicle(IPacketV2<IPayload> packetV2)
-        {
-            if (_config.TargetSystemId != 0 && _config.TargetSystemId != packetV2.SystemId) return false;
-            if (_config.TargetComponentId != 0 && _config.TargetComponentId != packetV2.ComponenId) return false;
-            return true;
         }
 
         public void Dispose()

@@ -48,23 +48,28 @@ namespace Asv.Mavlink.Server
         {
             if (Interlocked.CompareExchange(ref _isSending,1,0) == 1) return;
 
-            KeyValuePair<MavSeverity, string> res;
-            if (!_messageQueue.TryDequeue(out res)) return;
-
             try
             {
-                await _connection.Send(new StatustextLongPacket
+                KeyValuePair<MavSeverity, string> res;
+                if (_messageQueue.TryDequeue(out res))
                 {
-                    ComponenId = _identity.ComponenId,
-                    SystemId = _identity.SystemId,
-                    CompatFlags = 0,
-                    IncompatFlags = 0,
-                    Sequence = _seq.GetNextSequenceNumber(),
-                }, _disposeCancel.Token);
+                    await _connection.Send(new StatustextPacket
+                    {
+                        ComponenId = _identity.ComponenId,
+                        SystemId = _identity.SystemId,
+                        CompatFlags = 0,
+                        IncompatFlags = 0,
+                        Sequence = _seq.GetNextSequenceNumber(),
+                    }, _disposeCancel.Token);
+                }
             }
             catch (Exception e)
             {
-                _logger.Error(e,$"Error occured to send packet: {e.Message}");
+                _logger.Error(e, $"Error occured to send packet: {e.Message}");
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _isSending, 0);
             }
         }
 

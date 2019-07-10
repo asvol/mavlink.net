@@ -6,8 +6,9 @@ namespace Asv.Mavlink.Server
     {
         IMavlinkHeartbeatServer Heartbeat { get; }
         IStatusTextServer StatusText { get; }
-        INamedValueServer NamedValue { get; }
+        IDebugServer Debug { get; }
         ICommandLongServer CommandLong { get; }
+        ILoggingServer Logging { get; }
     }
 
     public class MavlinkServerBase:IMavlinkServer
@@ -25,14 +26,17 @@ namespace Asv.Mavlink.Server
                 MaxQueueSize = 100,
                 MaxSendRateHz = 10
             });
-            NamedValue = new NamedValueServer(connection,_seq,identity);
             CommandLong = new CommandLongServer(connection,_seq,identity);
+            Debug = new DebugServer(connection,_seq,identity);
+            Logging = new LoggingServer(connection, _seq, identity);
         }
 
         public IMavlinkHeartbeatServer Heartbeat { get; }
         public IStatusTextServer StatusText { get; }
-        public INamedValueServer NamedValue { get; }
+        public IDebugServer Debug { get; }
         public ICommandLongServer CommandLong { get; }
+        public ILoggingServer Logging { get; }
+
 
         public void Dispose()
         {

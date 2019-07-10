@@ -23,6 +23,7 @@ namespace Asv.Mavlink.Server
         private readonly byte[] _payloadContent;
         private readonly RxValue<PacketTransponderState> _state = new RxValue<PacketTransponderState>();
         private int _payloadSize;
+        private TPacket _packet;
 
         public MavlinkPacketTransponder(IMavlinkV2Connection connection, MavlinkServerIdentity identityConfig, IPacketSequenceCalculator seq)
         {
@@ -64,16 +65,7 @@ namespace Asv.Mavlink.Server
             {
 
                 dispose = await _dataLock.ReaderLockAsync();
-                var packet = new HeartbeatPacket
-                {
-                    CompatFlags = 0,
-                    IncompatFlags = 0,
-                    Sequence = _seq.GetNextSequenceNumber(),
-                    ComponenId = _identityConfig.ComponenId,
-                    SystemId = _identityConfig.SystemId,
-                };
-                packet.Payload.Deserialize(_payloadContent,0,_payloadSize);
-                await _connection.Send(packet, _disposeCancellation.Token);
+                await _connection.Send((IPacketV2<IPayload>) _packet, _disposeCancellation.Token);
                 LogSuccess();
             }
             catch (Exception e)
@@ -129,9 +121,16 @@ namespace Asv.Mavlink.Server
             try
             {
                 locker = _dataLock.WriterLock();
-                var payload = new TPayload();
-                changeCallback(payload);
-                _payloadSize = payload.Serialize(_payloadContent, 0);
+                _packet = new TPacket
+                {
+                    CompatFlags = 0,
+                    IncompatFlags = 0,
+                    Sequence = _seq.GetNextSequenceNumber(),
+                    ComponenId = _identityConfig.ComponenId,
+                    SystemId = _identityConfig.SystemId,
+                };
+                changeCallback(_packet.Payload);
+
             }
             catch (Exception e)
             {
