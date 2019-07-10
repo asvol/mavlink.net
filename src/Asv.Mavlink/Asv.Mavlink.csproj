@@ -100,7 +100,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client\Common\FilterVehicleHelper.cs" />
-    <Compile Include="Client\Debug\IDebugClient.cs" />
+    <Compile Include="Client\DebugClient\IDebugClient.cs" />
     <Compile Include="Client\Heartbeat\HeartbeatClient.cs" />
     <Compile Include="Client\Heartbeat\IHeartbeatClient.cs" />
     <Compile Include="Client\Logging\LoggingClient.cs" />
@@ -118,8 +118,8 @@
     <Compile Include="Server\CommandLong\CommandLongServer.cs" />
     <Compile Include="Server\CommandLong\ICommandLongServer.cs" />
     <Compile Include="Server\Common\IPacketSequenceCalculator.cs" />
-    <Compile Include="Server\Debug\DebugServer.cs" />
-    <Compile Include="Server\Debug\IDebugServer.cs" />
+    <Compile Include="Server\DebugServer\DebugServer.cs" />
+    <Compile Include="Server\DebugServer\IDebugServer.cs" />
     <Compile Include="Server\Heartbeat\IMavlinkHeartbeatServer.cs" />
     <Compile Include="Server\Common\IMavlinkPacketTransponder.cs" />
     <Compile Include="Server\Heartbeat\MavlinkHeartbeatServer.cs" />
