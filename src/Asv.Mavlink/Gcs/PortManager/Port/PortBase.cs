@@ -18,14 +18,16 @@ namespace Asv.Mavlink
         private long _txBytes;
 
         public IRxValue<bool> IsEnabled => _enableStream;
-
         public long RxBytes => Interlocked.Read(ref _rxBytes);
-
         public long TxBytes => Interlocked.Read(ref _txBytes);
-
         public abstract PortType PortType { get; }
         public TimeSpan ReconnectTimeout { get; set; } = TimeSpan.FromSeconds(5);
         public IRxValue<PortState> State => _portStateStream;
+
+        protected PortBase()
+        {
+            _enableStream.Where(_ => _).Subscribe(_ => TryConnect(), _disposedCancel.Token);
+        }
 
         public async Task Send(byte[] data, int count, CancellationToken cancel)
         {
@@ -43,11 +45,6 @@ namespace Asv.Mavlink
         }
 
         public IRxValue<Exception> Error => _portErrorStream;
-
-        protected PortBase()
-        {
-            _enableStream.Where(_ => _).Subscribe(_ => TryConnect(), _disposedCancel.Token);
-        }
 
         public void Enable()
         {

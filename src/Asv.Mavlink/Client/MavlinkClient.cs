@@ -32,6 +32,7 @@ namespace Asv.Mavlink
         private readonly MavlinkCommon _mode;
         private readonly NamedValueClient _namedValues;
         private readonly HeartbeatClient _heartbeat;
+        private readonly LoggingClient _logging;
 
         public MavlinkClient(IMavlinkV2Connection connection, MavlinkClientIdentity identity, MavlinkClientConfig config)
         {
@@ -47,6 +48,7 @@ namespace Asv.Mavlink
             _mode = new MavlinkCommon(_mavlinkConnection,identity);
             _namedValues = new NamedValueClient(_mavlinkConnection, identity);
             _heartbeat = new HeartbeatClient(_mavlinkConnection,identity);
+            _logging = new LoggingClient(_mavlinkConnection,identity);
         }
 
         protected IMavlinkV2Connection Connection => _mavlinkConnection;
@@ -59,6 +61,7 @@ namespace Asv.Mavlink
         public IMavlinkOffboardMode Offboard => _mavlinkOffboard;
         public IMavlinkCommon Common => _mode;
         public IDebugClient Debug => _namedValues;
+        public ILoggingClient Logging => _logging;
 
         public bool IsDisposed { get; private set; }
 

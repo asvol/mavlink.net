@@ -49,6 +49,7 @@ namespace Asv.Mavlink
 
     public interface IGroundControlStation:IDisposable
     {
+        GroundControlStationIdentity Identity { get; }
         IPortManager Ports { get; }
         IMavlinkV2Connection MavlinkV2 { get; }
         IObservable<IMavlinkDeviceInfo> OnFoundNewDevice { get; }

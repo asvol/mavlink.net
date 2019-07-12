@@ -18,5 +18,6 @@ namespace Asv.Mavlink
         IMavlinkOffboardMode Offboard { get; }
         IMavlinkCommon Common { get; }
         IDebugClient Debug { get; }
+        ILoggingClient Logging { get; }
     }
 }

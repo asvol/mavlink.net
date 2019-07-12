@@ -103,6 +103,7 @@
     <Compile Include="Client\DebugClient\IDebugClient.cs" />
     <Compile Include="Client\Heartbeat\HeartbeatClient.cs" />
     <Compile Include="Client\Heartbeat\IHeartbeatClient.cs" />
+    <Compile Include="Client\Logging\ILoggingClient.cs" />
     <Compile Include="Client\Logging\LoggingClient.cs" />
     <Compile Include="Connection\Dialects\ardupilotmega.cs" />
     <Compile Include="Connection\Dialects\DataTypes.cs" />
