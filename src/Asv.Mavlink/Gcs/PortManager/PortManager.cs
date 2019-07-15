@@ -62,12 +62,46 @@ namespace Asv.Mavlink
         }
     }
 
+    public class SubjectA<T> : ISubject<T>,IDisposable
+    {
+        private Subject<T> _s = new Subject<T>();
+        public SubjectA()
+        {
+            
+        }
+
+        public void OnNext(T value)
+        {
+            _s.OnNext(value);
+        }
+
+        public void OnError(Exception error)
+        {
+            _s.OnError(error);
+        }
+
+        public void OnCompleted()
+        {
+            _s.OnCompleted();
+        }
+
+        public IDisposable Subscribe(IObserver<T> observer)
+        {
+            return _s.Subscribe(observer);
+        }
+
+        public void Dispose()
+        {
+            _s?.Dispose();
+        }
+    }
+
     public class PortManager:IPortManager
     {
         private readonly object _sync = new object();
         private readonly List<PortWrapper> _ports = new List<PortWrapper>();
         private readonly Subject<Unit> _configChangedSubject = new Subject<Unit>();
-        private readonly Subject<byte[]> _onRecv = new Subject<byte[]>();
+        private readonly SubjectA<byte[]> _onRecv = new SubjectA<byte[]>();
 
         public PortManager()
         {

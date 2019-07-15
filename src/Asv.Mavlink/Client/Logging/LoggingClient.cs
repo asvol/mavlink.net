@@ -6,11 +6,6 @@ using Asv.Mavlink.V2.Common;
 
 namespace Asv.Mavlink.Client
 {
-    public interface ILoggingClient:IDisposable
-    {
-        IRxValue<LoggingDataPayload> RawLoggingData { get; }
-    }
-
     public class LoggingClient:ILoggingClient
     {
         private readonly CancellationTokenSource _disposeCancel = new CancellationTokenSource();

@@ -11,15 +11,15 @@ using Asv.Mavlink.V2.Uavionix;
 
 namespace Asv.Mavlink
 {
-    public class GroundControlStationConfig
+    public class GroundControlStationIdentity
     {
-        public int SystemId { get; set; } = 254;
-        public int ComponentId { get; set; } = 254;
+        public byte SystemId { get; set; } = 254;
+        public byte ComponentId { get; set; } = 254;
     }
 
     public class GroundControlStation : IGroundControlStation
     {
-        private readonly GroundControlStationConfig _config;
+        private readonly GroundControlStationIdentity _config;
         private readonly TimeSpan _linkTimeout = TimeSpan.FromSeconds(1);
         private readonly CancellationTokenSource _cancel = new CancellationTokenSource();
         private readonly List<MavlinkDevice> _info = new List<MavlinkDevice>();
@@ -74,7 +74,7 @@ namespace Asv.Mavlink
             }
         }
 
-        public GroundControlStation(GroundControlStationConfig config)
+        public GroundControlStation(GroundControlStationIdentity config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             _config = config;
@@ -158,6 +158,7 @@ namespace Asv.Mavlink
             if (newItem != null) _foundDeviceSubject.OnNext(newItem.GetInfo());
         }
 
+        public GroundControlStationIdentity Identity => _config;
         public IPortManager Ports { get; } = new PortManager();
         public IMavlinkV2Connection MavlinkV2 { get; }
         public IObservable<IMavlinkDeviceInfo> OnFoundNewDevice => _foundDeviceSubject;

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reactive.Subjects;
+using NLog;
 
 namespace Asv.Mavlink.Decoder
 {
@@ -13,6 +15,7 @@ namespace Asv.Mavlink.Decoder
         private readonly Dictionary<int, Func<IPacketV2<IPayload>>> _dict = new Dictionary<int, Func<IPacketV2<IPayload>>>();
         private readonly Subject<DeserializePackageException> _decodeErrorSubject = new Subject<DeserializePackageException>();
         private readonly Subject<IPacketV2<IPayload>> _packetSubject = new Subject<IPacketV2<IPayload>>();
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         private enum DecodeStep
         {
@@ -30,23 +33,32 @@ namespace Asv.Mavlink.Decoder
 
         public virtual void OnNext(byte value)
         {
-            switch (_decodeStep)
+            try
             {
-                case DecodeStep.Sync:
-                    _decodeStep = SyncStep(value);
-                    break;
-                case DecodeStep.Length:
-                    _decodeStep = GetLengthStep(value);
-                    break;
-                case DecodeStep.FillBuffer:
-                    _decodeStep = FillBufferStep(value);
-                    break;
-                case DecodeStep.FillSignature:
-                    _decodeStep = SignatureStep(value);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                switch (_decodeStep)
+                {
+                    case DecodeStep.Sync:
+                        _decodeStep = SyncStep(value);
+                        break;
+                    case DecodeStep.Length:
+                        _decodeStep = GetLengthStep(value);
+                        break;
+                    case DecodeStep.FillBuffer:
+                        _decodeStep = FillBufferStep(value);
+                        break;
+                    case DecodeStep.FillSignature:
+                        _decodeStep = SignatureStep(value);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
+            catch (Exception e)
+            {
+                _logger.Fatal(e,$"Fatal error to decode packet:{e.Message}");
+                Debug.Assert(false,e.Message);
+            }
+            
         }
 
         public void OnError(Exception error)
@@ -129,7 +141,17 @@ namespace Asv.Mavlink.Decoder
             {
                 _decodeErrorSubject.OnNext(new DeserializePackageException(messageId, string.Format(RS.DecoderV2_TryDecodePacket_Error_for_deserialize_mavlink_V2, messageId,exception.Message) , exception) );
             }
-            _packetSubject.OnNext(packet);
+
+            try
+            {
+                _packetSubject.OnNext(packet);
+            }
+            catch (Exception e)
+            {
+                _logger.Fatal(e, $"Fatal error to publish packet:{e.Message}");
+                Debug.Assert(false, e.Message);
+            }
+            
         }
 
 
