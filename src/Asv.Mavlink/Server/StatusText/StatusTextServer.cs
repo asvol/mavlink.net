@@ -60,6 +60,11 @@ namespace Asv.Mavlink.Server
                         CompatFlags = 0,
                         IncompatFlags = 0,
                         Sequence = _seq.GetNextSequenceNumber(),
+                        Payload =
+                        {
+                            Severity = res.Key,
+                            Text = res.Value.ToCharArray()
+                        }
                     }, _disposeCancel.Token);
                 }
             }
