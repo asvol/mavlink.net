@@ -17,8 +17,26 @@ namespace Asv.Mavlink.Server
         public int ResultValue { get; }
     }
 
+    public class DeviceIdentity
+    {
+        public byte SystemId { get; set; }
+        public byte ComponentId { get; set; }
+    }
 
-    public delegate Task<CommandLongResult> CommandLongDelegate(float param1, float param2, float param3, float param4, float param5, float param6, float param7, CancellationToken cancel);
+
+    public class CommandArgs
+    {
+        public DeviceIdentity Subject { get; set; }
+        public float Param1 { get; set; }
+        public float Param2 { get; set; }
+        public float Param3 { get; set; }
+        public float Param4 { get; set; }
+        public float Param5 { get; set; }
+        public float Param6 { get; set; }
+        public float Param7 { get; set; }
+    }
+
+    public delegate Task<CommandLongResult> CommandLongDelegate(CommandArgs args, CancellationToken cancel);
 
     public interface ICommandLongServer:IDisposable
     {

@@ -52,8 +52,23 @@ namespace Asv.Mavlink.Server
             {
                 _logger.Info($"Command {obj.Payload.Command}(Param1:{obj.Payload.Param1},Param2:{obj.Payload.Param2},Param3:{obj.Payload.Param3},Param4:{obj.Payload.Param4},Param5:{obj.Payload.Param5},Param6:{obj.Payload.Param6},Param7:{obj.Payload.Param7})");
 
-                var result = await callback(obj.Payload.Param1, obj.Payload.Param2, obj.Payload.Param3,
-                    obj.Payload.Param4, obj.Payload.Param5, obj.Payload.Param6, obj.Payload.Param7, _disposeCancel.Token);
+                var args = new CommandArgs
+                {
+                    Subject = new DeviceIdentity
+                    {
+                        ComponentId = obj.ComponenId,
+                        SystemId = obj.SystemId,
+                    },
+                    Param1 = obj.Payload.Param1,
+                    Param2 = obj.Payload.Param2,
+                    Param3 = obj.Payload.Param3,
+                    Param4 = obj.Payload.Param4,
+                    Param5 = obj.Payload.Param5,
+                    Param6 = obj.Payload.Param6,
+                    Param7 = obj.Payload.Param7,
+                };
+
+                var result = await callback(args, _disposeCancel.Token);
                 SafeSendCommandAck(obj.Payload.Command, result.ResultCode, obj.SystemId, obj.ComponenId,result.ResultValue);
                 
             }
