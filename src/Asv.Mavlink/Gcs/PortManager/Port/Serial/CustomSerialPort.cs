@@ -61,7 +61,10 @@ namespace Asv.Mavlink
         {
             lock (_sync)
             {
-                _serial = new SerialPort(_config.PortName, _config.BoundRate, _config.Parity, _config.DataBits, _config.StopBits);
+                _serial = new SerialPort(_config.PortName, _config.BoundRate, _config.Parity, _config.DataBits, _config.StopBits)
+                {
+                    WriteTimeout = _config.WriteTimeout,
+                };
                 _serial.Open();
                 _readingTimer = Observable.Timer(TimeSpan.FromMilliseconds(10),TimeSpan.FromMilliseconds(10)).Subscribe(TryReadData);
             }
@@ -75,7 +78,7 @@ namespace Asv.Mavlink
             {
                 lock (_sync)
                 {
-                    if (_serial.BytesToRead == 0) goto exit;
+                    if (_serial.BytesToRead == 0 || _serial.IsOpen == false) goto exit;
                     data = new byte[_serial.BytesToRead];
                     _serial.Read(data, 0, data.Length);
                 }
@@ -84,7 +87,7 @@ namespace Asv.Mavlink
             catch (Exception e)
             {
                 _logger.Error(e, $"Error to read and push data from serial port:{e.Message}");
-                Debug.Assert(false, e.Message);
+                InternalOnError(e);
             }
             
             exit:
