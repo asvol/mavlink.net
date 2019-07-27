@@ -20,7 +20,7 @@ namespace Asv.Mavlink
         private long _rxBytes;
         private long _txBytes;
         private int _isDisposed;
-        private SingleThreadTaskScheduler _portScheduler;
+        private readonly SingleThreadTaskScheduler _portScheduler;
 
         public PortBaseV2(string name)
         {

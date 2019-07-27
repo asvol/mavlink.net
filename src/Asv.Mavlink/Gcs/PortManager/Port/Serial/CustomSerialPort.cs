@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO.Ports;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
@@ -14,6 +15,8 @@ namespace Asv.Mavlink
         private SerialPort _serial;
         private readonly object _sync = new object();
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private int _isReading;
+        private IDisposable _readingTimer;
 
         public CustomSerialPort(SerialPortConfig config)
         {
@@ -40,7 +43,7 @@ namespace Asv.Mavlink
                 if (_serial == null) return;
                 try
                 {
-                    _serial.DataReceived -= _serial_DataReceived;
+                    _readingTimer.Dispose();
                     if (_serial.IsOpen == true)
                         _serial.Close();
 
@@ -60,31 +63,33 @@ namespace Asv.Mavlink
             {
                 _serial = new SerialPort(_config.PortName, _config.BoundRate, _config.Parity, _config.DataBits, _config.StopBits);
                 _serial.Open();
-                _serial.DataReceived += _serial_DataReceived;
+                _readingTimer = Observable.Timer(TimeSpan.FromMilliseconds(10),TimeSpan.FromMilliseconds(10)).Subscribe(TryReadData);
             }
         }
 
-        private void _serial_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        private void TryReadData(long l)
         {
+            if (Interlocked.CompareExchange(ref _isReading,1,0) !=0) return;
             byte[] data;
-            lock (_sync)
-            {
-                data = new byte[_serial.BytesToRead];
-                _serial.Read(data, 0, data.Length);
-            }
-
             try
             {
+                lock (_sync)
+                {
+                    if (_serial.BytesToRead == 0) goto exit;
+                    data = new byte[_serial.BytesToRead];
+                    _serial.Read(data, 0, data.Length);
+                }
                 InternalOnData(data);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                _logger.Error(ex,$"Error to push data:{ex.Message}");
-                Debug.Assert(false,ex.Message);
+                _logger.Error(e, $"Error to read and push data from serial port:{e.Message}");
+                Debug.Assert(false, e.Message);
             }
-
             
-            
+            exit:
+            Interlocked.Exchange(ref _isReading, 0);
         }
+
     }
 }
