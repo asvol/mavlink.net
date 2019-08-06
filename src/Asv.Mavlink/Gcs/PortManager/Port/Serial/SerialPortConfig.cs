@@ -12,7 +12,7 @@ namespace Asv.Mavlink
         public Parity Parity { get; set; } = Parity.None;
         public StopBits StopBits { get; set; } = StopBits.One;
         public string PortName { get; set; }
-        public int WriteTimeout { get; set; } = 1000;
+        public int WriteTimeout { get; set; } = 200;
 
         public static bool TryParseFromUri(Uri uri, out SerialPortConfig opt)
         {
