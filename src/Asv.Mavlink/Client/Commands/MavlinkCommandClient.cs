@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Asv.Mavlink.Client;
 using Asv.Mavlink.V2.Common;
 using Nito.AsyncEx;
 
@@ -12,18 +13,22 @@ namespace Asv.Mavlink
         public int CommandTimeoutMs { get; set; } = 5000;
     }
 
-    public class MavlinkCommandMicroservice : IMavlinkCommandMicroservice,IDisposable
+    public class MavlinkCommandClient : IMavlinkCommandClient,IDisposable
     {
         private readonly IMavlinkV2Connection _connection;
         private readonly MavlinkClientIdentity _identity;
+        private readonly PacketSequenceCalculator _seq;
         private readonly CommandProtocolConfig _config;
 
-        public MavlinkCommandMicroservice(IMavlinkV2Connection connection, MavlinkClientIdentity identity, CommandProtocolConfig config)
+        public MavlinkCommandClient(IMavlinkV2Connection connection, MavlinkClientIdentity identity,
+            PacketSequenceCalculator seq, CommandProtocolConfig config)
         {
             if (connection == null) throw new ArgumentNullException(nameof(connection));
+            if (seq == null) throw new ArgumentNullException(nameof(seq));
             if (config == null) throw new ArgumentNullException(nameof(config));
             _connection = connection;
             _identity = identity;
+            _seq = seq;
             _config = config;
         }
 
@@ -43,6 +48,7 @@ namespace Asv.Mavlink
             {
                 ComponenId = _identity.ComponentId,
                 SystemId = _identity.SystemId,
+                Sequence = _seq.GetNextSequenceNumber(),
                 Payload =
                 {
                     Command = command,
@@ -70,6 +76,7 @@ namespace Asv.Mavlink
             {
                 ComponenId = _identity.ComponentId,
                 SystemId = _identity.SystemId,
+                Sequence = _seq.GetNextSequenceNumber(),
                 Payload =
                 {
                     Command = command,
@@ -140,6 +147,7 @@ namespace Asv.Mavlink
             {
                 ComponenId = _identity.ComponentId,
                 SystemId = _identity.SystemId,
+                Sequence = _seq.GetNextSequenceNumber(),
                 Payload =
                 {
                     Command = command,
@@ -164,6 +172,7 @@ namespace Asv.Mavlink
             {
                 ComponenId = _identity.ComponentId,
                 SystemId = _identity.SystemId,
+                Sequence = _seq.GetNextSequenceNumber(),
                 Payload =
                 {
                     Command = command,
@@ -233,6 +242,7 @@ namespace Asv.Mavlink
             {
                 ComponenId = _identity.ComponentId,
                 SystemId = _identity.SystemId,
+                Sequence = _seq.GetNextSequenceNumber(),
                 Payload =
                 {
                     Command = MavCmd.MavCmdRequestAutopilotCapabilities,

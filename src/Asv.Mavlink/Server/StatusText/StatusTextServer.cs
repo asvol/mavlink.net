@@ -26,6 +26,7 @@ namespace Asv.Mavlink.Server
         private readonly CancellationTokenSource _disposeCancel = new CancellationTokenSource();
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private int _isSending;
+        private volatile int _isDisposed;
 
         public StatusTextServer(IMavlinkV2Connection connection,IPacketSequenceCalculator seq,MavlinkServerIdentity identity, StatusTextLoggerConfig config)
         {
@@ -101,6 +102,7 @@ namespace Asv.Mavlink.Server
 
         public void Dispose()
         {
+            if (Interlocked.CompareExchange(ref _isDisposed,1,0) !=0) return;
             _disposeCancel?.Cancel(false);
             _disposeCancel?.Dispose();
         }

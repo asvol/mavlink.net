@@ -1,5 +1,6 @@
 ﻿using System;
 using Asv.Mavlink.Client;
+using Asv.Mavlink.Server;
 
 namespace Asv.Mavlink
 {
@@ -13,11 +14,12 @@ namespace Asv.Mavlink
         IHeartbeatClient Heartbeat { get; }
         IMavlinkTelemetry Rtt { get; }
         IMavlinkParameterMicroservice Params { get; }
-        IMavlinkCommandMicroservice Commands { get; }
-        IMavlinkMissionMicroservice Mission { get; }
+        IMavlinkCommandClient Commands { get; }
+        IMissionClient Mission { get; }
         IMavlinkOffboardMode Offboard { get; }
         IMavlinkCommon Common { get; }
         IDebugClient Debug { get; }
         ILoggingClient Logging { get; }
+        IV2ExtensionClient V2Extension { get; }
     }
 }

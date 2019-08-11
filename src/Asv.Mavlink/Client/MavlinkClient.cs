@@ -26,13 +26,15 @@ namespace Asv.Mavlink
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly MavlinkTelemetry _rtt;
         private readonly MavlinkParameterMicroservice _params;
-        private readonly MavlinkCommandMicroservice _mavlinkCommands;
-        private readonly MavlinkMissionMicroservice _mission;
+        private readonly MavlinkCommandClient _mavlinkCommands;
+        private readonly MissionClient _mission;
         private readonly MavlinkOffboardMode _mavlinkOffboard;
         private readonly MavlinkCommon _mode;
-        private readonly NamedValueClient _namedValues;
+        private readonly DebugClient _debugs;
         private readonly HeartbeatClient _heartbeat;
         private readonly LoggingClient _logging;
+        private IV2ExtensionClient _v2Ext;
+        private PacketSequenceCalculator _seq = new PacketSequenceCalculator();
 
         public MavlinkClient(IMavlinkV2Connection connection, MavlinkClientIdentity identity, MavlinkClientConfig config)
         {
@@ -42,13 +44,14 @@ namespace Asv.Mavlink
             _mavlinkConnection = connection;
             _rtt = new MavlinkTelemetry(_mavlinkConnection, identity);
             _params = new MavlinkParameterMicroservice(_mavlinkConnection, identity,new VehicleParameterProtocolConfig {ReadWriteTimeoutMs = config.ReadParamTimeoutMs,TimeoutToReadAllParamsMs = config.TimeoutToReadAllParamsMs});
-            _mavlinkCommands = new MavlinkCommandMicroservice(_mavlinkConnection, identity,new CommandProtocolConfig { CommandTimeoutMs = config.CommandTimeoutMs});
-            _mission = new MavlinkMissionMicroservice(_mavlinkConnection,identity);
+            _mavlinkCommands = new MavlinkCommandClient(_mavlinkConnection, identity, _seq,new CommandProtocolConfig { CommandTimeoutMs = config.CommandTimeoutMs});
+            _mission = new MissionClient(_mavlinkConnection,_seq, identity);
             _mavlinkOffboard = new MavlinkOffboardMode(_mavlinkConnection,identity);
             _mode = new MavlinkCommon(_mavlinkConnection,identity);
-            _namedValues = new NamedValueClient(_mavlinkConnection, identity);
+            _debugs = new DebugClient(_mavlinkConnection, identity);
             _heartbeat = new HeartbeatClient(_mavlinkConnection,identity);
             _logging = new LoggingClient(_mavlinkConnection,identity);
+            _v2Ext = new V2ExtensionClient(_mavlinkConnection, _seq, identity);
         }
 
         protected IMavlinkV2Connection Connection => _mavlinkConnection;
@@ -56,12 +59,13 @@ namespace Asv.Mavlink
         public IHeartbeatClient Heartbeat => _heartbeat;
         public IMavlinkTelemetry Rtt => _rtt;
         public IMavlinkParameterMicroservice Params => _params;
-        public IMavlinkCommandMicroservice Commands => _mavlinkCommands;
-        public IMavlinkMissionMicroservice Mission => _mission;
+        public IMavlinkCommandClient Commands => _mavlinkCommands;
+        public IMissionClient Mission => _mission;
         public IMavlinkOffboardMode Offboard => _mavlinkOffboard;
         public IMavlinkCommon Common => _mode;
-        public IDebugClient Debug => _namedValues;
+        public IDebugClient Debug => _debugs;
         public ILoggingClient Logging => _logging;
+        public IV2ExtensionClient V2Extension => _v2Ext;
 
         public bool IsDisposed { get; private set; }
 
@@ -78,7 +82,7 @@ namespace Asv.Mavlink
                 _mavlinkOffboard?.Dispose();
                 _mode?.Dispose();
                 _heartbeat?.Dispose();
-                _namedValues?.Dispose();
+                _debugs?.Dispose();
             }
             catch (Exception e)
             {

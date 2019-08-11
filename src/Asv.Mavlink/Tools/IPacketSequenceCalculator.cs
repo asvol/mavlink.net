@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-namespace Asv.Mavlink.Server
+namespace Asv.Mavlink
 {
     public interface IPacketSequenceCalculator
     {

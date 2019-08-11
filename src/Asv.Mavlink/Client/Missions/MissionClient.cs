@@ -7,17 +7,20 @@ using Nito.AsyncEx;
 namespace Asv.Mavlink
 {
   
-    public class MavlinkMissionMicroservice : IMavlinkMissionMicroservice,IDisposable
+    public class MissionClient : IMissionClient,IDisposable
     {
         private readonly IMavlinkV2Connection _mavlink;
+        private readonly PacketSequenceCalculator _seq;
         private readonly MavlinkClientIdentity _config;
-        private int _seq = 0;
 
-        public MavlinkMissionMicroservice(IMavlinkV2Connection mavlink, MavlinkClientIdentity config)
+        public MissionClient(IMavlinkV2Connection mavlink, PacketSequenceCalculator seq,
+            MavlinkClientIdentity config)
         {
             if (mavlink == null) throw new ArgumentNullException(nameof(mavlink));
+            if (seq == null) throw new ArgumentNullException(nameof(seq));
             if (config == null) throw new ArgumentNullException(nameof(config));
             _mavlink = mavlink;
+            _seq = seq;
             _config = config;
         }
 
@@ -28,6 +31,7 @@ namespace Asv.Mavlink
             {
                 ComponenId = _config.ComponentId,
                 SystemId = _config.SystemId,
+                Sequence = _seq.GetNextSequenceNumber(),
                 Payload =
                 {
                     TargetComponent = _config.TargetComponentId,
@@ -50,14 +54,6 @@ namespace Asv.Mavlink
             _mavlink.Send(packet, cancel);
             return Task.CompletedTask;
         }
-
-        private bool FilterVehicle(IPacketV2<IPayload> packetV2)
-        {
-            if (_config.TargetSystemId != 0 && _config.TargetSystemId != packetV2.SystemId) return false;
-            if (_config.TargetComponentId != 0 && _config.TargetComponentId != packetV2.ComponenId) return false;
-            return true;
-        }
-
 
         public void Dispose()
         {

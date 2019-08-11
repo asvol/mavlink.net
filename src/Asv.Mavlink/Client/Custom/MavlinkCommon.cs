@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Asv.Mavlink.V2.Common;
 using NLog;
 
-namespace Asv.Mavlink
+namespace Asv.Mavlink.Client
 {
     public class MavlinkCommon : IMavlinkCommon
     {

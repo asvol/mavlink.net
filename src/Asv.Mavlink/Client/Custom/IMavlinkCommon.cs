@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.V2.Common;
 
-namespace Asv.Mavlink
+namespace Asv.Mavlink.Client
 {
     public interface IMavlinkCommon:IDisposable
     {

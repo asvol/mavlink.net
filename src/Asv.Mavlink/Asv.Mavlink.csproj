@@ -99,12 +99,16 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client\Commands\MavlinkCommandHelper.cs" />
     <Compile Include="Client\Common\FilterVehicleHelper.cs" />
     <Compile Include="Client\DebugClient\IDebugClient.cs" />
+    <Compile Include="Client\DebugClient\DebugClient.cs" />
     <Compile Include="Client\Heartbeat\HeartbeatClient.cs" />
     <Compile Include="Client\Heartbeat\IHeartbeatClient.cs" />
     <Compile Include="Client\Logging\ILoggingClient.cs" />
     <Compile Include="Client\Logging\LoggingClient.cs" />
+    <Compile Include="Client\V2_extention\IV2ExtensionServer.cs" />
+    <Compile Include="Client\V2_extention\V2ExtensionServer.cs" />
     <Compile Include="Connection\Dialects\ardupilotmega.cs" />
     <Compile Include="Connection\Dialects\DataTypes.cs" />
     <Compile Include="Connection\Dialects\icarous.cs" />
@@ -118,7 +122,8 @@
     <Compile Include="Gcs\PortManager\Port\PortBaseV2.cs" />
     <Compile Include="Server\CommandLong\CommandLongServer.cs" />
     <Compile Include="Server\CommandLong\ICommandLongServer.cs" />
-    <Compile Include="Server\Common\IPacketSequenceCalculator.cs" />
+    <Compile Include="Server\MavlinkServerBase.cs" />
+    <Compile Include="Tools\IPacketSequenceCalculator.cs" />
     <Compile Include="Server\DebugServer\DebugServer.cs" />
     <Compile Include="Server\DebugServer\IDebugServer.cs" />
     <Compile Include="Server\Heartbeat\IMavlinkHeartbeatServer.cs" />
@@ -130,6 +135,8 @@
     <Compile Include="Server\MavlinkServer.cs" />
     <Compile Include="Server\StatusText\IStatusTextServer.cs" />
     <Compile Include="Server\StatusText\StatusTextServer.cs" />
+    <Compile Include="Server\V2_extention\V2ExtensionServer.cs" />
+    <Compile Include="Server\V2_extention\IV2ExtensionServer.cs" />
     <Compile Include="Tools\GeoMath\Extension.cs" />
     <Compile Include="Tools\GeoMath\GeoMath.cs" />
     <Compile Include="Tools\GeoMath\GeoPoint.cs" />
@@ -142,10 +149,10 @@
     <Compile Include="Connection\IDataStream.cs" />
     <Compile Include="Connection\IMavlinkV2Connection.cs" />
     <Compile Include="Client\Custom\IMavlinkCommon.cs" />
-    <Compile Include="Client\Commands\MavlinkCommandMicroservice.cs" />
-    <Compile Include="Client\Commands\IMavlinkCommandMicroservice.cs" />
-    <Compile Include="Client\Missions\IMavlinkMissionMicroservice.cs" />
-    <Compile Include="Client\Missions\MavlinkMissionMicroservice.cs" />
+    <Compile Include="Client\Commands\MavlinkCommandClient.cs" />
+    <Compile Include="Client\Commands\IMavlinkCommandClient.cs" />
+    <Compile Include="Client\Missions\IMissionClient.cs" />
+    <Compile Include="Client\Missions\MissionClient.cs" />
     <Compile Include="Client\Offboard\IMavlinkOffboardMode.cs" />
     <Compile Include="Client\Offboard\MavlinkOffboardMode.cs" />
     <Compile Include="Client\Params\MavlinkParameterMicroservice.cs" />
