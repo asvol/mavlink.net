@@ -28,7 +28,6 @@
         public ILoggingServer Logging { get; }
         public IV2ExtensionServer V2Extension { get; }
 
-
         public void Dispose()
         {
             StatusText?.Dispose();
