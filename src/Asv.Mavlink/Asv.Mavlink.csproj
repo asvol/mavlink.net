@@ -155,7 +155,7 @@
     <Compile Include="Client\Missions\MissionClient.cs" />
     <Compile Include="Client\Offboard\IMavlinkOffboardMode.cs" />
     <Compile Include="Client\Offboard\MavlinkOffboardMode.cs" />
-    <Compile Include="Client\Params\MavlinkParameterMicroservice.cs" />
+    <Compile Include="Client\Params\MavlinkParameterClient.cs" />
     <Compile Include="Client\RawTelemetry\IMavlinkTelemetry.cs" />
     <Compile Include="Client\Params\MavParam.cs" />
     <Compile Include="Client\Params\IMavlinkParamClient.cs" />

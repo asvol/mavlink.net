@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Asv.Mavlink.Client;
 using Asv.Mavlink.V2.Common;
 
 namespace Asv.Mavlink
@@ -57,7 +58,7 @@ namespace Asv.Mavlink
         IRxValue<double> GroundVelocity { get; }
         
         IRxValue<VehicleMode> Mode { get; }
-        
+        IMavlinkParameterClient Params { get; }
 
         Task TakeOff(double altitude, CancellationToken cancel);
 

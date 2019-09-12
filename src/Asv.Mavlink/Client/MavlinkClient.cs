@@ -1,9 +1,7 @@
 ﻿using System;
-using Asv.Mavlink.Client;
-using Asv.Mavlink.Server;
 using NLog;
 
-namespace Asv.Mavlink
+namespace Asv.Mavlink.Client
 {
     public class MavlinkClientIdentity
     {
@@ -16,7 +14,7 @@ namespace Asv.Mavlink
     public class MavlinkClientConfig
     {
         public int CommandTimeoutMs { get; set; } = 5000;
-        public int TimeoutToReadAllParamsMs { get; set; } = 10000;
+        public int TimeoutToReadAllParamsMs { get; set; } = 60*60*1000;
         public int ReadParamTimeoutMs { get; set; } = 10000;
     }
 
@@ -25,7 +23,7 @@ namespace Asv.Mavlink
         private readonly IMavlinkV2Connection _mavlinkConnection;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly MavlinkTelemetry _rtt;
-        private readonly MavlinkParameterMicroservice _params;
+        private readonly MavlinkParameterClient _params;
         private readonly MavlinkCommandClient _mavlinkCommands;
         private readonly MissionClient _mission;
         private readonly MavlinkOffboardMode _mavlinkOffboard;
@@ -43,7 +41,7 @@ namespace Asv.Mavlink
             Identity = identity;
             _mavlinkConnection = connection;
             _rtt = new MavlinkTelemetry(_mavlinkConnection, identity);
-            _params = new MavlinkParameterMicroservice(_mavlinkConnection, identity,new VehicleParameterProtocolConfig {ReadWriteTimeoutMs = config.ReadParamTimeoutMs,TimeoutToReadAllParamsMs = config.TimeoutToReadAllParamsMs});
+            _params = new MavlinkParameterClient(_mavlinkConnection, identity,new VehicleParameterProtocolConfig {ReadWriteTimeoutMs = config.ReadParamTimeoutMs,TimeoutToReadAllParamsMs = config.TimeoutToReadAllParamsMs});
             _mavlinkCommands = new MavlinkCommandClient(_mavlinkConnection, identity, _seq,new CommandProtocolConfig { CommandTimeoutMs = config.CommandTimeoutMs});
             _mission = new MissionClient(_mavlinkConnection,_seq, identity);
             _mavlinkOffboard = new MavlinkOffboardMode(_mavlinkConnection,identity);
@@ -58,7 +56,7 @@ namespace Asv.Mavlink
         public MavlinkClientIdentity Identity { get; }
         public IHeartbeatClient Heartbeat => _heartbeat;
         public IMavlinkTelemetry Rtt => _rtt;
-        public IMavlinkParameterMicroservice Params => _params;
+        public IMavlinkParameterClient Params => _params;
         public IMavlinkCommandClient Commands => _mavlinkCommands;
         public IMissionClient Mission => _mission;
         public IMavlinkOffboardMode Offboard => _mavlinkOffboard;

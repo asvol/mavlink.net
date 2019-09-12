@@ -9,16 +9,16 @@ using System.Threading.Tasks;
 using Asv.Mavlink.V2.Common;
 using Nito.AsyncEx;
 
-namespace Asv.Mavlink
+namespace Asv.Mavlink.Client
 {
 
     public class VehicleParameterProtocolConfig
     {
-        public int TimeoutToReadAllParamsMs { get; set; } = 10000;
+        public int TimeoutToReadAllParamsMs { get; set; } = (int) TimeSpan.FromSeconds(60).TotalMilliseconds;
         public int ReadWriteTimeoutMs { get; set; } = 10000;
     }
 
-    public class MavlinkParameterMicroservice : IMavlinkParameterMicroservice,IDisposable
+    public class MavlinkParameterClient : IMavlinkParameterClient,IDisposable
     {
         private readonly IMavlinkV2Connection _connection;
         private readonly MavlinkClientIdentity _identity;
@@ -28,13 +28,14 @@ namespace Asv.Mavlink
         private readonly RxValue<int?> _paramsCount = new RxValue<int?>();
         private IDisposable _paramsSubscribe;
 
-        public MavlinkParameterMicroservice(IMavlinkV2Connection connection, MavlinkClientIdentity identity, VehicleParameterProtocolConfig config)
+        public MavlinkParameterClient(IMavlinkV2Connection connection, MavlinkClientIdentity identity, VehicleParameterProtocolConfig config)
         {
             if (connection == null) throw new ArgumentNullException(nameof(connection));
             if (config == null) throw new ArgumentNullException(nameof(config));
             _connection = connection;
             _identity = identity;
             _config = config;
+            HandleParams();
         }
 
         private bool FilterVehicle(IPacketV2<IPayload> packetV2)
@@ -54,6 +55,21 @@ namespace Asv.Mavlink
                 .Where(FilterVehicle)
                 .Where(_ => _.MessageId == ParamValuePacket.PacketMessageId)
                 .Cast<ParamValuePacket>().Subscribe(UpdateParam);
+        }
+
+        public Task RequestAllParams(CancellationToken cancel)
+        {
+            var packet = new ParamRequestListPacket
+            {
+                ComponenId = _identity.ComponentId,
+                SystemId = _identity.SystemId,
+                Payload =
+                {
+                    TargetComponent = _identity.TargetComponentId,
+                    TargetSystem = _identity.TargetSystemId,
+                }
+            };
+            return _connection.Send(packet, cancel);
         }
 
         public async Task ReadAllParams(CancellationToken cancel, IProgress<double> progress = null)

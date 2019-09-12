@@ -1,7 +1,7 @@
 using System;
 using Asv.Mavlink.V2.Common;
 
-namespace Asv.Mavlink
+namespace Asv.Mavlink.Client
 {
     public class MavParam:ICloneable
     {

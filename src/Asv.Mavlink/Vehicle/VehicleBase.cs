@@ -38,10 +38,6 @@ namespace Asv.Mavlink
 
         public IRxValue<int> PacketRateHz => _mavlink.Heartbeat.PacketRateHz;
 
-      
-
-
-
         public virtual void StartListen()
         {
             InitRequestVehicleInfo();
@@ -56,9 +52,6 @@ namespace Asv.Mavlink
             InitStatus();
             InitMode();
         }
-
-       
-
 
         #region Request init info
 
@@ -154,6 +147,7 @@ namespace Asv.Mavlink
 
         private readonly RxValue<VehicleMode> _mode = new RxValue<VehicleMode>();
         public IRxValue<VehicleMode> Mode => _mode;
+        public IMavlinkParameterClient Params => _mavlink.Params;
 
         protected abstract VehicleMode InterpretateMode(HeartbeatPayload heartbeat);
 

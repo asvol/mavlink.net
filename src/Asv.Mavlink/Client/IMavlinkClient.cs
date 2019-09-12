@@ -13,7 +13,7 @@ namespace Asv.Mavlink
         MavlinkClientIdentity Identity { get; }
         IHeartbeatClient Heartbeat { get; }
         IMavlinkTelemetry Rtt { get; }
-        IMavlinkParameterMicroservice Params { get; }
+        IMavlinkParameterClient Params { get; }
         IMavlinkCommandClient Commands { get; }
         IMissionClient Mission { get; }
         IMavlinkOffboardMode Offboard { get; }
