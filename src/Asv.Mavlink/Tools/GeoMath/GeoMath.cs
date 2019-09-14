@@ -177,6 +177,19 @@ namespace Asv.Mavlink
         }
 
         /// <summary>
+        /// Удаление по земле, при заданном угле подъема и высоте
+        /// </summary>
+        /// <param name="height">The height in meters.</param>
+        /// <param name="elevation">
+        /// The angle in degrees from the horizontal plane.
+        /// </param>
+        /// <returns>The ground range in meters.</returns>
+        public static double GroundRangeFromHeight(double height, double elevation)
+        {
+            return Math.Abs(height / Math.Tan(DegreesToRadians(elevation)));
+        }
+
+        /// <summary>
         /// Находит точку на заданной линии, являющуюся пересечением перпендикуляра опущенного из заданной точки к прямой (высота не учитывается)
         /// Работает на малых расстояниях (считается, что поверхность плоская)
         /// </summary>
@@ -186,6 +199,19 @@ namespace Asv.Mavlink
             var d = Distance(lineX, p);
             var h = Math.Abs(d * Math.Cos(azimuth * Math.PI / 180));
             return RadialPoint(lineX, h, Azimuth(lineX, lineY));
+        }
+
+        /// <summary>
+        /// Находит точку, являющуюся пересечением перпендикуляра опущенного от заданной точки к прямой, проходящей на заданном углу (высота не учитывается)
+        /// Работает на малых расстояниях (считается, что поверхность плоская)
+        /// </summary>
+        public static GeoPoint IntersectionLineAndPerpendicularFromPoint(GeoPoint lineX, GeoPoint lineY, double alpha)
+        {
+            
+            var azimuth = Azimuth(lineX, lineY) + alpha;
+            var b = Distance(lineX, lineY);
+            var c = Math.Abs(b / Math.Cos(azimuth * Math.PI / 180));
+            return RadialPoint(lineX, c, azimuth);
         }
 
         /// <summary>
