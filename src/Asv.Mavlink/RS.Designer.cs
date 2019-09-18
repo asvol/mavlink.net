@@ -268,6 +268,15 @@ namespace Asv.Mavlink {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Altitude of home position is null.
+        /// </summary>
+        internal static string VehicleArdupilotPlane_InternalGoToGlob_Altitude_of_home_position_is_null {
+            get {
+                return ResourceManager.GetString("VehicleArdupilotPlane_InternalGoToGlob_Altitude_of_home_position_is_null", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Timeout to execute &apos;{0}&apos; (wait {1:g} time).
         /// </summary>
         internal static string VehicleBase_WaitCompleteWithDefaultTimeout_Timeout_to_execute {

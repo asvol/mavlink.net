@@ -173,4 +173,7 @@
     <data name="GpsInfoHelper_GetDescription_Unknown" xml:space="preserve">
     <value>Unknown</value>
   </data>
+    <data name="VehicleArdupilotPlane_InternalGoToGlob_Altitude_of_home_position_is_null" xml:space="preserve">
+    <value>Altitude of home position is null</value>
+  </data>
 </root>

@@ -245,7 +245,7 @@ namespace Asv.Mavlink
             {
                 ports = _ports.Where(_ => _.Port.IsEnabled.Value).ToArray();
             }
-            return Task.WhenAll(ports.Select(_ => _.Port.Send(data, data.Length, cancel)));
+            return Task.WhenAll(ports.Select(_ => _.Port.Send(data, count, cancel)));
         }
     }
 }

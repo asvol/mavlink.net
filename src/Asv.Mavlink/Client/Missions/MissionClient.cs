@@ -40,7 +40,7 @@ namespace Asv.Mavlink
                     Seq = 0,
                     Frame = frame,
                     Command = cmd,
-                    Current = 2,
+                    Current = (byte) (current ? 2:0),
                     Autocontinue = (byte) (autoContinue? 1:0),
                     Param1 = param1,
                     Param2 = param2,
@@ -48,12 +48,11 @@ namespace Asv.Mavlink
                     Param4 = param4,
                     X = x,
                     Y = y,
-                    Z = 20,
+                    Z = z,
                     MissionType = missionType
                 }
             };
-            _mavlink.Send(packet, cancel);
-            return Task.CompletedTask;
+            return _mavlink.Send(packet, cancel);
         }
 
         public void Dispose()

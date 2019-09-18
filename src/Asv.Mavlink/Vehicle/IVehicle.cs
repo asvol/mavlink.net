@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.Client;
@@ -14,10 +15,18 @@ namespace Asv.Mavlink
         Complete
     }
 
+    public enum VehicleClass
+    {
+        Unknown,
+        Plane,
+        Copter,
+    }
 
     public interface IVehicle:IDisposable
     {
         MavlinkClientIdentity Identity { get; }
+
+        IMavlinkClient Mavlink { get; }
 
         IRxValue<VehicleInitState> InitState { get; }
 
@@ -25,6 +34,8 @@ namespace Asv.Mavlink
 
         IRxValue<LinkState> Link { get; }
         IRxValue<int> PacketRateHz { get; }
+
+        IRxValue<VehicleClass> Class { get; }
 
         IRxValue<GeoPoint> GpsLocation { get; }
         IRxValue<GpsInfo> GpsInfo { get; }
@@ -57,12 +68,13 @@ namespace Asv.Mavlink
 
         IRxValue<double> GroundVelocity { get; }
         
+        IEnumerable<VehicleCustomMode> AvailableModes { get; }
         IRxValue<VehicleMode> Mode { get; }
+        Task SetMode(VehicleMode mode, CancellationToken cancel);
+
         IMavlinkParameterClient Params { get; }
 
         Task TakeOff(double altitude, CancellationToken cancel);
-
-        Task GoToRel(GeoPoint location, CancellationToken cancel, double? yawDeg = null);
 
         IRxValue<GeoPoint?> GoToTarget { get; }
         Task GoToGlob(GeoPoint location, CancellationToken cancel, double? yawDeg = null);
@@ -82,5 +94,61 @@ namespace Asv.Mavlink
     {
         public string Text { get; set; }
         public MavSeverity Type { get; set; }
+    }
+
+
+    public static class VehicleFactory
+    {
+        public static IVehicle CreateVehicle(MavlinkClient client, IMavlinkDeviceInfo info)
+        {
+            switch (info.Autopilot)
+            {
+               
+                case MavAutopilot.MavAutopilotArdupilotmega:
+                    return SelectArdupilotmega(client,info);
+                case MavAutopilot.MavAutopilotGeneric:
+                case MavAutopilot.MavAutopilotReserved:
+                case MavAutopilot.MavAutopilotSlugs:
+                case MavAutopilot.MavAutopilotOpenpilot:
+                case MavAutopilot.MavAutopilotGenericWaypointsOnly:
+                case MavAutopilot.MavAutopilotGenericWaypointsAndSimpleNavigationOnly:
+                case MavAutopilot.MavAutopilotGenericMissionFull:
+                case MavAutopilot.MavAutopilotInvalid:
+                case MavAutopilot.MavAutopilotPpz:
+                case MavAutopilot.MavAutopilotUdb:
+                case MavAutopilot.MavAutopilotFp:
+                case MavAutopilot.MavAutopilotPx4:
+                case MavAutopilot.MavAutopilotSmaccmpilot:
+                case MavAutopilot.MavAutopilotAutoquad:
+                case MavAutopilot.MavAutopilotArmazila:
+                case MavAutopilot.MavAutopilotAerob:
+                case MavAutopilot.MavAutopilotAsluav:
+                case MavAutopilot.MavAutopilotSmartap:
+                case MavAutopilot.MavAutopilotAirrails:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public static VehicleArdupilot SelectArdupilotmega(MavlinkClient client, IMavlinkDeviceInfo info)
+        {
+            switch (info.Type)
+            {
+                case MavType.MavTypeFixedWing:
+                    return new VehicleArdupilotPlane(client,new VehicleBaseConfig());
+                case MavType.MavTypeQuadrotor:
+                case MavType.MavTypeTricopter:
+                case MavType.MavTypeHexarotor:
+                case MavType.MavTypeOctorotor:
+                case MavType.MavTypeHelicopter:
+                    return new VehicleArdupilotCopter(client, new VehicleBaseConfig());
+                case MavType.MavTypeSurfaceBoat:
+                case MavType.MavTypeGroundRover:
+                case MavType.MavTypeAntennaTracker:
+                case MavType.MavTypeSubmarine:
+                default:
+                    return null;
+            }
+        }
     }
 }

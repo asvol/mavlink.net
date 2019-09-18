@@ -142,6 +142,8 @@
     <Compile Include="Tools\GeoMath\GeoPoint.cs" />
     <Compile Include="Tools\RxValue\CancellationWrapper.cs" />
     <Compile Include="Tools\StringExtensions.cs" />
+    <Compile Include="Vehicle\Ardupilot\VehicleArdupilotCopter.cs" />
+    <Compile Include="Vehicle\Ardupilot\VehicleArdupilotPlane.cs" />
     <Compile Include="Vehicle\GpsInfo.cs" />
     <Compile Include="Vehicle\IVehicle.cs" />
     <Compile Include="Vehicle\Ardupilot\VehicleArdupilot.cs" />

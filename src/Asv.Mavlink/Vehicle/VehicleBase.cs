@@ -38,6 +38,8 @@ namespace Asv.Mavlink
 
         public IRxValue<int> PacketRateHz => _mavlink.Heartbeat.PacketRateHz;
 
+        public IMavlinkClient Mavlink => _mavlink;
+
         public virtual void StartListen()
         {
             InitRequestVehicleInfo();
@@ -51,14 +53,31 @@ namespace Asv.Mavlink
             InitGoTo();
             InitStatus();
             InitMode();
+            InitVehicleClass();
         }
+
+        
+
+        #region Vehicle class
+
+        public IRxValue<VehicleClass> Class => _vehicleClass;
+        private readonly RxValue<VehicleClass> _vehicleClass = new RxValue<VehicleClass>();
+        private void InitVehicleClass()
+        {
+            DisposeCancel.Token.Register(() => _vehicleClass.Dispose());
+            _mavlink.Heartbeat.RawHeartbeat.Select(InterpretVehicleClass).Subscribe(_vehicleClass,DisposeCancel.Token);
+        }
+
+        protected abstract VehicleClass InterpretVehicleClass(HeartbeatPayload heartbeatPacket);
+
+        #endregion
 
         #region Request init info
 
         private readonly RxValue<VehicleInitState> _initState = new RxValue<VehicleInitState>();
 
-
         public MavlinkClientIdentity Identity => _mavlink.Identity;
+        
         public IRxValue<VehicleInitState> InitState => _initState;
 
         private int _isRequestInfoIsInProgressOrAlreadySuccess;
@@ -104,15 +123,7 @@ namespace Asv.Mavlink
 
         #endregion
 
-        public virtual void Dispose()
-        {
-            Logger.Trace("Dispose vehicle");
-            if (Interlocked.CompareExchange(ref _isDisposed,1,0) == 1) return;
-            DisposeCancel?.Cancel(false);
-            DisposeCancel?.Dispose();
-            _mavlink?.Dispose();
-        }
-
+      
         protected async Task WaitCompleteWithDefaultTimeout(Func<bool> condition, string actionName, CancellationToken cancel)
         {
             var started = DateTime.Now;
@@ -146,14 +157,21 @@ namespace Asv.Mavlink
         #region Mode
 
         private readonly RxValue<VehicleMode> _mode = new RxValue<VehicleMode>();
+        public abstract IEnumerable<VehicleCustomMode> AvailableModes { get; }
         public IRxValue<VehicleMode> Mode => _mode;
+
+        public Task SetMode(VehicleMode mode, CancellationToken cancel)
+        {
+            return _mavlink.Common.SetMode((uint) mode.BaseMode, mode.CustomMode.Value, cancel);
+        }
+
         public IMavlinkParameterClient Params => _mavlink.Params;
 
-        protected abstract VehicleMode InterpretateMode(HeartbeatPayload heartbeat);
+        protected abstract VehicleMode Interpret(HeartbeatPayload heartbeat);
 
         private void InitMode()
         {
-            _mavlink.Heartbeat.RawHeartbeat.Select(InterpretateMode).Subscribe(_mode, DisposeCancel.Token);
+            _mavlink.Heartbeat.RawHeartbeat.Select(Interpret).Subscribe(_mode, DisposeCancel.Token);
             DisposeCancel.Token.Register(() => _dropRateComm.Dispose());
         }
 
@@ -172,9 +190,6 @@ namespace Asv.Mavlink
         protected abstract Task EnsureInGuidedMode(CancellationToken cancel);
 
         #endregion
-
-
-        
 
         #region Attitude
 
@@ -249,7 +264,6 @@ namespace Asv.Mavlink
         }
 
         #endregion
-
 
         #region Link
 
@@ -326,6 +340,7 @@ namespace Asv.Mavlink
         private readonly RxValue<TimeSpan> _armedTime = new RxValue<TimeSpan>();
         public Task RequestHome(CancellationToken cancel)
         {
+            Logger.Info("=> Request home position from vehicle");
             return _mavlink.Commands.GetHomePosition(cancel);
         }
 
@@ -409,10 +424,18 @@ namespace Asv.Mavlink
 
         #region GoTo
 
-        public Task GoToGlob(GeoPoint location, CancellationToken cancel, double? yawDeg = null)
+        public async Task GoToGlob(GeoPoint location, CancellationToken cancel, double? yawDeg = null)
         {
-            return GoTo(location, MavFrame.MavFrameGlobalInt, cancel, yawDeg);
+            await EnsureInGuidedMode(cancel);
+            if (location.Altitude.HasValue == false)
+            {
+                throw new MavlinkException(RS.VehicleArdupilot_GoTo_Altitude_of_end_point_is_null);
+            }
+            await InternalGoToGlob(location, cancel, yawDeg);
+            _goToTarget.OnNext(location);
         }
+
+        protected abstract Task InternalGoToGlob(GeoPoint location,CancellationToken cancel, double? yawDeg);
 
         public async Task GoToGlobAndWait(GeoPoint location, IProgress<double> progress, double precision, CancellationToken cancel)
         {
@@ -450,15 +473,8 @@ namespace Asv.Mavlink
             progress.Report(1);
         }
 
-        public virtual Task DoRtl(CancellationToken cancel)
-        {
-            throw new NotImplementedException();
-        }
-        
-        public Task GoToRel(GeoPoint location, CancellationToken cancel, double? yawDeg = null)
-        {
-             return GoTo(location, MavFrame.MavFrameGlobalRelativeAltInt, cancel, yawDeg);
-        }
+        public abstract Task DoRtl(CancellationToken cancel);
+
 
         private readonly RxValue<GeoPoint?> _goToTarget = new RxValue<GeoPoint?>();
         public IRxValue<GeoPoint?> GoToTarget => _goToTarget;
@@ -468,23 +484,11 @@ namespace Asv.Mavlink
             DisposeCancel.Token.Register(() => _goToTarget.Dispose());
         }
 
-        private async Task GoTo(GeoPoint location, MavFrame frame, CancellationToken cancel, double? yawDeg = null, double? vx = null, double? vy = null, double? vz = null)
-        {
-            await EnsureInGuidedMode(cancel);
-            if (location.Altitude.HasValue == false)
-            {
-                throw new MavlinkException(RS.VehicleArdupilot_GoTo_Altitude_of_end_point_is_null);
-            }
+       
 
-            var yaw = yawDeg.HasValue ? (float?) GeoMath.DegreesToRadians(yawDeg.Value) : null;
-            await _mavlink.Common.SetPositionTargetGlobalInt(0, frame,cancel, (int)(location.Latitude * 10000000), (int)(location.Longitude * 10000000), (float)location.Altitude.Value, yaw: yaw);
-            _goToTarget.OnNext(location);
-        }
+       
 
         #endregion
-
-
-        
 
         #region Status
 
@@ -511,12 +515,27 @@ namespace Asv.Mavlink
         }
 
         #endregion
+
+        public virtual void Dispose()
+        {
+            Logger.Trace("Dispose vehicle");
+            if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 1) return;
+            DisposeCancel?.Cancel(false);
+            DisposeCancel?.Dispose();
+            _mavlink?.Dispose();
+        }
+
+    }
+
+    public class VehicleCustomMode
+    {
+        public uint Value { get; set; }
+        public string Name { get; set; }
     }
 
     public class VehicleMode
     {
         public MavModeFlag BaseMode { get; set; }
-        public uint CustomMode { get; set; }
-        public string Name { get; set; }
+        public VehicleCustomMode CustomMode { get; set; }
     }
 }
