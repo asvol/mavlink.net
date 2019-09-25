@@ -210,7 +210,7 @@ namespace Asv.Mavlink
             
             var azimuth = Azimuth(lineX, lineY) + alpha;
             var b = Distance(lineX, lineY);
-            var c = Math.Abs(b / Math.Cos(azimuth * Math.PI / 180));
+            var c = Math.Abs(b / Math.Cos(alpha * Math.PI / 180));
             return RadialPoint(lineX, c, azimuth);
         }
 
