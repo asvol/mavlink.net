@@ -16,6 +16,7 @@ namespace Asv.Mavlink
 
         public VehicleArdupilotPlane(IMavlinkClient mavlink, VehicleBaseConfig config) : base(mavlink, config)
         {
+            
         }
 
         protected override VehicleClass InterpretVehicleClass(HeartbeatPayload heartbeatPacket)

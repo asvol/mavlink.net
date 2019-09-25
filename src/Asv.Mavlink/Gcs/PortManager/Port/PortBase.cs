@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -63,6 +64,10 @@ namespace Asv.Mavlink
             try
             {
                 InternalStop();
+            }
+            catch (Exception ex)
+            {
+                Debug.Assert(true,ex.Message);
             }
             finally
             {

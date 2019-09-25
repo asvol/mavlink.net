@@ -120,6 +120,7 @@
     <Compile Include="Gcs\GroundControlStation.cs" />
     <Compile Include="Gcs\IGroundControlStation.cs" />
     <Compile Include="Gcs\PortManager\Port\PortBaseV2.cs" />
+    <Compile Include="Gcs\PortManager\Port\Tcp\TcpPort.cs" />
     <Compile Include="Server\CommandLong\CommandLongServer.cs" />
     <Compile Include="Server\CommandLong\ICommandLongServer.cs" />
     <Compile Include="Server\MavlinkServerBase.cs" />

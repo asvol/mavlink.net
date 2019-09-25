@@ -16,6 +16,7 @@ namespace Asv.Mavlink
     {
         Serial,
         Udp,
+        Tcp
     }
 
 
@@ -38,11 +39,16 @@ namespace Asv.Mavlink
         {
             var uri = new Uri(connectionString);
 
+            TcpPortConfig tcp;
+            if (TcpPortConfig.TryParseFromUri(uri, out tcp)) return new TcpPort(tcp);
+
             UdpPortConfig udp;
             if (UdpPortConfig.TryParseFromUri(uri, out udp)) return new UdpPort(udp);
 
             SerialPortConfig ser;
             if (SerialPortConfig.TryParseFromUri(uri, out ser)) return new CustomSerialPort(ser);
+
+
 
             throw new Exception(string.Format(RS.RemoteStreamFactory_CreateStream_Connection_string_is_invalid, connectionString));
         }
