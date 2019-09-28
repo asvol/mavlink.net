@@ -21,4 +21,6 @@ namespace Asv.Mavlink
         Task MissionItem(MavFrame frame, MavCmd cmd, bool current, bool autoContinue, float param1, float param2, float param3, float param4, float x, float y, float z, MavMissionType missionType, int attemptCount, CancellationToken cancel);
     }
 
+    
+
 }

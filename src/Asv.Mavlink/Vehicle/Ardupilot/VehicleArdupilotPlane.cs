@@ -86,10 +86,15 @@ namespace Asv.Mavlink
             if (rel == null)
                     throw new MavlinkException(RS.VehicleArdupilotPlane_InternalGoToGlob_Altitude_of_home_position_is_null);
 
-            await Mavlink.Mission.MissionItem(MavFrame.MavFrameGlobalRelativeAlt, MavCmd.MavCmdNavWaypoint, true,
-                    true, 0, 0, 0,
+            
+            await Mavlink.Mission.MissionItem(MavFrame.MavFrameGlobalRelativeAlt, MavCmd.MavCmdNavLoiterUnlim, true,
+                    true, 0, 0, 100,
                     0, (float) location.Latitude, (float) location.Longitude, (float) rel.Value,
                     MavMissionType.MavMissionTypeMission, 3, cancel);
+                //            await Mavlink.Mission.MissionItem(MavFrame.MavFrameGlobalRelativeAlt, MavCmd.MavCmdNavWaypoint, true,
+                //                    true, 0, 0, 0,
+                //                    0, (float) location.Latitude, (float) location.Longitude, (float) rel.Value,
+                //                    MavMissionType.MavMissionTypeMission, 3, cancel);
         }
 
         public override Task DoRtl(CancellationToken cancel)
