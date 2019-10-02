@@ -7,6 +7,8 @@ namespace Asv.Mavlink.Client
 {
     public interface IMavlinkParameterClient
     {
+        IMavParamValueConverter Converter { get; set; }
+
         IReadOnlyDictionary<string, MavParam> Params { get; }
         IRxValue<int?> ParamsCount { get; }
         IObservable<MavParam> OnParamUpdated { get; }

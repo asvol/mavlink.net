@@ -107,6 +107,9 @@
     <Compile Include="Client\Heartbeat\IHeartbeatClient.cs" />
     <Compile Include="Client\Logging\ILoggingClient.cs" />
     <Compile Include="Client\Logging\LoggingClient.cs" />
+    <Compile Include="Client\Params\ParamConverters\IMavParamValueConverter.cs" />
+    <Compile Include="Client\Params\ParamConverters\MavParamArdupilotValueConverter.cs" />
+    <Compile Include="Client\Params\ParamConverters\MavParamValueConverter.cs" />
     <Compile Include="Client\V2_extention\IV2ExtensionServer.cs" />
     <Compile Include="Client\V2_extention\V2ExtensionServer.cs" />
     <Compile Include="Connection\Dialects\ardupilotmega.cs" />

@@ -36,6 +36,7 @@ namespace Asv.Mavlink.Client
             _identity = identity;
             _config = config;
             HandleParams();
+            Converter = new MavParamArdupilotValueConverter();
         }
 
         private bool FilterVehicle(IPacketV2<IPayload> packetV2)
@@ -227,6 +228,7 @@ namespace Asv.Mavlink.Client
             return result;
         }
 
+        public IMavParamValueConverter Converter { get; set; }
 
         public async Task<MavParam> WriteParam(MavParam param, int attemptCount, CancellationToken cancel)
         {
@@ -240,7 +242,7 @@ namespace Asv.Mavlink.Client
                     TargetSystem = _identity.TargetSystemId,
                     ParamId = SetParamName(param.Name),
                     ParamType = param.Type,
-                    ParamValue = ConvertToMavlinkUnionToParamValue(param)
+                    ParamValue = Converter.ConvertToMavlinkUnionToParamValue(param)
                 }
             };
 
@@ -286,64 +288,7 @@ namespace Asv.Mavlink.Client
 
         }
 
-        private float ConvertToMavlinkUnionToParamValue(MavParam param)
-        {
-            var arr = BitConverter.GetBytes(0.0F);
-            switch (param.Type)
-            {
-                case MavParamType.MavParamTypeUint8:
-                    if (!param.IntegerValue.HasValue)
-                        throw new Exception(string.Format(RS.Vehicle_ConvertToMavlinkUnionToParamValue_Integer_value_not_assigned_for_param, param.Name, param.Type));
-                    arr[0] = (byte)(param.IntegerValue & 0xFF);
-                    break;
-                case MavParamType.MavParamTypeInt8:
-                    if (!param.IntegerValue.HasValue)
-                        throw new Exception(string.Format(RS.Vehicle_ConvertToMavlinkUnionToParamValue_Integer_value_not_assigned_for_param, param.Name, param.Type));
-                    arr[0] = (byte)(param.IntegerValue & 0xFF);
-                    break;
-                case MavParamType.MavParamTypeUint16:
-                    if (!param.IntegerValue.HasValue)
-                        throw new Exception(string.Format(RS.Vehicle_ConvertToMavlinkUnionToParamValue_Integer_value_not_assigned_for_param, param.Name, param.Type));
-                    arr[0] = (byte)(param.IntegerValue & 0xFF);
-                    arr[1] = (byte)((param.IntegerValue >> 8) & 0xFF);
-                    break;
-                case MavParamType.MavParamTypeInt16:
-                    if (!param.IntegerValue.HasValue)
-                        throw new Exception(string.Format(RS.Vehicle_ConvertToMavlinkUnionToParamValue_Integer_value_not_assigned_for_param, param.Name, param.Type));
-                    arr[0] = (byte)(param.IntegerValue & 0xFF);
-                    arr[1] = (byte)((param.IntegerValue >> 8) & 0xFF);
-                    break;
-                case MavParamType.MavParamTypeUint32:
-                    if (!param.IntegerValue.HasValue)
-                        throw new Exception(string.Format(RS.Vehicle_ConvertToMavlinkUnionToParamValue_Integer_value_not_assigned_for_param, param.Name, param.Type));
-                    arr[0] = (byte)(param.IntegerValue & 0xFF);
-                    arr[1] = (byte)((param.IntegerValue >> 8) & 0xFF);
-                    arr[2] = (byte)((param.IntegerValue >> 16) & 0xFF);
-                    arr[3] = (byte)((param.IntegerValue >> 24) & 0xFF);
-                    break;
-                case MavParamType.MavParamTypeInt32:
-                    if (!param.IntegerValue.HasValue)
-                        throw new Exception(string.Format(RS.Vehicle_ConvertToMavlinkUnionToParamValue_Integer_value_not_assigned_for_param, param.Name, param.Type));
-                    arr[0] = (byte)(param.IntegerValue & 0xFF);
-                    arr[1] = (byte)((param.IntegerValue >> 8) & 0xFF);
-                    arr[2] = (byte)((param.IntegerValue >> 16) & 0xFF);
-                    arr[3] = (byte)((param.IntegerValue >> 24) & 0xFF);
-                    break;
-                case MavParamType.MavParamTypeUint64:
-                    throw new MavlinkException(RS.Vehicle_ConvertToMavlinkUnionToParamValue_NeedMoreByte);
-                case MavParamType.MavParamTypeInt64:
-                    throw new MavlinkException(RS.Vehicle_ConvertToMavlinkUnionToParamValue_NeedMoreByte);
-                case MavParamType.MavParamTypeReal32:
-                    if (!param.RealValue.HasValue)
-                        throw new Exception(string.Format(RS.Vehicle_ConvertToMavlinkUnionToParamValue_Real_value_not_assigned_for_param, param.Name, param.Type));
-                    return param.RealValue.Value;
-                case MavParamType.MavParamTypeReal64:
-                    throw new MavlinkException(RS.Vehicle_ConvertToMavlinkUnionToParamValue_NeedMoreByte);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(param.Type), param.Type, null);
-            }
-            return BitConverter.ToSingle(arr, 0);
-        }
+        
 
        
 
@@ -358,66 +303,16 @@ namespace Asv.Mavlink.Client
 
             float? floatVal;
             long? longVal;
-            ConvertFromMavlinkUnionToParamValue(p.Payload.ParamValue, p.Payload.ParamType, out floatVal, out longVal);
+            Converter.ConvertFromMavlinkUnionToParamValue(p.Payload.ParamValue, p.Payload.ParamType, out floatVal, out longVal);
             var mavParam = new MavParam(p.Payload.ParamIndex, name, p.Payload.ParamType, floatVal, longVal);
             _params.AddOrUpdate(name, mavParam, (s, param) => mavParam);
             _paramUpdated.OnNext(mavParam);
             _paramsCount.OnNext(p.Payload.ParamCount);
         }
 
-        private void ConvertFromMavlinkUnionToParamValue(float payloadParamValue, MavParamType payloadParamType, out float? floatVal, out long? longVal)
-        {
+        
 
-            // MAVLink (v1.0, v2.0) supports these data types:
-            // uint32_t - 32bit unsigned integer(use the ENUM value MAV_PARAM_TYPE_UINT32)
-            // int32_t - 32bit signed integer(use the ENUM value MAV_PARAM_TYPE_INT32)
-            // float - IEEE754 single precision floating point number(use the ENUM value MAV_PARAM_TYPE_FLOAT)
-            // All parameters are send as the float value of mavlink_param_union_t, which means that a parameter 
-            // should be byte-wise converted with this union to a byte-wise float (no type conversion). 
-            // This is necessary in order to not limit the maximum precision for scaled integer params. 
-            // E.g. GPS coordinates can only be expressed with single float precision up to a few meters, while GPS coordinates in 1E7 scaled integers 
-            // provide very high accuracy.
-
-            switch (payloadParamType)
-            {
-                case MavParamType.MavParamTypeUint8:
-                    longVal = BitConverter.GetBytes(payloadParamValue)[0];
-                    floatVal = null;
-                    break;
-                case MavParamType.MavParamTypeInt8:
-                    longVal = (sbyte)BitConverter.GetBytes(payloadParamValue)[0];
-                    floatVal = null;
-                    break;
-                case MavParamType.MavParamTypeUint16:
-                    longVal = BitConverter.ToUInt16(BitConverter.GetBytes(payloadParamValue), 0);
-                    floatVal = null;
-                    break;
-                case MavParamType.MavParamTypeInt16:
-                    longVal = BitConverter.ToInt16(BitConverter.GetBytes(payloadParamValue), 0);
-                    floatVal = null;
-                    break;
-                case MavParamType.MavParamTypeUint32:
-                    longVal = BitConverter.ToUInt32(BitConverter.GetBytes(payloadParamValue), 0);
-                    floatVal = null;
-                    break;
-                case MavParamType.MavParamTypeInt32:
-                    longVal = BitConverter.ToInt32(BitConverter.GetBytes(payloadParamValue), 0);
-                    floatVal = null;
-                    break;
-                case MavParamType.MavParamTypeUint64:
-                    throw new MavlinkException(RS.Vehicle_ConvertToMavlinkUnionToParamValue_NeedMoreByte);
-                case MavParamType.MavParamTypeInt64:
-                    throw new MavlinkException(RS.Vehicle_ConvertToMavlinkUnionToParamValue_NeedMoreByte);
-                case MavParamType.MavParamTypeReal32:
-                    floatVal = payloadParamValue;
-                    longVal = null;
-                    break;
-                case MavParamType.MavParamTypeReal64:
-                    throw new MavlinkException(RS.Vehicle_ConvertToMavlinkUnionToParamValue_NeedMoreByte);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(payloadParamType), payloadParamType, null);
-            }
-        }
+        
 
         private string GetParamName(ParamValuePayload payload)
         {

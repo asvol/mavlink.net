@@ -44,8 +44,8 @@ namespace Asv.Mavlink.Client
         public ushort Index { get; private set; }
         public string Name { get; private set; }
         public MavParamType Type { get; private set; }
-        public float? RealValue { get; private set; }
-        public long? IntegerValue { get; private set; }
+        public float? RealValue { get; set; }
+        public long? IntegerValue { get; set; }
 
         public object Clone()
         {
