@@ -47,6 +47,11 @@ namespace Asv.Mavlink.Client
         public float? RealValue { get; set; }
         public long? IntegerValue { get; set; }
 
+        public override string ToString()
+        {
+            return $"MAV_PARAM[index:{Index},name:{Name},type:{Type:G},realValue:{RealValue},intValue:{IntegerValue}]";
+        }
+
         public object Clone()
         {
             return MemberwiseClone();

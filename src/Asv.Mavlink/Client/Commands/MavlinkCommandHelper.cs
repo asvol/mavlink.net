@@ -11,5 +11,9 @@ namespace Asv.Mavlink.Client
             return src.CommandLong(MavCmd.MavCmdGetHomePosition, float.NaN, float.NaN, float.NaN, float.NaN, float.NaN,
                 float.NaN, float.NaN, 1, cancel);
         }
+
+       
     }
+
+   
 }

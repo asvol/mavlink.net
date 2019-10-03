@@ -57,6 +57,7 @@ namespace Asv.Mavlink
 
         public Task Send(IPacketV2<IPayload> packet, CancellationToken cancel)
         {
+            if (_disposed != 0) return Task.CompletedTask;
             Interlocked.Increment(ref _txPackets);
             var buffer = new byte[packet.GetMaxByteSize()];
             var size = packet.Serialize(buffer, 0);

@@ -263,6 +263,7 @@ namespace Asv.Mavlink
             _roi.OnNext(null);
         }
 
+     
         #endregion
 
         #region Link
@@ -516,6 +517,19 @@ namespace Asv.Mavlink
 
         #endregion
 
+        #region Custom commands
+
+        public async Task PreflightRebootShutdown(AutopilotRebootShutdown ardupilot, CompanionRebootShutdown companion, CancellationToken cancel)
+        {
+            Logger.Info($"=> PreflightRebootShutdown(Autopilot:{ardupilot:G}, Companion:{companion:G})");
+            var res = await Mavlink.Commands.CommandLong(MavCmd.MavCmdPreflightRebootShutdown, (float)ardupilot, (float)companion, 0, 0, 0, 0, 0, 1, cancel);
+            Logger.Info($"<= PreflightRebootShutdown(Autopilot:{ardupilot:G}, Companion:{companion:G}): '{res.Result}'(porgress:{res.Progress};resultParam2:{res.ResultParam2})");
+            ValidateCommandResult(res);
+        }
+
+
+        #endregion
+
         public virtual void Dispose()
         {
             Logger.Trace("Dispose vehicle");
@@ -526,6 +540,23 @@ namespace Asv.Mavlink
         }
 
     }
+
+    public enum AutopilotRebootShutdown
+    {
+        DoNothingForAutopilot = 0,
+        RebootAutopilot = 1,
+        ShutdownAutopilot = 2,
+        RebootAutopilotAndKeepItInTheBootloaderUntilUpgraded = 3,
+    }
+
+    public enum CompanionRebootShutdown
+    {
+        DoNothingForOnboardComputer = 0,
+        RebootOnboardComputer = 1,
+        ShutdownOnboardComputer = 2,
+        RebootOnboardComputerAndKeepItInTheBootloaderUntilUpgraded = 3,
+    }
+
 
     public class VehicleCustomMode
     {

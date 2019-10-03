@@ -22,7 +22,7 @@ namespace Asv.Mavlink
         Copter,
     }
 
-    public interface IVehicle:IDisposable
+    public interface IVehicle
     {
         MavlinkClientIdentity Identity { get; }
 
@@ -86,8 +86,14 @@ namespace Asv.Mavlink
         IRxValue<GeoPoint?> Roi { get; }
         
         Task ClearRoi(CancellationToken cancel);
-
-        
+        /// <summary>
+        /// Request the reboot or shutdown of system components.
+        /// </summary>
+        /// <param name="ardupilot"></param>
+        /// <param name="companion"></param>
+        /// <param name="cancel"></param>
+        /// <returns></returns>
+        Task PreflightRebootShutdown(AutopilotRebootShutdown ardupilot, CompanionRebootShutdown companion, CancellationToken cancel);
     }
 
     public class VehicleStatusMessage
