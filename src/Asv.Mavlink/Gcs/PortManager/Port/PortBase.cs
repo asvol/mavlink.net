@@ -140,6 +140,7 @@ namespace Asv.Mavlink
             _portErrorStream.Dispose();
             _portStateStream.Dispose();
             _enableStream.Dispose();
+            _outputData.OnCompleted();
             _outputData.Dispose();
         }
     }

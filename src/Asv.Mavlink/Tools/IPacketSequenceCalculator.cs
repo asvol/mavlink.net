@@ -9,7 +9,7 @@ namespace Asv.Mavlink
 
     public class PacketSequenceCalculator : IPacketSequenceCalculator
     {
-        private int _seq;
+        private volatile int _seq;
 
         public byte GetNextSequenceNumber()
         {

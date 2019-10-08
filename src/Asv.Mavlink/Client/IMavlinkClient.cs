@@ -21,5 +21,6 @@ namespace Asv.Mavlink
         IDebugClient Debug { get; }
         ILoggingClient Logging { get; }
         IV2ExtensionClient V2Extension { get; }
+        IDgpsClient Rtk { get; }
     }
 }

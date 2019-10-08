@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using NLog;
 
 namespace Asv.Mavlink.Client
@@ -20,6 +21,7 @@ namespace Asv.Mavlink.Client
 
     public class MavlinkClient : IMavlinkClient
     {
+        private readonly CancellationTokenSource _disposeCancel = new CancellationTokenSource();
         private readonly IMavlinkV2Connection _mavlinkConnection;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly MavlinkTelemetry _rtt;
@@ -31,8 +33,11 @@ namespace Asv.Mavlink.Client
         private readonly DebugClient _debugs;
         private readonly HeartbeatClient _heartbeat;
         private readonly LoggingClient _logging;
+        private readonly DgpsClient _rtk;
         private IV2ExtensionClient _v2Ext;
-        private PacketSequenceCalculator _seq = new PacketSequenceCalculator();
+        private readonly PacketSequenceCalculator _seq = new PacketSequenceCalculator();
+        private int _isDisposed;
+
 
         public MavlinkClient(IMavlinkV2Connection connection, MavlinkClientIdentity identity, MavlinkClientConfig config)
         {
@@ -40,16 +45,40 @@ namespace Asv.Mavlink.Client
             if (config == null) throw new ArgumentNullException(nameof(config));
             Identity = identity;
             _mavlinkConnection = connection;
+
             _rtt = new MavlinkTelemetry(_mavlinkConnection, identity);
+            _disposeCancel.Token.Register(() => _rtt.Dispose());
+
             _params = new MavlinkParameterClient(_mavlinkConnection, identity,new VehicleParameterProtocolConfig {ReadWriteTimeoutMs = config.ReadParamTimeoutMs,TimeoutToReadAllParamsMs = config.TimeoutToReadAllParamsMs});
+            _disposeCancel.Token.Register(() => _params.Dispose());
+
             _mavlinkCommands = new MavlinkCommandClient(_mavlinkConnection, identity, _seq,new CommandProtocolConfig { CommandTimeoutMs = config.CommandTimeoutMs});
+            _disposeCancel.Token.Register(() => _mavlinkCommands.Dispose());
+
             _mission = new MissionClient(_mavlinkConnection,_seq, identity);
+            _disposeCancel.Token.Register(() => _mission.Dispose());
+
             _mavlinkOffboard = new MavlinkOffboardMode(_mavlinkConnection,identity);
+            _disposeCancel.Token.Register(() => _mavlinkOffboard.Dispose());
+
             _mode = new MavlinkCommon(_mavlinkConnection,identity);
+            _disposeCancel.Token.Register(() => _mode.Dispose());
+
             _debugs = new DebugClient(_mavlinkConnection, identity);
+            _disposeCancel.Token.Register(() => _debugs.Dispose());
+
             _heartbeat = new HeartbeatClient(_mavlinkConnection,identity);
+            _disposeCancel.Token.Register(() => _heartbeat.Dispose());
+
             _logging = new LoggingClient(_mavlinkConnection,identity);
+            _disposeCancel.Token.Register(() => _logging.Dispose());
+
             _v2Ext = new V2ExtensionClient(_mavlinkConnection, _seq, identity);
+            _disposeCancel.Token.Register(() => _v2Ext.Dispose());
+
+            _rtk = new DgpsClient(_mavlinkConnection, _seq, identity);
+            _disposeCancel.Token.Register(() => _rtt.Dispose());
+
         }
 
         protected IMavlinkV2Connection Connection => _mavlinkConnection;
@@ -64,23 +93,15 @@ namespace Asv.Mavlink.Client
         public IDebugClient Debug => _debugs;
         public ILoggingClient Logging => _logging;
         public IV2ExtensionClient V2Extension => _v2Ext;
-
-        public bool IsDisposed { get; private set; }
+        public IDgpsClient Rtk => _rtk;
 
         public void Dispose()
         {
-            if (IsDisposed) return;
-            IsDisposed = true;
+            if (Interlocked.CompareExchange(ref _isDisposed,1,0) !=0) return;
             try
             {
-                _rtt.Dispose();
-                _params.Dispose();
-                _mavlinkCommands.Dispose();
-                _mission.Dispose();
-                _mavlinkOffboard?.Dispose();
-                _mode?.Dispose();
-                _heartbeat?.Dispose();
-                _debugs?.Dispose();
+                _disposeCancel?.Cancel(false);
+                _disposeCancel?.Dispose();
             }
             catch (Exception e)
             {

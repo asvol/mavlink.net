@@ -34,26 +34,27 @@ namespace Asv.Mavlink.Client
 
         public IRxValue<V2ExtensionPacket> OnData => _onData;
 
-        public Task SendData(byte targetNetworkId,ushort messageType, byte[] data, CancellationToken cancel)
+        public async Task SendData(byte targetNetworkId,ushort messageType, byte[] data, CancellationToken cancel)
         {
-            var linked = CancellationTokenSource.CreateLinkedTokenSource(_disposeCancel.Token, cancel);
-            return _connection.Send(new V2ExtensionPacket
+            using (var linked = CancellationTokenSource.CreateLinkedTokenSource(_disposeCancel.Token, cancel))
             {
-                ComponenId = _identity.ComponentId,
-                SystemId = _identity.SystemId,
-                CompatFlags = 0,
-                IncompatFlags = 0,
-                Sequence = _seq.GetNextSequenceNumber(),
-                Payload =
+                await _connection.Send(new V2ExtensionPacket
                 {
-                    MessageType = messageType,
-                    Payload = data,
-                    TargetComponent = _identity.TargetComponentId,
-                    TargetSystem = _identity.TargetSystemId,
-                    TargetNetwork = targetNetworkId,
-                }
-            }, linked.Token);
-
+                    ComponenId = _identity.ComponentId,
+                    SystemId = _identity.SystemId,
+                    CompatFlags = 0,
+                    IncompatFlags = 0,
+                    Sequence = _seq.GetNextSequenceNumber(),
+                    Payload =
+                    {
+                        MessageType = messageType,
+                        Payload = data,
+                        TargetComponent = _identity.TargetComponentId,
+                        TargetSystem = _identity.TargetSystemId,
+                        TargetNetwork = targetNetworkId,
+                    }
+                }, linked.Token);
+            }
         }
     }
 

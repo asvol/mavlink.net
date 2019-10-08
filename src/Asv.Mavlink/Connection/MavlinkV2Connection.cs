@@ -42,6 +42,7 @@ namespace Asv.Mavlink
         public void Dispose()
         {
             if (Interlocked.CompareExchange(ref _disposed, 1,0) == 1) return;
+            _sendPacketSubject?.OnCompleted();
             _sendPacketSubject?.Dispose();
             _disposeCancel?.Cancel(false);
             _disposeCancel?.Dispose();

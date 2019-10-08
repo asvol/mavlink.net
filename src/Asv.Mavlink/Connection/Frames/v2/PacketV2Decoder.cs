@@ -171,7 +171,10 @@ namespace Asv.Mavlink.Decoder
 
         public virtual void Dispose()
         {
+            _decodeErrorSubject?.OnCompleted();
             _decodeErrorSubject?.Dispose();
+
+            _packetSubject?.OnCompleted();
             _packetSubject?.Dispose();
         }
     }

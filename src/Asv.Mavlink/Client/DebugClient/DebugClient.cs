@@ -26,7 +26,11 @@ namespace Asv.Mavlink.Client
                 .Select(_ => new KeyValuePair<string, float>(ConvertToKey(_.Payload.Name), _.Payload.Value))
                 .Subscribe(_onFloatSubject,_disposeCancel.Token);
 
-            _disposeCancel.Token.Register(() => _onFloatSubject.Dispose());
+            _disposeCancel.Token.Register(() =>
+            {
+                _onFloatSubject.OnCompleted();
+                _onFloatSubject.Dispose();
+            });
 
             inputPackets
                 .Where(_ => _.MessageId == NamedValueIntPacket.PacketMessageId)
@@ -34,7 +38,11 @@ namespace Asv.Mavlink.Client
                 .Select(_ => new KeyValuePair<string, int>(ConvertToKey(_.Payload.Name), _.Payload.Value))
                 .Subscribe(_onIntSubject, _disposeCancel.Token);
 
-            _disposeCancel.Token.Register(() => _onIntSubject.Dispose());
+            _disposeCancel.Token.Register(() =>
+            {
+                _onIntSubject.OnCompleted();
+                _onIntSubject.Dispose();
+            });
 
             inputPackets
                 .Where(_ => _.MessageId == DebugFloatArrayPacket.PacketMessageId)
@@ -62,10 +70,10 @@ namespace Asv.Mavlink.Client
 
         public void Dispose()
         {
-            _disposeCancel?.Cancel(false);
-            _disposeCancel?.Dispose();
-            _onFloatSubject?.Dispose();
-            _onIntSubject?.Dispose();
+            _disposeCancel.Cancel(false);
+            _disposeCancel.Dispose();
+
+            
         }
     }
 }

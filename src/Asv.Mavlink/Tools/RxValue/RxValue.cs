@@ -24,6 +24,7 @@ namespace Asv.Mavlink
 
         public virtual void Dispose()
         {
+            _subject.OnCompleted();
             _subject.Dispose();
         }
 

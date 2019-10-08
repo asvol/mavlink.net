@@ -32,7 +32,11 @@ namespace Asv.Mavlink
             _disposedCancel.Token.Register(() => _portErrorStream.Dispose());
             _disposedCancel.Token.Register(() => _portStateStream.Dispose());
             _disposedCancel.Token.Register(() => _enableStream.Dispose());
-            _disposedCancel.Token.Register(() => _outputData.Dispose());
+            _disposedCancel.Token.Register(() =>
+            {
+                _outputData.OnCompleted();
+                _outputData.Dispose();
+            });
         }
 
 

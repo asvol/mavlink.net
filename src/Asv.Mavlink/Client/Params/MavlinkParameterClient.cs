@@ -321,8 +321,12 @@ namespace Asv.Mavlink.Client
 
         public void Dispose()
         {
+            _paramUpdated?.OnCompleted();
             _paramUpdated?.Dispose();
+
+            _paramsCount?.OnCompleted();
             _paramsCount?.Dispose();
+            
             _params.Clear();
             _paramsSubscribe?.Dispose();
         }

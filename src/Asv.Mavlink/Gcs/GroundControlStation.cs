@@ -86,8 +86,16 @@ namespace Asv.Mavlink
                 _.RegisterIcarousDialect();
                 _.RegisterUavionixDialect();
             });
-            _cancel.Token.Register(() => _foundDeviceSubject.Dispose());
-            _cancel.Token.Register(() => _lostDeviceSubject.Dispose());
+            _cancel.Token.Register(() =>
+            {
+                _foundDeviceSubject.OnCompleted();
+                _foundDeviceSubject.Dispose();
+            });
+            _cancel.Token.Register(() =>
+            {
+                _lostDeviceSubject.OnCompleted();
+                _lostDeviceSubject.Dispose();
+            });
             MavlinkV2.Where(_=>_.MessageId == HeartbeatPacket.PacketMessageId).Cast<HeartbeatPacket>().Subscribe(DeviceFounder, _cancel.Token);
             Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(_=>RemoveOldDevice(), _cancel.Token);
 
