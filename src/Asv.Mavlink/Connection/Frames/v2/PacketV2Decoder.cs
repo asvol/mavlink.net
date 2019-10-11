@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reactive.Subjects;
+using System.Threading;
 using NLog;
 
 namespace Asv.Mavlink.Decoder
@@ -16,6 +17,7 @@ namespace Asv.Mavlink.Decoder
         private readonly Subject<DeserializePackageException> _decodeErrorSubject = new Subject<DeserializePackageException>();
         private readonly Subject<IPacketV2<IPayload>> _packetSubject = new Subject<IPacketV2<IPayload>>();
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private int _isDisposed;
 
         private enum DecodeStep
         {
@@ -171,6 +173,8 @@ namespace Asv.Mavlink.Decoder
 
         public virtual void Dispose()
         {
+            if (Interlocked.CompareExchange(ref _isDisposed,1,0)!=0) return;
+
             _decodeErrorSubject?.OnCompleted();
             _decodeErrorSubject?.Dispose();
 
