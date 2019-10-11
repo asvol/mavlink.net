@@ -26,6 +26,7 @@ namespace Asv.Mavlink
         private readonly ReaderWriterLockSlim _deviceListLock = new ReaderWriterLockSlim();
         private readonly Subject<IMavlinkDeviceInfo> _foundDeviceSubject = new Subject<IMavlinkDeviceInfo>();
         private readonly Subject<IMavlinkDeviceInfo> _lostDeviceSubject = new Subject<IMavlinkDeviceInfo>();
+        private int _isDisposed;
 
 
         public class MavlinkDeviceInfo : IMavlinkDeviceInfo
@@ -185,6 +186,7 @@ namespace Asv.Mavlink
 
         public void Dispose()
         {
+            if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) != 0) return;
             Ports?.Dispose();
             MavlinkV2?.Dispose();
         }

@@ -156,8 +156,6 @@ namespace Asv.Mavlink.Decoder
             
         }
 
-
-
         public IObservable<DeserializePackageException> OutError => _decodeErrorSubject;
 
         public void Register(Func<IPacketV2<IPayload>> factory)
