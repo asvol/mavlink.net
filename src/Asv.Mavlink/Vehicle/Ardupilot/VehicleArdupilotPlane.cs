@@ -10,6 +10,58 @@ using MavCmd = Asv.Mavlink.V2.Common.MavCmd;
 
 namespace Asv.Mavlink
 {
+    public static class PlaneModeHelper
+    {
+        public static string GetDisplayName(this PlaneMode customMode)
+        {
+            switch (customMode)
+            {
+                case PlaneMode.PlaneModeManual:
+                    return "Manual";
+                case PlaneMode.PlaneModeCircle:
+                    return "Circle";
+                case PlaneMode.PlaneModeStabilize:
+                    return "Stabilize";
+                case PlaneMode.PlaneModeTraining:
+                    return "Training";
+                case PlaneMode.PlaneModeAcro:
+                    return "Acro";
+                case PlaneMode.PlaneModeFlyByWireA:
+                    return "Fly by wire A";
+                case PlaneMode.PlaneModeFlyByWireB:
+                    return "Fly by wire B";
+                case PlaneMode.PlaneModeCruise:
+                    return "Cruise";
+                case PlaneMode.PlaneModeAutotune:
+                    return "Autotune";
+                case PlaneMode.PlaneModeAuto:
+                    return "Auto";
+                case PlaneMode.PlaneModeRtl:
+                    return "RTL";
+                case PlaneMode.PlaneModeLoiter:
+                    return "Loiter";
+                case PlaneMode.PlaneModeAvoidAdsb:
+                    return "Avoid ADSB";
+                case PlaneMode.PlaneModeGuided:
+                    return "Guided";
+                case PlaneMode.PlaneModeInitializing:
+                    return "Initializing";
+                case PlaneMode.PlaneModeQstabilize:
+                    return "Quad Stabilize";
+                case PlaneMode.PlaneModeQhover:
+                    return "Quad Hover";
+                case PlaneMode.PlaneModeQloiter:
+                    return "Quad Loiter";
+                case PlaneMode.PlaneModeQland:
+                    return "Quad Land";
+                case PlaneMode.PlaneModeQrtl:
+                    return "Quad RTL";
+                default:
+                    return customMode.ToString("G").Replace("PlaneMode", string.Empty);
+            }
+        }
+    }
+
     public class VehicleArdupilotPlane : VehicleArdupilot
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -31,7 +83,7 @@ namespace Asv.Mavlink
         private IEnumerable<VehicleCustomMode> GetModes()
         {
             return _modes ?? (_modes = Enum.GetValues(typeof(PlaneMode)).Cast<PlaneMode>()
-                       .Select(_ => new VehicleCustomMode { Name = _.ToString("G"), Value = (uint)_ }).ToArray());
+                       .Select(_ => new VehicleCustomMode { Name = _.GetDisplayName(), Value = (uint)_ }).ToArray());
         }
 
         protected override VehicleMode Interpret(HeartbeatPayload heartbeat)
@@ -42,7 +94,7 @@ namespace Asv.Mavlink
                 BaseMode = heartbeat.BaseMode,
                 CustomMode = new VehicleCustomMode
                 {
-                    Name = customMode.ToString("G"),
+                    Name = customMode.GetDisplayName(),
                     Value = (uint)customMode
                 }
             };

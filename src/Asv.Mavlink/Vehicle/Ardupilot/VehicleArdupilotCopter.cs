@@ -9,6 +9,57 @@ using Asv.Mavlink.Client;
 
 namespace Asv.Mavlink
 {
+
+    public static class CopterModeHelper
+    {
+        public static string GetDisplayName(this CopterMode customMode)
+        {
+            switch (customMode)
+            {
+                case CopterMode.CopterModeStabilize:
+                    return "Stabilize";
+                case CopterMode.CopterModeAcro:
+                    return "Acro";
+                case CopterMode.CopterModeAltHold:
+                    return "AltHold";
+                case CopterMode.CopterModeAuto:
+                    return "Auto";
+                case CopterMode.CopterModeGuided:
+                    return "Guided";
+                case CopterMode.CopterModeLoiter:
+                    return "Loiter";
+                case CopterMode.CopterModeRtl:
+                    return "RTL";
+                case CopterMode.CopterModeCircle:
+                    return "Circle";
+                case CopterMode.CopterModeLand:
+                    return "Land";
+                case CopterMode.CopterModeDrift:
+                    return "Drift";
+                case CopterMode.CopterModeSport:
+                    return "Sport";
+                case CopterMode.CopterModeFlip:
+                    return "Flip";
+                case CopterMode.CopterModeAutotune:
+                    return "Autotune";
+                case CopterMode.CopterModePoshold:
+                    return "Position hold";
+                case CopterMode.CopterModeBrake:
+                    return "Brake";
+                case CopterMode.CopterModeThrow:
+                    return "Throw";
+                case CopterMode.CopterModeAvoidAdsb:
+                    return "Avoid ADSB";
+                case CopterMode.CopterModeGuidedNogps:
+                    return "Guided no GPS";
+                case CopterMode.CopterModeSmartRtl:
+                    return "Smart RTL";
+                default:
+                    return customMode.ToString("G").Replace("CopterMode", string.Empty);
+            }
+        }
+    }
+
     public class VehicleArdupilotCopter : VehicleArdupilot
     {
         public VehicleArdupilotCopter(IMavlinkClient mavlink, VehicleBaseConfig config) : base(mavlink, config)
@@ -27,7 +78,7 @@ namespace Asv.Mavlink
         private IEnumerable<VehicleCustomMode> GetModes()
         {
             return _modes ?? (_modes = Enum.GetValues(typeof(CopterMode)).Cast<CopterMode>()
-                       .Select(_ => new VehicleCustomMode {Name = _.ToString("G"), Value = (uint) _}).ToArray());
+                       .Select(_ => new VehicleCustomMode {Name = _.GetDisplayName(), Value = (uint) _}).ToArray());
         }
 
         protected override VehicleMode Interpret(HeartbeatPayload heartbeat)
@@ -38,11 +89,13 @@ namespace Asv.Mavlink
                 BaseMode = heartbeat.BaseMode,
                 CustomMode = new VehicleCustomMode
                 {
-                    Name = customMode.ToString("G"),
+                    Name = customMode.GetDisplayName(),
                     Value = (uint) customMode
                 }
             };
         }
+
+      
 
         #endregion
 
