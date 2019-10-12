@@ -438,16 +438,16 @@ namespace Asv.Mavlink
 
         protected abstract Task InternalGoToGlob(GeoPoint location,CancellationToken cancel, double? yawDeg);
 
-        public async Task GoToGlobAndWait(GeoPoint location, IProgress<double> progress, double precision, CancellationToken cancel)
+        public async Task GoToGlobAndWait(GeoPoint location, IProgress<double> progress, double precisionMet, CancellationToken cancel)
         {
             await GoToGlob(location, cancel);
             progress = progress ?? new Progress<double>();
             var startLocation = this.GpsLocation.Value;
             var startDistance = Math.Abs(GeoMath.Distance(location, startLocation));
 
-            Logger.Info("GoToAndWait {0} with precision {2:F1} m. Distance to target {3:F1}", location, precision, startDistance);
+            Logger.Info("GoToAndWait {0} with precision {2:F1} m. Distance to target {3:F1}", location, precisionMet, startDistance);
             progress.Report(0);
-            if (startDistance <= precision)
+            if (startDistance <= precisionMet)
             {
                 Logger.Debug("Already in target, nothing to do", startLocation);
                 progress.Report(1);
@@ -466,13 +466,15 @@ namespace Asv.Mavlink
                 var prog = 1 - dist / startDistance;
                 Logger.Trace("Distance to target {0:F1}, location: {1}, progress {2:P2}", dist, loc, prog);
                 progress.Report(prog);
-                if (dist <= precision) break;
+                if (dist <= precisionMet) break;
                 await Task.Delay(TimeSpan.FromSeconds(1), cancel).ConfigureAwait(false);
             }
             sw.Stop();
             Logger.Info($"Complete {sw.Elapsed:hh\\:mm\\:ss} location error {dist:F1} m");
             progress.Report(1);
         }
+
+        public abstract Task FlyByLineGlob(GeoPoint start, GeoPoint stop, double precisionMet, CancellationToken cancel, Action firstPointComplete = null);
 
         public abstract Task DoRtl(CancellationToken cancel);
 

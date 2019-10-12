@@ -141,6 +141,13 @@ namespace Asv.Mavlink
             }
         }
 
+        public override async Task FlyByLineGlob(GeoPoint start, GeoPoint stop, double precisionMet, CancellationToken cancel, Action firstPointComplete = null)
+        {
+            await GoToGlobAndWait(start, new Microsoft.Progress<double>(_ => { }), precisionMet, cancel);
+            firstPointComplete?.Invoke();
+            await GoToGlobAndWait(stop, new Microsoft.Progress<double>(_ => { }), precisionMet, cancel);
+        }
+
         public override Task DoRtl(CancellationToken cancel)
         {
             return Mavlink.Common.SetMode(1, (int)CopterMode.CopterModeRtl, cancel);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Asv.Mavlink.Client;
 using Asv.Mavlink.V2.Ardupilotmega;
 using Asv.Mavlink.V2.Common;
 using NLog;
@@ -147,6 +148,39 @@ namespace Asv.Mavlink
                 //                    true, 0, 0, 0,
                 //                    0, (float) location.Latitude, (float) location.Longitude, (float) rel.Value,
                 //                    MavMissionType.MavMissionTypeMission, 3, cancel);
+        }
+
+        public override async Task FlyByLineGlob(GeoPoint start, GeoPoint stop, double precisionMet, CancellationToken cancel, Action firstPointComplete = null)
+        {
+            const string paramName = "WP_LOITER_RAD";
+            const int PrePointDistanceParts = 2;
+            const int GoToPrecisionErrorMet = 20;
+            var waitInPrePointTime = TimeSpan.FromSeconds(3);
+            var waitForCorrectionTime = TimeSpan.FromSeconds(1);
+
+            _logger.Info($"Try read circle radius param for plane '{paramName}'");
+            var value = await this.Params.GetOrReadFromVehicleParam(paramName, cancel);
+            var loiterRadius = value.IntegerValue.Value;
+            _logger.Info($"{paramName} = {loiterRadius} meter");
+            var prePointDistance = (int) (PrePointDistanceParts * loiterRadius);
+
+            var azimuth = start.Azimuth(stop);
+            var prePoint = start.RadialPoint(prePointDistance, azimuth - 180);
+            _logger.Info($"GoTo prepoint {prePoint}");
+            await GoToGlobAndWait(prePoint, new Microsoft.Progress<double>(), loiterRadius + GoToPrecisionErrorMet, cancel);
+            _logger.Info($"Arrived at prepoint, wait {waitInPrePointTime:g}");
+            await Task.Delay(waitInPrePointTime, cancel);
+
+            while (true)
+            {
+                if (GpsLocation.Value.DistanceTo(start) > loiterRadius + GoToPrecisionErrorMet) break;
+                var angleangle = GpsLocation.Value.Azimuth(start);
+                var dist = start.DistanceTo(stop);
+                var nextPoint = start.RadialPoint(dist, angleangle);
+                _logger.Info($"Correct direction {nextPoint:g}");
+                await GoToGlob(nextPoint,cancel);
+                await Task.Delay(waitForCorrectionTime, cancel);
+            }
         }
 
         public override Task DoRtl(CancellationToken cancel)

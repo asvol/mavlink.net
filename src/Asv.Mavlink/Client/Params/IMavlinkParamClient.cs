@@ -70,6 +70,17 @@ namespace Asv.Mavlink.Client
 
             return await src.WriteParam(new MavParam(param, value), cancel).ConfigureAwait(false);
         }
+
+
+        public static async Task<MavParam> GetOrReadFromVehicleParam(this IMavlinkParameterClient src, string name, CancellationToken cancel)
+        {
+            MavParam value;
+            if (src.Params.TryGetValue(name, out value)) return value;
+            var param = await src.ReadParam(name, DefaultAttemptCount, cancel);
+            return param;
+        }
+
+
     }
 
 }
