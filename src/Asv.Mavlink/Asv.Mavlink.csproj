@@ -151,6 +151,7 @@
     <Compile Include="Vehicle\Ardupilot\VehicleArdupilotCopter.cs" />
     <Compile Include="Vehicle\Ardupilot\VehicleArdupilotPlane.cs" />
     <Compile Include="Vehicle\GpsInfo.cs" />
+    <Compile Include="Vehicle\IVehiclePlane.cs" />
     <Compile Include="Vehicle\IVehicle.cs" />
     <Compile Include="Vehicle\Ardupilot\VehicleArdupilot.cs" />
     <Compile Include="Vehicle\Px4\VehiclePx4.cs" />

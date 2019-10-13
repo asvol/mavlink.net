@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.Client;
@@ -63,9 +64,10 @@ namespace Asv.Mavlink
         }
     }
 
-    public class VehicleArdupilotPlane : VehicleArdupilot
+    public class VehicleArdupilotPlane : VehicleArdupilot, IVehiclePlane
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        
 
         public VehicleArdupilotPlane(IMavlinkClient mavlink, VehicleBaseConfig config) : base(mavlink, config)
         {
@@ -81,6 +83,8 @@ namespace Asv.Mavlink
 
         public override IEnumerable<VehicleCustomMode> AvailableModes => GetModes();
         private VehicleCustomMode[] _modes;
+        
+
         private IEnumerable<VehicleCustomMode> GetModes()
         {
             return _modes ?? (_modes = Enum.GetValues(typeof(PlaneMode)).Cast<PlaneMode>()
@@ -152,16 +156,14 @@ namespace Asv.Mavlink
 
         public override async Task FlyByLineGlob(GeoPoint start, GeoPoint stop, double precisionMet, CancellationToken cancel, Action firstPointComplete = null)
         {
-            const string paramName = "WP_LOITER_RAD";
+            
             const int PrePointDistanceParts = 2;
             const int GoToPrecisionErrorMet = 20;
             var waitInPrePointTime = TimeSpan.FromSeconds(3);
             var waitForCorrectionTime = TimeSpan.FromSeconds(1);
 
-            _logger.Info($"Try read circle radius param for plane '{paramName}'");
-            var value = await this.Params.GetOrReadFromVehicleParam(paramName, cancel);
-            var loiterRadius = value.IntegerValue.Value;
-            _logger.Info($"{paramName} = {loiterRadius} meter");
+
+            var loiterRadius = (_planeRadius.Value ?? await _planeRadius.FirstAsync(_=>_.HasValue)).Value;
             var prePointDistance = (int) (PrePointDistanceParts * loiterRadius);
 
             var azimuth = start.Azimuth(stop);
@@ -187,5 +189,43 @@ namespace Asv.Mavlink
         {
             return Mavlink.Common.SetMode(1, (int)PlaneMode.PlaneModeRtl, cancel);
         }
+
+        public override void StartListen()
+        {
+            base.StartListen();
+            InitPlaneRadius();
+        }
+
+        #region Plane radius
+
+        private void InitPlaneRadius()
+        {
+            const string paramName = "WP_LOITER_RAD";
+            Params.OnParamUpdated.Where(_ => _.Name == paramName).Select(_ => (double?) _.IntegerValue.Value)
+                .Subscribe(_planeRadius, DisposeCancel.Token);
+            _updatePlaneRaidus = Observable.Timer(TimeSpan.FromMilliseconds(10)).Subscribe(_=>TryUpdateRadius(paramName));
+            DisposeCancel.Token.Register(() => _updatePlaneRaidus?.Dispose());
+        }
+
+        private async void TryUpdateRadius(string paramName)
+        {
+            try
+            {
+                var value = await Params.GetOrReadFromVehicleParam(paramName, DisposeCancel.Token);
+                _planeRadius.OnNext(value.IntegerValue);
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"Error to read plane radius param '{paramName}':{e.Message}");
+                _updatePlaneRaidus = Observable.Timer(TimeSpan.FromMilliseconds(3000)).Subscribe(_ => TryUpdateRadius(paramName));
+            }
+        }
+
+        private readonly RxValue<double?> _planeRadius = new RxValue<double?>();
+        private IDisposable _updatePlaneRaidus;
+
+        public IRxValue<double?> PlaneCircleRadius => _planeRadius;
+
+        #endregion
     }
 }
