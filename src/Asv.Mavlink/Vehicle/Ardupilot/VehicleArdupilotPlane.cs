@@ -188,10 +188,10 @@ namespace Asv.Mavlink
         private bool IsInAzimuthLimits(double azimuth, double targetAzimuth, double precisionDegr)
         {
             if (targetAzimuth >= 360) targetAzimuth = targetAzimuth % 360.0;
-            else if (targetAzimuth < 0) targetAzimuth = 360 - targetAzimuth % 360.0;
+            else if (targetAzimuth < 0) targetAzimuth = 360 + targetAzimuth % 360.0;
 
             if (azimuth >= 360) azimuth = azimuth % 360.0;
-            else if (azimuth < 0) azimuth = 360 - azimuth % 360.0;
+            else if (azimuth < 0) azimuth = 360 + azimuth % 360.0;
 
             var from = targetAzimuth - precisionDegr;
             var to = targetAzimuth + precisionDegr;
@@ -202,7 +202,7 @@ namespace Asv.Mavlink
                 azimuth = azimuth - from;
                 from = 0;
                 if (azimuth >= 360) azimuth = azimuth % 360.0;
-                else if (azimuth < 0) azimuth = 360 - azimuth % 360.0;
+                else if (azimuth < 0) azimuth = 360 + azimuth % 360.0;
             }
 
             return azimuth <= to && azimuth >= from;
