@@ -71,7 +71,7 @@ namespace Asv.Mavlink
 
         public VehicleArdupilotPlane(IMavlinkClient mavlink, VehicleBaseConfig config) : base(mavlink, config)
         {
-            
+            _rotationDirection.OnNext(RotationDirection.Cw);
         }
 
         protected override VehicleClass InterpretVehicleClass(HeartbeatPayload heartbeatPacket)
@@ -154,35 +154,126 @@ namespace Asv.Mavlink
                 //                    MavMissionType.MavMissionTypeMission, 3, cancel);
         }
 
+//        public override async Task FlyByLineGlob(GeoPoint start, GeoPoint stop, double precisionMet, CancellationToken cancel, Action firstPointComplete = null)
+//        {
+//            
+//            const int PrePointDistanceParts = 2;
+//            const int GoToPrecisionErrorMet = 20;
+//            var waitInPrePointTime = TimeSpan.FromSeconds(3);
+//            var waitForCorrectionTime = TimeSpan.FromSeconds(1);
+//
+//
+//            var loiterRadius = (_planeRadius.Value ?? await _planeRadius.FirstAsync(_=>_.HasValue)).Value;
+//            var prePointDistance = (int) (PrePointDistanceParts * loiterRadius);
+//
+//            var azimuth = start.Azimuth(stop);
+//            var prePoint = start.RadialPoint(prePointDistance, azimuth - 180);
+//            _logger.Info($"GoTo prepoint {prePoint}");
+//            await GoToGlobAndWait(prePoint, new Microsoft.Progress<double>(), loiterRadius + GoToPrecisionErrorMet, cancel);
+//            _logger.Info($"Arrived at prepoint, wait {waitInPrePointTime:g}");
+//            await Task.Delay(waitInPrePointTime, cancel);
+//
+//            while (true)
+//            {
+//                if (GpsLocation.Value.DistanceTo(start) > loiterRadius + GoToPrecisionErrorMet) break;
+//                var angleangle = GpsLocation.Value.Azimuth(start);
+//                var dist = start.DistanceTo(stop);
+//                var nextPoint = start.RadialPoint(dist, angleangle);
+//                _logger.Info($"Correct direction {nextPoint:g}");
+//                await GoToGlob(nextPoint,cancel);
+//                await Task.Delay(waitForCorrectionTime, cancel);
+//            }
+//        }
+
+        private bool IsInAzimuthLimits(double azimuth, double targetAzimuth, double precisionDegr)
+        {
+            if (targetAzimuth >= 360) targetAzimuth = targetAzimuth % 360.0;
+            else if (targetAzimuth < 0) targetAzimuth = 360 - targetAzimuth % 360.0;
+
+            if (azimuth >= 360) azimuth = azimuth % 360.0;
+            else if (azimuth < 0) azimuth = 360 - azimuth % 360.0;
+
+            var from = targetAzimuth - precisionDegr;
+            var to = targetAzimuth + precisionDegr;
+
+            if (from < 0 || to >= 360)
+            {
+                to = to - from;
+                azimuth = azimuth - from;
+                from = 0;
+                if (azimuth >= 360) azimuth = azimuth % 360.0;
+                else if (azimuth < 0) azimuth = 360 - azimuth % 360.0;
+            }
+
+            return azimuth <= to && azimuth >= from;
+        }
+
+        private async Task<double> GoToPointUntilReachAzimuth(GeoPoint point, double azimuth, double precisionMet, double precisionDegr, CancellationToken cancel, int attemptsCnt = 1)
+        {
+            _logger.Info($"GoTo point {point}");
+            await GoToGlobAndWait(point, new Microsoft.Progress<double>(), precisionMet, cancel);
+            _logger.Info("Start circling");
+
+            var attempts = 0;
+            while (!cancel.IsCancellationRequested)
+            {
+                var location = GpsLocation.Value;
+                var currentAzimuth = point.Azimuth(location);
+                _logger.Info($"Azimuth relative to the point {currentAzimuth:F1} deg");
+                if (IsInAzimuthLimits(currentAzimuth, azimuth, precisionDegr))
+                {
+                    attempts++;
+                    if (attempts >= attemptsCnt)
+                        return GeoMath.Distance(location, point);
+                }
+                await Task.Delay(TimeSpan.FromMilliseconds(250), cancel);
+            }
+
+            return 0;
+        }
+
         public override async Task FlyByLineGlob(GeoPoint start, GeoPoint stop, double precisionMet, CancellationToken cancel, Action firstPointComplete = null)
         {
-            
+            const int ApproachAngle = 90;
             const int PrePointDistanceParts = 2;
-            const int GoToPrecisionErrorMet = 20;
+            const double GoToPrecisionErrorMet = 20.5;
+
+            var waitForDetectingAzimuthTime = TimeSpan.FromSeconds(3);
             var waitInPrePointTime = TimeSpan.FromSeconds(3);
             var waitForCorrectionTime = TimeSpan.FromSeconds(1);
 
-
-            var loiterRadius = (_planeRadius.Value ?? await _planeRadius.FirstAsync(_=>_.HasValue)).Value;
-            var prePointDistance = (int) (PrePointDistanceParts * loiterRadius);
-
             var azimuth = start.Azimuth(stop);
-            var prePoint = start.RadialPoint(prePointDistance, azimuth - 180);
-            _logger.Info($"GoTo prepoint {prePoint}");
-            await GoToGlobAndWait(prePoint, new Microsoft.Progress<double>(), loiterRadius + GoToPrecisionErrorMet, cancel);
-            _logger.Info($"Arrived at prepoint, wait {waitInPrePointTime:g}");
-            await Task.Delay(waitInPrePointTime, cancel);
+            var reverseAzimuth = stop.Azimuth(start);
+            var loiterRadius = (_planeRadius.Value ?? await _planeRadius.FirstAsync(_ => _.HasValue)).Value;
+            var realLoiterRadius = (int)(loiterRadius + GoToPrecisionErrorMet);
 
-            while (true)
+            var start0 = start.SetAltitude(0);
+            var stop0 = stop.SetAltitude(0);
+
+            var startPrePoint0 = start.RadialPoint(PrePointDistanceParts * realLoiterRadius, reverseAzimuth);
+            var glideAngle = GeoMath.RadiansToDegrees(Math.Atan(Math.Abs((start.Altitude ?? 0) - (stop.Altitude ?? 0)) / GeoMath.Distance(start0, stop0)));
+
+            var height = GeoMath.HeightFromGroundRange(GeoMath.Distance(stop0, startPrePoint0), glideAngle);
+
+            if ((start.Altitude ?? 0) - (stop.Altitude ?? 0) < 0)
+                height = (stop.Altitude ?? 0) - height;
+            else
+                height = (stop.Altitude ?? 0) + height;
+
+            //TODO if (height <= 0) нужно что-то делать!!!
+            if (height <= 0)
             {
-                if (GpsLocation.Value.DistanceTo(start) > loiterRadius + GoToPrecisionErrorMet) break;
-                var angleangle = GpsLocation.Value.Azimuth(start);
-                var dist = start.DistanceTo(stop);
-                var nextPoint = start.RadialPoint(dist, angleangle);
-                _logger.Info($"Correct direction {nextPoint:g}");
-                await GoToGlob(nextPoint,cancel);
-                await Task.Delay(waitForCorrectionTime, cancel);
+                _logger.Info($"Impossible fly by line from altitude {start.Altitude ?? 0}м to altitude {stop.Altitude ?? 0}m");
+                return;
             }
+
+            var firstPrePoint = startPrePoint0.RadialPoint(PrePointDistanceParts * realLoiterRadius, azimuth + ApproachAngle).SetAltitude(height);
+
+            var r = await GoToPointUntilReachAzimuth(firstPrePoint, reverseAzimuth - 10, realLoiterRadius, 4, cancel, 2);
+            var secondPrePoint = startPrePoint0.RadialPoint(r, azimuth + ApproachAngle).SetAltitude(height);
+
+            await GoToPointUntilReachAzimuth(secondPrePoint, reverseAzimuth + ApproachAngle - 5, realLoiterRadius, 2, cancel, 2);
+            await GoToGlob(stop, cancel);
         }
 
         public override Task DoRtl(CancellationToken cancel)
@@ -221,6 +312,13 @@ namespace Asv.Mavlink
             }
         }
 
+        private enum RotationDirection
+        {
+            Cw,
+            Ccw
+        }
+        
+        private readonly RxValue<RotationDirection> _rotationDirection = new RxValue<RotationDirection>();
         private readonly RxValue<double?> _planeRadius = new RxValue<double?>();
         private IDisposable _updatePlaneRaidus;
 
