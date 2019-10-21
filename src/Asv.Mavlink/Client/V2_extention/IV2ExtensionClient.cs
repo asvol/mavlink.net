@@ -10,6 +10,8 @@ namespace Asv.Mavlink.Client
     /// </summary>
     public interface IV2ExtensionClient : IDisposable
     {
+        int MaxDataSize { get; }
+
         IRxValue<V2ExtensionPacket> OnData { get; }
 
         Task SendData(byte targetNetworkId, ushort messageType,
