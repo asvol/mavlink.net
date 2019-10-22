@@ -150,7 +150,7 @@ namespace Asv.Mavlink.Decoder
             }
             catch (Exception e)
             {
-                _logger.Fatal(e, $"Fatal error to publish packet:{e.Message}");
+                _logger.Error(e, $"Fatal error to publish packet:{e.Message}");
                 Debug.Assert(false, e.Message);
             }
             

@@ -219,6 +219,7 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
 {%- for field in msg.Fields -%}
     {%- if field.IsEnum -%}
         {%- if field.IsArray -%}
@@ -264,7 +265,7 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
         {%- endif -%}
     {%- endif -%}
 {%- endfor -%}
-            return index; // /*PayloadByteSize*/{{ msg.PayloadByteSize }};
+            return index - start; // /*PayloadByteSize*/{{ msg.PayloadByteSize }};
         }
 
     {%- for field in msg.Fields -%}

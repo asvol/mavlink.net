@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Asv.Mavlink
 {
@@ -29,7 +30,8 @@ namespace Asv.Mavlink
             PacketV2Helper.SetComponenId(buffer, offset, ComponenId);
             PacketV2Helper.SetMessageId(buffer, offset, MessageId);
             var index = offset + PacketV2Helper.PaylodStartIndexInFrame;
-            var payloadSize = Payload.Serialize(buffer, index) - index;
+            var payloadSize = Payload.Serialize(buffer, index);
+            Debug.Assert(payloadSize <= byte.MaxValue,$"Wrong payload serialize size (must be {byte.MaxValue} size)");
             PacketV2Helper.SetPayloadSize(buffer, offset, (byte) payloadSize);
             PacketV2Helper.SetCrc(buffer, offset, GetCrcEtra());
             if (Signature.IsPresent)
