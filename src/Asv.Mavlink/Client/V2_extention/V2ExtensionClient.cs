@@ -13,6 +13,7 @@ namespace Asv.Mavlink.Client
         private readonly MavlinkClientIdentity _identity;
         private readonly RxValue<V2ExtensionPacket> _onData = new RxValue<V2ExtensionPacket>();
         private readonly CancellationTokenSource _disposeCancel = new CancellationTokenSource();
+        public static readonly int StaticMaxDataSize = new V2ExtensionPayload().GetMaxByteSize();
 
         public V2ExtensionClient(IMavlinkV2Connection connection, IPacketSequenceCalculator seq, MavlinkClientIdentity identity)
         {
@@ -31,6 +32,9 @@ namespace Asv.Mavlink.Client
         {
             _disposeCancel.Dispose();
         }
+
+        public int MaxDataSize => StaticMaxDataSize;
+        
 
         public IRxValue<V2ExtensionPacket> OnData => _onData;
 
