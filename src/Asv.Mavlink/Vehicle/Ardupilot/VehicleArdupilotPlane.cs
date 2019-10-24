@@ -273,7 +273,7 @@ namespace Asv.Mavlink
             var secondPrePoint = startPrePoint0.RadialPoint(r, azimuth + ApproachAngle).SetAltitude(height);
 
             await GoToPointUntilReachAzimuth(secondPrePoint, reverseAzimuth + ApproachAngle - 5, realLoiterRadius, 2, cancel, 2);
-            await GoToGlob(stop, cancel);
+            await GoToGlobAndWait(stop, new Microsoft.Progress<double>(), realLoiterRadius, cancel);
         }
 
         public override Task DoRtl(CancellationToken cancel)
