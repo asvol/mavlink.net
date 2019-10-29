@@ -360,6 +360,7 @@ namespace Asv.Mavlink.V2.Uavionix
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Icao).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Stallspeed).CopyTo(buffer, index);index+=2;
             Encoding.ASCII.GetBytes(Callsign,0,Callsign.Length,buffer,index);index+=9;
@@ -368,7 +369,7 @@ namespace Asv.Mavlink.V2.Uavionix
             buffer[index] = (byte)Gpsoffsetlat;index+=1;
             buffer[index] = (byte)Gpsoffsetlon;index+=1;
             buffer[index] = (byte)Rfselect;index+=1;
-            return index; // /*PayloadByteSize*/20;
+            return index - start; // /*PayloadByteSize*/20;
         }
 
         /// <summary>
@@ -460,6 +461,7 @@ namespace Asv.Mavlink.V2.Uavionix
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Utctime).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Gpslat).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Gpslon).CopyTo(buffer, index);index+=4;
@@ -476,7 +478,7 @@ namespace Asv.Mavlink.V2.Uavionix
             buffer[index] = (byte)Gpsfix;index+=1;
             BitConverter.GetBytes(Numsats).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)Emergencystatus;index+=1;
-            return index; // /*PayloadByteSize*/41;
+            return index - start; // /*PayloadByteSize*/41;
         }
 
         /// <summary>
@@ -592,8 +594,9 @@ namespace Asv.Mavlink.V2.Uavionix
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             buffer[index] = (byte)Rfhealth;index+=1;
-            return index; // /*PayloadByteSize*/1;
+            return index - start; // /*PayloadByteSize*/1;
         }
 
         /// <summary>

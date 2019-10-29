@@ -126,8 +126,9 @@ namespace Asv.Mavlink.V2.Icarous
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             buffer[index] = (byte)Status;index+=1;
-            return index; // /*PayloadByteSize*/1;
+            return index - start; // /*PayloadByteSize*/1;
         }
 
         /// <summary>
@@ -183,6 +184,7 @@ namespace Asv.Mavlink.V2.Icarous
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Min1).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Max1).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Min2).CopyTo(buffer, index);index+=4;
@@ -199,7 +201,7 @@ namespace Asv.Mavlink.V2.Icarous
             buffer[index] = (byte)Type3;index+=1;
             buffer[index] = (byte)Type4;index+=1;
             buffer[index] = (byte)Type5;index+=1;
-            return index; // /*PayloadByteSize*/46;
+            return index - start; // /*PayloadByteSize*/46;
         }
 
         /// <summary>

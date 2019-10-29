@@ -103,6 +103,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             for(var i=0;i<ArU32.Length;i++)
             {
                 BitConverter.GetBytes(ArU32[i]).CopyTo(buffer, index);index+=4;
@@ -120,7 +121,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
             {
                 buffer[index] = (byte)ArU8[i];index+=1;
             }
-            return index; // /*PayloadByteSize*/33;
+            return index - start; // /*PayloadByteSize*/33;
         }
 
         /// <summary>
@@ -187,11 +188,12 @@ namespace Asv.Mavlink.V2.PythonArrayTest
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             for(var i=0;i<ArU32.Length;i++)
             {
                 BitConverter.GetBytes(ArU32[i]).CopyTo(buffer, index);index+=4;
             }
-            return index; // /*PayloadByteSize*/16;
+            return index - start; // /*PayloadByteSize*/16;
         }
 
         /// <summary>
@@ -239,12 +241,13 @@ namespace Asv.Mavlink.V2.PythonArrayTest
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             for(var i=0;i<ArU32.Length;i++)
             {
                 BitConverter.GetBytes(ArU32[i]).CopyTo(buffer, index);index+=4;
             }
             BitConverter.GetBytes(V).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/17;
+            return index - start; // /*PayloadByteSize*/17;
         }
 
         /// <summary>
@@ -297,12 +300,13 @@ namespace Asv.Mavlink.V2.PythonArrayTest
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             for(var i=0;i<ArU32.Length;i++)
             {
                 BitConverter.GetBytes(ArU32[i]).CopyTo(buffer, index);index+=4;
             }
             BitConverter.GetBytes(V).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/17;
+            return index - start; // /*PayloadByteSize*/17;
         }
 
         /// <summary>
@@ -355,9 +359,10 @@ namespace Asv.Mavlink.V2.PythonArrayTest
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             Encoding.ASCII.GetBytes(C1,0,C1.Length,buffer,index);index+=5;
             Encoding.ASCII.GetBytes(C2,0,C2.Length,buffer,index);index+=5;
-            return index; // /*PayloadByteSize*/10;
+            return index - start; // /*PayloadByteSize*/10;
         }
 
         /// <summary>
@@ -450,6 +455,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             for(var i=0;i<ArD.Length;i++)
             {
                 BitConverter.GetBytes(ArD[i]).CopyTo(buffer, index);index+=8;
@@ -486,7 +492,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
                 buffer[index] = (byte)ArI8[i];index+=1;
             }
             Encoding.ASCII.GetBytes(ArC,0,ArC.Length,buffer,index);index+=32;
-            return index; // /*PayloadByteSize*/91;
+            return index - start; // /*PayloadByteSize*/91;
         }
 
         /// <summary>
@@ -626,6 +632,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             for(var i=0;i<ArD.Length;i++)
             {
                 BitConverter.GetBytes(ArD[i]).CopyTo(buffer, index);index+=8;
@@ -659,7 +666,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
                 buffer[index] = (byte)ArI8[i];index+=1;
             }
             Encoding.ASCII.GetBytes(ArC,0,ArC.Length,buffer,index);index+=32;
-            return index; // /*PayloadByteSize*/84;
+            return index - start; // /*PayloadByteSize*/84;
         }
 
         /// <summary>
@@ -752,6 +759,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             for(var i=0;i<ArD.Length;i++)
             {
                 BitConverter.GetBytes(ArD[i]).CopyTo(buffer, index);index+=8;
@@ -761,7 +769,7 @@ namespace Asv.Mavlink.V2.PythonArrayTest
             {
                 BitConverter.GetBytes(ArU16[i]).CopyTo(buffer, index);index+=2;
             }
-            return index; // /*PayloadByteSize*/24;
+            return index - start; // /*PayloadByteSize*/24;
         }
 
         /// <summary>
