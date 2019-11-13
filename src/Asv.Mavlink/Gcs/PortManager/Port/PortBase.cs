@@ -27,7 +27,7 @@ namespace Asv.Mavlink
 
         protected PortBase()
         {
-            _enableStream.Where(_ => _).Subscribe(_ => TryConnect(), _disposedCancel.Token);
+            _enableStream.Where(_ => _).Subscribe(_ => Task.Factory.StartNew(TryConnect), _disposedCancel.Token);
         }
 
         public async Task Send(byte[] data, int count, CancellationToken cancel)
@@ -56,7 +56,7 @@ namespace Asv.Mavlink
         {
             _enableStream.OnNext(false);
             _portStateStream.OnNext(PortState.Disabled);
-            Stop();
+            Task.Factory.StartNew(Stop);
         }
 
         private void Stop()
@@ -74,6 +74,8 @@ namespace Asv.Mavlink
                 // ignore
             }
         }
+
+
 
 
         private void TryConnect()

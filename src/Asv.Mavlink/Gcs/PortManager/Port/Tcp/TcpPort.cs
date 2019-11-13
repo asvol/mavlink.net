@@ -63,7 +63,7 @@ namespace Asv.Mavlink
             tcp.Connect(_cfg.Host,_cfg.Port);
             _tcp = tcp;
             _stop = new CancellationTokenSource();
-            var recvThread = new Thread(ListenAsync);
+            var recvThread = new Thread(ListenAsync) { IsBackground = true, Priority = ThreadPriority.Lowest };
             _stop.Token.Register(() =>
             {
                 try
