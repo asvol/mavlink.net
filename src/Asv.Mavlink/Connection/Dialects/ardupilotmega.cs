@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// This code was generate by tool Asv.Mavlink.Gen version v0.1.0-6-g9101a23
+// This code was generate by tool Asv.Mavlink.Gen version v0.1.0-7-ge0db5cb
 
 using System;
 using System.Text;
@@ -2037,6 +2037,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(MagDeclination).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(RawPress).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(RawTemp).CopyTo(buffer, index);index+=4;
@@ -2049,7 +2050,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(MagOfsX).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(MagOfsY).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(MagOfsZ).CopyTo(buffer, index);index+=2;
-            return index; // /*PayloadByteSize*/42;
+            return index - start; // /*PayloadByteSize*/42;
         }
 
         /// <summary>
@@ -2149,12 +2150,13 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(MagOfsX).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(MagOfsY).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(MagOfsZ).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/8;
+            return index - start; // /*PayloadByteSize*/8;
         }
 
         /// <summary>
@@ -2219,10 +2221,11 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Brkval).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Freemem).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Freemem32).CopyTo(buffer, index);index+=4;
-            return index; // /*PayloadByteSize*/8;
+            return index - start; // /*PayloadByteSize*/8;
         }
 
         /// <summary>
@@ -2278,13 +2281,14 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Adc1).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Adc2).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Adc3).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Adc4).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Adc5).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Adc6).CopyTo(buffer, index);index+=2;
-            return index; // /*PayloadByteSize*/12;
+            return index - start; // /*PayloadByteSize*/12;
         }
 
         /// <summary>
@@ -2360,6 +2364,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(ExtraValue).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(ShutterSpeed).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
@@ -2371,7 +2376,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(CommandId).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(EngineCutOff).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(ExtraParam).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/15;
+            return index - start; // /*PayloadByteSize*/15;
         }
 
         /// <summary>
@@ -2471,6 +2476,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(ExtraValue).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
@@ -2481,7 +2487,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(Shot).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(CommandId).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(ExtraParam).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/13;
+            return index - start; // /*PayloadByteSize*/13;
         }
 
         /// <summary>
@@ -2572,13 +2578,14 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)MountMode;index+=1;
             BitConverter.GetBytes(StabRoll).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(StabPitch).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(StabYaw).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/6;
+            return index - start; // /*PayloadByteSize*/6;
         }
 
         /// <summary>
@@ -2649,13 +2656,14 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(InputA).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(InputB).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(InputC).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(SavePosition).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/15;
+            return index - start; // /*PayloadByteSize*/15;
         }
 
         /// <summary>
@@ -2725,12 +2733,13 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(PointingA).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(PointingB).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(PointingC).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/14;
+            return index - start; // /*PayloadByteSize*/14;
         }
 
         /// <summary>
@@ -2796,13 +2805,14 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Lat).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Lng).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Idx).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Count).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/12;
+            return index - start; // /*PayloadByteSize*/12;
         }
 
         /// <summary>
@@ -2870,10 +2880,11 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Idx).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/3;
+            return index - start; // /*PayloadByteSize*/3;
         }
 
         /// <summary>
@@ -2927,11 +2938,12 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(BreachTime).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(BreachCount).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(BreachStatus).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)BreachType;index+=1;
-            return index; // /*PayloadByteSize*/8;
+            return index - start; // /*PayloadByteSize*/8;
         }
 
         /// <summary>
@@ -2993,6 +3005,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Omegaix).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Omegaiy).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Omegaiz).CopyTo(buffer, index);index+=4;
@@ -3000,7 +3013,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(RenormVal).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(ErrorRp).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(ErrorYaw).CopyTo(buffer, index);index+=4;
-            return index; // /*PayloadByteSize*/28;
+            return index - start; // /*PayloadByteSize*/28;
         }
 
         /// <summary>
@@ -3081,6 +3094,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Roll).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Pitch).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Yaw).CopyTo(buffer, index);index+=4;
@@ -3092,7 +3106,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(Zgyro).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Lat).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Lng).CopyTo(buffer, index);index+=4;
-            return index; // /*PayloadByteSize*/44;
+            return index - start; // /*PayloadByteSize*/44;
         }
 
         /// <summary>
@@ -3184,9 +3198,10 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Vcc).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(I2cerr).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/3;
+            return index - start; // /*PayloadByteSize*/3;
         }
 
         /// <summary>
@@ -3238,6 +3253,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Rxerrors).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Fixed).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Rssi).CopyTo(buffer, index);index+=1;
@@ -3245,7 +3261,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(Txbuf).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Noise).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Remnoise).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/9;
+            return index - start; // /*PayloadByteSize*/9;
         }
 
         /// <summary>
@@ -3324,6 +3340,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(LastTrigger).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(LastAction).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(LastRecovery).CopyTo(buffer, index);index+=4;
@@ -3333,7 +3350,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             buffer[index] = (byte)ModsEnabled;index+=1;
             buffer[index] = (byte)ModsRequired;index+=1;
             buffer[index] = (byte)ModsTriggered;index+=1;
-            return index; // /*PayloadByteSize*/22;
+            return index - start; // /*PayloadByteSize*/22;
         }
 
         /// <summary>
@@ -3416,10 +3433,11 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Direction).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Speed).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(SpeedZ).CopyTo(buffer, index);index+=4;
-            return index; // /*PayloadByteSize*/12;
+            return index - start; // /*PayloadByteSize*/12;
         }
 
         /// <summary>
@@ -3477,13 +3495,14 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Type).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Len).CopyTo(buffer, index);index+=1;
             for(var i=0;i<Data.Length;i++)
             {
                 buffer[index] = (byte)Data[i];index+=1;
             }
-            return index; // /*PayloadByteSize*/18;
+            return index - start; // /*PayloadByteSize*/18;
         }
 
         /// <summary>
@@ -3542,13 +3561,14 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Type).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Len).CopyTo(buffer, index);index+=1;
             for(var i=0;i<Data.Length;i++)
             {
                 buffer[index] = (byte)Data[i];index+=1;
             }
-            return index; // /*PayloadByteSize*/34;
+            return index - start; // /*PayloadByteSize*/34;
         }
 
         /// <summary>
@@ -3607,13 +3627,14 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Type).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Len).CopyTo(buffer, index);index+=1;
             for(var i=0;i<Data.Length;i++)
             {
                 buffer[index] = (byte)Data[i];index+=1;
             }
-            return index; // /*PayloadByteSize*/66;
+            return index - start; // /*PayloadByteSize*/66;
         }
 
         /// <summary>
@@ -3672,13 +3693,14 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Type).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Len).CopyTo(buffer, index);index+=1;
             for(var i=0;i<Data.Length;i++)
             {
                 buffer[index] = (byte)Data[i];index+=1;
             }
-            return index; // /*PayloadByteSize*/98;
+            return index - start; // /*PayloadByteSize*/98;
         }
 
         /// <summary>
@@ -3731,9 +3753,10 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Distance).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Voltage).CopyTo(buffer, index);index+=4;
-            return index; // /*PayloadByteSize*/8;
+            return index - start; // /*PayloadByteSize*/8;
         }
 
         /// <summary>
@@ -3790,6 +3813,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Vx).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Vy).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Vz).CopyTo(buffer, index);index+=4;
@@ -3802,7 +3826,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(Pax).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Pby).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Pcz).CopyTo(buffer, index);index+=4;
-            return index; // /*PayloadByteSize*/48;
+            return index - start; // /*PayloadByteSize*/48;
         }
 
         /// <summary>
@@ -3907,6 +3931,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Lat).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Lng).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Alt).CopyTo(buffer, index);index+=2;
@@ -3917,7 +3942,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(Idx).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Count).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)Flags;index+=1;
-            return index; // /*PayloadByteSize*/19;
+            return index - start; // /*PayloadByteSize*/19;
         }
 
         /// <summary>
@@ -4005,10 +4030,11 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Idx).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/3;
+            return index - start; // /*PayloadByteSize*/3;
         }
 
         /// <summary>
@@ -4064,13 +4090,14 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Current).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Compensationx).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Compensationy).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Compensationz).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Throttle).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(Interference).CopyTo(buffer, index);index+=2;
-            return index; // /*PayloadByteSize*/20;
+            return index - start; // /*PayloadByteSize*/20;
         }
 
         /// <summary>
@@ -4141,13 +4168,14 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Roll).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Pitch).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Yaw).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Altitude).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Lat).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Lng).CopyTo(buffer, index);index+=4;
-            return index; // /*PayloadByteSize*/24;
+            return index - start; // /*PayloadByteSize*/24;
         }
 
         /// <summary>
@@ -4221,6 +4249,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
             BitConverter.GetBytes(P1).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(P2).CopyTo(buffer, index);index+=4;
@@ -4230,7 +4259,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(CamIdx).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)EventId;index+=1;
-            return index; // /*PayloadByteSize*/29;
+            return index - start; // /*PayloadByteSize*/29;
         }
 
         /// <summary>
@@ -4326,6 +4355,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
             BitConverter.GetBytes(Lat).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Lng).CopyTo(buffer, index);index+=4;
@@ -4340,7 +4370,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(CamIdx).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)Flags;index+=1;
             BitConverter.GetBytes(CompletedCaptures).CopyTo(buffer, index);index+=2;
-            return index; // /*PayloadByteSize*/47;
+            return index - start; // /*PayloadByteSize*/47;
         }
 
         /// <summary>
@@ -4447,9 +4477,10 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Voltage).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(CurrentBattery).CopyTo(buffer, index);index+=2;
-            return index; // /*PayloadByteSize*/4;
+            return index - start; // /*PayloadByteSize*/4;
         }
 
         /// <summary>
@@ -4504,6 +4535,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Roll).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Pitch).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Yaw).CopyTo(buffer, index);index+=4;
@@ -4514,7 +4546,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(V2).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(V3).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(V4).CopyTo(buffer, index);index+=4;
-            return index; // /*PayloadByteSize*/40;
+            return index - start; // /*PayloadByteSize*/40;
         }
 
         /// <summary>
@@ -4601,9 +4633,10 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/2;
+            return index - start; // /*PayloadByteSize*/2;
         }
 
         /// <summary>
@@ -4657,6 +4690,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes((uint)Seqno).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
@@ -4664,7 +4698,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             {
                 buffer[index] = (byte)Data[i];index+=1;
             }
-            return index; // /*PayloadByteSize*/206;
+            return index - start; // /*PayloadByteSize*/206;
         }
 
         /// <summary>
@@ -4724,11 +4758,12 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Seqno).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)Status;index+=1;
-            return index; // /*PayloadByteSize*/7;
+            return index - start; // /*PayloadByteSize*/7;
         }
 
         /// <summary>
@@ -4794,6 +4829,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Instance).CopyTo(buffer, index);index+=1;
@@ -4803,7 +4839,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             {
                 buffer[index] = (byte)CustomBytes[i];index+=1;
             }
-            return index; // /*PayloadByteSize*/29;
+            return index - start; // /*PayloadByteSize*/29;
         }
 
         /// <summary>
@@ -4883,6 +4919,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(DirectionX).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(DirectionY).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(DirectionZ).CopyTo(buffer, index);index+=4;
@@ -4895,7 +4932,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             {
                 buffer[index] = (byte)CompletionMask[i];index+=1;
             }
-            return index; // /*PayloadByteSize*/27;
+            return index - start; // /*PayloadByteSize*/27;
         }
 
         /// <summary>
@@ -4999,6 +5036,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Fitness).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(OfsX).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(OfsY).CopyTo(buffer, index);index+=4;
@@ -5016,7 +5054,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(OrientationConfidence).CopyTo(buffer, index);index+=4;
             buffer[index] = (byte)OldOrientation;index+=1;
             buffer[index] = (byte)NewOrientation;index+=1;
-            return index; // /*PayloadByteSize*/50;
+            return index - start; // /*PayloadByteSize*/50;
         }
 
         /// <summary>
@@ -5145,6 +5183,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(VelocityVariance).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(PosHorizVariance).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(PosVertVariance).CopyTo(buffer, index);index+=4;
@@ -5152,7 +5191,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(TerrainAltVariance).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes((ushort)Flags).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(AirspeedVariance).CopyTo(buffer, index);index+=4;
-            return index; // /*PayloadByteSize*/26;
+            return index - start; // /*PayloadByteSize*/26;
         }
 
         /// <summary>
@@ -5229,6 +5268,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Desired).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Achieved).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Ff).CopyTo(buffer, index);index+=4;
@@ -5236,7 +5276,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(I).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(D).CopyTo(buffer, index);index+=4;
             buffer[index] = (byte)Axis;index+=1;
-            return index; // /*PayloadByteSize*/25;
+            return index - start; // /*PayloadByteSize*/25;
         }
 
         /// <summary>
@@ -5316,6 +5356,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(LandingLat).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(LandingLon).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(PathLat).CopyTo(buffer, index);index+=4;
@@ -5326,7 +5367,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(ExpectedTravelDistance).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(CrossTrackError).CopyTo(buffer, index);index+=4;
             buffer[index] = (byte)Stage;index+=1;
-            return index; // /*PayloadByteSize*/37;
+            return index - start; // /*PayloadByteSize*/37;
         }
 
         /// <summary>
@@ -5423,6 +5464,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(DeltaTime).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(DeltaAngleX).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(DeltaAngleY).CopyTo(buffer, index);index+=4;
@@ -5435,7 +5477,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(JointAz).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/42;
+            return index - start; // /*PayloadByteSize*/42;
         }
 
         /// <summary>
@@ -5535,12 +5577,13 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(DemandedRateX).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(DemandedRateY).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(DemandedRateZ).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/14;
+            return index - start; // /*PayloadByteSize*/14;
         }
 
         /// <summary>
@@ -5605,12 +5648,13 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(RlTorqueCmd).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(ElTorqueCmd).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(AzTorqueCmd).CopyTo(buffer, index);index+=2;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/8;
+            return index - start; // /*PayloadByteSize*/8;
         }
 
         /// <summary>
@@ -5673,10 +5717,11 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             buffer[index] = (byte)Status;index+=1;
             buffer[index] = (byte)CaptureMode;index+=1;
             buffer[index] = (byte)Flags;index+=1;
-            return index; // /*PayloadByteSize*/3;
+            return index - start; // /*PayloadByteSize*/3;
         }
 
         /// <summary>
@@ -5729,10 +5774,11 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)CmdId;index+=1;
-            return index; // /*PayloadByteSize*/3;
+            return index - start; // /*PayloadByteSize*/3;
         }
 
         /// <summary>
@@ -5790,13 +5836,14 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             buffer[index] = (byte)CmdId;index+=1;
             buffer[index] = (byte)Status;index+=1;
             for(var i=0;i<Value.Length;i++)
             {
                 buffer[index] = (byte)Value[i];index+=1;
             }
-            return index; // /*PayloadByteSize*/6;
+            return index - start; // /*PayloadByteSize*/6;
         }
 
         /// <summary>
@@ -5856,6 +5903,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             buffer[index] = (byte)CmdId;index+=1;
@@ -5863,7 +5911,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             {
                 buffer[index] = (byte)Value[i];index+=1;
             }
-            return index; // /*PayloadByteSize*/7;
+            return index - start; // /*PayloadByteSize*/7;
         }
 
         /// <summary>
@@ -5921,9 +5969,10 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             buffer[index] = (byte)CmdId;index+=1;
             buffer[index] = (byte)Status;index+=1;
-            return index; // /*PayloadByteSize*/2;
+            return index - start; // /*PayloadByteSize*/2;
         }
 
         /// <summary>
@@ -5970,9 +6019,10 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Rpm1).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Rpm2).CopyTo(buffer, index);index+=4;
-            return index; // /*PayloadByteSize*/8;
+            return index - start; // /*PayloadByteSize*/8;
         }
 
         /// <summary>
@@ -6029,6 +6079,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(RequestId).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
@@ -6038,7 +6089,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             Encoding.ASCII.GetBytes(Busname,0,Busname.Length,buffer,index);index+=40;
             BitConverter.GetBytes(Regstart).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Count).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/51;
+            return index - start; // /*PayloadByteSize*/51;
         }
 
         /// <summary>
@@ -6129,6 +6180,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(RequestId).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Result).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Regstart).CopyTo(buffer, index);index+=1;
@@ -6137,7 +6189,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             {
                 buffer[index] = (byte)Data[i];index+=1;
             }
-            return index; // /*PayloadByteSize*/135;
+            return index - start; // /*PayloadByteSize*/135;
         }
 
         /// <summary>
@@ -6215,6 +6267,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(RequestId).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
@@ -6228,7 +6281,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             {
                 buffer[index] = (byte)Data[i];index+=1;
             }
-            return index; // /*PayloadByteSize*/179;
+            return index - start; // /*PayloadByteSize*/179;
         }
 
         /// <summary>
@@ -6316,9 +6369,10 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(RequestId).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Result).CopyTo(buffer, index);index+=1;
-            return index; // /*PayloadByteSize*/5;
+            return index - start; // /*PayloadByteSize*/5;
         }
 
         /// <summary>
@@ -6376,6 +6430,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(Desired).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Achieved).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Error).CopyTo(buffer, index);index+=4;
@@ -6389,7 +6444,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             BitConverter.GetBytes(FDot).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(U).CopyTo(buffer, index);index+=4;
             buffer[index] = (byte)Axis;index+=1;
-            return index; // /*PayloadByteSize*/49;
+            return index - start; // /*PayloadByteSize*/49;
         }
 
         /// <summary>
@@ -6503,6 +6558,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
             BitConverter.GetBytes(TimeDeltaUsec).CopyTo(buffer, index);index+=8;
             for(var i=0;i<AngleDelta.Length;i++)
@@ -6514,7 +6570,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
                 BitConverter.GetBytes(PositionDelta[i]).CopyTo(buffer, index);index+=4;
             }
             BitConverter.GetBytes(Confidence).CopyTo(buffer, index);index+=4;
-            return index; // /*PayloadByteSize*/44;
+            return index - start; // /*PayloadByteSize*/44;
         }
 
         /// <summary>
@@ -6578,10 +6634,11 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(TimeUsec).CopyTo(buffer, index);index+=8;
             BitConverter.GetBytes(Aoa).CopyTo(buffer, index);index+=4;
             BitConverter.GetBytes(Ssa).CopyTo(buffer, index);index+=4;
-            return index; // /*PayloadByteSize*/16;
+            return index - start; // /*PayloadByteSize*/16;
         }
 
         /// <summary>
@@ -6662,6 +6719,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             for(var i=0;i<Voltage.Length;i++)
             {
                 BitConverter.GetBytes(Voltage[i]).CopyTo(buffer, index);index+=2;
@@ -6686,7 +6744,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             {
                 buffer[index] = (byte)Temperature[i];index+=1;
             }
-            return index; // /*PayloadByteSize*/44;
+            return index - start; // /*PayloadByteSize*/44;
         }
 
         /// <summary>
@@ -6783,6 +6841,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             for(var i=0;i<Voltage.Length;i++)
             {
                 BitConverter.GetBytes(Voltage[i]).CopyTo(buffer, index);index+=2;
@@ -6807,7 +6866,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             {
                 buffer[index] = (byte)Temperature[i];index+=1;
             }
-            return index; // /*PayloadByteSize*/44;
+            return index - start; // /*PayloadByteSize*/44;
         }
 
         /// <summary>
@@ -6904,6 +6963,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             for(var i=0;i<Voltage.Length;i++)
             {
                 BitConverter.GetBytes(Voltage[i]).CopyTo(buffer, index);index+=2;
@@ -6928,7 +6988,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             {
                 buffer[index] = (byte)Temperature[i];index+=1;
             }
-            return index; // /*PayloadByteSize*/44;
+            return index - start; // /*PayloadByteSize*/44;
         }
 
         /// <summary>
