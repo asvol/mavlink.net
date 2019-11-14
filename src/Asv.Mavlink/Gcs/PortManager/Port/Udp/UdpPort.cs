@@ -85,7 +85,7 @@ namespace Asv.Mavlink
                 _udp.Connect(_sendEndPoint);
             }
             _stop = new CancellationTokenSource();
-            var recvThread = new Thread(ListenAsync);
+            var recvThread = new Thread(ListenAsync) { IsBackground = true, Priority = ThreadPriority.Lowest };
             _stop.Token.Register(() =>
             {
                 try

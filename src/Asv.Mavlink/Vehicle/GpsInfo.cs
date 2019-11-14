@@ -102,9 +102,8 @@ namespace Asv.Mavlink
                 case DopStatusEnum.Poor:
                     return RS.GpsInfoHelper_GetDescription_Poor;
                 case DopStatusEnum.Unknown:
-                    return RS.GpsInfoHelper_GetDescription_Unknown;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(src), src, null);
+                    return RS.GpsInfoHelper_GetDescription_Unknown;
             }
         }
 
@@ -125,9 +124,8 @@ namespace Asv.Mavlink
                 case DopStatusEnum.Poor:
                     return RS.GpsInfoHelper_GetDisplayName_Poor;
                 case DopStatusEnum.Unknown:
-                    return RS.GpsInfoHelper_GetDescription_Unknown;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(src), src, null);
+                    return RS.GpsInfoHelper_GetDescription_Unknown;
             }
         }
 
@@ -154,7 +152,7 @@ namespace Asv.Mavlink
                 case GpsFixType.GpsFixTypePpp:
                     return "Ppp";
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    return RS.GpsInfoHelper_GetDescription_Unknown;
             }
         }
     }
