@@ -225,6 +225,7 @@ namespace Asv.Mavlink
                     attempts++;
                     if (attempts >= attemptsCnt)
                         return GeoMath.Distance(location, point);
+                    await Task.Delay(TimeSpan.FromMilliseconds(1500), cancel);
                 }
                 await Task.Delay(TimeSpan.FromMilliseconds(250), cancel);
             }
@@ -242,18 +243,21 @@ namespace Asv.Mavlink
             var waitInPrePointTime = TimeSpan.FromSeconds(3);
             var waitForCorrectionTime = TimeSpan.FromSeconds(1);
 
-            var azimuth = start.Azimuth(stop);
-            var reverseAzimuth = stop.Azimuth(start);
-            var loiterRadius = (_planeRadius.Value ?? await _planeRadius.FirstAsync(_ => _.HasValue)).Value;
-            var realLoiterRadius = (int)(loiterRadius + GoToPrecisionErrorMet);
-
             var start0 = start.SetAltitude(0);
             var stop0 = stop.SetAltitude(0);
 
-            var startPrePoint0 = start.RadialPoint(PrePointDistanceParts * realLoiterRadius, reverseAzimuth);
-            var glideAngle = GeoMath.RadiansToDegrees(Math.Atan(Math.Abs((start.Altitude ?? 0) - (stop.Altitude ?? 0)) / GeoMath.Distance(start0, stop0)));
+            var azimuth = start0.Azimuth(stop0);
+            var reverseAzimuth = stop0.Azimuth(start0);
+            var loiterRadius = (_planeRadius.Value ?? await _planeRadius.FirstAsync(_ => _.HasValue)).Value;
+            var realLoiterRadius = (int)(loiterRadius + GoToPrecisionErrorMet);
 
-            var height = GeoMath.HeightFromGroundRange(GeoMath.Distance(stop0, startPrePoint0), glideAngle);
+            
+
+            var startPrePoint0 = start0.RadialPoint(PrePointDistanceParts * realLoiterRadius, reverseAzimuth);
+            var pointDistanceFromGround = GeoMath.Distance(start0, stop0);
+            var angle = Math.Abs(pointDistanceFromGround) > 0.001 ? GeoMath.RadiansToDegrees(Math.Atan(Math.Abs((start.Altitude ?? 0) - (stop.Altitude ?? 0)) / pointDistanceFromGround)) : 0.0;
+
+            var height = GeoMath.HeightFromGroundRange(GeoMath.Distance(stop0, startPrePoint0), angle);
 
             if ((start.Altitude ?? 0) - (stop.Altitude ?? 0) < 0)
                 height = (stop.Altitude ?? 0) - height;
@@ -272,7 +276,7 @@ namespace Asv.Mavlink
             var r = await GoToPointUntilReachAzimuth(firstPrePoint, reverseAzimuth - 10, realLoiterRadius, 4, cancel, 2);
             var secondPrePoint = startPrePoint0.RadialPoint(r, azimuth + ApproachAngle).SetAltitude(height);
 
-            await GoToPointUntilReachAzimuth(secondPrePoint, reverseAzimuth + ApproachAngle - 5, realLoiterRadius, 2, cancel, 2);
+            await GoToPointUntilReachAzimuth(secondPrePoint, reverseAzimuth + ApproachAngle - 10, realLoiterRadius, 2, cancel, 2);
             await GoToGlobAndWait(stop, new Microsoft.Progress<double>(), realLoiterRadius, cancel);
         }
 
