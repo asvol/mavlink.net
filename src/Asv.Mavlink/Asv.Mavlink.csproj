@@ -130,6 +130,7 @@
     <Compile Include="Server\CommandLong\CommandLongServer.cs" />
     <Compile Include="Server\CommandLong\ICommandLongServer.cs" />
     <Compile Include="Server\MavlinkServerBase.cs" />
+    <Compile Include="Tools\GeoMath\GeoConverter.cs" />
     <Compile Include="Tools\IPacketSequenceCalculator.cs" />
     <Compile Include="Server\DebugServer\DebugServer.cs" />
     <Compile Include="Server\DebugServer\IDebugServer.cs" />

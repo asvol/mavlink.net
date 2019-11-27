@@ -45,7 +45,7 @@ namespace Asv.Mavlink
                 if (_serial == null) return;
                 try
                 {
-                    _readingTimer.Dispose();
+                    _readingTimer?.Dispose();
                     if (_serial.IsOpen == true)
                         _serial.Close();
 
