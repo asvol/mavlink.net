@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// This code was generate by tool Asv.Mavlink.Gen version v0.1.0-6-g9101a23
+// This code was generate by tool Asv.Mavlink.Gen version v0.1.0-7-ge0db5cb
 
 using System;
 using System.Text;
@@ -140,6 +140,7 @@ namespace Asv.Mavlink.V2.Test
 
         public int Serialize(byte[] buffer, int index)
         {
+            var start = index;
             BitConverter.GetBytes(U64).CopyTo(buffer, index);index+=8;
             BitConverter.GetBytes(S64).CopyTo(buffer, index);index+=8;
             BitConverter.GetBytes(D).CopyTo(buffer, index);index+=8;
@@ -192,7 +193,7 @@ namespace Asv.Mavlink.V2.Test
             {
                 buffer[index] = (byte)S8Array[i];index+=1;
             }
-            return index; // /*PayloadByteSize*/179;
+            return index - start; // /*PayloadByteSize*/179;
         }
 
         /// <summary>

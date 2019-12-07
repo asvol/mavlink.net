@@ -1,5 +1,4 @@
 ﻿using System;
-
 namespace Asv.Mavlink
 {
     public static class Extension

@@ -99,7 +99,6 @@ namespace Asv.Mavlink
             });
             MavlinkV2.Where(_=>_.MessageId == HeartbeatPacket.PacketMessageId).Cast<HeartbeatPacket>().Subscribe(DeviceFounder, _cancel.Token);
             Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(_=>RemoveOldDevice(), _cancel.Token);
-
             Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(_=>SendHeartBeat(),_cancel.Token);
         }
 

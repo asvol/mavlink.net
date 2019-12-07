@@ -341,5 +341,7 @@ namespace Asv.Mavlink
         {
             return p1.RadialPoint(distance, p1.Azimuth(p2));
         }
+
+
     }
 }
