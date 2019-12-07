@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -129,7 +129,16 @@
     <Compile Include="Connection\Dialects\standard.cs" />
     <Compile Include="Connection\Dialects\test.cs" />
     <Compile Include="Connection\Dialects\uAvionix.cs" />
+    <Compile Include="Payload\Client\Diagnostic\DiagnosticValue.cs" />
+    <Compile Include="Payload\Client\Diagnostic\IDiagnosticClient.cs" />
+    <Compile Include="Payload\Client\Diagnostic\SettingsValue.cs" />
+    <Compile Include="Payload\Client\IMavlinkPayloadClient.cs" />
+    <Compile Include="Payload\Client\Base\IMavlinkPayloadClientInterface.cs" />
+    <Compile Include="Payload\Client\MavlinkPayloadClient.cs" />
+    <Compile Include="Payload\Client\Base\MavlinkPayloadClientInterfaceBase.cs" />
+    <Compile Include="Payload\Client\PayloadClientException.cs" />
     <Compile Include="Payload\PayloadHelper.cs" />
+    <Compile Include="Payload\Client\Diagnostic\DiagnosticClientInterface.cs" />
     <Compile Include="Payload\Server\IMavlinkPayloadServer.cs" />
     <Compile Include="Payload\Server\MavlinkPayloadServer.cs" />
     <Compile Include="Tools\Exceptions\CommandException.cs" />
@@ -159,6 +168,11 @@
     <Compile Include="Tools\GeoMath\Extension.cs" />
     <Compile Include="Tools\GeoMath\GeoMath.cs" />
     <Compile Include="Tools\GeoMath\GeoPoint.cs" />
+    <Compile Include="Tools\RxCollection\ConcurrentRxCollection.cs" />
+    <Compile Include="Tools\RxCollection\IReadonlyRxCollection.cs" />
+    <Compile Include="Tools\RxCollection\IRxCollection.cs" />
+    <Compile Include="Tools\RxCollection\RxCollection.cs" />
+    <Compile Include="Tools\RxCollection\SynchronizedList.cs" />
     <Compile Include="Tools\RxValue\CancellationWrapper.cs" />
     <Compile Include="Tools\StringExtensions.cs" />
     <Compile Include="Vehicle\Ardupilot\VehicleArdupilotCopter.cs" />
@@ -225,7 +239,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Connection\Frames\v1\" />
-    <Folder Include="Payload\Client\" />
+    <Folder Include="Payload\Server\Diagnostic\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="RS.ru.resx">
