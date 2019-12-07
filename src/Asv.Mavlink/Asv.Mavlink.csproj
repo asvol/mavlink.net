@@ -47,6 +47,14 @@
       <HintPath>..\..\..\src\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.Desktop.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\..\src\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json.Bson, Version=1.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\..\src\packages\Newtonsoft.Json.Bson.1.0.2\lib\net45\Newtonsoft.Json.Bson.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Nito.AsyncEx, Version=4.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\..\src\packages\Nito.AsyncEx.4.0.1\lib\net45\Nito.AsyncEx.dll</HintPath>
       <Private>True</Private>
@@ -99,50 +107,53 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Client\Commands\MavlinkCommandHelper.cs" />
-    <Compile Include="Client\Common\FilterVehicleHelper.cs" />
-    <Compile Include="Client\DebugClient\IDebugClient.cs" />
-    <Compile Include="Client\DebugClient\DebugClient.cs" />
-    <Compile Include="Client\DGPS\DgpsClient.cs" />
-    <Compile Include="Client\DGPS\IDgpsClient.cs" />
-    <Compile Include="Client\Heartbeat\HeartbeatClient.cs" />
-    <Compile Include="Client\Heartbeat\IHeartbeatClient.cs" />
-    <Compile Include="Client\Logging\ILoggingClient.cs" />
-    <Compile Include="Client\Logging\LoggingClient.cs" />
-    <Compile Include="Client\Params\ParamConverters\IMavParamValueConverter.cs" />
-    <Compile Include="Client\Params\ParamConverters\MavParamArdupilotValueConverter.cs" />
-    <Compile Include="Client\Params\ParamConverters\MavParamValueConverter.cs" />
-    <Compile Include="Client\V2_extention\IV2ExtensionClient.cs" />
-    <Compile Include="Client\V2_extention\V2ExtensionClient.cs" />
+    <Compile Include="Connection\Client\Commands\MavlinkCommandHelper.cs" />
+    <Compile Include="Connection\Client\Common\FilterVehicleHelper.cs" />
+    <Compile Include="Connection\Client\DebugClient\IDebugClient.cs" />
+    <Compile Include="Connection\Client\DebugClient\DebugClient.cs" />
+    <Compile Include="Connection\Client\DGPS\DgpsClient.cs" />
+    <Compile Include="Connection\Client\DGPS\IDgpsClient.cs" />
+    <Compile Include="Connection\Client\Heartbeat\HeartbeatClient.cs" />
+    <Compile Include="Connection\Client\Heartbeat\IHeartbeatClient.cs" />
+    <Compile Include="Connection\Client\Logging\ILoggingClient.cs" />
+    <Compile Include="Connection\Client\Logging\LoggingClient.cs" />
+    <Compile Include="Connection\Client\Params\ParamConverters\IMavParamValueConverter.cs" />
+    <Compile Include="Connection\Client\Params\ParamConverters\MavParamArdupilotValueConverter.cs" />
+    <Compile Include="Connection\Client\Params\ParamConverters\MavParamValueConverter.cs" />
+    <Compile Include="Connection\Client\V2_extention\IV2ExtensionClient.cs" />
+    <Compile Include="Connection\Client\V2_extention\V2ExtensionClient.cs" />
     <Compile Include="Connection\Dialects\ardupilotmega.cs" />
     <Compile Include="Connection\Dialects\DataTypes.cs" />
     <Compile Include="Connection\Dialects\icarous.cs" />
     <Compile Include="Connection\Dialects\python_array_test.cs" />
     <Compile Include="Connection\Dialects\test.cs" />
     <Compile Include="Connection\Dialects\uAvionix.cs" />
-    <Compile Include="Exceptions\CommandException.cs" />
+    <Compile Include="Payload\PayloadHelper.cs" />
+    <Compile Include="Payload\Server\IMavlinkPayloadServer.cs" />
+    <Compile Include="Payload\Server\MavlinkPayloadServer.cs" />
+    <Compile Include="Tools\Exceptions\CommandException.cs" />
     <Compile Include="Connection\Frames\ISerializable.cs" />
     <Compile Include="Gcs\GroundControlStation.cs" />
     <Compile Include="Gcs\IGroundControlStation.cs" />
     <Compile Include="Gcs\PortManager\Port\PortBaseV2.cs" />
     <Compile Include="Gcs\PortManager\Port\Tcp\TcpPort.cs" />
-    <Compile Include="Server\CommandLong\CommandLongServer.cs" />
-    <Compile Include="Server\CommandLong\ICommandLongServer.cs" />
-    <Compile Include="Server\MavlinkServerBase.cs" />
+    <Compile Include="Connection\Server\CommandLong\CommandLongServer.cs" />
+    <Compile Include="Connection\Server\CommandLong\ICommandLongServer.cs" />
+    <Compile Include="Connection\Server\MavlinkServerBase.cs" />
     <Compile Include="Tools\IPacketSequenceCalculator.cs" />
-    <Compile Include="Server\DebugServer\DebugServer.cs" />
-    <Compile Include="Server\DebugServer\IDebugServer.cs" />
-    <Compile Include="Server\Heartbeat\IMavlinkHeartbeatServer.cs" />
-    <Compile Include="Server\Common\IMavlinkPacketTransponder.cs" />
-    <Compile Include="Server\Heartbeat\MavlinkHeartbeatServer.cs" />
-    <Compile Include="Server\Common\MavlinkPacketTransponder.cs" />
-    <Compile Include="Server\Common\MavlinkServerIdentity.cs" />
-    <Compile Include="Server\Logging\LoggingServer.cs" />
-    <Compile Include="Server\MavlinkServer.cs" />
-    <Compile Include="Server\StatusText\IStatusTextServer.cs" />
-    <Compile Include="Server\StatusText\StatusTextServer.cs" />
-    <Compile Include="Server\V2_extention\V2ExtensionServer.cs" />
-    <Compile Include="Server\V2_extention\IV2ExtensionServer.cs" />
+    <Compile Include="Connection\Server\DebugServer\DebugServer.cs" />
+    <Compile Include="Connection\Server\DebugServer\IDebugServer.cs" />
+    <Compile Include="Connection\Server\Heartbeat\IMavlinkHeartbeatServer.cs" />
+    <Compile Include="Connection\Server\Common\IMavlinkPacketTransponder.cs" />
+    <Compile Include="Connection\Server\Heartbeat\MavlinkHeartbeatServer.cs" />
+    <Compile Include="Connection\Server\Common\MavlinkPacketTransponder.cs" />
+    <Compile Include="Connection\Server\Common\MavlinkServerIdentity.cs" />
+    <Compile Include="Connection\Server\Logging\LoggingServer.cs" />
+    <Compile Include="Connection\Server\MavlinkServer.cs" />
+    <Compile Include="Connection\Server\StatusText\IStatusTextServer.cs" />
+    <Compile Include="Connection\Server\StatusText\StatusTextServer.cs" />
+    <Compile Include="Connection\Server\V2_extention\V2ExtensionServer.cs" />
+    <Compile Include="Connection\Server\V2_extention\IV2ExtensionServer.cs" />
     <Compile Include="Tools\GeoMath\Extension.cs" />
     <Compile Include="Tools\GeoMath\GeoMath.cs" />
     <Compile Include="Tools\GeoMath\GeoPoint.cs" />
@@ -157,20 +168,20 @@
     <Compile Include="Vehicle\Px4\VehiclePx4.cs" />
     <Compile Include="Connection\IDataStream.cs" />
     <Compile Include="Connection\IMavlinkV2Connection.cs" />
-    <Compile Include="Client\Custom\IMavlinkCommon.cs" />
-    <Compile Include="Client\Commands\MavlinkCommandClient.cs" />
-    <Compile Include="Client\Commands\IMavlinkCommandClient.cs" />
-    <Compile Include="Client\Missions\IMissionClient.cs" />
-    <Compile Include="Client\Missions\MissionClient.cs" />
-    <Compile Include="Client\Offboard\IMavlinkOffboardMode.cs" />
-    <Compile Include="Client\Offboard\MavlinkOffboardMode.cs" />
-    <Compile Include="Client\Params\MavlinkParameterClient.cs" />
-    <Compile Include="Client\RawTelemetry\IMavlinkTelemetry.cs" />
-    <Compile Include="Client\Params\MavParam.cs" />
-    <Compile Include="Client\Params\IMavlinkParamClient.cs" />
+    <Compile Include="Connection\Client\Custom\IMavlinkCommon.cs" />
+    <Compile Include="Connection\Client\Commands\MavlinkCommandClient.cs" />
+    <Compile Include="Connection\Client\Commands\IMavlinkCommandClient.cs" />
+    <Compile Include="Connection\Client\Missions\IMissionClient.cs" />
+    <Compile Include="Connection\Client\Missions\MissionClient.cs" />
+    <Compile Include="Connection\Client\Offboard\IMavlinkOffboardMode.cs" />
+    <Compile Include="Connection\Client\Offboard\MavlinkOffboardMode.cs" />
+    <Compile Include="Connection\Client\Params\MavlinkParameterClient.cs" />
+    <Compile Include="Connection\Client\RawTelemetry\IMavlinkTelemetry.cs" />
+    <Compile Include="Connection\Client\Params\MavParam.cs" />
+    <Compile Include="Connection\Client\Params\IMavlinkParamClient.cs" />
     <Compile Include="Gcs\PortManager\PortManager.cs" />
     <Compile Include="Gcs\PortManager\Port\IPort.cs" />
-    <Compile Include="Client\IMavlinkClient.cs" />
+    <Compile Include="Connection\Client\IMavlinkClient.cs" />
     <Compile Include="Connection\MavlinkV2Connection.cs" />
     <Compile Include="Tools\LinkIndicator\LinkIndicator.cs" />
     <Compile Include="Tools\LinkIndicator\LinkState.cs" />
@@ -189,9 +200,9 @@
     <Compile Include="Connection\Frames\v2\PacketV2.cs" />
     <Compile Include="Connection\Frames\v2\PacketV2Helper.cs" />
     <Compile Include="Connection\Frames\X25Crc.cs" />
-    <Compile Include="Exceptions\DeserializePackageException.cs" />
-    <Compile Include="Exceptions\MavlinkException.cs" />
-    <Compile Include="Exceptions\MessageIdNotFoundException.cs" />
+    <Compile Include="Tools\Exceptions\DeserializePackageException.cs" />
+    <Compile Include="Tools\Exceptions\MavlinkException.cs" />
+    <Compile Include="Tools\Exceptions\MessageIdNotFoundException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Connection\Frames\v2\Signature.cs" />
     <Compile Include="RS.Designer.cs">
@@ -206,14 +217,15 @@
     <Compile Include="Gcs\PortManager\Port\Udp\UdpPort.cs" />
     <Compile Include="Vehicle\Px4\IVehiclePx4.cs" />
     <Compile Include="Vehicle\Px4\PxModeMap.cs" />
-    <Compile Include="Client\RawTelemetry\MavlinkTelemetry.cs" />
-    <Compile Include="Client\Custom\MavlinkCommon.cs" />
-    <Compile Include="Client\MavlinkClient.cs" />
-    <Compile Include="Client\Commands\VehicleDoRepositionHelper.cs" />
+    <Compile Include="Connection\Client\RawTelemetry\MavlinkTelemetry.cs" />
+    <Compile Include="Connection\Client\Custom\MavlinkCommon.cs" />
+    <Compile Include="Connection\Client\MavlinkClient.cs" />
+    <Compile Include="Connection\Client\Commands\VehicleDoRepositionHelper.cs" />
     <Compile Include="Vehicle\VehicleBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Connection\Frames\v1\" />
+    <Folder Include="Payload\Client\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="RS.ru.resx">
