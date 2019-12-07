@@ -66,7 +66,7 @@ namespace Asv.Mavlink
 
         private Task SendUpdate(KeyValuePair<string,string> value, CancellationToken cancel)
         {
-            return Send<KeyValuePair<string, string>,Void>("SET", value, cancel);
+            return Send<KeyValuePair<string, string>,Void>(WellKnownDiag.DiagSettingsSetMethodName, value, cancel);
         }
 
         private void OnDataDigit(Result<IDictionary<string, double>> val)

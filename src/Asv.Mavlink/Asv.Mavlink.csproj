@@ -139,6 +139,10 @@
     <Compile Include="Payload\Client\PayloadClientException.cs" />
     <Compile Include="Payload\PayloadHelper.cs" />
     <Compile Include="Payload\Client\Diagnostic\DiagnosticClientInterface.cs" />
+    <Compile Include="Payload\Server\Base\IPayloadServerInterface.cs" />
+    <Compile Include="Payload\Server\Base\PayloadServerInterfaceBase.cs" />
+    <Compile Include="Payload\Server\Diagnostic\DiagnosticServerInterface.cs" />
+    <Compile Include="Payload\Server\Diagnostic\IDiagnosticServer.cs" />
     <Compile Include="Payload\Server\IMavlinkPayloadServer.cs" />
     <Compile Include="Payload\Server\MavlinkPayloadServer.cs" />
     <Compile Include="Tools\Exceptions\CommandException.cs" />
@@ -239,7 +243,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Connection\Frames\v1\" />
-    <Folder Include="Payload\Server\Diagnostic\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="RS.ru.resx">

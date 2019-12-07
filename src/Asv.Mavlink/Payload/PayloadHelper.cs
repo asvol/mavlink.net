@@ -43,6 +43,7 @@ namespace Asv.Mavlink
         public const string DiagStringsValueName = "SVAL";
         public const string DiagDigitValueName = "DVAL";
         public const string DiagSettingsValueName = "CONF";
+        public const string DiagSettingsSetMethodName = "SET";
 
         #endregion
     }
