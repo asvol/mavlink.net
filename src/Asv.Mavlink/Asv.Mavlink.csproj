@@ -129,6 +129,8 @@
     <Compile Include="Connection\Dialects\standard.cs" />
     <Compile Include="Connection\Dialects\test.cs" />
     <Compile Include="Connection\Dialects\uAvionix.cs" />
+    <Compile Include="Gcs\PortManager\Port\Tcp\TcpPortConfig.cs" />
+    <Compile Include="Gcs\PortManager\Port\Tcp\TcpServerPort.cs" />
     <Compile Include="Payload\Client\Diagnostic\DiagnosticValue.cs" />
     <Compile Include="Payload\Client\Diagnostic\IDiagnosticClient.cs" />
     <Compile Include="Payload\Client\Diagnostic\SettingsValue.cs" />
@@ -150,7 +152,7 @@
     <Compile Include="Gcs\GroundControlStation.cs" />
     <Compile Include="Gcs\IGroundControlStation.cs" />
     <Compile Include="Gcs\PortManager\Port\PortBaseV2.cs" />
-    <Compile Include="Gcs\PortManager\Port\Tcp\TcpPort.cs" />
+    <Compile Include="Gcs\PortManager\Port\Tcp\TcpClientPort.cs" />
     <Compile Include="Connection\Server\CommandLong\CommandLongServer.cs" />
     <Compile Include="Connection\Server\CommandLong\ICommandLongServer.cs" />
     <Compile Include="Connection\Server\MavlinkServerBase.cs" />

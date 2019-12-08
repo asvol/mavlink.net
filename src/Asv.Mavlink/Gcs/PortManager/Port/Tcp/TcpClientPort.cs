@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,36 +6,13 @@ using System.Web;
 
 namespace Asv.Mavlink
 {
-    public class TcpPortConfig
-    {
-        public string Host { get; set; }
-        public int Port { get; set; }
-
-        public static bool TryParseFromUri(Uri uri, out TcpPortConfig opt)
-        {
-            if (!"tcp".Equals(uri.Scheme, StringComparison.InvariantCultureIgnoreCase))
-            {
-                opt = null;
-                return false;
-            }
-
-            opt = new TcpPortConfig
-            {
-                Host = IPAddress.Parse(uri.Host).ToString(),
-                Port = uri.Port,
-            };
-
-            return true;
-        }
-    }
-
-    public class TcpPort:PortBase
+    public class TcpClientPort:PortBase
     {
         private TcpPortConfig _cfg;
         private TcpClient _tcp;
         private CancellationTokenSource _stop;
 
-        public TcpPort(TcpPortConfig cfg)
+        public TcpClientPort(TcpPortConfig cfg)
         {
             _cfg = cfg;
         }

@@ -80,7 +80,7 @@ namespace Asv.Mavlink
                 byte[] data;
                 using (_sync.Lock())
                 {
-                    if (_serial.BytesToRead == 0 || _serial.IsOpen == false) goto exit;
+                    if (_serial == null || _serial.BytesToRead == 0 || _serial.IsOpen == false) goto exit;
                     data = new byte[_serial.BytesToRead];
                     _serial.Read(data, 0, data.Length);
                 }

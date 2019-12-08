@@ -40,7 +40,17 @@ namespace Asv.Mavlink
             var uri = new Uri(connectionString);
 
             TcpPortConfig tcp;
-            if (TcpPortConfig.TryParseFromUri(uri, out tcp)) return new TcpPort(tcp);
+            if (TcpPortConfig.TryParseFromUri(uri, out tcp))
+            {
+                if (tcp.IsServer)
+                {
+                    return new TcpServerPort(tcp);
+                }
+                else
+                {
+                    return new TcpClientPort(tcp);
+                }
+            }
 
             UdpPortConfig udp;
             if (UdpPortConfig.TryParseFromUri(uri, out udp)) return new UdpPort(udp);
