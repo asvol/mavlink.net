@@ -69,7 +69,10 @@ namespace Asv.Mavlink
                         _tcp.GetStream().Read(buff, 0, buff.Length);
                         InternalOnData(buff);
                     }
-                    Thread.Sleep(100);
+                    else
+                    {
+                        Thread.Sleep(100);
+                    }
                 }
             }
             catch (SocketException ex)

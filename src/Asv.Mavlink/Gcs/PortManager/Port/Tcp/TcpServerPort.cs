@@ -82,8 +82,12 @@ namespace Asv.Mavlink
                             _client.GetStream().Read(buff, 0, buff.Length);
                             InternalOnData(buff);
                         }
+                        else
+                        {
+                            Thread.Sleep(100);
+                        }
                     }
-                    Thread.Sleep(100);
+                    
                 }
             }
             catch (SocketException ex)
