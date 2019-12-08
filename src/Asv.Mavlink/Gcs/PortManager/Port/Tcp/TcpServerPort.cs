@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog;
 
 namespace Asv.Mavlink
 {
@@ -14,6 +15,7 @@ namespace Asv.Mavlink
         private TcpListener _tcp;
         private CancellationTokenSource _stop;
         private TcpClient _client;
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public TcpServerPort(TcpPortConfig cfg)
         {
@@ -70,6 +72,7 @@ namespace Asv.Mavlink
                     if (_client == null)
                     {
                         _client = _tcp.AcceptTcpClient();
+                        _logger.Info($"Accept tcp client {_client.Client.RemoteEndPoint}");
                     }
                     else
                     {
