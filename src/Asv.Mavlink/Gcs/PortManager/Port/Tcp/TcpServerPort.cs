@@ -100,5 +100,10 @@ namespace Asv.Mavlink
 
 
         }
+
+        public override string ToString()
+        {
+            return _cfg.ToString();
+        }
     }
 }

@@ -96,5 +96,10 @@ namespace Asv.Mavlink
             Interlocked.Exchange(ref _isReading, 0);
         }
 
+
+        public override string ToString()
+        {
+            return _config.ToString();
+        }
     }
 }

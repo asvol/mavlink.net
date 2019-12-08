@@ -27,5 +27,10 @@ namespace Asv.Mavlink
 
             return true;
         }
+
+        public override string ToString()
+        {
+            return $"tcp://{Host}:{Port}?isServer={IsServer}";
+        }
     }
 }

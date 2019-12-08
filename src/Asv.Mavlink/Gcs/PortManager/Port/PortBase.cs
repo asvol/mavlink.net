@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog;
 
 namespace Asv.Mavlink
 {
@@ -24,9 +25,14 @@ namespace Asv.Mavlink
         public abstract PortType PortType { get; }
         public TimeSpan ReconnectTimeout { get; set; } = TimeSpan.FromSeconds(5);
         public IRxValue<PortState> State => _portStateStream;
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         protected PortBase()
         {
+            State.DistinctUntilChanged().Subscribe(_ =>
+            {
+                _logger.Info($"Port connection changed {this}: {_:G}");
+            });
             _enableStream.Where(_ => _).Subscribe(_ => Task.Factory.StartNew(TryConnect), _disposedCancel.Token);
         }
 
@@ -88,6 +94,7 @@ namespace Asv.Mavlink
                 _portStateStream.OnNext(PortState.Connecting);
                 InternalStart();
                 _portStateStream.OnNext(PortState.Connected);
+                
             }
             catch (Exception e)
             {

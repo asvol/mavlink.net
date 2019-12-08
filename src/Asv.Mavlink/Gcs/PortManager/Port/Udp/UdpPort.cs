@@ -3,58 +3,23 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
+using NLog;
 
 namespace Asv.Mavlink
 {
-    public class UdpPortConfig
-    {
-        public string LocalHost { get; set; }
-        public int LocalPort { get; set; }
-        public string RemoteHost { get; set; }
-        public int RemotePort { get; set; }
-
-        public static bool TryParseFromUri(Uri uri, out UdpPortConfig opt)
-        {
-            if (!"udp".Equals(uri.Scheme, StringComparison.InvariantCultureIgnoreCase))
-            {
-                opt = null;
-                return false;
-            }
-
-            var coll = HttpUtility.ParseQueryString(uri.Query);
-
-            opt = new UdpPortConfig
-            {
-                LocalHost = IPAddress.Parse(uri.Host).ToString(),
-                LocalPort = uri.Port,
-            };
-
-            var rhost = coll["rhost"];
-            if (!rhost.IsNullOrWhiteSpace())
-            {
-                opt.RemoteHost = IPAddress.Parse(rhost).ToString();
-            }
-
-            var rport = coll["rport"];
-            if (!rport.IsNullOrWhiteSpace())
-            {
-                opt.RemotePort = int.Parse(rport);
-            }
-            return true;
-        }
-    }
-
     public class UdpPort : PortBase
     {
+        private readonly UdpPortConfig _config;
         private readonly IPEndPoint _recvEndPoint;
         private UdpClient _udp;
         private IPEndPoint _lastRecvEndpoint;
         private CancellationTokenSource _stop;
         private IPEndPoint _sendEndPoint;
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public UdpPort(UdpPortConfig config)
         {
+            _config = config;
             _recvEndPoint = new IPEndPoint(IPAddress.Parse(config.LocalHost), config.LocalPort);
             if (!config.RemoteHost.IsNullOrWhiteSpace() && config.RemotePort != 0)
             {
@@ -113,6 +78,7 @@ namespace Asv.Mavlink
                     {
                         _lastRecvEndpoint = anyEp;
                         _udp.Connect(_lastRecvEndpoint);
+                        _logger.Info($"Recieve new UDP client {_lastRecvEndpoint}");
                     }
                     InternalOnData(bytes);
                 }
@@ -126,6 +92,11 @@ namespace Asv.Mavlink
             {
                 InternalOnError(e);
             }
+        }
+
+        public override string ToString()
+        {
+            return _config.ToString();
         }
     }
 }
