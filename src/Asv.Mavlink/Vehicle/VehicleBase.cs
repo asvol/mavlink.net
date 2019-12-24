@@ -474,6 +474,46 @@ namespace Asv.Mavlink
             progress.Report(1);
         }
 
+        public async Task GoToGlobAndWaitWithoutAltitude(GeoPoint location, IProgress<double> progress, double precisionMet, CancellationToken cancel)
+        {
+            await GoToGlob(location, cancel);
+            progress = progress ?? new Progress<double>();
+            var startLocation = this.GpsLocation.Value;
+            var startLocation0 = startLocation.SetAltitude(0);
+            var startDistance = Math.Abs(GeoMath.Distance(location, startLocation));
+            var startDistance0 = Math.Abs(GeoMath.Distance(location.SetAltitude(0), startLocation0));
+
+            Logger.Info("GoToAndWaitWithoutAltitude {0} with precision {2:F1} m. Distance to target {3:F1}", location, precisionMet, startDistance);
+            progress.Report(0);
+            if (startDistance0 <= precisionMet)
+            {
+                Logger.Debug("Already in target, nothing to do", startLocation);
+                progress.Report(1);
+                return;
+            }
+
+            var sw = new Stopwatch();
+            sw.Start();
+            Logger.Debug("Send command GoTo to vehicle", startLocation);
+            await this.GoToGlob(location, cancel).ConfigureAwait(false);
+            double dist = 0;
+            while (!cancel.IsCancellationRequested)
+            {
+                var loc = this.GpsLocation.Value;
+                var loc0 = loc.SetAltitude(0);
+                dist = Math.Abs(GeoMath.Distance(location, loc));
+                var dist0 = Math.Abs(GeoMath.Distance(location.SetAltitude(0), loc0));
+                var prog = 1 - dist / startDistance;
+                Logger.Trace("Distance to target {0:F1}, location: {1}, progress {2:P2}", dist, loc, prog);
+                progress.Report(prog);
+                if (dist0 <= precisionMet) break;
+                await Task.Delay(TimeSpan.FromSeconds(1), cancel).ConfigureAwait(false);
+            }
+            sw.Stop();
+            Logger.Info($"Complete {sw.Elapsed:hh\\:mm\\:ss} location error {dist:F1} m");
+            progress.Report(1);
+        }
+
         public abstract Task FlyByLineGlob(GeoPoint start, GeoPoint stop, double precisionMet, CancellationToken cancel, Action firstPointComplete = null);
 
         public abstract Task DoRtl(CancellationToken cancel);

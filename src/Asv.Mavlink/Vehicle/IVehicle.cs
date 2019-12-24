@@ -79,6 +79,7 @@ namespace Asv.Mavlink
         IRxValue<GeoPoint?> GoToTarget { get; }
         Task GoToGlob(GeoPoint location, CancellationToken cancel, double? yawDeg = null);
         Task GoToGlobAndWait(GeoPoint location, IProgress<double> progress, double precisionMet, CancellationToken cancel);
+        Task GoToGlobAndWaitWithoutAltitude(GeoPoint location, IProgress<double> progress, double precisionMet, CancellationToken cancel);
 
         Task FlyByLineGlob(GeoPoint start, GeoPoint stop, double precisionMet, CancellationToken cancel, Action firstPointComplete = null);
 
