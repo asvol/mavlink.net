@@ -37,6 +37,7 @@ namespace Asv.Mavlink
         }
 
         public IRxValue<int> PacketRateHz => _mavlink.Heartbeat.PacketRateHz;
+        
 
         public IMavlinkClient Mavlink => _mavlink;
 
@@ -54,6 +55,7 @@ namespace Asv.Mavlink
             InitStatus();
             InitMode();
             InitVehicleClass();
+            InitRadioStatus();
         }
 
         
@@ -527,11 +529,25 @@ namespace Asv.Mavlink
             DisposeCancel.Token.Register(() => _goToTarget.Dispose());
         }
 
-       
 
-       
+
+
 
         #endregion
+
+        #region Radiostatus
+
+        public IRxValue<RadioLinkStatus> RadioStatus => _radioStatus;
+        private readonly RxValue<RadioLinkStatus> _radioStatus = new RxValue<RadioLinkStatus>();
+
+        private void InitRadioStatus()
+        {
+            _mavlink.Rtt.RawRadioStatus.Select(_=>new RadioLinkStatus(_)).Subscribe(_radioStatus, DisposeCancel.Token);
+            DisposeCancel.Token.Register(() => _radioStatus.Dispose());
+        }
+
+        #endregion
+
 
         #region Status
 
@@ -542,6 +558,8 @@ namespace Asv.Mavlink
         public IRxValue<double> CpuLoad => _cpuLoad;
 
         private readonly RxValue<double> _dropRateComm = new RxValue<double>();
+
+        
 
         public IRxValue<double> DropRateCommunication => _dropRateComm;
 

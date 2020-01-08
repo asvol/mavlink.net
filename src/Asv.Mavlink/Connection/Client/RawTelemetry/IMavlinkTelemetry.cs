@@ -4,6 +4,7 @@ namespace Asv.Mavlink
 {
     public interface IMavlinkTelemetry
     {
+        IRxValue<RadioStatusPayload> RawRadioStatus { get; }
         IRxValue<SysStatusPayload> RawSysStatus { get; }
         IRxValue<GpsRawIntPayload> RawGpsRawInt { get; }
         IRxValue<HighresImuPayload> RawHighresImu { get; }
