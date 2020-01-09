@@ -30,11 +30,13 @@ namespace Asv.Mavlink
             RSSI = rssi;
             if (rssi == 255)
             {
+                RSSIPersent = 0;
                 RSSIdBm = Double.NaN;
                 RSSImW = Double.NaN;
             }
             else
             {
+                RSSIPersent = 100.0 / 254.0 * rssi;
                 RSSIdBm = rssi / 1.9 - 127;
                 RSSImW = Math.Pow(10, (RSSIdBm - 30) / 10) * 1000;
             }
@@ -42,23 +44,28 @@ namespace Asv.Mavlink
             Noise = noise;
             if (noise == 255)
             {
+                NoisePercent = 0;
                 NoisedBm = Double.NaN;
                 NoisemW = Double.NaN;
             }
             else
             {
+                NoisePercent = 100.0 / 254.0 * noise;
                 NoisedBm = noise / 1.9 - 127;
                 NoisemW = Math.Pow(10, (NoisedBm - 30) / 10) * 1000;
             }
         }
 
+
         public double RSSI { get; set; }
+        public double RSSIPersent { get; set; }
         public double RSSIdBm { get; set; }
         public double RSSImW { get; set; }
 
         public double Noise { get; set; }
         public double NoisedBm { get; set; }
         public double NoisemW { get; set; }
+        public double NoisePercent { get; set; }
     }
 
     public class RadioLinkStatus
