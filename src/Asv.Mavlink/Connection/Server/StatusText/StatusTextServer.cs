@@ -89,7 +89,7 @@ namespace Asv.Mavlink.Server
                 _logger.Warn($"Original: [{severity}]=>{message}");
                 var newMessage = message.Substring(0, _maxMessageSize - 3) + "...";
                 _logger.Warn($"Reduced: [{severity}]=>{newMessage}");
-                _messageQueue.Enqueue(new KeyValuePair<MavSeverity, string>(severity, message));
+                _messageQueue.Enqueue(new KeyValuePair<MavSeverity, string>(severity, newMessage));
                 return true;
             }
             if (_messageQueue.Count > _config.MaxQueueSize)

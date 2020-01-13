@@ -19,7 +19,7 @@ namespace Asv.Mavlink.Client
         public DebugClient(IMavlinkV2Connection connection, MavlinkClientIdentity identity)
         {
             _identity = identity;
-            var inputPackets = connection.Where(FilterVehicle);
+            var inputPackets = connection.FilterVehicle(identity);
             inputPackets
                 .Where(_ => _.MessageId == NamedValueFloatPacket.PacketMessageId)
                 .Cast<NamedValueFloatPacket>()
@@ -55,13 +55,6 @@ namespace Asv.Mavlink.Client
         private string ConvertToKey(char[] payloadName)
         {
             return new string(payloadName.Where(_=>_ != 0).ToArray());
-        }
-
-        private bool FilterVehicle(IPacketV2<IPayload> packetV2)
-        {
-            if (_identity.TargetSystemId != 0 && _identity.TargetSystemId != packetV2.SystemId) return false;
-            if (_identity.TargetComponentId != 0 && _identity.TargetComponentId != packetV2.ComponenId) return false;
-            return true;
         }
 
         public IObservable<KeyValuePair<string, float>> NamedFloatValue =>_onFloatSubject;
