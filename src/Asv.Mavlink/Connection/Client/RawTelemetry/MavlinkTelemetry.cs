@@ -24,17 +24,17 @@ namespace Asv.Mavlink
         private readonly RxValue<HomePositionPayload> _home = new RxValue<HomePositionPayload>();
         private readonly RxValue<StatustextPayload> _statusText = new RxValue<StatustextPayload>();
         private readonly RxValue<GlobalPositionIntPayload> _globalPositionInt = new RxValue<GlobalPositionIntPayload>();
-        
+        private readonly RxValue<RadioStatusPayload> _radioStatus = new RxValue<RadioStatusPayload>();
 
         private readonly IObservable<IPacketV2<IPayload>> _inputPackets;
         private readonly CancellationTokenSource _disposeCancel = new CancellationTokenSource();
+        private IMavlinkV2Connection _connection;
 
-        
-        
 
         public MavlinkTelemetry(IMavlinkV2Connection connection, MavlinkClientIdentity config)
         {
             _config = config;
+            _connection = connection;
             _inputPackets = connection.FilterVehicle(config);
 
             HandleSystemStatus();
@@ -47,8 +47,12 @@ namespace Asv.Mavlink
             HandleExtendedSysState();
             HandleHome();
             HandleGlobalPositionInt();
+            HandleRadioStatus();
         }
+
         
+
+        public IRxValue<RadioStatusPayload> RawRadioStatus => _radioStatus;
         public IRxValue<SysStatusPayload> RawSysStatus => _sysStatus;
         public IRxValue<GpsRawIntPayload> RawGpsRawInt => _gpsRawInt;
         public IRxValue<HighresImuPayload> RawHighresImu => _highresImu;
@@ -60,7 +64,17 @@ namespace Asv.Mavlink
         public IRxValue<HomePositionPayload> RawHome => _home;
         public IRxValue<StatustextPayload> RawStatusText => _statusText;
         public IRxValue<GlobalPositionIntPayload> RawGlobalPositionInt => _globalPositionInt;
-        
+
+
+        private void HandleRadioStatus()
+        {
+            _connection
+                .Where(_ => _.MessageId == RadioStatusPacket.PacketMessageId)
+                .Cast<RadioStatusPacket>()
+                .Select(_ => _.Payload)
+                .Subscribe(_radioStatus, _disposeCancel.Token);
+            _disposeCancel.Token.Register(() => _globalPositionInt.Dispose());
+        }
 
         private void HandleGlobalPositionInt()
         {
@@ -69,7 +83,7 @@ namespace Asv.Mavlink
                 .Cast<GlobalPositionIntPacket>()
                 .Select(_ => _.Payload)
                 .Subscribe(_globalPositionInt, _disposeCancel.Token);
-            _disposeCancel.Token.Register(() => _globalPositionInt.Dispose());
+            _disposeCancel.Token.Register(() => _radioStatus.Dispose());
 
         }
 

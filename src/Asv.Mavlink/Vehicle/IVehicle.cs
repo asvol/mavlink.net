@@ -22,6 +22,73 @@ namespace Asv.Mavlink
         Copter,
     }
 
+    public class RadioStatusInfo
+    {
+
+        public RadioStatusInfo(byte rssi, byte noise)
+        {
+            RSSI = rssi;
+            if (rssi == 255)
+            {
+                RSSIPersent = 0;
+                RSSIdBm = Double.NaN;
+                RSSImW = Double.NaN;
+            }
+            else
+            {
+                RSSIPersent = 100.0 / 254.0 * rssi;
+                RSSIdBm = rssi / 1.9 - 127;
+                RSSImW = Math.Pow(10, (RSSIdBm - 30) / 10) * 1000;
+            }
+
+            Noise = noise;
+            if (noise == 255)
+            {
+                NoisePercent = 0;
+                NoisedBm = Double.NaN;
+                NoisemW = Double.NaN;
+            }
+            else
+            {
+                NoisePercent = 100.0 / 254.0 * noise;
+                NoisedBm = noise / 1.9 - 127;
+                NoisemW = Math.Pow(10, (NoisedBm - 30) / 10) * 1000;
+            }
+        }
+
+
+        public double RSSI { get; set; }
+        public double RSSIPersent { get; set; }
+        public double RSSIdBm { get; set; }
+        public double RSSImW { get; set; }
+
+        public double Noise { get; set; }
+        public double NoisedBm { get; set; }
+        public double NoisemW { get; set; }
+        public double NoisePercent { get; set; }
+    }
+
+    public class RadioLinkStatus
+    {
+        public RadioLinkStatus(RadioStatusPayload value)
+        {
+            Local = new RadioStatusInfo(value.Rssi,value.Noise);
+            Remote = new RadioStatusInfo(value.Remrssi,value.Remnoise);
+            CorrectedPackets = value.Fixed;
+            FreeTxBufferSpace = value.Txbuf;
+            ReceiveErrors = value.Rxerrors;
+        }
+
+        public ushort ReceiveErrors { get; set; }
+        public byte FreeTxBufferSpace { get; set; }
+
+        public ushort CorrectedPackets { get; set; }
+
+        public RadioStatusInfo Local { get; set; }
+        public RadioStatusInfo Remote { get; set; }
+        
+    }
+
     public interface IVehicle
     {
         MavlinkClientIdentity Identity { get; }
@@ -34,6 +101,7 @@ namespace Asv.Mavlink
 
         IRxValue<LinkState> Link { get; }
         IRxValue<int> PacketRateHz { get; }
+        IRxValue<RadioLinkStatus> RadioStatus { get; }
 
         IRxValue<VehicleClass> Class { get; }
 
