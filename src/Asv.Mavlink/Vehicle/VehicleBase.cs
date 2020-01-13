@@ -441,6 +441,8 @@ namespace Asv.Mavlink
         public async Task GoToGlobAndWait(GeoPoint location, IProgress<double> progress, double precisionMet, CancellationToken cancel)
         {
             await GoToGlob(location, cancel);
+            await GoToGlob(location, cancel);
+            await GoToGlob(location, cancel);
             progress = progress ?? new Progress<double>();
             var startLocation = this.GpsLocation.Value;
             var startDistance = Math.Abs(GeoMath.Distance(location, startLocation));
