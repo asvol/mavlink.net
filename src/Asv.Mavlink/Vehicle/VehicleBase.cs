@@ -102,7 +102,7 @@ namespace Asv.Mavlink
             try
             {
                 Logger.Info($"Request ALL data stream from vehicle");
-                await _mavlink.Common.RequestDataStream(0, 2, true, DisposeCancel.Token);
+                await _mavlink.Common.RequestDataStream(0, -1, true, DisposeCancel.Token);
                 Logger.Info($"Request home position");
                 await _mavlink.Commands.GetHomePosition(CancellationToken.None);
                 //await _mavlink.Params.ReadAllParams(DisposeCancel.Token,);
