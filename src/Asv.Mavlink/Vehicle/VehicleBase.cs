@@ -102,7 +102,13 @@ namespace Asv.Mavlink
             try
             {
                 Logger.Info($"Request ALL data stream from vehicle");
-                await _mavlink.Common.RequestDataStream(0, -1, true, DisposeCancel.Token);
+                await _mavlink.Common.RequestDataStream((int)MavDataStream.MavDataStreamAll, 2, true, DisposeCancel.Token);
+                // Logger.Info($"Request MavDataStreamRawSensors data stream from vehicle");
+                // await _mavlink.Common.RequestDataStream((int)MavDataStream.MavDataStreamRawSensors, 3, true, DisposeCancel.Token);
+                // Logger.Info($"Request MavDataStreamRawController data stream from vehicle");
+                // await _mavlink.Common.RequestDataStream((int)MavDataStream.MavDataStreamRawController,3 , true, DisposeCancel.Token);
+                // Logger.Info($"Request MavDataStreamPosition data stream from vehicle");
+                // await _mavlink.Common.RequestDataStream((int)MavDataStream.MavDataStreamPosition, 2, true, DisposeCancel.Token);
                 Logger.Info($"Request home position");
                 await _mavlink.Commands.GetHomePosition(CancellationToken.None);
                 //await _mavlink.Params.ReadAllParams(DisposeCancel.Token,);
