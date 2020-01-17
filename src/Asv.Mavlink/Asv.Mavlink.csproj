@@ -113,6 +113,7 @@
     <Compile Include="Connection\Client\DebugClient\DebugClient.cs" />
     <Compile Include="Connection\Client\DGPS\DgpsClient.cs" />
     <Compile Include="Connection\Client\DGPS\IDgpsClient.cs" />
+    <Compile Include="Connection\Client\Ftp\FtpClient.cs" />
     <Compile Include="Connection\Client\Heartbeat\HeartbeatClient.cs" />
     <Compile Include="Connection\Client\Heartbeat\IHeartbeatClient.cs" />
     <Compile Include="Connection\Client\Logging\ILoggingClient.cs" />
