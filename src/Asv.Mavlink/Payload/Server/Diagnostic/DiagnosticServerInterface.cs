@@ -13,9 +13,9 @@ namespace Asv.Mavlink
 {
     public class DiagnosticServerConfig
     {
-        public int StringUpdateTimeMs { get; set; } = 2000;
-        public int DigitUpdateTimeMs { get; set; } = 1000;
-        public int SettingsUpdateTimeMs { get; set; } = 2000;
+        public int StringUpdateTimeMs { get; set; } = 3000;
+        public int DigitUpdateTimeMs { get; set; } = 2000;
+        public int SettingsUpdateTimeMs { get; set; } = 3000;
     }
 
     public class DiagnosticValues<T> : IDiagnosticValues<T>
