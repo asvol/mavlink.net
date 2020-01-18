@@ -65,6 +65,7 @@ namespace Asv.Mavlink
             {
                 _serial = new SerialPort(_config.PortName, _config.BoundRate, _config.Parity, _config.DataBits, _config.StopBits)
                 {
+                    WriteBufferSize = _config.WriteBufferSize,
                     WriteTimeout = _config.WriteTimeout,
                 };
                 _serial.Open();
