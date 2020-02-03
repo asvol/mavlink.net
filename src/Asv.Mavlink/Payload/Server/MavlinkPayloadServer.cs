@@ -143,6 +143,8 @@ namespace Asv.Mavlink
                 var item = new MessagePart(packetInfo);
                 _dict.Add(packetInfo.PacketId, item);
 
+
+                // TODO: можно сделать намного реже
                 // Check old parts and remove them
                 var toDelete = _dict.Where(_ => (DateTime.Now - _.Value.LastMessage) > _dropOldPacketsTime).Select(_=>_.Key).ToArray();
                 foreach (var key in toDelete)
@@ -186,17 +188,18 @@ namespace Asv.Mavlink
                 try
                 {
                     var result = await callback(devId, data);
-                    await Send(devId, path, result, CancellationToken.None);
+                    await SendResult(devId, path, result, CancellationToken.None);
                 }
                 catch (Exception e)
                 {
+                    Status.Error($"Execute {path}:{e.Message}");
                     _logger.Warn(e, $"Error to execute '{path}':{e.Message}");
                     await SendError(devId, path, ErrorType.ArgsError, "Execute error", CancellationToken.None);
                 }
             };
         }
 
-        public async Task Send<T>(DeviceIdentity devId, string path, T data, CancellationToken cancel)
+        public async Task SendResult<T>(DeviceIdentity devId, string path, T data, CancellationToken cancel)
         {
             using (var strm = new MemoryStream())
             {
@@ -213,10 +216,27 @@ namespace Asv.Mavlink
             }
         }
 
+
+        public async Task SendError(DeviceIdentity devId, string path, ErrorType errorType, string message, CancellationToken cancel)
+        {
+            try
+            {
+                using (var strm = new MemoryStream())
+                {
+                    PayloadHelper.WriteHeader(strm, path);
+                    PayloadHelper.WriteData(strm, new ErrorCode { Msg = message, Res = errorType });
+                    strm.Position = 0;
+                    await SendData(devId.SystemId, devId.ComponentId, PayloadHelper.DefaultNetworkId, PayloadHelper.DefaultErrorMessageType, strm, cancel);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e, $"Exception occured to send error. Type:{errorType:G}, Message:{message}");
+            }
+        }
+
         private async Task SendData(byte targetSystemId, byte targetComponentId, byte targetNetworkId, ushort messageType, MemoryStream strm, CancellationToken cancel)
         {
-
-
             var maxDataSize = (PayloadHelper.V2ExtensionMaxDataSize - PacketInfo.PacketInfoSize);
             var fullPacketCount = strm.Length / maxDataSize;
             var lastPartSize = strm.Length % maxDataSize;
@@ -250,33 +270,14 @@ namespace Asv.Mavlink
                     }
                 }
             }
-
-
-
-
-
         }
+
 
 
         public IRxValue<int> TxPacketMaxSize => _txPacketMaxSize;
         public IRxValue<int> RxPacketMaxSize => _rxPacketMaxSize;
 
-        public async Task SendError(DeviceIdentity devId, string path, ErrorType errorType, string message, CancellationToken cancel)
-        {
-            try
-            {
-                using (var strm = new MemoryStream())
-                {
-                    PayloadHelper.WriteHeader(strm, path);
-                    PayloadHelper.WriteData(strm, new ErrorCode { Msg = message, Res = errorType });
-                    await _srv.V2Extension.SendData(devId.SystemId, devId.ComponentId, PayloadHelper.DefaultNetworkId, PayloadHelper.DefaultErrorMessageType, strm.ToArray(), cancel);
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e, $"Exception occured to send error. Type:{errorType:G}, Message:{message}");
-            }
-        }
+       
 
         public IStatusTextServer Status => _srv.StatusText;
     }

@@ -37,7 +37,7 @@ namespace Asv.Mavlink
 
         protected Task Send<T>(DeviceIdentity devId, string path, T data, CancellationToken cancel)
         {
-            return _server.Send(devId, PayloadHelper.PathJoin(_name, path), data, cancel);
+            return _server.SendResult(devId, PayloadHelper.PathJoin(_name, path), data, cancel);
         }
 
         protected Task SendError(DeviceIdentity devId, string path, ErrorType errorCode, string message, CancellationToken cancel)
