@@ -143,7 +143,6 @@ namespace Asv.Mavlink
                 var item = new MessagePart(packetInfo);
                 _dict.Add(packetInfo.PacketId, item);
 
-
                 // TODO: можно сделать намного реже
                 // Check old parts and remove them
                 var toDelete = _dict.Where(_ => (DateTime.Now - _.Value.LastMessage) > _dropOldPacketsTime).Select(_=>_.Key).ToArray();
@@ -156,9 +155,6 @@ namespace Asv.Mavlink
             }
 
         }
-
-        
-
 
         public void Dispose()
         {
@@ -185,6 +181,7 @@ namespace Asv.Mavlink
                     await SendError(devId, path, ErrorType.ArgsError,"Args error", CancellationToken.None);
                     return;
                 }
+
                 try
                 {
                     var result = await callback(devId, data);
@@ -194,7 +191,7 @@ namespace Asv.Mavlink
                 {
                     Status.Error($"Execute {path}:{e.Message}");
                     _logger.Warn(e, $"Error to execute '{path}':{e.Message}");
-                    await SendError(devId, path, ErrorType.ArgsError, "Execute error", CancellationToken.None);
+                    await SendError(devId, path, ErrorType.InternalError, "Execute error", CancellationToken.None);
                 }
             };
         }
