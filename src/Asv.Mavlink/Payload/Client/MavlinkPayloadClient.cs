@@ -139,7 +139,7 @@ namespace Asv.Mavlink
                 {
                     strm.Position = 0;
                     await SendData(PayloadHelper.DefaultNetworkId, PayloadHelper.DefaultSuccessMessageType, strm, cancel);
-                    
+
                     await eve.WaitAsync(cancel);
                     if (result.IsError)
                     {
@@ -147,7 +147,6 @@ namespace Asv.Mavlink
                     }
                     Debug.Assert(result.Value != null);
                     return result.Value;
-
                 }
                 catch (Exception e)
                 {
@@ -158,14 +157,11 @@ namespace Asv.Mavlink
                 {
                     dispose.Dispose();
                 }
-                
             }
         }
 
         private async Task SendData(byte defaultNetworkId, ushort defaultSuccessMessageType, MemoryStream strm, CancellationToken cancel)
         {
-            
-
             var maxDataSize = (PayloadHelper.V2ExtensionMaxDataSize - PacketInfo.PacketInfoSize);
             var fullPacketCount = strm.Length / maxDataSize;
             var lastPartSize = strm.Length % maxDataSize;

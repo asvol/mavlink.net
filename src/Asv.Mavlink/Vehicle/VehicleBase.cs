@@ -24,7 +24,7 @@ namespace Asv.Mavlink
 
         private readonly IMavlinkClient _mavlink;
         private readonly VehicleBaseConfig _config;
-
+        private const int DefaultAttemptsCount = 5;
 
         protected readonly CancellationTokenSource DisposeCancel = new CancellationTokenSource();
         private int _isDisposed;
@@ -448,8 +448,6 @@ namespace Asv.Mavlink
 
         public async Task GoToGlobAndWait(GeoPoint location, IProgress<double> progress, double precisionMet, CancellationToken cancel)
         {
-            await GoToGlob(location, cancel);
-            await GoToGlob(location, cancel);
             await GoToGlob(location, cancel);
             progress = progress ?? new Progress<double>();
             var startLocation = this.GpsLocation.Value;
