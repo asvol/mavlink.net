@@ -14,7 +14,7 @@ namespace Asv.Mavlink
     public class MavlinkPayloadServerConfig
     {
         public MavlinkServerIdentity Identity { get; set; } = new MavlinkServerIdentity { ComponenId = 13,SystemId = 13};
-        public string ConnectionString { get; set; } = "udp://127.0.0.1:55555?rhost=127.0.0.1&rport=55554"; //"serial:COM5"
+        public string ConnectionString { get; set; } = "serial:/dev/ttyACM0"; // "udp://127.0.0.1:55555?rhost=127.0.0.1&rport=55554"; //"serial:COM5"
     }
 
     public class MessagePart

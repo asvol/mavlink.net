@@ -6,7 +6,6 @@ namespace Asv.Mavlink
 {
     public class SerialPortConfig
     {
-
         public int DataBits { get; set; } = 8;
         public int BoundRate { get; set; } = 115200;
         public Parity Parity { get; set; } = Parity.None;
