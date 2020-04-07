@@ -244,6 +244,7 @@
     <Compile Include="Connection\Client\MavlinkClient.cs" />
     <Compile Include="Connection\Client\Commands\VehicleDoRepositionHelper.cs" />
     <Compile Include="Vehicle\VehicleBase.cs" />
+    <Compile Include="Vehicle\VehicleExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Connection\Frames\v1\" />
