@@ -146,5 +146,10 @@ namespace Asv.Mavlink.Vehicle
             return GoToGlobAndWaitWithConfirmBase(vehicle, location, progress, precisionMet, cancel, true,
                 attemptsCount, logger);
         }
+
+        public static Task KillSwitch(this IVehicle vehicle,CancellationToken cancel)
+        {
+            return vehicle.ArmDisarm(false, cancel, true);
+        }
     }
 }
