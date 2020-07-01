@@ -6,7 +6,7 @@ namespace Asv.Mavlink
 {
     public interface IDataStream:IObservable<byte[]>
     {
-        Task Send(byte[] data, int count, CancellationToken cancel);
+        Task<bool> Send(byte[] data, int count, CancellationToken cancel);
     }
 
 }

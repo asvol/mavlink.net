@@ -208,14 +208,15 @@ namespace Asv.Mavlink
             return _onRecv.Subscribe(observer);
         }
 
-        public Task Send(byte[] data, int count, CancellationToken cancel)
+        public async Task<bool> Send(byte[] data, int count, CancellationToken cancel)
         {
             PortWrapper[] ports;
             lock (_sync)
             {
                 ports = _ports.Where(_ => _.Port.IsEnabled.Value).ToArray();
             }
-            return Task.WhenAll(ports.Select(_ => _.Port.Send(data, count, cancel)));
+            var res = await Task.WhenAll(ports.Select(_ => _.Port.Send(data, count, cancel)));
+            return res.Any();
         }
     }
 }

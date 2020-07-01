@@ -136,20 +136,21 @@ namespace Asv.Mavlink
 
 
 
-        public async Task Send(byte[] data, int count, CancellationToken cancel)
+        public async Task<bool> Send(byte[] data, int count, CancellationToken cancel)
         {
             if (_portScheduler.CheckAccess() == true)
             {
 
             }
-            if (!IsEnabled.Value) return;
-            if (_portStateStream.Value == PortState.Error || _portStateStream.Value == PortState.Disabled) return;
+            if (!IsEnabled.Value) return false;
+            if (_portStateStream.Value == PortState.Error || _portStateStream.Value == PortState.Disabled) return false;
             CancellationTokenSource linkedCancel = null;
             try
             {
                 linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, _disposedCancel.Token);
                 await _taskFactory.StartNew(() => InternalSend(data, count), linkedCancel.Token);
                 Interlocked.Add(ref _txBytes, count);
+                return true;
             }
             catch (Exception e)
             {
@@ -157,6 +158,7 @@ namespace Asv.Mavlink
                 _portErrorStream.OnNext(e);
                 _portStateStream.OnNext(PortState.Error);
                 Observable.Timer(ReconnectTimeout).Subscribe(_ => _taskFactory.StartNew(TryReconnect, _disposedCancel.Token));
+                return false;
             }
             finally
             {

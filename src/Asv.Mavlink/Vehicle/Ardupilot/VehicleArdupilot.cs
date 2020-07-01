@@ -76,7 +76,7 @@ namespace Asv.Mavlink
             }
             else
             {
-                await base.ArmDisarm(isArming, cancel, force);
+                await base.ArmDisarm(isArming, cancel);
             }
         }
 
