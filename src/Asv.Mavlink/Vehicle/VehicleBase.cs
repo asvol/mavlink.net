@@ -102,14 +102,22 @@ namespace Asv.Mavlink
             try
             {
                 Logger.Info($"Request ALL data stream from vehicle");
-                await _mavlink.Common.RequestDataStream((int)MavDataStream.MavDataStreamAll, 2, true, DisposeCancel.Token);
+                //await _mavlink.Common.RequestDataStream((int)MavDataStream.MavDataStreamAll, 0, false, DisposeCancel.Token);
+
+                await _mavlink.Common.RequestDataStream((int)MavDataStream.MavDataStreamAll, 1, true, DisposeCancel.Token);
+
+                await _mavlink.Common.RequestDataStream((int)MavDataStream.MavDataStreamExtendedStatus, 2, true, DisposeCancel.Token);
+
+                await _mavlink.Common.RequestDataStream((int)MavDataStream.MavDataStreamPosition, 2, true, DisposeCancel.Token);
                 // Logger.Info($"Request MavDataStreamRawSensors data stream from vehicle");
-                // await _mavlink.Common.RequestDataStream((int)MavDataStream.MavDataStreamRawSensors, 3, true, DisposeCancel.Token);
+                //await _mavlink.Common.RequestDataStream((int)MavDataStream.MavDataStreamRawSensors, 3, true, DisposeCancel.Token);
                 // Logger.Info($"Request MavDataStreamRawController data stream from vehicle");
-                // await _mavlink.Common.RequestDataStream((int)MavDataStream.MavDataStreamRawController,3 , true, DisposeCancel.Token);
+                //await _mavlink.Common.RequestDataStream((int)MavDataStream.MavDataStreamRawController,2 , true, DisposeCancel.Token);
                 // Logger.Info($"Request MavDataStreamPosition data stream from vehicle");
                 // await _mavlink.Common.RequestDataStream((int)MavDataStream.MavDataStreamPosition, 2, true, DisposeCancel.Token);
+
                 Logger.Info($"Request home position");
+
                 await _mavlink.Commands.GetHomePosition(CancellationToken.None);
                 //await _mavlink.Params.ReadAllParams(DisposeCancel.Token,);
                 _initState.OnNext(VehicleInitState.Complete);
@@ -406,7 +414,7 @@ namespace Asv.Mavlink
             /// TODO: add _mavlink.Rtt.RawBatteryStatus
 
             _mavlink.Rtt.RawSysStatus.Select(_ => _.BatteryRemaining < 0 ? default(double?) : (_.BatteryRemaining / 100.0d)).Subscribe(_batteryCharge,DisposeCancel.Token);
-            _mavlink.Rtt.RawSysStatus.Select(_ => _.CurrentBattery < 0 ? default(double?) : (_.CurrentBattery / 1000.0d)).Subscribe(_currentBattery, DisposeCancel.Token);
+            _mavlink.Rtt.RawSysStatus.Select(_ => _.CurrentBattery < 0 ? default(double?) : (_.CurrentBattery / 100.0d)).Subscribe(_currentBattery, DisposeCancel.Token);
             _mavlink.Rtt.RawSysStatus.Select(_ => _.VoltageBattery / 1000.0d).Subscribe(_voltageBattery, DisposeCancel.Token);
 
             DisposeCancel.Token.Register(() => _batteryCharge.Dispose());
