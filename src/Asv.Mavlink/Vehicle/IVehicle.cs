@@ -127,7 +127,8 @@ namespace Asv.Mavlink
 
         IRxValue<bool> IsArmed { get; }
         IRxValue<TimeSpan> ArmedTime { get; }
-        Task ArmDisarm(bool isArming, CancellationToken cancel);
+
+        Task ArmDisarm(bool isArming, CancellationToken cancel, bool force = false);
 
         IRxValue<double?> CurrentBattery { get; }
         IRxValue<double> VoltageBattery { get; }

@@ -57,7 +57,22 @@ namespace Asv.Mavlink
         private readonly Dictionary<ushort, MessagePart> _dict = new Dictionary<ushort, MessagePart>();
         private int _packetId;
 
-       
+        public MavlinkPayloadServer(MavlinkServerIdentity identity, IDataStream dataStream)
+        {
+            _logger.Info($"Create mavlink payload server: dataStream:{dataStream}, comId:{identity.ComponenId}, sysId:{identity.SystemId}");
+            _conn = new MavlinkV2Connection(dataStream, _ => _.RegisterCommonDialect());
+            _srv = new MavlinkServerBase(_conn, identity);
+            _srv.Heartbeat.Set(_ =>
+            {
+                _.Autopilot = MavAutopilot.MavAutopilotGeneric;
+                _.Type = MavType.MavTypeGeneric;
+                _.SystemStatus = MavState.MavStateActive;
+                _.MavlinkVersion = 3;
+                _.CustomMode = PayloadHelper.HeartbeatMagicDigit;
+            });
+            _srv.Heartbeat.Start();
+            _srv.V2Extension.OnData.Subscribe(OnData, _disposeCancel.Token);
+        }
 
         public MavlinkPayloadServer(MavlinkPayloadServerConfig cfg)
         {
@@ -75,6 +90,8 @@ namespace Asv.Mavlink
             _srv.Heartbeat.Start();
             _srv.V2Extension.OnData.Subscribe(OnData, _disposeCancel.Token);
         }
+
+        public IMavlinkV2Connection Connection => _conn;
 
         private void OnData(V2ExtensionPacket v2ExtensionPacket)
         {

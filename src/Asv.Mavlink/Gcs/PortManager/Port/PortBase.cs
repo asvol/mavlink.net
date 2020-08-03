@@ -36,18 +36,20 @@ namespace Asv.Mavlink
             _enableStream.Where(_ => _).Subscribe(_ => Task.Factory.StartNew(TryConnect), _disposedCancel.Token);
         }
 
-        public async Task Send(byte[] data, int count, CancellationToken cancel)
+        public async Task<bool> Send(byte[] data, int count, CancellationToken cancel)
         {
-            if (!IsEnabled.Value) return;
-            if (_portStateStream.Value != PortState.Connected) return;
+            if (!IsEnabled.Value) return false;
+            if (_portStateStream.Value != PortState.Connected) return false;
             try
             {
                 await InternalSend(data, count, cancel).ConfigureAwait(false);
                 Interlocked.Add(ref _txBytes, count);
+                return true;
             }
             catch (Exception exception)
             {
                 InternalOnError(exception);
+                return false;
             }
         }
 

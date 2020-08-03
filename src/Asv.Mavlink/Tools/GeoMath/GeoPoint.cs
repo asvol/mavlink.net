@@ -19,7 +19,8 @@ namespace Asv.Mavlink
 
         public static GeoPoint FromLatLon(double lat, double lon) { return new GeoPoint(lat, lon); }
         public static GeoPoint NordPole { get { return new GeoPoint(90.0, 0.0); } }
-        
+        public static GeoPoint Zero { get { return new GeoPoint(0.0, 0.0); } }
+
 
 
         public GeoPoint(double latitude, double longitude)

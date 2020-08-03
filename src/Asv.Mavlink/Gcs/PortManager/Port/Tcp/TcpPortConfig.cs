@@ -30,7 +30,7 @@ namespace Asv.Mavlink
 
         public override string ToString()
         {
-            return $"tcp://{Host}:{Port}?isServer={IsServer}";
+            return $"tcp://{Host}:{Port}?srv={IsServer}";
         }
     }
 }

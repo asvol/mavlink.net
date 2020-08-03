@@ -386,12 +386,19 @@ namespace Asv.Mavlink
             DisposeCancel.Token.Register(() => _isArmed.Dispose());
         }
 
-        public virtual async Task ArmDisarm(bool isArming,CancellationToken cancel)
+        public virtual async Task ArmDisarm(bool isArming,CancellationToken cancel, bool force = false)
         {
-            if (_isArmed.Value == isArming) return;
-            Logger.Info($"=> ArmDisarm(isArming:{isArming})");
+            if (_isArmed.Value == isArming)
+            {
+                Logger.Info($"=> ArmDisarm(isArming:{isArming}, force={force}): already Armed\\Disarmed");
+                return;
+            }
+            else
+            {
+                Logger.Info($"=> ArmDisarm(isArming:{isArming}, force={force})");
+            }
             var result = await _mavlink.Commands.CommandLong(MavCmd.MavCmdComponentArmDisarm, isArming ? 1 : 0, float.NaN, float.NaN, float.NaN, float.NaN, float.NaN, float.NaN, 3, cancel);
-            Logger.Info($"=> ArmDisarm(isArming:{isArming}): '{result.Result}'(porgress:{result.Progress};resultParam2:{result.ResultParam2})");
+            Logger.Info($"=> ArmDisarm(isArming:{isArming}, force={force})): '{result.Result}'(porgress:{result.Progress};resultParam2:{result.ResultParam2})");
             ValidateCommandResult(result);
             await WaitCompleteWithDefaultTimeout(() => _isArmed.Value, "Arm/Disarm", cancel);
         }

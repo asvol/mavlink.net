@@ -62,6 +62,24 @@ namespace Asv.Mavlink
 
         }
 
+        public override async Task ArmDisarm(bool isArming, CancellationToken cancel, bool force = false)
+        {
+            const float magic_force_arm_value = 2989.0f;
+            const float magic_force_disarm_value = 21196.0f;
+
+            if (force)
+            {
+                var result = await _mavlink.Commands.CommandLong(MavCmd.MavCmdComponentArmDisarm, isArming ? 1 : 0, isArming? magic_force_arm_value : magic_force_disarm_value, float.NaN, float.NaN, float.NaN, float.NaN, float.NaN, 3, cancel);
+                Logger.Info($"=> Ardupilot force ArmDisarm(isArming:{isArming}, force={force})): '{result.Result}'(porgress:{result.Progress};resultParam2:{result.ResultParam2})");
+                ValidateCommandResult(result);
+                await WaitCompleteWithDefaultTimeout(() => IsArmed.Value, "Arm/Disarm", cancel);
+            }
+            else
+            {
+                await base.ArmDisarm(isArming, cancel);
+            }
+        }
+
         public override async Task TakeOff(double altitude, CancellationToken cancel)
         {
             try

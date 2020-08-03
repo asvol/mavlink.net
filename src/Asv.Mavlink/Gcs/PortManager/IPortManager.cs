@@ -37,6 +37,10 @@ namespace Asv.Mavlink
 
     public class PortManagerSettings
     {
-        public PortSettings[] Ports { get; set; } = new PortSettings[0];
+        public PortSettings[] Ports { get; set; } = new PortSettings []
+        {
+            new PortSettings {ConnectionString = "serial:COM1?br=57600", IsEnabled = true, Title = "Example Serial"},
+            new PortSettings {ConnectionString = "udp://10.10.4.39:5555", IsEnabled = true, Title = "Example UDP"},
+        };
     }
 }
