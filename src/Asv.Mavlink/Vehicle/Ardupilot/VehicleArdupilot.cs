@@ -44,6 +44,11 @@ namespace Asv.Mavlink
             
         }
 
+        public override IEnumerable<VehicleParamDescription> GetParamDescription()
+        {
+            return ArdupilotParamParser.Parse(Files.apm_pdef);
+        }
+
         public override async Task ClearRoi(CancellationToken cancel)
         {
             var old = _roi.Value;

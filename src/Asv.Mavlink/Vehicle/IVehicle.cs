@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
@@ -153,6 +154,8 @@ namespace Asv.Mavlink
         Task SetMode(VehicleMode mode, CancellationToken cancel);
 
         IMavlinkParameterClient Params { get; }
+
+        IEnumerable<VehicleParamDescription> GetParamDescription();
 
         Task TakeOff(double altitude, CancellationToken cancel);
 

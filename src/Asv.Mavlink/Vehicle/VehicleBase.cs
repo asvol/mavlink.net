@@ -434,6 +434,11 @@ namespace Asv.Mavlink
 
         #region Takeoff
 
+        public virtual IEnumerable<VehicleParamDescription> GetParamDescription()
+        {
+            yield break;
+        }
+
         public virtual async Task TakeOff(double altitude, CancellationToken cancel)
         {
             Logger.Info($"=> TakeOff(altitude:{altitude:F2})");
