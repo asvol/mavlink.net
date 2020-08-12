@@ -84,7 +84,7 @@ namespace Asv.Mavlink.Streams
             try
             {
                 linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, this._cancel.Token);
-                byte[] data = this._config.DefaultEncoding.GetBytes(((int)this._config.StartByte).ToString() + value + (object)this._config.StopByte);
+                byte[] data = this._config.DefaultEncoding.GetBytes(_config.StartByte + value + _config.StopByte);
                 await this._input.Send(data, data.Length, linkedCancel.Token);
                 data = (byte[])null;
             }
