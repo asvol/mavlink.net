@@ -187,6 +187,11 @@
     <Compile Include="Tools\RxCollection\RxCollection.cs" />
     <Compile Include="Tools\RxCollection\SynchronizedList.cs" />
     <Compile Include="Tools\RxValue\CancellationWrapper.cs" />
+    <Compile Include="Tools\Streams\JsonStreamBase.cs" />
+    <Compile Include="Tools\Streams\IJsonStream.cs" />
+    <Compile Include="Tools\Streams\ITextStream.cs" />
+    <Compile Include="Tools\Streams\TextReaderBaseConfig.cs" />
+    <Compile Include="Tools\Streams\TextStreamBase.cs" />
     <Compile Include="Tools\StringExtensions.cs" />
     <Compile Include="Vehicle\Ardupilot\ArdupilotParamParser.cs" />
     <Compile Include="Vehicle\Ardupilot\VehicleArdupilotCopter.cs" />
