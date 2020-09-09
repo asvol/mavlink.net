@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,9 +30,9 @@ namespace Asv.Mavlink
             return _client.Register<TOut>(absolutePath);
         }
 
-        protected Task<TOut> Send<TIn, TOut>(string path, TIn data, CancellationToken cancel)
+        protected Task<TOut> Send<TIn, TOut>(string path, TIn data, TimeSpan attemptTimeout, int attemptsCount, CancellationToken cancel, Action<int> progressCallback)
         {
-            return _client.Send<TIn, TOut>(PayloadHelper.PathJoin(_name, path), data, cancel);
+            return _client.Send<TIn, TOut>(PayloadHelper.PathJoin(_name, path), data, attemptTimeout, attemptsCount, cancel, progressCallback);
         }
 
         public void Dispose()

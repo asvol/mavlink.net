@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +8,9 @@ namespace Asv.Mavlink
 {
     public class DiagnosticClientInterface:MavlinkPayloadClientInterfaceBase,IDiagnosticClient
     {
+        private static TimeSpan DefaultTimeout = TimeSpan.FromSeconds(1);
+        private static int DefaultAttemptCount = 3;
+
         private readonly CancellationTokenSource _cancel = new CancellationTokenSource();
         private readonly RxCollection<IDiagnosticValue<string>> _strings = new RxCollection<IDiagnosticValue<string>>();
         private readonly RxCollection<IDiagnosticValue<double>> _digits = new RxCollection<IDiagnosticValue<double>>();
@@ -66,7 +69,7 @@ namespace Asv.Mavlink
 
         private Task SendUpdate(KeyValuePair<string,string> value, CancellationToken cancel)
         {
-            return Send<KeyValuePair<string, string>,Void>(WellKnownDiag.DiagSettingsSetMethodName, value, cancel);
+            return Send<KeyValuePair<string, string>,Void>(WellKnownDiag.DiagSettingsSetMethodName, value, DefaultTimeout, DefaultAttemptCount,  cancel, null);
         }
 
         private void OnDataDigit(Result<IDictionary<string, double>> val)
