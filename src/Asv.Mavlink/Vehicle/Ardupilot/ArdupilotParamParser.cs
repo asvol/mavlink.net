@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -112,7 +112,7 @@ namespace Asv.Mavlink
 
         private static void ParseCalibrationField(VehicleParamDescription result, XmlNode field)
         {
-            result.Calibration = int.Parse(field.InnerText);
+            result.Calibration = int.Parse(field.InnerText, CultureInfo.InvariantCulture);
         }
 
         private static void ParseValuesField(VehicleParamDescription result, XmlNode field)
@@ -129,7 +129,7 @@ namespace Asv.Mavlink
         {
             return new VehicleParamValue
             {
-                Code = decimal.Parse(valueField.Attributes["code"].Value),
+                Code = decimal.Parse(valueField.Attributes["code"].Value, CultureInfo.InvariantCulture),
                 Description = valueField.InnerText
             };
         }
@@ -146,7 +146,7 @@ namespace Asv.Mavlink
 
         private static void ParseIncrement(VehicleParamDescription result, XmlNode fieldValue)
         {
-            result.Increment = decimal.Parse(fieldValue.InnerText);
+            result.Increment = decimal.Parse(fieldValue.InnerText, CultureInfo.InvariantCulture);
         }
 
         private static void ParseRange(VehicleParamDescription result, XmlNode fieldValue)

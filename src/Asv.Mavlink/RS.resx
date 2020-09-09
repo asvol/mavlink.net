@@ -176,4 +176,7 @@
     <data name="VehicleArdupilotPlane_InternalGoToGlob_Altitude_of_home_position_is_null" xml:space="preserve">
     <value>Altitude of home position is null</value>
   </data>
+    <data name="PayloadDiagnosticRtt_PayloadDiagnosticRtt_Payload" xml:space="preserve">
+      <value>Payload</value>
+  </data>
 </root>

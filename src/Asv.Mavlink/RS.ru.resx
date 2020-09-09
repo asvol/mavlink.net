@@ -173,4 +173,7 @@
     <data name="GpsInfoHelper_GetDescription_Unknown" xml:space="preserve">
     <value>Unknown</value>
   </data>
+    <data name="PayloadDiagnosticRtt_PayloadDiagnosticRtt_Payload" xml:space="preserve">
+      <value>Полезная нагрузка</value>
+  </data>
 </root>

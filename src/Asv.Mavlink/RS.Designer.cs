@@ -19,7 +19,7 @@ namespace Asv.Mavlink {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class RS {
@@ -210,6 +210,15 @@ namespace Asv.Mavlink {
         internal static string PacketV2Helper_VerifyCrc_Bad_X25Crc {
             get {
                 return ResourceManager.GetString("PacketV2Helper_VerifyCrc_Bad_X25Crc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Payload.
+        /// </summary>
+        internal static string PayloadDiagnosticRtt_PayloadDiagnosticRtt_Payload {
+            get {
+                return ResourceManager.GetString("PayloadDiagnosticRtt_PayloadDiagnosticRtt_Payload", resourceCulture);
             }
         }
         
