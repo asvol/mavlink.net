@@ -138,13 +138,13 @@
     <Compile Include="Gcs\PortManager\Port\Tcp\TcpPortConfig.cs" />
     <Compile Include="Gcs\PortManager\Port\Tcp\TcpServerPort.cs" />
     <Compile Include="Gcs\PortManager\Port\Udp\UdpPortConfig.cs" />
+    <Compile Include="Payload\Client\Base\MavlinkPayloadClientInterfaceBase.cs" />
     <Compile Include="Payload\Client\Diagnostic\DiagnosticValue.cs" />
     <Compile Include="Payload\Client\Diagnostic\IDiagnosticClient.cs" />
     <Compile Include="Payload\Client\Diagnostic\SettingsValue.cs" />
     <Compile Include="Payload\Client\IMavlinkPayloadClient.cs" />
     <Compile Include="Payload\Client\Base\IMavlinkPayloadClientInterface.cs" />
     <Compile Include="Payload\Client\MavlinkPayloadClient.cs" />
-    <Compile Include="Payload\Client\Base\MavlinkPayloadClientInterfaceBase.cs" />
     <Compile Include="Payload\Client\PayloadClientException.cs" />
     <Compile Include="Payload\PayloadHelper.cs" />
     <Compile Include="Payload\Client\Diagnostic\DiagnosticClientInterface.cs" />
