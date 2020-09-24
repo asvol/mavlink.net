@@ -28,7 +28,7 @@ namespace Asv.Mavlink
             progressCallback = progressCallback ?? ((i) => { });
             var isSuccessfully = false;
             Exception lastError = null;
-            TOut result = default;
+            var result = default(TOut);
             for (var i = 0; i < attemptsCount; i++)
             {
                 progressCallback(i+1);
