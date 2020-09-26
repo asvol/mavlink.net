@@ -182,17 +182,9 @@ namespace Asv.Mavlink
                         var data = RecvClientData(tcpClient);
                         if (data != null)
                         {
-                            foreach (var otherClients in clients.Where(_ => _ != tcpClient && tcpClient.Connected))
+                            foreach (var otherClients in clients)
                             {
-                                try
-                                {
-                                    otherClients.GetStream().Write(data, 0, data.Length);
-                                }
-                                catch (ThreadAbortException e)
-                                {
-                                    // ignore
-                                }
-                                
+                                SendData(otherClients,data);
                             }
                             InternalOnData(data);
                         }
@@ -218,10 +210,26 @@ namespace Asv.Mavlink
 
         }
 
+        private void SendData(TcpClient tcpClient, byte[] data)
+        {
+            if (tcpClient.Available == 0) return;
+            if (tcpClient.Connected == false) return;
+            if (tcpClient.Client.Connected == false) return;
+            try
+            {
+                tcpClient.GetStream().Write(data, 0, data.Length);
+            }
+            catch (Exception e)
+            {
+                // ignore
+            }
+        }
+
         private byte[] RecvClientData(TcpClient tcpClient)
         {
             if (tcpClient.Available == 0) return null;
             if (tcpClient.Connected == false) return null;
+            if (tcpClient.Client.Connected == false) return null;
             var buff = new byte[tcpClient.Available];
             try
             {
