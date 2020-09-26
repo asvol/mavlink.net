@@ -27,21 +27,26 @@ namespace Asv.Mavlink
         public IRxValue<PortState> State => _portStateStream;
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private int _errCnt;
+        private DateTime _lastSuccess;
 
         protected PortBase()
         {
             State.Where(_ => _ == PortState.Connected).Subscribe(_ =>
             {
+                _lastSuccess = DateTime.Now;
                 _logger.Info($"Port {this}: {_:G}");
             });
-            State.Where(_ => _ == PortState.Error).Subscribe(_ => _errCnt++);
+            State.Where(_ => _ == PortState.Error).Subscribe(_ =>
+            {
+                _errCnt++;
+            });
             _enableStream.Where(_ => _).Subscribe(_ => Task.Factory.StartNew(TryConnect), _disposedCancel.Token);
 
             Observable.Timer(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30)).Subscribe(_ =>
             {
                 if (State.Value == PortState.Connected)
                 {
-                    _logger.Info($"Port {this}: {State.Value:G}; rx:{_rxBytes / 1024:F0} KiB; tx:{_rxBytes / 1024:F0} KiB; conn err:{_errCnt};");
+                    _logger.Info($"Port {this}: work {DateTime.Now - _lastSuccess:g}; rx:{_rxBytes / 1024:F0} KiB; tx:{_rxBytes / 1024:F0} KiB; conn err:{_errCnt};");
                 }
                 else
                 {
@@ -49,8 +54,6 @@ namespace Asv.Mavlink
                 }
             }, _disposedCancel.Token);
         }
-
-        
 
         public async Task<bool> Send(byte[] data, int count, CancellationToken cancel)
         {
@@ -64,6 +67,7 @@ namespace Asv.Mavlink
             }
             catch (Exception exception)
             {
+                _logger.Error($"Error to send data to port:{exception.Message}");
                 InternalOnError(exception);
                 return false;
             }
@@ -149,6 +153,7 @@ namespace Asv.Mavlink
 
         protected void InternalOnError(Exception exception)
         {
+            _logger.Trace(exception.ToString());
             _portStateStream.OnNext(PortState.Error);
             _portErrorStream.OnNext(exception);
             Observable.Timer(ReconnectTimeout).Subscribe(_ => TryConnect(), _disposedCancel.Token);

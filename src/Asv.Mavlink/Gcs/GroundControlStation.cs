@@ -58,6 +58,7 @@ namespace Asv.Mavlink
             public MavlinkDevice(HeartbeatPacket packet)
             {
                 Packet = packet;
+                Touch();
             }
 
             public DateTime GetLastHit()

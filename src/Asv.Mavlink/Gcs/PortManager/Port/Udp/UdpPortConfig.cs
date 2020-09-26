@@ -43,7 +43,15 @@ namespace Asv.Mavlink
 
         public override string ToString()
         {
-            return $"udp://{LocalHost}:{LocalPort}?rhost={RemoteHost}&rport={RemotePort}";
+            if (RemoteHost.IsNullOrWhiteSpace())
+            {
+                return $"UDP {LocalHost}:{LocalPort}";
+            }
+            else
+            {
+                return $"UDP {LocalHost}:{LocalPort}=>{RemoteHost}:{RemotePort}";
+            }
+            //return $"udp://{LocalHost}:{LocalPort}?rhost={RemoteHost}&rport={RemotePort}";
         }
     }
 }
