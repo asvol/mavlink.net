@@ -139,7 +139,7 @@ namespace Asv.Mavlink
             }
             catch (Exception ex)
             {
-                Debug.Assert(false);
+                
             }
             finally
             {
