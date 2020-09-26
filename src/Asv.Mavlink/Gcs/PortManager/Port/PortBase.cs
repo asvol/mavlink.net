@@ -153,7 +153,6 @@ namespace Asv.Mavlink
 
         protected void InternalOnError(Exception exception)
         {
-            _logger.Trace(exception.ToString());
             _portStateStream.OnNext(PortState.Error);
             _portErrorStream.OnNext(exception);
             Observable.Timer(ReconnectTimeout).Subscribe(_ => TryConnect(), _disposedCancel.Token);
