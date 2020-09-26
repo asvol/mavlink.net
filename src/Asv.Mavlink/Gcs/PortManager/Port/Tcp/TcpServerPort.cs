@@ -74,10 +74,17 @@ namespace Asv.Mavlink
             return Task.WhenAll(clients.Select(_ => SendAsync(_, data, count, cancel)));
         }
 
-        private Task SendAsync(TcpClient client, byte[] data, int count, CancellationToken cancel)
+        private async Task SendAsync(TcpClient client, byte[] data, int count, CancellationToken cancel)
         {
-            if (_tcp == null || client == null || client.Connected == false) return Task.CompletedTask;
-            return client.GetStream().WriteAsync(data, 0, count, cancel);
+            if (_tcp == null || client == null || client.Connected == false) return;
+            try
+            {
+                await client.GetStream().WriteAsync(data, 0, count, cancel);
+            }
+            catch (Exception e)
+            {
+                Debug.Assert(false);    
+            }
         }
 
         protected override void InternalStop()
@@ -129,27 +136,35 @@ namespace Asv.Mavlink
 
         private void RecvConnectionCallback(object obj)
         {
-            while (true)
+            try
             {
-                try
+                while (true)
                 {
-                    var newClient = _tcp.AcceptTcpClient();
-                    _rw.EnterWriteLock();
-                    _clients.Add(newClient);
-                    _rw.ExitWriteLock();
-                    _logger.Info($"Accept tcp client {newClient.Client.RemoteEndPoint}");
+                    try
+                    {
+                        var newClient = _tcp.AcceptTcpClient();
+                        _rw.EnterWriteLock();
+                        _clients.Add(newClient);
+                        _rw.ExitWriteLock();
+                        _logger.Info($"Accept tcp client {newClient.Client.RemoteEndPoint}");
+                    }
+                    catch (ThreadAbortException e)
+                    {
+                        // ignore
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.Assert(false);
+                        // ignore
+                    }
+
                 }
-                catch (ThreadAbortException e)
-                {
-                    // ignore
-                }
-                catch (Exception e)
-                {
-                    Debug.Assert(false);
-                    // ignore
-                }
-                
             }
+            catch (ThreadAbortException e)
+            {
+                // ignore
+            }
+
         }
 
         private void RecvDataCallback(object obj)
@@ -190,6 +205,10 @@ namespace Asv.Mavlink
             {
                 if (ex.SocketErrorCode == SocketError.Interrupted) return;
                 InternalOnError(ex);
+            }
+            catch (ThreadAbortException e)
+            {
+                // ignore
             }
             catch (Exception e)
             {

@@ -64,6 +64,7 @@ namespace Asv.Mavlink
             }
             catch (Exception exception)
             {
+                _logger.Error($"Error to send data to port:{exception.Message}");
                 InternalOnError(exception);
                 return false;
             }
