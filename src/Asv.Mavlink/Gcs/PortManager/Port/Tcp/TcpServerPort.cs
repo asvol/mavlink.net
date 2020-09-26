@@ -139,6 +139,10 @@ namespace Asv.Mavlink
                     _rw.ExitWriteLock();
                     _logger.Info($"Accept tcp client {newClient.Client.RemoteEndPoint}");
                 }
+                catch (ThreadAbortException e)
+                {
+                    // ignore
+                }
                 catch (Exception e)
                 {
                     Debug.Assert(false);
@@ -165,7 +169,15 @@ namespace Asv.Mavlink
                         {
                             foreach (var otherClients in clients.Where(_ => _ != tcpClient && tcpClient.Connected))
                             {
-                                otherClients.GetStream().Write(data,0,data.Length);
+                                try
+                                {
+                                    otherClients.GetStream().Write(data, 0, data.Length);
+                                }
+                                catch (ThreadAbortException e)
+                                {
+                                    // ignore
+                                }
+                                
                             }
                             InternalOnData(data);
                         }
@@ -192,7 +204,15 @@ namespace Asv.Mavlink
             if (tcpClient.Available == 0) return null;
             if (tcpClient.Connected == false) return null;
             var buff = new byte[tcpClient.Available];
-            tcpClient.GetStream().Read(buff, 0, buff.Length);
+            try
+            {
+                tcpClient.GetStream().Read(buff, 0, buff.Length);
+            }
+            catch (ThreadAbortException e)
+            {
+                // ignore
+            }
+            
             return buff;
         }
 
