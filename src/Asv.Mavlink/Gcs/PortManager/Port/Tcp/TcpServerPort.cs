@@ -31,21 +31,34 @@ namespace Asv.Mavlink
         private void DeleteClients(long l)
         {
             _rw.EnterUpgradeableReadLock();
-            var itemsToDelete = _clients.Where(_ => _.Connected == false).ToArray();
-            if (itemsToDelete.Length != 0)
+            try
             {
-                _rw.EnterWriteLock();
-                foreach (var tcpClient in itemsToDelete)
+                
+                var itemsToDelete = _clients.Where(_ => _.Connected == false).ToArray();
+                if (itemsToDelete.Length != 0)
                 {
-                    _clients.Remove(tcpClient);
-                    _logger.Info($"Remove TCP client {tcpClient.Client.RemoteEndPoint}");
+                    _rw.EnterWriteLock();
+                    try
+                    {
+                        foreach (var tcpClient in itemsToDelete)
+                        {
+                            _clients.Remove(tcpClient);
+                            _logger.Info($"Remove TCP client {tcpClient?.Client?.RemoteEndPoint}");
+                        }
+                    }
+                    finally
+                    {
+                        _rw.ExitWriteLock();
+                    }
                 }
-                _rw.ExitWriteLock();
             }
-            else
+            catch (Exception e)
             {
                 _rw.ExitUpgradeableReadLock();
+                _logger.Error(e,$"Error to delete TCP client:{e.Message}");
+                Debug.Assert(false);
             }
+            
         }
 
         public override PortType PortType { get; } = PortType.Tcp;
@@ -111,11 +124,20 @@ namespace Asv.Mavlink
         {
             while (true)
             {
-                var newClient = _tcp.AcceptTcpClient();
-                _rw.EnterWriteLock();
-                _clients.Add(newClient);
-                _rw.ExitWriteLock();
-                _logger.Info($"Accept tcp client {newClient.Client.RemoteEndPoint}");
+                try
+                {
+                    var newClient = _tcp.AcceptTcpClient();
+                    _rw.EnterWriteLock();
+                    _clients.Add(newClient);
+                    _rw.ExitWriteLock();
+                    _logger.Info($"Accept tcp client {newClient.Client.RemoteEndPoint}");
+                }
+                catch (Exception e)
+                {
+                    Debug.Assert(false);
+                    // ignore
+                }
+                
             }
         }
 

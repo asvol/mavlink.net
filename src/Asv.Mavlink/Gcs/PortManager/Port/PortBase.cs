@@ -45,7 +45,7 @@ namespace Asv.Mavlink
                 }
                 else
                 {
-                    _logger.Info($"Port error {this}: {Error.Value.Message}");
+                    _logger.Info($"Port error {this}: {Error.Value?.Message}");
                 }
             }, _disposedCancel.Token);
         }
