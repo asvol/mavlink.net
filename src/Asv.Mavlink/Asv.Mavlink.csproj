@@ -147,6 +147,9 @@
     <Compile Include="Payload\Server\Diagnostic\IDiagnosticServer.cs" />
     <Compile Include="Payload\Server\IMavlinkPayloadServer.cs" />
     <Compile Include="Payload\Server\MavlinkPayloadServer.cs" />
+    <Compile Include="Tools\Configuration\IConfiguration.cs" />
+    <Compile Include="Tools\Configuration\Json\JsonConfiguration.cs" />
+    <Compile Include="Tools\Configuration\Json\JsonOneFileConfiguration.cs" />
     <Compile Include="Tools\Exceptions\CommandException.cs" />
     <Compile Include="Connection\Frames\ISerializable.cs" />
     <Compile Include="Gcs\GroundControlStation.cs" />

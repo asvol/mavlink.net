@@ -26,24 +26,31 @@ namespace Asv.Mavlink
         public TimeSpan ReconnectTimeout { get; set; } = TimeSpan.FromSeconds(5);
         public IRxValue<PortState> State => _portStateStream;
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private int _errCnt;
 
         protected PortBase()
         {
-            State.Where(_ => _ == PortState.Error).Throttle(TimeSpan.FromSeconds(10)).Subscribe(_ =>
-            {
-                _logger.Error(Error.Value, $"Port {this}: {Error.Value.Message}");
-            });
             State.Where(_ => _ == PortState.Connected).Subscribe(_ =>
             {
                 _logger.Info($"Port {this}: {_:G}");
             });
-
-            State.DistinctUntilChanged().Subscribe(_ =>
-            {
-               
-            });
+            State.Where(_ => _ == PortState.Error).Subscribe(_ => _errCnt++);
             _enableStream.Where(_ => _).Subscribe(_ => Task.Factory.StartNew(TryConnect), _disposedCancel.Token);
+
+            Observable.Timer(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30)).Subscribe(_ =>
+            {
+                if (State.Value == PortState.Connected)
+                {
+                    _logger.Info($"Port {this}: {State.Value:G}; rx:{_rxBytes / 1024:F0} KiB; tx:{_rxBytes / 1024:F0} KiB; conn err:{_errCnt};");
+                }
+                else
+                {
+                    _logger.Info($"Port error {this}: {Error.Value.Message}");
+                }
+            }, _disposedCancel.Token);
         }
+
+        
 
         public async Task<bool> Send(byte[] data, int count, CancellationToken cancel)
         {
