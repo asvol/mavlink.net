@@ -1,8 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog;
@@ -14,20 +17,51 @@ namespace Asv.Mavlink
         private readonly TcpPortConfig _cfg;
         private TcpListener _tcp;
         private CancellationTokenSource _stop;
-        private TcpClient _client;
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private readonly List<TcpClient> _clients = new List<TcpClient>();
+        private ReaderWriterLockSlim _rw = new ReaderWriterLockSlim();
 
         public TcpServerPort(TcpPortConfig cfg)
         {
             _cfg = cfg;
+            Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Where(_=>IsEnabled.Value).Subscribe(DeleteClients, DisposeCancel);
+            DisposeCancel.Register(InternalStop);
+        }
+
+        private void DeleteClients(long l)
+        {
+            _rw.EnterUpgradeableReadLock();
+            var itemsToDelete = _clients.Where(_ => _.Connected == false).ToArray();
+            if (itemsToDelete.Length != 0)
+            {
+                _rw.EnterWriteLock();
+                foreach (var tcpClient in itemsToDelete)
+                {
+                    _clients.Remove(tcpClient);
+                    _logger.Info($"Remove TCP client {tcpClient.Client.RemoteEndPoint}");
+                }
+                _rw.ExitWriteLock();
+            }
+            else
+            {
+                _rw.ExitUpgradeableReadLock();
+            }
         }
 
         public override PortType PortType { get; } = PortType.Tcp;
 
         protected override Task InternalSend(byte[] data, int count, CancellationToken cancel)
         {
-            if (_tcp == null || _client == null || _client.Connected == false) return Task.CompletedTask;
-            return _client.GetStream().WriteAsync(data, 0, count, cancel);
+            _rw.EnterReadLock();
+            var clients = _clients.ToArray();
+            _rw.ExitReadLock();
+            return Task.WhenAll(clients.Select(_ => SendAsync(_, data, count, cancel)));
+        }
+
+        private Task SendAsync(TcpClient client, byte[] data, int count, CancellationToken cancel)
+        {
+            if (_tcp == null || client == null || client.Connected == false) return Task.CompletedTask;
+            return client.GetStream().WriteAsync(data, 0, count, cancel);
         }
 
         protected override void InternalStop()
@@ -44,66 +78,95 @@ namespace Asv.Mavlink
             tcp.Start();
             _tcp = tcp;
             _stop = new CancellationTokenSource();
-            var recvThread = new Thread(RecvThreadCallback) { IsBackground = true, Priority = ThreadPriority.Lowest };
+            var recvConnectionThread = new Thread(RecvConnectionCallback) { IsBackground = true, Priority = ThreadPriority.Lowest };
+            var recvDataThread = new Thread(RecvDataCallback) { IsBackground = true, Priority = ThreadPriority.Lowest };
             _stop.Token.Register(() =>
             {
                 try
                 {
-                    recvThread.Abort();
-                    _client.Dispose();
-                    _client = null;
                     _tcp.Stop();
+                    _rw.EnterWriteLock();
+                    foreach (var client in _clients.ToArray())
+                    {
+                        client.Dispose();
+                    }
+                    _clients.Clear();
+                    _rw.ExitWriteLock();
+
+                    recvDataThread.Abort();
+                    recvConnectionThread.Abort();
                 }
                 catch (Exception e)
                 {
+                    Debug.Assert(false);
                     // ignore
                 }
             });
-            recvThread.Start();
+            recvDataThread.Start();
+            recvConnectionThread.Start();
 
         }
 
-        private void RecvThreadCallback(object obj)
+        private void RecvConnectionCallback(object obj)
+        {
+            while (true)
+            {
+                var newClient = _tcp.AcceptTcpClient();
+                _rw.EnterWriteLock();
+                _clients.Add(newClient);
+                _rw.ExitWriteLock();
+                _logger.Info($"Accept tcp client {newClient.Client.RemoteEndPoint}");
+            }
+        }
+
+        private void RecvDataCallback(object obj)
         {
             try
             {
                 while (true)
                 {
-                    if (_client == null)
+                    _rw.EnterReadLock();
+                    var clients = _clients.ToArray();
+                    _rw.ExitReadLock();
+
+                    foreach (var tcpClient in clients)
                     {
-                        _client = _tcp.AcceptTcpClient();
-                        _logger.Info($"Accept tcp client {_client.Client.RemoteEndPoint}");
-                    }
-                    else
-                    {
-                        if (_client.Available != 0)
+                        var data = RecvClientData(tcpClient);
+                        if (data != null)
                         {
-                            var buff = new byte[_client.Available];
-                            _client.GetStream().Read(buff, 0, buff.Length);
-                            InternalOnData(buff);
+                            foreach (var otherClients in clients.Where(_ => _ != tcpClient))
+                            {
+                                otherClients.GetStream().Write(data,0,data.Length);
+                            }
+                            InternalOnData(data);
                         }
-                        else
-                        {
-                            Thread.Sleep(100);
-                        }
+                        
                     }
-                    
+                    Thread.Sleep(30);
                 }
             }
             catch (SocketException ex)
             {
-                _client = null;
                 if (ex.SocketErrorCode == SocketError.Interrupted) return;
                 InternalOnError(ex);
             }
             catch (Exception e)
             {
-                _client = null;
                 InternalOnError(e);
             }
 
 
         }
+
+        private byte[] RecvClientData(TcpClient tcpClient)
+        {
+            if (tcpClient.Available == 0) return null;
+            var buff = new byte[tcpClient.Available];
+            tcpClient.GetStream().Read(buff, 0, buff.Length);
+            return buff;
+        }
+
+        
 
         public override string ToString()
         {

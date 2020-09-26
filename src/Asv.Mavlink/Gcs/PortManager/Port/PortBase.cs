@@ -29,9 +29,18 @@ namespace Asv.Mavlink
 
         protected PortBase()
         {
+            State.Where(_ => _ == PortState.Error).Throttle(TimeSpan.FromSeconds(10)).Subscribe(_ =>
+            {
+                _logger.Error(Error.Value, $"Port {this}: {Error.Value.Message}");
+            });
+            State.Where(_ => _ == PortState.Connected).Subscribe(_ =>
+            {
+                _logger.Info($"Port {this}: {_:G}");
+            });
+
             State.DistinctUntilChanged().Subscribe(_ =>
             {
-                _logger.Info($"Port connection changed {this}: {_:G}");
+               
             });
             _enableStream.Where(_ => _).Subscribe(_ => Task.Factory.StartNew(TryConnect), _disposedCancel.Token);
         }
@@ -83,7 +92,7 @@ namespace Asv.Mavlink
             }
         }
 
-
+        protected CancellationToken DisposeCancel => _disposedCancel.Token;
 
 
         private void TryConnect()
@@ -123,7 +132,7 @@ namespace Asv.Mavlink
             }
             catch (Exception ex)
             {
-
+                Debug.Assert(false);
             }
             finally
             {
