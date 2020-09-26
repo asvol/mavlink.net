@@ -33,7 +33,7 @@ namespace Asv.Mavlink
             _rw.EnterUpgradeableReadLock();
             try
             {
-                
+
                 var itemsToDelete = _clients.Where(_ => _.Connected == false).ToArray();
                 if (itemsToDelete.Length != 0)
                 {
@@ -54,9 +54,12 @@ namespace Asv.Mavlink
             }
             catch (Exception e)
             {
-                _rw.ExitUpgradeableReadLock();
-                _logger.Error(e,$"Error to delete TCP client:{e.Message}");
+                _logger.Error(e, $"Error to delete TCP client:{e.Message}");
                 Debug.Assert(false);
+            }
+            finally
+            {
+                _rw.ExitUpgradeableReadLock();
             }
             
         }
