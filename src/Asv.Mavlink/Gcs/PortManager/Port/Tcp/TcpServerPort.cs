@@ -24,7 +24,7 @@ namespace Asv.Mavlink
         public TcpServerPort(TcpPortConfig cfg)
         {
             _cfg = cfg;
-            Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Where(_=>IsEnabled.Value).Subscribe(DeleteClients, DisposeCancel);
+            Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3)).Where(_=>IsEnabled.Value).Subscribe(DeleteClients, DisposeCancel);
             DisposeCancel.Register(InternalStop);
         }
 
@@ -90,6 +90,10 @@ namespace Asv.Mavlink
 
         protected override void InternalStart()
         {
+            _rw.EnterWriteLock();
+            _clients.Clear();
+            _rw.ExitWriteLock();
+
             var tcp = new TcpListener(IPAddress.Parse(_cfg.Host),_cfg.Port);
             tcp.Start();
             _tcp = tcp;
@@ -159,7 +163,7 @@ namespace Asv.Mavlink
                         var data = RecvClientData(tcpClient);
                         if (data != null)
                         {
-                            foreach (var otherClients in clients.Where(_ => _ != tcpClient))
+                            foreach (var otherClients in clients.Where(_ => _ != tcpClient && tcpClient.Connected))
                             {
                                 otherClients.GetStream().Write(data,0,data.Length);
                             }
@@ -186,6 +190,7 @@ namespace Asv.Mavlink
         private byte[] RecvClientData(TcpClient tcpClient)
         {
             if (tcpClient.Available == 0) return null;
+            if (tcpClient.Connected == false) return null;
             var buff = new byte[tcpClient.Available];
             tcpClient.GetStream().Read(buff, 0, buff.Length);
             return buff;
