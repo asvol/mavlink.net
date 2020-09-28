@@ -19,7 +19,7 @@ namespace Asv.Mavlink.Json
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 
-        public JsonOneFileConfiguration(string fileName)
+        public JsonOneFileConfiguration(string fileName, bool createIfNotExist)
         {
             if (string.IsNullOrEmpty(fileName))
                 throw new ArgumentException($"File name {fileName} cannot be null or empty.", nameof(fileName));
@@ -36,8 +36,17 @@ namespace Asv.Mavlink.Json
             _fileName = fileName;
             if (File.Exists(fileName) == false)
             {
-                Logger.Warn($"Config file not exist. Try to create it: {fileName}");
-                InternalSaveChanges();
+                Logger.Warn($"Config file not exist");
+                if (createIfNotExist)
+                {
+                    Logger.Warn($"Config file not exist. Try to create {fileName}");
+                    InternalSaveChanges();
+                }
+                else
+                {
+                    Logger.Warn($"Config file not exist.");
+                    throw new Exception($"Configuration file not exist {fileName}");
+                }
             }
             else
             {
