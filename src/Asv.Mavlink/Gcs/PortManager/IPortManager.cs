@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reactive;
 
 namespace Asv.Mavlink
@@ -21,9 +21,10 @@ namespace Asv.Mavlink
         PortSettings Settings { get; }
         long RxAcc { get; }
         long TxAcc { get; }
-        PortType Type { get; set; }
-        PortState State { get; set; }
-        Exception LastException { get; set; }
+        PortType Type { get; }
+        PortState State { get; }
+        Exception LastException { get; }
+        string Description { get; }
     }
 
     
@@ -39,8 +40,7 @@ namespace Asv.Mavlink
     {
         public PortSettings[] Ports { get; set; } = new PortSettings []
         {
-            new PortSettings {ConnectionString = "serial:COM1?br=57600", IsEnabled = true, Title = "Example Serial"},
-            new PortSettings {ConnectionString = "udp://10.10.4.39:5555", IsEnabled = true, Title = "Example UDP"},
+            new PortSettings {ConnectionString = "tcp://172.16.0.1:7341", IsEnabled = true, Title = "Base station"},
         };
     }
 }
