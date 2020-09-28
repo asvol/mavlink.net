@@ -117,7 +117,7 @@ namespace Asv.Mavlink
                     Action<DeviceIdentity, Stream> callback;
                     if (!_dataCallbacks.TryGetValue(path, out callback))
                     {
-                        _logger.Warn($"Receive unsuported data '{path}'");
+                        //_logger.Warn($"Receive unsupported data '{path}'");
                         return;
                     }
                     callback(new DeviceIdentity { ComponentId = v2ExtensionPacket.ComponenId, SystemId = v2ExtensionPacket.SystemId }, ms);
