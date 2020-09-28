@@ -152,6 +152,10 @@ namespace Asv.Mavlink
                     {
                         // ignore
                     }
+                    catch (SocketException e)
+                    {
+                        // ignore
+                    }
                     catch (Exception e)
                     {
                         Debug.Assert(false);
