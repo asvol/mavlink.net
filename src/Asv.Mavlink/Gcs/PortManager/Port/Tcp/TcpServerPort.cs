@@ -83,7 +83,7 @@ namespace Asv.Mavlink
             }
             catch (Exception e)
             {
-                Debug.Assert(false);    
+               // Debug.Assert(false);    
             }
         }
 
