@@ -249,8 +249,8 @@ namespace Asv.Mavlink
         public void Dispose()
         {
             if (Interlocked.CompareExchange(ref _isDisposed,1,0) != 0) return;
+            _disposeCancel?.Cancel(false);
             _disposeCancel?.Dispose();
-            
         }
     }
 

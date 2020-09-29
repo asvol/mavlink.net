@@ -17,10 +17,11 @@ namespace Asv.Mavlink
         private long _rxPackets;
         private long _skipPackets;
         private readonly Subject<IPacketV2<IPayload>> _sendPacketSubject = new Subject<IPacketV2<IPayload>>();
+        private readonly bool _disposeDataStream;
 
         public MavlinkV2Connection(string connectionString, Action<IPacketDecoder<IPacketV2<IPayload>>> register):this(ConnectionStringConvert(connectionString),register)
         {
-
+            _disposeDataStream = true;
         }
 
         private static IDataStream ConnectionStringConvert(string connString)
@@ -42,6 +43,10 @@ namespace Asv.Mavlink
         public void Dispose()
         {
             if (Interlocked.CompareExchange(ref _disposed, 1,0) == 1) return;
+            if (_disposeDataStream)
+            {
+                (DataStream as IDisposable)?.Dispose();
+            }
             _sendPacketSubject?.OnCompleted();
             _sendPacketSubject?.Dispose();
             _disposeCancel?.Cancel(false);
