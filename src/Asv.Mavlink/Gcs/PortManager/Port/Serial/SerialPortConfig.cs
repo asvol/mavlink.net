@@ -38,7 +38,8 @@ namespace Asv.Mavlink
 
         public override string ToString()
         {
-            return $"serial:{PortName}?br={BoundRate}&wrt={WriteTimeout}&parity={Parity}&dataBits={DataBits}&stopBits={StopBits}";
+            return $"Serial {PortName} ({BoundRate})";
+            //return $"serial:{PortName}?br={BoundRate}&wrt={WriteTimeout}&parity={Parity}&dataBits={DataBits}&stopBits={StopBits}";
         }
     }
 }

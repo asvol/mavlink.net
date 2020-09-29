@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
@@ -44,6 +44,7 @@ namespace Asv.Mavlink
     {
         public string Id { get; }
         public PortSettings Settings { get; }
+        public string Description { get; set; }
         public long RxAcc { get; }
         public long TxAcc { get; }
         public PortState State { get; set; }
@@ -59,7 +60,9 @@ namespace Asv.Mavlink
             LastException = wraper.Port.Error.Value;
             Type = wraper.Port.PortType;
             State = wraper.Port.State.Value;
+            Description = wraper.Port.ToString();
         }
+        
     }
 
     

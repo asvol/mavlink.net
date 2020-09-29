@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Web;
 
@@ -30,7 +30,15 @@ namespace Asv.Mavlink
 
         public override string ToString()
         {
-            return $"tcp://{Host}:{Port}?srv={IsServer}";
+            if (IsServer)
+            {
+                return $"TCP_S {Host}:{Port}";
+            }
+            else
+            {
+                return $"TCP_C {Host}:{Port}";
+            }
+            
         }
     }
 }

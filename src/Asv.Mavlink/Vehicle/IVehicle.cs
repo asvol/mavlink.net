@@ -218,7 +218,7 @@ namespace Asv.Mavlink
                 case MavAutopilot.MavAutopilotSmartap:
                 case MavAutopilot.MavAutopilotAirrails:
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    return null;
             }
         }
 

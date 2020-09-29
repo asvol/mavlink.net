@@ -25,6 +25,7 @@ namespace Asv.Mavlink
         }
 
         public override PortType PortType => PortType.Serial;
+        
 
         protected override async Task InternalSend(byte[] data, int count, CancellationToken cancel)
         {

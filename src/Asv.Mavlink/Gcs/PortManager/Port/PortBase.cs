@@ -26,14 +26,33 @@ namespace Asv.Mavlink
         public TimeSpan ReconnectTimeout { get; set; } = TimeSpan.FromSeconds(5);
         public IRxValue<PortState> State => _portStateStream;
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private int _errCnt;
+        private DateTime _lastSuccess;
 
         protected PortBase()
         {
-            State.DistinctUntilChanged().Subscribe(_ =>
+            State.Where(_ => _ == PortState.Connected).Subscribe(_ =>
             {
-                _logger.Info($"Port connection changed {this}: {_:G}");
+                _lastSuccess = DateTime.Now;
+                _logger.Info($"Port {this}: {_:G}");
+            });
+            State.Where(_ => _ == PortState.Error).Subscribe(_ =>
+            {
+                _errCnt++;
             });
             _enableStream.Where(_ => _).Subscribe(_ => Task.Factory.StartNew(TryConnect), _disposedCancel.Token);
+
+            Observable.Timer(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30)).Subscribe(_ =>
+            {
+                if (State.Value == PortState.Connected)
+                {
+                    _logger.Info($"Port {this}: work {DateTime.Now - _lastSuccess:g}; rx:{_rxBytes / 1024:F0} KiB; tx:{_rxBytes / 1024:F0} KiB; conn err:{_errCnt};");
+                }
+                else
+                {
+                    _logger.Info($"Port error {this}: {Error.Value?.Message}");
+                }
+            }, _disposedCancel.Token);
         }
 
         public async Task<bool> Send(byte[] data, int count, CancellationToken cancel)
@@ -48,6 +67,7 @@ namespace Asv.Mavlink
             }
             catch (Exception exception)
             {
+                _logger.Error($"Error to send data to port:{exception.Message}");
                 InternalOnError(exception);
                 return false;
             }
@@ -83,7 +103,7 @@ namespace Asv.Mavlink
             }
         }
 
-
+        protected CancellationToken DisposeCancel => _disposedCancel.Token;
 
 
         private void TryConnect()
@@ -123,7 +143,7 @@ namespace Asv.Mavlink
             }
             catch (Exception ex)
             {
-
+                
             }
             finally
             {

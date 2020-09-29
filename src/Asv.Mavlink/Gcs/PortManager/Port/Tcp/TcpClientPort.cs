@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -79,6 +79,10 @@ namespace Asv.Mavlink
             {
                 if (ex.SocketErrorCode == SocketError.Interrupted) return;
                 InternalOnError(ex);
+            }
+            catch (ThreadAbortException e)
+            {
+                //ignore
             }
             catch (Exception e)
             {
