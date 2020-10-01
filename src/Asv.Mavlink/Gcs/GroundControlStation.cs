@@ -191,6 +191,8 @@ namespace Asv.Mavlink
         public void Dispose()
         {
             if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) != 0) return;
+            _cancel.Cancel(false);
+            _cancel.Dispose();
             Ports?.Dispose();
             MavlinkV2?.Dispose();
         }
