@@ -68,7 +68,13 @@ namespace Asv.Mavlink.Json
             try
             {
                 var content = JsonConvert.SerializeObject(_values ?? new Dictionary<string, JToken>(), Formatting.Indented, new StringEnumConverter());
-                File.WriteAllText(_fileName, content);
+
+                var tmpFileName = Path.GetRandomFileName();
+                File.WriteAllText(tmpFileName, content);
+                File.Delete(_fileName);
+                File.Move(tmpFileName, _fileName);
+                File.Delete(tmpFileName);
+                Logger.Trace("File writing");
             }
             catch (Exception e)
             {
