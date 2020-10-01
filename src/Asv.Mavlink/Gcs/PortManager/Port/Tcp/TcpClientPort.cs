@@ -90,6 +90,12 @@ namespace Asv.Mavlink
             }
         }
 
+        protected override void InternalDisposeOnce()
+        {
+            base.InternalDisposeOnce();
+            _tcp.Dispose();
+        }
+
         public override string ToString()
         {
             return _cfg.ToString();

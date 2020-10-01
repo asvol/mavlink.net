@@ -94,6 +94,12 @@ namespace Asv.Mavlink
             }
         }
 
+        protected override void InternalDisposeOnce()
+        {
+            base.InternalDisposeOnce();
+            _udp.Dispose();
+        }
+
         public override string ToString()
         {
             return _config.ToString();

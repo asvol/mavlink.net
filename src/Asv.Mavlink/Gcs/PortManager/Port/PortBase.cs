@@ -28,6 +28,7 @@ namespace Asv.Mavlink
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private int _errCnt;
         private DateTime _lastSuccess;
+        private int _isDisposed;
 
         protected PortBase()
         {
@@ -167,12 +168,18 @@ namespace Asv.Mavlink
 
         public void Dispose()
         {
+            if (Interlocked.CompareExchange(ref _isDisposed,1,0) != 0) return;
             Disable();
             _portErrorStream.Dispose();
             _portStateStream.Dispose();
             _enableStream.Dispose();
             _outputData.OnCompleted();
             _outputData.Dispose();
+            InternalDisposeOnce();
+        }
+
+        protected virtual void InternalDisposeOnce()
+        {
         }
     }
 }

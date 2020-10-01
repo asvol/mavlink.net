@@ -29,6 +29,7 @@ namespace Asv.Mavlink
         private readonly IObservable<IPacketV2<IPayload>> _inputPackets;
         private readonly CancellationTokenSource _disposeCancel = new CancellationTokenSource();
         private IMavlinkV2Connection _connection;
+        private int _isDisposed;
 
 
         public MavlinkTelemetry(IMavlinkV2Connection connection, MavlinkClientIdentity config)
@@ -188,6 +189,7 @@ namespace Asv.Mavlink
 
         public void Dispose()
         {
+            if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) != 0) return;
             _disposeCancel.Cancel(false);
             _disposeCancel.Dispose();
         }

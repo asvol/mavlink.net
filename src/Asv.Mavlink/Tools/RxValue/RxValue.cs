@@ -39,12 +39,18 @@ namespace Asv.Mavlink
         
         public void OnError(Exception error)
         {
-            _subject.OnError(error);
+            if (_subject.HasObservers && !_subject.IsDisposed)
+            {
+                _subject.OnError(error);
+            }
         }
 
         public void OnCompleted()
         {
-            _subject.OnCompleted();
+            if (_subject.HasObservers && !_subject.IsDisposed)
+            {
+                _subject.OnCompleted();
+            }
         }
 
         public IDisposable Subscribe(IObserver<TValue> observer)
