@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Asv.Mavlink
 {
-    public interface IConfiguration
+    public interface IConfiguration:IDisposable
     {
         IEnumerable<string> AvalableParts { get; }
         bool Exist<TPocoType>(string key);
