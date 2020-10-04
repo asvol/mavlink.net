@@ -16,7 +16,7 @@ namespace Asv.Mavlink
             MacOsX
         }
 
-        private static OperatingSystem DetectPlatform()
+        public static OperatingSystem DetectPlatform()
         {
             var windir = Environment.GetEnvironmentVariable("windir");
             if (!string.IsNullOrEmpty(windir) && windir.Contains(@"\") && Directory.Exists(windir)) return OperatingSystem.Windows;
