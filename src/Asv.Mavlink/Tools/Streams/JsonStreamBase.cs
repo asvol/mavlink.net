@@ -62,6 +62,48 @@ namespace Asv.Mavlink.Streams
             }
         }
 
+        public async Task<JObject> RequestText(string request, Func<JObject, bool> responseFilter, CancellationToken cancel)
+        {
+            JObject jobject;
+            using (CancellationTokenSource timeoutCancel = new CancellationTokenSource(this._requestTimeout))
+            {
+                using (CancellationTokenSource linkedCancel = CancellationTokenSource.CreateLinkedTokenSource(cancel, timeoutCancel.Token))
+                {
+                    IDisposable subscribe = (IDisposable)null;
+                    try
+                    {
+                        AsyncAutoResetEvent eve = new AsyncAutoResetEvent(false);
+                        JObject result = (JObject)null;
+                        subscribe = this.FirstAsync<JObject>(responseFilter).Subscribe<JObject>((Action<JObject>)(_ =>
+                        {
+                            result = _;
+                            eve.Set();
+                        }));
+                        await SendText(request, linkedCancel.Token);
+                        await eve.WaitAsync(linkedCancel.Token);
+                        jobject = result;
+                    }
+                    finally
+                    {
+                        subscribe?.Dispose();
+                    }
+                }
+            }
+            return jobject;
+        }
+
+        public async Task SendText(string data, CancellationToken cancel)
+        {
+            try
+            {
+                await _textStream.Send(data, cancel);
+            }
+            catch (Exception ex)
+            {
+                this._onErrorSubject.OnNext(ex);
+            }
+        }
+
         public async Task<JObject> Request<TRequest>(TRequest request, Func<JObject, bool> responseFilter, CancellationToken cancel)
         {
             JObject jobject;
