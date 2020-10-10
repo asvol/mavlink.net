@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -30,7 +30,7 @@ namespace Asv.Mavlink
 
     public class Void
     {
-
+        public static Void Default = new Void();
     }
 
     public delegate Task<TOut> DataDelegate<in TIn, TOut>(DeviceIdentity devId, TIn data);

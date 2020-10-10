@@ -283,6 +283,7 @@
     <Compile Include="Tools\GeoMath\Extension.cs" />
     <Compile Include="Tools\GeoMath\GeoMath.cs" />
     <Compile Include="Tools\GeoMath\GeoPoint.cs" />
+    <Compile Include="Tools\MathEx.cs" />
     <Compile Include="Tools\Platform\PlatformHelper.cs" />
     <Compile Include="Tools\RxCollection\ConcurrentRxCollection.cs" />
     <Compile Include="Tools\RxCollection\IReadonlyRxCollection.cs" />
