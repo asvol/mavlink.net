@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reactive.Linq;
@@ -39,6 +39,8 @@ namespace Asv.Mavlink
                 _values.AddOrUpdate(name, _ => value, (k, v) => value);
             }
         }
+
+        public bool IsEmpty => _values.IsEmpty;
     }
 
    
@@ -79,15 +81,15 @@ namespace Asv.Mavlink
             base.Init(server);
             if (_cfg.StringUpdateTimeMs > 0)
             {
-                Observable.Timer(TimeSpan.FromMilliseconds(_cfg.StringUpdateTimeMs), TimeSpan.FromMilliseconds(_cfg.StringUpdateTimeMs)).Subscribe(_ => UpdateStrings(), _disposeCancel.Token);
+                Observable.Timer(TimeSpan.FromMilliseconds(_cfg.StringUpdateTimeMs), TimeSpan.FromMilliseconds(_cfg.StringUpdateTimeMs)).Where(_=> !Strings.IsEmpty).Subscribe(_ => UpdateStrings(), _disposeCancel.Token);
             }
             if (_cfg.DigitUpdateTimeMs > 0)
             {
-                Observable.Timer(TimeSpan.FromMilliseconds(_cfg.DigitUpdateTimeMs), TimeSpan.FromMilliseconds(_cfg.DigitUpdateTimeMs)).Subscribe(_ => UpdateDigits(), _disposeCancel.Token);
+                Observable.Timer(TimeSpan.FromMilliseconds(_cfg.DigitUpdateTimeMs), TimeSpan.FromMilliseconds(_cfg.DigitUpdateTimeMs)).Where(_ => !Digits.IsEmpty).Subscribe(_ => UpdateDigits(), _disposeCancel.Token);
             }
             if (_cfg.SettingsUpdateTimeMs > 0)
             {
-                Observable.Timer(TimeSpan.FromMilliseconds(_cfg.SettingsUpdateTimeMs), TimeSpan.FromMilliseconds(_cfg.SettingsUpdateTimeMs)).Subscribe(_ => UpdateSettings(), _disposeCancel.Token);
+                Observable.Timer(TimeSpan.FromMilliseconds(_cfg.SettingsUpdateTimeMs), TimeSpan.FromMilliseconds(_cfg.SettingsUpdateTimeMs)).Where(_=> !Settings.IsEmpty).Subscribe(_ => UpdateSettings(), _disposeCancel.Token);
             }
             Register<KeyValuePair<string,string>,Void>(WellKnownDiag.DiagSettingsSetMethodName, OnValueSet);
         }
@@ -183,6 +185,7 @@ namespace Asv.Mavlink
 
         public IObservable<KeyValuePair<string, string>> OnLocalChanged => _localChanges;
         public IObservable<KeyValuePair<string, string>> OnRemoteChanged => _remoteChanges;
+        public bool IsEmpty => _values.IsEmpty;
 
         public void OnRemoteUpdate(KeyValuePair<string, string> value)
         {

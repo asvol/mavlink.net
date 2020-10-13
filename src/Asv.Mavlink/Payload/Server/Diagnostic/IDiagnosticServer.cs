@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Asv.Mavlink
@@ -6,6 +6,7 @@ namespace Asv.Mavlink
     public interface IDiagnosticValues<in T>
     {
         T this[string name] { set; }
+        bool IsEmpty { get;}
     }
 
 
@@ -13,6 +14,7 @@ namespace Asv.Mavlink
     {
         IObservable<KeyValuePair<string, string>> OnLocalChanged { get; }
         IObservable<KeyValuePair<string,string>> OnRemoteChanged { get; }
+        bool IsEmpty { get; }
         string this[string name] { get; set; }
     }
 
