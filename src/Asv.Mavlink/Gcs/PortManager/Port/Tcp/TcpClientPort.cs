@@ -93,7 +93,7 @@ namespace Asv.Mavlink
         protected override void InternalDisposeOnce()
         {
             base.InternalDisposeOnce();
-            _tcp.Dispose();
+            _tcp?.Dispose();
         }
 
         public override string ToString()
