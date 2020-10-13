@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Asv.Mavlink.V2.Common;
 
 namespace Asv.Mavlink.Server

@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -14,18 +17,33 @@ namespace Asv.Mavlink.Json
     public class JsonOneFileConfiguration : IConfiguration
     {
         private readonly string _fileName;
-        private readonly Dictionary<string, JToken> _values;
+        private readonly Dictionary<string, JToken> _values = new Dictionary<string, JToken>();
         private readonly ReaderWriterLockSlim _rw = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private readonly Subject<Unit> _onNeedToSave = new Subject<Unit>();
+        private readonly IDisposable _saveSubscribe;
 
 
-        public JsonOneFileConfiguration(string fileName, bool createIfNotExist)
+        public JsonOneFileConfiguration(string fileName, bool createIfNotExist, TimeSpan? flushToFileDelayMs)
         {
+            if (flushToFileDelayMs == null)
+            {
+                Logger.Debug($"ctor {nameof(JsonOneFileConfiguration)} file:{fileName} createIfNotExist:{createIfNotExist} flushToFileDelay: No, write immediately ");
+            }
+            else
+            {
+                Logger.Debug($"ctor {nameof(JsonOneFileConfiguration)} file:{fileName} createIfNotExist:{createIfNotExist} flushToFileDelay every {flushToFileDelayMs.Value.TotalSeconds:F2} seconds");
+            }
+
             if (string.IsNullOrEmpty(fileName))
                 throw new ArgumentException($"File name {fileName} cannot be null or empty.", nameof(fileName));
 
             var dir = Path.GetDirectoryName(Path.GetFullPath(fileName));
             if (string.IsNullOrWhiteSpace(dir)) throw new InvalidOperationException("Directory path is null");
+
+            _saveSubscribe = flushToFileDelayMs == null
+                ? _onNeedToSave.Subscribe(InternalSaveChanges)
+                : _onNeedToSave.Throttle(flushToFileDelayMs.Value).Subscribe(InternalSaveChanges);
 
             if (!Directory.Exists(dir))
             {
@@ -40,7 +58,7 @@ namespace Asv.Mavlink.Json
                 if (createIfNotExist)
                 {
                     Logger.Warn($"Config file not exist. Try to create {fileName}");
-                    InternalSaveChanges();
+                    InternalSaveChanges(Unit.Default);
                 }
                 else
                 {
@@ -63,12 +81,17 @@ namespace Asv.Mavlink.Json
             }
         }
 
-        private void InternalSaveChanges()
+        private void InternalSaveChanges(Unit unit)
         {
             try
             {
-                var content = JsonConvert.SerializeObject(_values ?? new Dictionary<string, JToken>(), Formatting.Indented, new StringEnumConverter());
-                File.WriteAllText(_fileName, content);
+                var content = JsonConvert.SerializeObject(_values, Formatting.Indented, new StringEnumConverter());
+                var tmpFileName = Path.GetRandomFileName();
+                File.WriteAllText(tmpFileName, content);
+                File.Delete(_fileName);
+                File.Move(tmpFileName, _fileName);
+                File.Delete(tmpFileName);
+                Logger.Trace("Flush configuration to file");
             }
             catch (Exception e)
             {
@@ -137,7 +160,7 @@ namespace Asv.Mavlink.Json
                     Logger.Trace($"Add new config part [{key}]");
                     _values.Add(key,jValue);
                 }
-                InternalSaveChanges();
+                _onNeedToSave.OnNext(Unit.Default);
             }
             finally
             {
@@ -154,13 +177,20 @@ namespace Asv.Mavlink.Json
                 {
                     Logger.Trace($"Remove config part [{key}]");
                     _values.Remove(key);
-                    InternalSaveChanges();
+                    _onNeedToSave.OnNext(Unit.Default);
                 }
             }
             finally
             {
                 _rw.ExitWriteLock();
             }
+        }
+
+        public void Dispose()
+        {
+            _saveSubscribe.Dispose();
+            _rw?.Dispose();
+            _onNeedToSave?.Dispose();
         }
     }
 }

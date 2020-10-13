@@ -55,5 +55,9 @@ namespace Asv.Mavlink.Json
                 File.Delete(path);
             }
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

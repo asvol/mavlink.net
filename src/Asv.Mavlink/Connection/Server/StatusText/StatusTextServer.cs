@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reactive.Linq;
@@ -83,6 +83,11 @@ namespace Asv.Mavlink.Server
         {
             _logger.Trace($"=>{severity:G}:{message}");
 
+            if (message == null)
+            {
+                _logger.Warn("Sending message is null");
+                return false;
+            }
             if (message.Length > _maxMessageSize)
             {
                 _logger.Warn($"Message size ({message.Length} char) is more then we can send by packet (max size {_maxMessageSize}).");
