@@ -97,7 +97,7 @@ namespace Asv.Mavlink
         protected override void InternalDisposeOnce()
         {
             base.InternalDisposeOnce();
-            _udp.Dispose();
+            _udp?.Dispose();
         }
 
         public override string ToString()
