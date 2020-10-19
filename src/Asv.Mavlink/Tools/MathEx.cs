@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Asv.Mavlink
 {
     public class MathEx
@@ -36,5 +40,57 @@ namespace Asv.Mavlink
             }
             return upper;
         }
+
+
+        /// <summary>
+        /// Calculate мВт в мкВ
+        /// </summary>
+        /// <param name="mW"></param>
+        /// <param name="ohm"></param>
+        /// <returns></returns>
+        public static double mW2uV(double mW, double ohm)
+        {
+            return Math.Sqrt((mW / 1000) * ohm) * 1e6;
+        }
+        /// <summary>
+        /// Calculate дБм в мВт
+        /// </summary>
+        /// <param name="dBm"></param>
+        /// <returns></returns>
+        public static double dBm2mW(double dBm)
+        {
+            return Math.Pow(10, dBm / 10);
+        }
+
+        /// <summary>
+        /// Calculate dBm в мкВ
+        /// </summary>
+        /// <param name="dBm"></param>
+        /// <param name="ohm"></param>
+        /// <returns></returns>
+        public static double dBm2uV(double dBm, double ohm)
+        {
+            return mW2uV(dBm2mW(dBm), ohm);
+        }
+
+        public static double GetAvgAngleDeg(double[] angles)
+        {
+            // https://rosettacode.org/wiki/Averages/Mean_angle#C.23
+            var x = angles.Sum(a => Math.Cos(a * Math.PI / 180)) / angles.Length;
+            var y = angles.Sum(a => Math.Sin(a * Math.PI / 180)) / angles.Length;
+            return Math.Atan2(y, x) * 180 / Math.PI;
+        }
+
+        public static double GetDistanceAngleDeg(double a, double b)
+        {
+            // https://en.wikipedia.org/wiki/Mean_of_circular_quantities
+            var distance = (a-b)%360;
+            if (distance < -180)
+                distance += 360;
+            else if (distance > 179)
+                distance -= 360;
+            return distance;
+        }
+
     }
 }
