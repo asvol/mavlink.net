@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Asv.Mavlink.Server;
 using Asv.Mavlink.V2.Common;
+using MsgPack.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Bson;
 
@@ -65,39 +66,26 @@ namespace Asv.Mavlink
 
         public static void WriteData<T>(Stream strm, T data)
         {
-            using (var writer = new BsonDataWriter(new BinaryWriter(strm, DefaultEncoding, true)))
-            {
-                var serializer = new JsonSerializer();
-                serializer.Serialize(writer, data);
-            }
+            var serializer = MessagePackSerializer.Get<T>();
+            serializer.Pack(strm, data);
         }
 
         public static T ReadData<T>(Stream strm)
         {
-            using (var rdr = new BsonDataReader(new BinaryReader(strm, DefaultEncoding, true)))
-            {
-                var serializer = new JsonSerializer();
-                return serializer.Deserialize<T>(rdr);
-            }
+            var serializer = MessagePackSerializer.Get<T>();
+            return serializer.Unpack(strm);
         }
 
         public static void ReadHeader(Stream strm, out string path)
         {
-            using (var rdr = new BsonDataReader(new BinaryReader(strm, DefaultEncoding, true)))
-            {
-                var serializer = new JsonSerializer();
-                var res = serializer.Deserialize<NameWrapper>(rdr);
-                path = res.N;
-            }
+            var serializer = MessagePackSerializer.Get<string>();
+            path = serializer.Unpack(strm);
         }
 
         public static void WriteHeader(Stream strm, string path)
         {
-            using (var writer = new BsonDataWriter(new BinaryWriter(strm, DefaultEncoding, true)))
-            {
-                var serializer = new JsonSerializer();
-                serializer.Serialize(writer, new NameWrapper { N = path });
-            }
+            var serializer = MessagePackSerializer.Get<string>();
+            serializer.Pack(strm, path);
         }
 
         public static void ValidateName(string name)
