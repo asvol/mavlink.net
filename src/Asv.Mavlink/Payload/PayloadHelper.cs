@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using Asv.Mavlink.Server;
 using Asv.Mavlink.V2.Common;
 using MsgPack.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Bson;
 
 namespace Asv.Mavlink
 {
@@ -31,6 +29,7 @@ namespace Asv.Mavlink
 
     public class Void
     {
+        public bool N { get; set; }
         public static Void Default = new Void();
     }
 
@@ -133,6 +132,12 @@ namespace Asv.Mavlink
             wrt.Write(info.PacketCount);
             wrt.Write(info.DataCount);
             wrt.Write(info.Data, 0, info.DataCount);
+        }
+
+        public static string PrintData(MemoryStream ms)
+        {
+            var obj = MessagePackSerializer.UnpackMessagePackObject(ms);
+            return obj.ToString();
         }
     }
 
