@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -18,7 +17,7 @@ namespace Asv.Mavlink
     public class Result<T>
     {
         public bool IsError { get; set; }
-        public string ErrorMessage { get; set; }
+        public ErrorCode Error { get; set; }
         public T Value { get; set; }
     }
 
@@ -26,36 +25,25 @@ namespace Asv.Mavlink
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private readonly IMavlinkClient _client;
-        private readonly byte _networkId;
         private readonly RxValue<VehicleStatusMessage> _logMessage = new RxValue<VehicleStatusMessage>();
         private readonly CancellationTokenSource _disposeCancel = new CancellationTokenSource();
         private volatile int _isDisposed;
         private int _packetId;
         private readonly object _sync = new object();
+        private readonly Dictionary<ushort, SortedList<ushort, PacketInfo>> _dict = new Dictionary<ushort, SortedList<ushort, PacketInfo>>();
         private readonly Subject<V2Packet> _onData = new Subject<V2Packet>();
-        private readonly RxValue<int> _rxPacketCount = new RxValue<int>();
-        private readonly RxValue<int> _txPacketCount = new RxValue<int>();
-        private readonly RxValue<int> _rxDoublePacketCount = new RxValue<int>();
-        private readonly ConcurrentQueue<ushort> _packetIdCache = new ConcurrentQueue<ushort>();
-        private int _maxPacketIdCacheSize = 15;
-        private int _packetCounter;
 
-        public MavlinkPayloadClient(IMavlinkClient client, byte networkId = 0)
+        public MavlinkPayloadClient(IMavlinkClient client)
         {
             _client = client;
-            _networkId = networkId;
             client.Rtt.RawStatusText.Select(ConvertLog).Subscribe(_logMessage,_disposeCancel.Token);
-            client.V2Extension.OnData.Where(CheckPacketTarget).Subscribe(OnData, _disposeCancel.Token);
+            client.V2Extension.OnData.Subscribe(OnData, _disposeCancel.Token);
         }
 
         public IMavlinkClient Client => _client;
 
         public IRxValue<LinkState> Link => _client.Heartbeat.Link;
         public IRxValue<int> PacketRateHz => _client.Heartbeat.PacketRateHz;
-        public IRxValue<int> RxPacketCount => _rxPacketCount;
-        public IRxValue<int> TxPacketCount => _txPacketCount;
-        public IRxValue<int> RxDoublePacketCount => _rxDoublePacketCount;
-
         public IRxValue<VehicleStatusMessage> OnLogMessage => _logMessage;
 
         private VehicleStatusMessage ConvertLog(StatustextPayload payload)
@@ -64,40 +52,38 @@ namespace Asv.Mavlink
             return new VehicleStatusMessage {Type = payload.Severity, Text = message};
         }
 
-        private bool CheckPacketTarget(V2ExtensionPacket packet)
-        {
-            var network = (packet.Payload.TargetNetwork == 0 || packet.Payload.TargetNetwork == _networkId || _networkId == 0);
-            var system = (packet.Payload.TargetSystem == 0 || _client.Identity.SystemId == 0 || packet.Payload.TargetSystem == _client.Identity.SystemId);
-            var component = (packet.Payload.TargetComponent == 0 || _client.Identity.ComponentId == 0 || packet.Payload.TargetComponent == _client.Identity.ComponentId);
-            return network && system && component;
-        }
-
         private void OnData(V2ExtensionPacket v2ExtensionPacket)
         {
             try
             {
-                PayloadPacketHeader header;
+                PacketInfo packetInfo = null;
 
                 using (var ms = new MemoryStream(v2ExtensionPacket.Payload.Payload))
                 {
-                    _rxPacketCount.Value++;
-                    header = PayloadSerializerV2.ReadHeader(ms);
-                    if (FilterDoublePackets(header) == false)
+                    using (var rdr = new BinaryReader(ms))
                     {
-                        _rxDoublePacketCount.Value++;
-                        return;
+                        packetInfo = PayloadHelper.GetInfo(rdr);
                     }
+                }
 
+                var memStream = CheckNewPacketId(packetInfo);
+                if (memStream == null) return;
+
+                using (var ms = memStream)
+                {
+                    string path;
+                    PayloadHelper.ReadHeader(ms, out path);
                     var data = new byte[ms.Length - ms.Position];
                     ms.Read(data, 0, data.Length);
                     var pkt = new V2Packet
                     {
                         Device = new DeviceIdentity { ComponentId = v2ExtensionPacket.ComponenId, SystemId = v2ExtensionPacket.SystemId },
-                        Path = header.Path,
+                        Path = path,
                         Data = data,
                         MessageType = v2ExtensionPacket.Payload.MessageType,
                     };
-                    _onData.OnNext(pkt);
+                  _onData.OnNext(pkt);
+                    
                 }
             }
             catch (Exception e)
@@ -106,33 +92,41 @@ namespace Asv.Mavlink
             }
         }
 
-        private bool FilterDoublePackets(PayloadPacketHeader header)
+        private MemoryStream CheckNewPacketId(PacketInfo packetInfo)
         {
-            if (_packetIdCache.Contains(header.PacketId)) return false;
-            _packetIdCache.Enqueue(header.PacketId);
-            while (_packetIdCache.Count > _maxPacketIdCacheSize)
+            if (packetInfo.PacketCount == 1) return new MemoryStream(packetInfo.Data);
+            lock (_sync)
             {
-                _packetIdCache.TryDequeue(out var id);
+                SortedList<ushort, PacketInfo> res;
+                if (_dict.TryGetValue(packetInfo.PacketId, out res))
+                {
+                    res.Add(packetInfo.PacketIndex, packetInfo);
+                    if (res.Count != packetInfo.PacketCount) return null;
+
+                    var mem = new MemoryStream(res.Sum(_ => _.Value.DataCount));
+
+                    foreach (var info in res)
+                    {
+                        mem.Write(info.Value.Data, 0, info.Value.DataCount);
+                    }
+
+                    mem.Position = 0;
+                    return mem;
+                }
+
+                var list = new SortedList<ushort, PacketInfo> { { packetInfo.PacketIndex, packetInfo } };
+                _dict.Add(packetInfo.PacketId, list);
+                return null;
             }
 
-            return true;
         }
 
-        private ushort GetPacketId()
-        {
-            return (ushort)(Interlocked.Increment(ref _packetCounter) % ushort.MaxValue);
-        }
-
-        public async Task<TOut> Send<TIn, TOut>(string path, TIn data, CancellationToken cancel = default, byte sendPacketCount = 1)
+        public async Task<TOut> Send<TIn, TOut>(string path, TIn data, CancellationToken cancel)
         {
             using (var strm = new MemoryStream())
             {
-                PayloadSerializerV2.WriteHeader(strm, new PayloadPacketHeader
-                {
-                    PacketId = GetPacketId(),
-                    Path = path,
-                });
-                PayloadSerializerV2.WriteData(strm, data);
+                PayloadHelper.WriteHeader(strm, path);
+                PayloadHelper.WriteData(strm, data);
                 var eve = new AsyncAutoResetEvent(false);
 
                 var result = default(Result<TOut>);
@@ -144,11 +138,12 @@ namespace Asv.Mavlink
                 try
                 {
                     strm.Position = 0;
-                    await SendData((byte)_networkId, PayloadSerializerV2.SuccessMessageTypeId, strm, cancel, sendPacketCount);
+                    await SendData(PayloadHelper.DefaultNetworkId, PayloadHelper.DefaultSuccessMessageType, strm, cancel);
+
                     await eve.WaitAsync(cancel);
                     if (result.IsError)
                     {
-                        throw new PayloadClientException(path, result.ErrorMessage);
+                        throw new PayloadClientException(path, result.Error);
                     }
                     Debug.Assert(result.Value != null);
                     return result.Value;
@@ -165,15 +160,40 @@ namespace Asv.Mavlink
             }
         }
 
-        private async Task SendData(byte defaultNetworkId, ushort defaultSuccessMessageType, MemoryStream strm, CancellationToken cancel = default, byte sendPacketCount = 1)
+        private async Task SendData(byte defaultNetworkId, ushort defaultSuccessMessageType, MemoryStream strm, CancellationToken cancel)
         {
-            if (strm.Length > PayloadSerializerV2.V2ExtensionMaxDataSize) throw new Exception($"Packet size ({strm.Length}) too large to send. Max available size: {PayloadSerializerV2.V2ExtensionMaxDataSize} bytes");
-            var data = new byte[strm.Length];
-            await strm.ReadAsync(data, 0, data.Length, cancel);
-            for (var i = 0; i < sendPacketCount; i++)
+            var maxDataSize = (PayloadHelper.V2ExtensionMaxDataSize - PacketInfo.PacketInfoSize);
+            var fullPacketCount = strm.Length / maxDataSize;
+            var lastPartSize = strm.Length % maxDataSize;
+            var packetCount = fullPacketCount + (lastPartSize == 0 ? 0 : 1);
+            var packetId = (ushort)(Interlocked.Increment(ref _packetId) % ushort.MaxValue);
+
+            using (var wrtStream = new MemoryStream(new byte[PayloadHelper.V2ExtensionMaxDataSize]))
             {
-                _txPacketCount.Value++;
-                await _client.V2Extension.SendData(defaultNetworkId, defaultSuccessMessageType, data, cancel);
+                using (var wrt = new BinaryWriter(wrtStream))
+                {
+                    var buffer = new byte[maxDataSize];
+                    for (ushort i = 0; i < packetCount; i++)
+                    {
+                        var count = strm.Read(buffer, 0, buffer.Length);
+
+                        var info = new PacketInfo
+                        {
+                            PacketId = packetId,
+                            PacketIndex = i,
+                            PacketCount = (ushort)packetCount,
+                            DataCount = (byte) count,
+                            Data = buffer
+                        };
+                        PayloadHelper.SetInfo(wrt, info);
+                        var length = wrtStream.Position;
+                        var data = new  byte[length];
+                        wrtStream.Position = 0;
+                        wrtStream.Read(data,0,data.Length);
+                        await _client.V2Extension.SendData(defaultNetworkId, defaultSuccessMessageType, data, cancel);
+                        wrtStream.Position = 0;
+                    }
+                }
             }
         }
 
@@ -189,24 +209,25 @@ namespace Asv.Mavlink
         {
             return _onData.Where(_=>_.Path == path).Select(_ =>
             {
+                
                 using (var strm = new MemoryStream(_.Data))
                 {
                     try
                     {
                         if (!path.Equals(_.Path)) return default(Result<TOut>);
-                        if (_.MessageType == PayloadSerializerV2.ErrorMessageTypeId)
+                        if (_.MessageType == PayloadHelper.DefaultErrorMessageType)
                         {
-                            var err = PayloadSerializerV2.ReadData<PayloadError>(strm);
+                            var err = PayloadHelper.ReadData<ErrorCode>(strm);
                             return new Result<TOut>
                             {
-                                ErrorMessage = err.ErrorMessage,
+                                Error = err,
                                 IsError = true,
                             };
                         }
 
-                        if (_.MessageType == PayloadSerializerV2.SuccessMessageTypeId)
+                        if (_.MessageType == PayloadHelper.DefaultSuccessMessageType)
                         {
-                            var data = PayloadSerializerV2.ReadData<TOut>(strm);
+                            var data = PayloadHelper.ReadData<TOut>(strm);
                             return new Result<TOut>
                             {
                                 IsError = false,

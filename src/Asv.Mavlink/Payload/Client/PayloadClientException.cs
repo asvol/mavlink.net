@@ -1,16 +1,16 @@
-using System;
+﻿using System;
 
 namespace Asv.Mavlink
 {
     public class PayloadClientException : Exception
     {
         public string Path { get; }
-        public string ErrorMessage { get; }
+        public ErrorCode ResultError { get; }
 
-        public PayloadClientException(string path, string errorMessage):base($"Remote error to execute '{path}'. Error code:'{errorMessage:G}'")
+        public PayloadClientException(string path, ErrorCode resultError):base($"Remote error to execute '{path}'. Error code:'{resultError:G}'")
         {
             Path = path;
-            ErrorMessage = errorMessage;
+            ResultError = resultError;
         }
     }
 }

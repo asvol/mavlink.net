@@ -7,19 +7,16 @@ using NLog;
 
 namespace Asv.Mavlink
 {
+   
 
-
-    public interface IMavlinkPayloadClient : IDisposable
+    public interface IMavlinkPayloadClient:IDisposable
     {
         IMavlinkClient Client { get; }
         IRxValue<LinkState> Link { get; }
         IRxValue<int> PacketRateHz { get; }
-        IRxValue<int> RxPacketCount { get; }
-        IRxValue<int> TxPacketCount { get; }
-        IRxValue<int> RxDoublePacketCount { get; }
         IRxValue<VehicleStatusMessage> OnLogMessage { get; }
         IObservable<Result<TOut>> Register<TOut>(string path);
-        Task<TOut> Send<TIn, TOut>(string path, TIn data, CancellationToken cancel = default, byte sendPacketCount = 1);
+        Task<TOut> Send<TIn,TOut>(string path, TIn data, CancellationToken cancel);
     }
 
     public static class MavlinkPayloadClientHelper

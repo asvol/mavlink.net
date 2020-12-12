@@ -13,7 +13,7 @@ namespace Asv.Mavlink
         public MavlinkPayloadClientInterfaceBase(string name)
         {
             _name = name;
-            PayloadSerializerV2.ValidateName(name);
+            PayloadHelper.ValidateName(name);
         }
 
         public string Name => _name;
@@ -26,13 +26,13 @@ namespace Asv.Mavlink
 
         protected IObservable<Result<TOut>> Register<TOut>(string path)
         {
-            var absolutePath = PayloadSerializerV2.PathJoin(_name, path);
+            var absolutePath = PayloadHelper.PathJoin(_name, path);
             return _client.Register<TOut>(absolutePath);
         }
 
         protected Task<TOut> Send<TIn, TOut>(string path, TIn data, TimeSpan attemptTimeout, int attemptsCount, CancellationToken cancel, Action<int> progressCallback)
         {
-            return _client.Send<TIn, TOut>(PayloadSerializerV2.PathJoin(_name, path), data, attemptTimeout, attemptsCount, cancel, progressCallback);
+            return _client.Send<TIn, TOut>(PayloadHelper.PathJoin(_name, path), data, attemptTimeout, attemptsCount, cancel, progressCallback);
         }
 
         public void Dispose()
