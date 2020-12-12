@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.Server;
@@ -16,7 +16,7 @@ namespace Asv.Mavlink
         protected PayloadServerInterfaceBase(string name)
         {
             _name = name;
-            PayloadHelper.ValidateName(name);
+            PayloadSerializerV2.ValidateName(name);
         }
 
         public string Name => _name;
@@ -30,19 +30,19 @@ namespace Asv.Mavlink
         {
             if (!path.StartsWith(_name, StringComparison.InvariantCultureIgnoreCase))
             {
-                var absolutePath = PayloadHelper.PathJoin(_name, path);
+                var absolutePath = PayloadSerializerV2.PathJoin(_name, path);
                 _server.Register(absolutePath,callback);
             }
         }
 
-        protected Task Send<T>(DeviceIdentity devId, string path, T data, CancellationToken cancel)
+        protected Task Send<T>(DeviceIdentity devId, string path, T data, CancellationToken cancel = default)
         {
-            return _server.SendResult(devId, PayloadHelper.PathJoin(_name, path), data, cancel);
+            return _server.SendResult(devId, PayloadSerializerV2.PathJoin(_name, path), data, cancel);
         }
 
-        protected Task SendError(DeviceIdentity devId, string path, ErrorType errorCode, string message, CancellationToken cancel)
+        protected Task SendError(DeviceIdentity devId, string path, string message, CancellationToken cancel = default, byte sendPacketCount = 1)
         {
-            return _server.SendError(devId, PayloadHelper.PathJoin(_name, path), errorCode, message, cancel);
+            return _server.SendError(devId, PayloadSerializerV2.PathJoin(_name, path), message, cancel, sendPacketCount);
         }
 
         protected IStatusTextServer Status => _server.Status;
