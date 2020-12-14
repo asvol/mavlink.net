@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 
 namespace Asv.Mavlink
 {
@@ -16,6 +19,20 @@ namespace Asv.Mavlink
         IObservable<KeyValuePair<string,string>> OnRemoteChanged { get; }
         bool IsEmpty { get; }
         string this[string name] { get; set; }
+    }
+
+    public static class SettingsValueHelper
+    {
+        public static IDisposable Set(this ISettingsValues src,string key,  string value, Action<string> onRemoteUpdateCallback)
+        {
+            src[key] = value;
+            return src.OnRemoteChanged.Where(_=>string.Equals(_.Key,value, StringComparison.CurrentCultureIgnoreCase)).Select(_=>_.Value).Subscribe(onRemoteUpdateCallback);
+        }
+        public static void Set(this ISettingsValues src, string key, string value, Action<string> onRemoteUpdateCallback, CancellationToken cancel)
+        {
+            src[key] = value;
+            src.OnRemoteChanged.Where(_ => string.Equals(_.Key, key, StringComparison.CurrentCultureIgnoreCase)).Select(_ => _.Value).Subscribe(onRemoteUpdateCallback, cancel);
+        }
     }
 
     public interface IDiagnosticServer
