@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.Server;
@@ -13,8 +13,6 @@ namespace Asv.Mavlink
         Task SendResult<T>(DeviceIdentity devId, string path, T data, CancellationToken cancel);
         Task SendError(DeviceIdentity devId, string path, ErrorType errorType, string message, CancellationToken cancel);
         IStatusTextServer Status { get; }
-        IRxValue<int> RxPacketMaxSize { get; }
-        IRxValue<int> TxPacketMaxSize { get; }
     }
 
     

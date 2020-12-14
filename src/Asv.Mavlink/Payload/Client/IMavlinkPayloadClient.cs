@@ -14,6 +14,7 @@ namespace Asv.Mavlink
         IMavlinkClient Client { get; }
         IRxValue<LinkState> Link { get; }
         IRxValue<int> PacketRateHz { get; }
+        IRxValue<double> LinkQuality { get; }
         IRxValue<VehicleStatusMessage> OnLogMessage { get; }
         IObservable<Result<TOut>> Register<TOut>(string path);
         Task<TOut> Send<TIn,TOut>(string path, TIn data, CancellationToken cancel);
