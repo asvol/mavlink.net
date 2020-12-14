@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Asv.Mavlink.V2.Common;
 
 namespace Asv.Mavlink.Client
@@ -7,6 +7,7 @@ namespace Asv.Mavlink.Client
     {
         IRxValue<HeartbeatPayload> RawHeartbeat { get; }
         IRxValue<int> PacketRateHz { get; }
+        IRxValue<double> LinkQuality { get; }
         IRxValue<LinkState> Link { get; }
     }
 }

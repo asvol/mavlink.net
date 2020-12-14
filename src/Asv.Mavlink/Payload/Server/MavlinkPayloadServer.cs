@@ -181,9 +181,9 @@ namespace Asv.Mavlink
                 await SendData(devId.SystemId, devId.ComponentId, PayloadHelper.DefaultNetworkId, PayloadHelper.DefaultSuccessMessageType,strm,cancel);
             }
         }
-        private ushort GetPacketId()
+        private byte GetPacketId()
         {
-            return (ushort)(Interlocked.Increment(ref _packetCounter) % ushort.MaxValue);
+            return (byte)(Interlocked.Increment(ref _packetCounter) % byte.MaxValue);
         }
     
 

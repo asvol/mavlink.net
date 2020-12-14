@@ -23,7 +23,7 @@ namespace Asv.Mavlink
         private volatile int _isDigitBusy;
         private volatile int _isStringBusy;
         private volatile int _isSettingsBusy;
-        private object _sync;
+        private readonly object _sync = new object();
 
 
         public DiagnosticClientInterface() : base(WellKnownDiag.Diag)

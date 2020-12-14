@@ -20,8 +20,7 @@ namespace Asv.Mavlink
 
         public virtual void Init(IMavlinkPayloadClient client)
         {
-            if (client == null) throw new ArgumentNullException(nameof(client));
-            _client = client;
+            _client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
         protected IObservable<Result<TOut>> Register<TOut>(string path)

@@ -33,7 +33,7 @@ namespace Asv.Mavlink
     public class PayloadPacketHeader
     {
         public string Path { get; set; }
-        public ushort PacketId { get; set; }
+        public byte PacketId { get; set; }
     }
 
     public static class PayloadHelper

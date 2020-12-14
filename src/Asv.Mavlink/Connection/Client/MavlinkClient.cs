@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using NLog;
 
@@ -78,6 +78,8 @@ namespace Asv.Mavlink.Client
 
             _rtk = new DgpsClient(_mavlinkConnection, _seq, identity);
             _disposeCancel.Token.Register(() => _rtt.Dispose());
+
+            
 
         }
 

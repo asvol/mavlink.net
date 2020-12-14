@@ -44,7 +44,6 @@ namespace Asv.Mavlink
             _networkId = networkId;
             client.Rtt.RawStatusText.Select(ConvertLog).Subscribe(_logMessage,_disposeCancel.Token);
             client.V2Extension.OnData.Where(CheckPacketTarget).Subscribe(OnData, _disposeCancel.Token);
-            _onData.Select(_=>_.Header.PacketId).Buffer(TimeSpan.FromSeconds(1)).Where(_=>_.Count!=0 && (_.Last() -_.First())>=0).Select(_=>(_.Last() - _.First())/(double)_.Count).Subscribe(_linkQualitySubject, _disposeCancel.Token);
         }
 
 
@@ -54,8 +53,9 @@ namespace Asv.Mavlink
 
         public IRxValue<LinkState> Link => Client.Heartbeat.Link;
         public IRxValue<int> PacketRateHz => Client.Heartbeat.PacketRateHz;
+        public IRxValue<double> LinkQuality => Client.Heartbeat.LinkQuality;
         public IRxValue<VehicleStatusMessage> OnLogMessage => _logMessage;
-        public IRxValue<double> LinkQuality => _linkQualitySubject;
+        
 
         private VehicleStatusMessage ConvertLog(StatustextPayload payload)
         {
@@ -108,9 +108,9 @@ namespace Asv.Mavlink
             return network && system && component;
         }
 
-        private ushort GetPacketId()
+        private byte GetPacketId()
         {
-            return (ushort) (Interlocked.Increment(ref _packetCounter) % ushort.MaxValue);
+            return (byte) (Interlocked.Increment(ref _packetCounter) % byte.MaxValue);
         }
 
         public async Task<TOut> Send<TIn, TOut>(string path, TIn data, CancellationToken cancel)
