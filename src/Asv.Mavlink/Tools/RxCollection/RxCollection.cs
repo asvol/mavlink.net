@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -34,6 +34,15 @@ namespace Asv.Avialab.Core
         {
             _items.Add(model);
             _addSubject.OnNext(model);
+        }
+
+        public void Clear()
+        {
+            var itemsToDelete = _items.ToArray();
+            foreach (var item in itemsToDelete)
+            {
+                Remove(item);
+            }
         }
 
         public IObservable<TModel> OnAdd => _addSubject;

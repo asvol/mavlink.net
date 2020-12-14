@@ -22,26 +22,13 @@ namespace Asv.Mavlink
         InternalError
     }
 
-    public class Void
+    public class PayloadVoid
     {
         public bool N { get; set; }
-        public static Void Default = new Void();
+        public static PayloadVoid Default = new PayloadVoid();
     }
 
     public delegate Task<TOut> DataDelegate<in TIn, TOut>(DeviceIdentity devId, TIn data);
-
-    public static class WellKnownDiag
-    {
-        #region DIAG
-
-        public const string Diag = "DIAG";
-        public const string DiagStringsValueName = "SVAL";
-        public const string DiagDigitValueName = "DVAL";
-        public const string DiagSettingsValueName = "CONF";
-        public const string DiagSettingsSetMethodName = "SET";
-
-        #endregion
-    }
 
     public class PayloadPacketHeader
     {

@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
 using Asv.Avialab.Core;
 
@@ -7,6 +7,7 @@ namespace Asv.Mavlink
 
     public interface IDiagnosticClient
     {
+        Task QueryAll(CancellationToken cancel = default);
         IReadonlyRxCollection<IDiagnosticValue<string>> Strings { get; }
         IReadonlyRxCollection<IDiagnosticValue<double>> Digits { get; }
         IReadonlyRxCollection<ISettingsValue> Settings { get; }

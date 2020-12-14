@@ -23,6 +23,7 @@ namespace Asv.Mavlink
         private volatile int _isDigitBusy;
         private volatile int _isStringBusy;
         private volatile int _isSettingsBusy;
+        private object _sync;
 
 
         public DiagnosticClientInterface() : base(WellKnownDiag.Diag)
@@ -36,6 +37,21 @@ namespace Asv.Mavlink
             Register<IDictionary<string, string>>(WellKnownDiag.DiagStringsValueName).Subscribe(OnDataString, _cancel.Token);
             Register<IDictionary<string, double>>(WellKnownDiag.DiagDigitValueName).Subscribe(OnDataDigit, _cancel.Token);
             Register<IDictionary<string, string>>(WellKnownDiag.DiagSettingsValueName).Subscribe(OnDataSettings, _cancel.Token);
+        }
+
+        public Task QueryAll(CancellationToken cancel = default)
+        {
+            lock (_sync)
+            {
+                _stringDict.Clear();
+                _digitDict.Clear();
+                _settingsDict.Clear();
+                _stringDict.Clear();
+                _digitDict.Clear();
+                _settingsDict.Clear();
+            }
+            
+            return Send<PayloadVoid, PayloadVoid>(WellKnownDiag.DiagGetAll, PayloadVoid.Default, TimeSpan.FromSeconds(3), 1, cancel, null);
         }
 
         private void OnDataSettings(Result<IDictionary<string, string>> val)
@@ -69,7 +85,7 @@ namespace Asv.Mavlink
 
         private Task SendUpdate(KeyValuePair<string,string> value, CancellationToken cancel)
         {
-            return Send<KeyValuePair<string, string>,Void>(WellKnownDiag.DiagSettingsSetMethodName, value, DefaultTimeout, DefaultAttemptCount,  cancel, null);
+            return Send<KeyValuePair<string, string>,PayloadVoid>(WellKnownDiag.DiagSettingsSetMethodName, value, DefaultTimeout, DefaultAttemptCount,  cancel, null);
         }
 
         private void OnDataDigit(Result<IDictionary<string, double>> val)

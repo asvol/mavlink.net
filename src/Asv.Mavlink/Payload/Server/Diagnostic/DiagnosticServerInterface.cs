@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -13,16 +14,20 @@ namespace Asv.Mavlink
 {
     public class DiagnosticServerConfig
     {
-        public int StringUpdateTimeMs { get; set; } = 3000;
-        public int DigitUpdateTimeMs { get; set; } = 2000;
-        public int SettingsUpdateTimeMs { get; set; } = 3000;
+        public int MaxAgeToUpdateAllMs { get; set; } = 30_000;
+    }
+
+    public class ValueWithFlag<T>
+    {
+        public T Value { get; set; }
+        public DateTime LastSyncTime { get; set; } = DateTime.MinValue;
     }
 
     public class DiagnosticValues<T> : IDiagnosticValues<T>
     {
-        private readonly ConcurrentDictionary<string, T> _values;
+        private readonly ConcurrentDictionary<string, ValueWithFlag<T>> _values;
 
-        public DiagnosticValues(ConcurrentDictionary<string,T> values)
+        public DiagnosticValues(ConcurrentDictionary<string, ValueWithFlag<T>> values)
         {
             _values = values;
         }
@@ -31,12 +36,17 @@ namespace Asv.Mavlink
         {
             get
             {
-                T value;
-                return _values.TryGetValue(name, out value) ? value : default(T);
+                var item = _values.TryGetValue(name, out var value) ? value : new ValueWithFlag<T>();
+                return item.Value;
             }
             set
             {
-                _values.AddOrUpdate(name, _ => value, (k, v) => value);
+                _values.AddOrUpdate(name, _ => new ValueWithFlag<T>{Value = value , LastSyncTime = DateTime.MinValue }, (k, v) =>
+                {
+                    v.Value = value;
+                    v.LastSyncTime = DateTime.MinValue;
+                    return v;
+                });
             }
         }
 
@@ -53,9 +63,9 @@ namespace Asv.Mavlink
         private readonly CancellationTokenSource _disposeCancel = new CancellationTokenSource();
         
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-        private readonly ConcurrentDictionary<string,string> _valuesStr = new ConcurrentDictionary<string, string>();
-        private readonly ConcurrentDictionary<string, double> _valuesDig = new ConcurrentDictionary<string, double>();
-        private readonly ConcurrentDictionary<string, string> _settingsDict = new ConcurrentDictionary<string, string>();
+        private readonly ConcurrentDictionary<string, ValueWithFlag<string>> _valuesStr = new ConcurrentDictionary<string, ValueWithFlag<string>>();
+        private readonly ConcurrentDictionary<string, ValueWithFlag<double>> _valuesDig = new ConcurrentDictionary<string, ValueWithFlag<double>>();
+        private readonly ConcurrentDictionary<string, ValueWithFlag<string>> _settingsDict = new ConcurrentDictionary<string, ValueWithFlag<string>>();
 
         private readonly DiagnosticValues<string> _valuesStrDict;
         private readonly DiagnosticValues<double> _valuesDigDict;
@@ -66,35 +76,53 @@ namespace Asv.Mavlink
         private volatile int _isUpdateDigitInProgress;
         private volatile int _isUpdateStringsInProgress;
         private volatile int _isUpdateSettingsInProgress;
+        private TimeSpan _maxAgeToUpdateAll;
 
         public DiagnosticServerInterface(DiagnosticServerConfig config) : base(WellKnownDiag.Diag)
         {
             _cfg = config;
+            _maxAgeToUpdateAll = TimeSpan.FromMilliseconds(_cfg.MaxAgeToUpdateAllMs);
+
             _settings = new SettingsValues(_settingsDict);
-            _disposeCancel.Token.Register(()=> _settings.Dispose());
             _valuesStrDict = new DiagnosticValues<string>(_valuesStr);
             _valuesDigDict = new DiagnosticValues<double>(_valuesDig);
+            _disposeCancel.Token.Register(() => _settings.Dispose());
         }
 
         public override void Init(IMavlinkPayloadServer server)
         {
             base.Init(server);
-            if (_cfg.StringUpdateTimeMs > 0)
+            Observable.Timer(UpdateTime, UpdateTime).Subscribe(_ =>
             {
-                Observable.Timer(TimeSpan.FromMilliseconds(_cfg.StringUpdateTimeMs), TimeSpan.FromMilliseconds(_cfg.StringUpdateTimeMs)).Where(_=> !Strings.IsEmpty).Subscribe(_ => UpdateStrings(), _disposeCancel.Token);
-            }
-            if (_cfg.DigitUpdateTimeMs > 0)
-            {
-                Observable.Timer(TimeSpan.FromMilliseconds(_cfg.DigitUpdateTimeMs), TimeSpan.FromMilliseconds(_cfg.DigitUpdateTimeMs)).Where(_ => !Digits.IsEmpty).Subscribe(_ => UpdateDigits(), _disposeCancel.Token);
-            }
-            if (_cfg.SettingsUpdateTimeMs > 0)
-            {
-                Observable.Timer(TimeSpan.FromMilliseconds(_cfg.SettingsUpdateTimeMs), TimeSpan.FromMilliseconds(_cfg.SettingsUpdateTimeMs)).Where(_=> !Settings.IsEmpty).Subscribe(_ => UpdateSettings(), _disposeCancel.Token);
-            }
-            Register<KeyValuePair<string,string>,Void>(WellKnownDiag.DiagSettingsSetMethodName, OnValueSet);
+                UpdateStrings();
+                UpdateDigits();
+                UpdateSettings();
+            }, _disposeCancel.Token);
+
+            Register<KeyValuePair<string, string>, PayloadVoid>(WellKnownDiag.DiagGetAll, OnGetAll);
+
+            Register<KeyValuePair<string,string>,PayloadVoid>(WellKnownDiag.DiagSettingsSetMethodName, OnValueSet);
         }
 
-        private Task<Void> OnValueSet(DeviceIdentity devid, KeyValuePair<string, string> data)
+        private async Task<PayloadVoid> OnGetAll(DeviceIdentity devid, KeyValuePair<string, string> data)
+        {
+            foreach (var item in _valuesDig)
+            {
+                item.Value.LastSyncTime = DateTime.MinValue;
+            }
+            foreach (var item in _valuesStr)
+            {
+                item.Value.LastSyncTime = DateTime.MinValue;
+            }
+            foreach (var item in _settingsDict)
+            {
+                item.Value.LastSyncTime = DateTime.MinValue;
+            }
+
+            return PayloadVoid.Default;
+        }
+
+        private Task<PayloadVoid> OnValueSet(DeviceIdentity devid, KeyValuePair<string, string> data)
         {
             _logger.Info($"Settings changed[sys:{devid.SystemId}, com:{devid.ComponentId}]: {data.Key} = {data.Value}");
             Status.Log(MavSeverity.MavSeverityInfo, $"Write {data.Key}={data.Value}");
@@ -102,16 +130,16 @@ namespace Asv.Mavlink
             {
                 _settings.OnRemoteUpdate(data);
                 UpdateSettings();
-                return new Void();
+                return new PayloadVoid();
             });
         }
 
-        private void UpdateSettings()
+        private async void UpdateSettings()
         {
             if (Interlocked.CompareExchange(ref _isUpdateSettingsInProgress, 1, 0) != 0) return;
             try
             {
-                Send(new DeviceIdentity { ComponentId = 0, SystemId = 0 }, WellKnownDiag.DiagSettingsValueName, _settingsDict, CancellationToken.None);
+                await SendDictionary(WellKnownDiag.DiagSettingsValueName, _settingsDict);
             }
             catch (Exception e)
             {
@@ -123,12 +151,13 @@ namespace Asv.Mavlink
             }
         }
 
-        private void UpdateStrings()
+        private async void UpdateStrings()
         {
             if (Interlocked.CompareExchange(ref _isUpdateStringsInProgress,1,0)!=0) return;
+
             try
             {
-                Send(new DeviceIdentity {ComponentId = 0, SystemId = 0}, WellKnownDiag.DiagStringsValueName, _valuesStr, CancellationToken.None);
+                await SendDictionary(WellKnownDiag.DiagStringsValueName, _valuesStr);
             }
             catch (Exception e)
             {
@@ -140,12 +169,12 @@ namespace Asv.Mavlink
             }
         }
 
-        private void UpdateDigits()
+        private async void UpdateDigits()
         {
             if (Interlocked.CompareExchange(ref _isUpdateDigitInProgress, 1, 0) != 0) return;
             try
             {
-                Send(new DeviceIdentity { ComponentId = 0, SystemId = 0 }, WellKnownDiag.DiagDigitValueName, _valuesDig, CancellationToken.None);
+                await SendDictionary(WellKnownDiag.DiagDigitValueName, _valuesDig);
             }
             catch (Exception e)
             {
@@ -155,6 +184,43 @@ namespace Asv.Mavlink
             {
                 Interlocked.Exchange(ref _isUpdateDigitInProgress, 0);
             }
+        }
+
+        private async Task SendDictionary<T>(string path, IReadOnlyDictionary<string,ValueWithFlag<T>> values)
+        {
+            if (values.Count == 0) return;
+            var list = new List<KeyValuePair<string, T>>();
+            foreach (var item in values.Where(_=>(DateTime.Now - _.Value.LastSyncTime) > _maxAgeToUpdateAll ))
+            {
+                list.Add(new KeyValuePair<string, T>(item.Key,item.Value.Value));
+                item.Value.LastSyncTime = DateTime.Now;
+            }
+
+            if (list.Count == 0) return;
+            var factor = 1;
+            while (true)
+            {
+                try
+                {
+                    var temp = new Dictionary<string,T>();
+                    var itemsPerOne = list.Count / factor;
+                    for (var i = 0; i < list.Count; i++)
+                    {
+                        temp.Add(list[i].Key,list[i].Value);
+                        if (temp.Count > itemsPerOne)
+                        {
+                            await Send(new DeviceIdentity { ComponentId = 0, SystemId = 0 }, WellKnownDiag.DiagDigitValueName, list.Skip(i), CancellationToken.None);
+                            temp.Clear();
+                        }
+                    }
+                    break;
+                }
+                catch (PayloadOversizeException e)
+                {
+                    factor++;
+                }
+            }
+            
         }
 
         protected override void InternalDisposeOnce()
@@ -173,12 +239,12 @@ namespace Asv.Mavlink
 
     public class SettingsValues : ISettingsValues,IDisposable
     {
-        private readonly ConcurrentDictionary<string, string> _values;
+        private readonly ConcurrentDictionary<string, ValueWithFlag<string>> _values;
         private readonly Subject<KeyValuePair<string,string>> _localChanges = new Subject<KeyValuePair<string, string>>();
         private readonly Subject<KeyValuePair<string, string>> _remoteChanges = new Subject<KeyValuePair<string, string>>();
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public SettingsValues(ConcurrentDictionary<string, string> values)
+        public SettingsValues(ConcurrentDictionary<string, ValueWithFlag<string>> values)
         {
             _values = values;
         }
@@ -189,7 +255,11 @@ namespace Asv.Mavlink
 
         public void OnRemoteUpdate(KeyValuePair<string, string> value)
         {
-            _values.AddOrUpdate(value.Key, _ => value.Value, (k, v) => value.Value);
+            _values.AddOrUpdate(value.Key, _ => new ValueWithFlag<string>{Value = value.Value}, (k, v) =>
+            {
+                v.Value = value.Value;
+                return v;
+            });
             try
             {
                 _remoteChanges.OnNext(value);
@@ -202,14 +272,15 @@ namespace Asv.Mavlink
 
         public string this[string name]
         {
-            get
-            {
-                string value;
-                return _values.TryGetValue(name, out value) ? value : default(string);
-            }
+            get => _values.TryGetValue(name, out var value) ? value.Value : null;
             set
             {
-                _values.AddOrUpdate(name, _ => value, (k, v) => value);
+                _values.AddOrUpdate(name, _ => new ValueWithFlag<string>{LastSyncTime = DateTime.MinValue,Value = value}, (k, v) =>
+                {
+                    v.LastSyncTime = DateTime.MinValue;
+                    v.Value = value;
+                    return v;
+                });
                 try
                 {
                     _localChanges.OnNext(new KeyValuePair<string, string>(name, value));

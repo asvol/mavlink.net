@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.Server;
@@ -33,6 +34,7 @@ namespace Asv.Mavlink
         private readonly CancellationTokenSource _disposeCancel = new CancellationTokenSource();
         private volatile int _isDisposed;
         private readonly ConcurrentQueue<ushort> _packetIdCache = new ConcurrentQueue<ushort>();
+        private readonly Subject<PayloadPacketHeader> _onData = new Subject<PayloadPacketHeader>();
         private int _maxPacketIdCacheSize = 15;
         private int _doublePacketsCount;
         private int _packetCounter;
@@ -60,6 +62,7 @@ namespace Asv.Mavlink
             _logger.Info($"Create mavlink payload server: cs:{cfg.ConnectionString}, comId:{cfg.Identity.ComponenId}, sysId:{cfg.Identity.SystemId}, netId:{cfg.Identity.NetworkId}");
             _conn = new MavlinkV2Connection(cfg.ConnectionString, _ => _.RegisterCommonDialect());
             _srv = new MavlinkServerBase(_conn, cfg.Identity);
+
             _identity = cfg.Identity;
             _srv.Heartbeat.Set(_ =>
             {
@@ -87,16 +90,15 @@ namespace Asv.Mavlink
         {
             try
             {
-                PayloadPacketHeader header = null;
-
                 using (var ms = new MemoryStream(v2ExtensionPacket.Payload.Payload))
                 {
-                    header = PayloadHelper.ReadHeader(ms);
+                    var header = PayloadHelper.ReadHeader(ms);
                     if (FilterDoublePackets(header) == false)
                     {
                         Interlocked.Increment(ref _doublePacketsCount);
                         return;
                     }
+
 
                     if (!_dataCallbacks.TryGetValue(header.Path, out var callback))
                     {
@@ -130,6 +132,8 @@ namespace Asv.Mavlink
             _disposeCancel?.Dispose();
             _conn?.Dispose();
             _srv?.Dispose();
+            _onData.OnCompleted();
+            _onData.Dispose();
             _dataCallbacks.Clear();
         }
 
@@ -209,7 +213,7 @@ namespace Asv.Mavlink
         private async Task SendData(byte targetSystemId, byte targetComponentId, byte targetNetworkId, ushort messageType, MemoryStream strm, CancellationToken cancel)
         {
             if (strm.Length > PayloadHelper.V2ExtensionMaxDataSize)
-                throw new Exception(
+                throw new PayloadOversizeException(
                     $"Packet size ({strm.Length}) too large to send. Max available size: {PayloadHelper.V2ExtensionMaxDataSize}");
             var data = new byte[strm.Length];
             await strm.ReadAsync(data, 0, data.Length, cancel);
@@ -218,6 +222,4 @@ namespace Asv.Mavlink
 
         public IStatusTextServer Status => _srv.StatusText;
     }
-
-    
 }

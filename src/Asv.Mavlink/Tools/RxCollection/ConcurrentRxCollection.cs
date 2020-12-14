@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Subjects;
 
 namespace Asv.Avialab.Core
@@ -26,6 +27,15 @@ namespace Asv.Avialab.Core
             if (_items.Remove(model))
             {
                 _remSubject.OnNext(model);
+            }
+        }
+
+        public void Clear()
+        {
+            var itemsToDelete = _items.ToArray();
+            foreach (var item in itemsToDelete)
+            {
+                Remove(item);
             }
         }
 

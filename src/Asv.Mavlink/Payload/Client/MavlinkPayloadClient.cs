@@ -158,7 +158,7 @@ namespace Asv.Mavlink
 
         private async Task SendData(byte defaultNetworkId, ushort defaultSuccessMessageType, MemoryStream strm, CancellationToken cancel = default, int sendPacketCount = 1)
         {
-            if (strm.Length > PayloadHelper.V2ExtensionMaxDataSize) throw new Exception($"Packet size ({strm.Length}) too large to send. Max available size: {PayloadHelper.V2ExtensionMaxDataSize}");
+            if (strm.Length > PayloadHelper.V2ExtensionMaxDataSize) throw new PayloadOversizeException($"Packet size ({strm.Length}) too large to send. Max available size: {PayloadHelper.V2ExtensionMaxDataSize}");
             var data = new byte[strm.Length];
             await strm.ReadAsync(data, 0, data.Length, cancel);
             for (int i = 0; i < sendPacketCount; i++)
