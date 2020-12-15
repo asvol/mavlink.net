@@ -15,9 +15,10 @@ namespace Asv.Mavlink.Client
         private readonly RxValue<int> _packetRate = new RxValue<int>();
         private readonly RxValue<double> _linkQuality = new RxValue<double>();
         private readonly LinkIndicator _link = new LinkIndicator(3);
-        private readonly ConcurrentQueue<byte> _sequence = new ConcurrentQueue<byte>(new []{ (byte)1, (byte)2, (byte)3, (byte)4, (byte)5, (byte)6, (byte)7, (byte)8, (byte)9, (byte)10 });
-
         private DateTime _lastHeartbeat;
+        private int _lastPacketId;
+        private int _packetCounter;
+        private int _prev;
 
         public HeartbeatClient(IMavlinkV2Connection connection, MavlinkClientIdentity config, int heartBeatTimeoutMs = 2000)
         {
@@ -27,8 +28,8 @@ namespace Asv.Mavlink.Client
                 .Select(_ => _.Sequence)
                 .Subscribe(_ =>
                 {
-                    while (_sequence.TryDequeue(out var val) == false) { }
-                    _sequence.Enqueue(_);
+                    Interlocked.Exchange(ref _lastPacketId, _);
+                    Interlocked.Increment(ref _packetCounter);
                 }, _disposeCancel.Token);
 
 
@@ -52,11 +53,16 @@ namespace Asv.Mavlink.Client
             {
                 if (_disposeCancel.IsCancellationRequested) return;
                 _lastHeartbeat = DateTime.Now;
-                var last = _sequence.Last();
-                var first = _sequence.First();
-                var seq = last - first + 1;
+
+                var last = _lastPacketId;
+                var count = Interlocked.Exchange(ref _packetCounter,0);
+                var first = Interlocked.Exchange(ref _prev, last);
+                
+                var seq = last - first;
                 if (seq < 0) seq = last + byte.MaxValue - first + 1;
-                _linkQuality.OnNext(((double)_sequence.Count)/ seq);
+                _linkQuality.OnNext(((double)count) / seq);
+                
+
                 _link.Upgrade();
             }, _disposeCancel.Token);
             _disposeCancel.Token.Register(() => _link.Dispose());
