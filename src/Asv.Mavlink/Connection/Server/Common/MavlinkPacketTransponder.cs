@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reactive.Linq;
 using System.Threading;
 using Asv.Mavlink.V2.Common;
@@ -65,6 +65,7 @@ namespace Asv.Mavlink.Server
             {
 
                 dispose = await _dataLock.ReaderLockAsync();
+                ((IPacketV2<IPayload>) _packet).Sequence = _seq.GetNextSequenceNumber();
                 await _connection.Send((IPacketV2<IPayload>) _packet, _disposeCancellation.Token);
                 LogSuccess();
             }
