@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
@@ -14,6 +15,7 @@ namespace Asv.Mavlink.Client
         private readonly RxValue<int> _packetRate = new RxValue<int>();
         private readonly RxValue<double> _linkQuality = new RxValue<double>();
         private readonly LinkIndicator _link = new LinkIndicator(3);
+        private readonly ConcurrentQueue<byte> _sequence = new ConcurrentQueue<byte>(new []{ (byte)1, (byte)2, (byte)3, (byte)4, (byte)5, (byte)6, (byte)7, (byte)8, (byte)9, (byte)10 });
 
         private DateTime _lastHeartbeat;
 
@@ -22,7 +24,14 @@ namespace Asv.Mavlink.Client
             _heartBeatTimeoutMs = heartBeatTimeoutMs;
             connection
                 .FilterVehicle(config)
-                .Select(_ => _.Sequence).Buffer(TimeSpan.FromSeconds(1)).Where(_ => _.Count != 0 && (_.Last() - _.First()) >= 0).Select(_ => (_.Last() - _.First()) / (double)_.Count).Subscribe(_linkQuality, _disposeCancel.Token);
+                .Select(_ => _.Sequence)
+                .Subscribe(_ =>
+                {
+                    while (_sequence.TryDequeue(out var val) == false) { }
+                    _sequence.Enqueue(_);
+                }, _disposeCancel.Token);
+
+
             connection
                 .FilterVehicle(config)
                 .Where(_ => _.MessageId == HeartbeatPacket.PacketMessageId)
@@ -43,6 +52,11 @@ namespace Asv.Mavlink.Client
             {
                 if (_disposeCancel.IsCancellationRequested) return;
                 _lastHeartbeat = DateTime.Now;
+                var last = _sequence.Last();
+                var first = _sequence.First();
+                var seq = last - first + 1;
+                if (seq < 0) seq = last + byte.MaxValue - first + 1;
+                _linkQuality.OnNext(((double)_sequence.Count)/ seq);
                 _link.Upgrade();
             }, _disposeCancel.Token);
             _disposeCancel.Token.Register(() => _link.Dispose());
