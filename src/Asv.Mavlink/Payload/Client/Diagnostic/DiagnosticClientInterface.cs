@@ -34,9 +34,9 @@ namespace Asv.Mavlink
         public override void Init(IMavlinkPayloadClient client)
         {
             base.Init(client);
-            Register<IDictionary<string, string>>(WellKnownDiag.DiagStringsValueName).Subscribe(OnDataString, _cancel.Token);
-            Register<IDictionary<string, double>>(WellKnownDiag.DiagDigitValueName).Subscribe(OnDataDigit, _cancel.Token);
-            Register<IDictionary<string, string>>(WellKnownDiag.DiagSettingsValueName).Subscribe(OnDataSettings, _cancel.Token);
+            Register<Dictionary<string, string>>(WellKnownDiag.DiagStringsValueName).Subscribe(OnDataString, _cancel.Token);
+            Register<Dictionary<string, double>>(WellKnownDiag.DiagDigitValueName).Subscribe(OnDataDigit, _cancel.Token);
+            Register<Dictionary<string, string>>(WellKnownDiag.DiagSettingsValueName).Subscribe(OnDataSettings, _cancel.Token);
         }
 
         public Task QueryAll(CancellationToken cancel = default)
@@ -54,7 +54,7 @@ namespace Asv.Mavlink
             return Send<PayloadVoid, PayloadVoid>(WellKnownDiag.DiagGetAll, PayloadVoid.Default, TimeSpan.FromSeconds(3), 1, cancel, null);
         }
 
-        private void OnDataSettings(Result<IDictionary<string, string>> val)
+        private void OnDataSettings(Result<Dictionary<string, string>> val)
         {
             if (Interlocked.CompareExchange(ref _isSettingsBusy, 1, 0) != 0) return;
             try
@@ -88,7 +88,7 @@ namespace Asv.Mavlink
             return Send<KeyValuePair<string, string>,PayloadVoid>(WellKnownDiag.DiagSettingsSetMethodName, value, DefaultTimeout, DefaultAttemptCount,  cancel, null);
         }
 
-        private void OnDataDigit(Result<IDictionary<string, double>> val)
+        private void OnDataDigit(Result<Dictionary<string, double>> val)
         {
             if (Interlocked.CompareExchange(ref _isDigitBusy, 1, 0) != 0) return;
             try
@@ -118,7 +118,7 @@ namespace Asv.Mavlink
 
         }
 
-        private void OnDataString(Result<IDictionary<string, string>> val)
+        private void OnDataString(Result<Dictionary<string, string>> val)
         {
             if (Interlocked.CompareExchange(ref _isStringBusy, 1,0) !=0 ) return;
             try

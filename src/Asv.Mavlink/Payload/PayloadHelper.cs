@@ -26,16 +26,35 @@ namespace Asv.Mavlink
 
     public class PayloadVoid
     {
-        public bool N { get; set; }
         public static PayloadVoid Default = new PayloadVoid();
     }
 
     public delegate Task<TOut> DataDelegate<in TIn, TOut>(DeviceIdentity devId, TIn data);
 
-    public class PayloadPacketHeader
+    public class PayloadPacketHeader:ISerializablePayloadData
     {
         public string Path { get; set; }
         public byte PacketId { get; set; }
+        public void Serialize(BsonDataWriter wrt)
+        {
+            wrt.WriteStartArray();
+            wrt.WriteValue(Path);
+            wrt.WriteValue(PacketId);
+            wrt.WriteEndArray();
+        }
+
+        public void Deserialize(BsonDataReader rdr)
+        {
+            var arr = JArray.ReadFrom(rdr);
+            Path = (string) ((JValue) arr.First).Value;
+            PacketId = (byte)((JValue)arr.Last).Value;
+        }
+    }
+
+    public interface ISerializablePayloadData
+    {
+        void Serialize(BsonDataWriter wrt);
+        void Deserialize(BsonDataReader rdr);
     }
 
     public static class PayloadHelper
@@ -51,48 +70,46 @@ namespace Asv.Mavlink
         public const ushort DefaultSuccessMessageType = 32770;
         public const ushort DefaultErrorMessageType = 32771;
         public static Encoding DefaultEncoding => Encoding.UTF8;
-        private static JsonSerializer serializer = JsonSerializer.CreateDefault();
+        private static readonly JsonSerializer Serializer = JsonSerializer.CreateDefault();
 
         public static void WriteData<T>(Stream strm, T data)
         {
             using (var writer = new BsonDataWriter(new BinaryWriter(strm, DefaultEncoding, true)))
             {
-                serializer.Serialize(writer, data);
+                if (data is ISerializablePayloadData)
+                {
+                    ((ISerializablePayloadData)data).Serialize(writer);
+                }
+                else
+                {
+                    Serializer.Serialize(writer, data);
+                }
             }
             // var serializer = MessagePackSerializer.Get<T>();
             // serializer.Pack(strm, data);
         }
 
-        public static T ReadData<T>(Stream strm)
+        public static T ReadData<T>(Stream strm) where T : new()
         {
+            var data = new T();
             using (var rdr = new BsonDataReader(new BinaryReader(strm, DefaultEncoding, true)))
             {
-                return serializer.Deserialize<T>(rdr);
+                if (data is ISerializablePayloadData)
+                {
+                    ((ISerializablePayloadData)data).Deserialize(rdr);
+                }
+                else
+                {
+                    Serializer.Populate(rdr, data);
+                }
+                return data;
             }
 
             // var serializer = MessagePackSerializer.Get<T>();
             // return serializer.Unpack(strm);
         }
 
-        public static PayloadPacketHeader ReadHeader(Stream strm)
-        {
-            using (var rdr = new BsonDataReader(new BinaryReader(strm, DefaultEncoding, true)))
-            {
-                return serializer.Deserialize<PayloadPacketHeader>(rdr);
-            }
-            // var serializer = MessagePackSerializer.Get<PayloadPacketHeader>();
-            // return serializer.Unpack(strm);
-        }
-
-        public static void WriteHeader(Stream strm, PayloadPacketHeader header)
-        {
-            using (var writer = new BsonDataWriter(new BinaryWriter(strm, DefaultEncoding, true)))
-            {
-                serializer.Serialize(writer, header);
-            }
-            // var serializer = MessagePackSerializer.Get<PayloadPacketHeader>();
-            // serializer.Pack(strm, header);
-        }
+        
 
         public static void ValidateName(string name)
         {
@@ -121,7 +138,7 @@ namespace Asv.Mavlink
         {
             using (var rdr = new BsonDataReader(new BinaryReader(strm, DefaultEncoding, true)))
             {
-                return serializer.Deserialize<JToken>(rdr)?.ToString();
+                return Serializer.Deserialize<JToken>(rdr)?.ToString(Formatting.Indented);
             }
             // var obj = MessagePackSerializer.UnpackMessagePackObject(ms);
             // return obj.ToString();

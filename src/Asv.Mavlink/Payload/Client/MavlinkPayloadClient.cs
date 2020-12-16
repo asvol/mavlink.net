@@ -73,7 +73,7 @@ namespace Asv.Mavlink
 
                 using (var ms = new MemoryStream(v2ExtensionPacket.Payload.Payload))
                 {
-                    packetInfo = PayloadHelper.ReadHeader(ms);
+                    packetInfo = PayloadHelper.ReadData<PayloadPacketHeader>(ms);
 
                     if (FilterDoublePackets(packetInfo) == false)
                     {
@@ -113,11 +113,11 @@ namespace Asv.Mavlink
             return (byte) (Interlocked.Increment(ref _packetCounter) % byte.MaxValue);
         }
 
-        public async Task<TOut> Send<TIn, TOut>(string path, TIn data, CancellationToken cancel)
+        public async Task<TOut> Send<TIn, TOut>(string path, TIn data, CancellationToken cancel) where TOut : new()
         {
             using (var strm = new MemoryStream())
             {
-                PayloadHelper.WriteHeader(strm, new PayloadPacketHeader
+                PayloadHelper.WriteData(strm, new PayloadPacketHeader
                 {
                     PacketId = GetPacketId(),
                     Path = path,
@@ -187,7 +187,7 @@ namespace Asv.Mavlink
             public PayloadPacketHeader Header { get; set; }
         }
 
-        public IObservable<Result<TOut>> Register<TOut>(string path)
+        public IObservable<Result<TOut>> Register<TOut>(string path) where TOut : new()
         {
             return _onData.Where(_=>_.Header.Path == path).Select(_ =>
             {

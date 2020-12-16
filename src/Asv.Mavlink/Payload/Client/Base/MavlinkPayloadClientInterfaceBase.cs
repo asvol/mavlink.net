@@ -23,13 +23,13 @@ namespace Asv.Mavlink
             _client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
-        protected IObservable<Result<TOut>> Register<TOut>(string path)
+        protected IObservable<Result<TOut>> Register<TOut>(string path) where TOut : new()
         {
             var absolutePath = PayloadHelper.PathJoin(_name, path);
             return _client.Register<TOut>(absolutePath);
         }
 
-        protected Task<TOut> Send<TIn, TOut>(string path, TIn data, TimeSpan attemptTimeout, int attemptsCount, CancellationToken cancel, Action<int> progressCallback)
+        protected Task<TOut> Send<TIn, TOut>(string path, TIn data, TimeSpan attemptTimeout, int attemptsCount, CancellationToken cancel, Action<int> progressCallback) where TOut : new()
         {
             return _client.Send<TIn, TOut>(PayloadHelper.PathJoin(_name, path), data, attemptTimeout, attemptsCount, cancel, progressCallback);
         }

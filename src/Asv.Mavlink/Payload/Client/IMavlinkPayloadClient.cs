@@ -16,15 +16,15 @@ namespace Asv.Mavlink
         IRxValue<int> PacketRateHz { get; }
         IRxValue<double> LinkQuality { get; }
         IRxValue<VehicleStatusMessage> OnLogMessage { get; }
-        IObservable<Result<TOut>> Register<TOut>(string path);
-        Task<TOut> Send<TIn,TOut>(string path, TIn data, CancellationToken cancel);
+        IObservable<Result<TOut>> Register<TOut>(string path) where TOut : new();
+        Task<TOut> Send<TIn,TOut>(string path, TIn data, CancellationToken cancel) where TOut : new();
     }
 
     public static class MavlinkPayloadClientHelper
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public static async Task<TOut> Send<TIn, TOut>(this IMavlinkPayloadClient src, string path, TIn data, TimeSpan timeout , int attemptsCount, CancellationToken cancel, Action<int> progressCallback)
+        public static async Task<TOut> Send<TIn, TOut>(this IMavlinkPayloadClient src, string path, TIn data, TimeSpan timeout , int attemptsCount, CancellationToken cancel, Action<int> progressCallback) where TOut : new()
         {
             progressCallback = progressCallback ?? ((i) => { });
             var isSuccessfully = false;

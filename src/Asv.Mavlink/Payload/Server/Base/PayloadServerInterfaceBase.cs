@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.Server;
@@ -26,7 +26,7 @@ namespace Asv.Mavlink
             _server = server;
         }
 
-        protected void Register<TIn,TOut>(string path, DataDelegate<TIn,TOut> callback)
+        protected void Register<TIn,TOut>(string path, DataDelegate<TIn,TOut> callback) where TIn : new()
         {
             if (!path.StartsWith(_name, StringComparison.InvariantCultureIgnoreCase))
             {

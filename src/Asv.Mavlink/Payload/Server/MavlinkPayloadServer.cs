@@ -95,7 +95,7 @@ namespace Asv.Mavlink
             {
                 using (var ms = new MemoryStream(v2ExtensionPacket.Payload.Payload))
                 {
-                    var header = PayloadHelper.ReadHeader(ms);
+                    var header = PayloadHelper.ReadData<PayloadPacketHeader>(ms);
                     if (FilterDoublePackets(header) == false)
                     {
                         Interlocked.Increment(ref _doublePacketsCount);
@@ -140,7 +140,7 @@ namespace Asv.Mavlink
             _dataCallbacks.Clear();
         }
 
-        public void Register<TIn,TOut>(string path, DataDelegate<TIn,TOut> callback)
+        public void Register<TIn,TOut>(string path, DataDelegate<TIn,TOut> callback) where TIn : new()
         {
             _dataCallbacks[path] = async (devId, strm) =>
             {
@@ -174,7 +174,7 @@ namespace Asv.Mavlink
         {
             using (var strm = new MemoryStream())
             {
-                PayloadHelper.WriteHeader(strm, new PayloadPacketHeader
+                PayloadHelper.WriteData(strm, new PayloadPacketHeader
                 {
                     PacketId = GetPacketId(),
                     Path = path,
@@ -197,7 +197,7 @@ namespace Asv.Mavlink
             {
                 using (var strm = new MemoryStream())
                 {
-                    PayloadHelper.WriteHeader(strm, new PayloadPacketHeader
+                    PayloadHelper.WriteData(strm, new PayloadPacketHeader
                     {
                         PacketId = GetPacketId(),
                         Path = path,
