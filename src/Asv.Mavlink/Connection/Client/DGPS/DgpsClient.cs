@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -67,7 +67,9 @@ namespace Asv.Mavlink.Client
                     pkt.Payload.Flags += (byte)((Interlocked.Increment(ref _seqNumber) & 0x1f) << 3);
 
                     var dataLength = Math.Min(length - i * MaxMessageLength, MaxMessageLength);
-                    Array.Copy(data, i * MaxMessageLength, pkt.Payload.Data, 0, dataLength);
+                    var dataArray = new byte[dataLength];
+                    Array.Copy(data, i * MaxMessageLength, dataArray, 0, dataLength);
+                    pkt.Payload.Data = dataArray;
 
                     pkt.Payload.Len = (byte) dataLength;
                     await _connection.Send(pkt, linked.Token);
