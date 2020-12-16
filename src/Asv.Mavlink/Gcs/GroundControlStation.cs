@@ -102,30 +102,9 @@ namespace Asv.Mavlink
             });
             MavlinkV2.Where(_ => _.MessageId == HeartbeatPacket.PacketMessageId).Cast<HeartbeatPacket>().Subscribe(DeviceFounder, _cancel.Token);
             Observable.Timer(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3)).Subscribe(_ => RemoveOldDevice(), _cancel.Token);
-            Observable.Timer(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1)).Subscribe(_ => SendHeartBeat(), _cancel.Token);
         }
 
-        private void SendHeartBeat()
-        {
-            var packet = new HeartbeatPacket
-            {
-                ComponenId = (byte) _config.ComponentId,
-                SystemId = (byte) _config.SystemId,
-                Sequence = 0,
-                Payload =
-                {
-                    Autopilot = MavAutopilot.MavAutopilotInvalid,
-                    BaseMode = 0,
-                    CustomMode = 0,
-                    MavlinkVersion = 3,
-                    SystemStatus = MavState.MavStateActive,
-                    Type = MavType.MavTypeGcs,
-
-                }
-            };
-            MavlinkV2.Send(packet, CancellationToken.None);
-        }
-
+       
         private void RemoveOldDevice()
         {
             _deviceListLock.EnterUpgradeableReadLock();

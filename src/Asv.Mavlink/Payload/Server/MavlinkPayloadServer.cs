@@ -39,7 +39,7 @@ namespace Asv.Mavlink
         private int _doublePacketsCount;
         private int _packetCounter;
 
-        public MavlinkPayloadServer(MavlinkPayloadIdentity identity, IDataStream dataStream)
+        public MavlinkPayloadServer(MavlinkPayloadIdentity identity, IDataStream dataStream, bool sendHeartBeatMessages = true)
         {
             _identity = identity;
             _logger.Info($"Create mavlink payload server: dataStream:{dataStream}, comId:{identity.ComponenId}, sysId:{identity.SystemId}, netId:{identity.NetworkId}");
@@ -53,11 +53,12 @@ namespace Asv.Mavlink
                 _.MavlinkVersion = 3;
                 _.CustomMode = PayloadHelper.HeartbeatMagicDigit;
             });
-            _srv.Heartbeat.Start();
+            if (sendHeartBeatMessages) _srv.Heartbeat.Start();
+
             _srv.V2Extension.OnData.Where(CheckPacketTarget).Subscribe(OnData, _disposeCancel.Token);
         }
 
-        public MavlinkPayloadServer(MavlinkPayloadServerConfig cfg)
+        public MavlinkPayloadServer(MavlinkPayloadServerConfig cfg, bool sendHeartBeatMessages = true)
         {
             _logger.Info($"Create mavlink payload server: cs:{cfg.ConnectionString}, comId:{cfg.Identity.ComponenId}, sysId:{cfg.Identity.SystemId}, netId:{cfg.Identity.NetworkId}");
             _conn = new MavlinkV2Connection(cfg.ConnectionString, _ => _.RegisterCommonDialect());
@@ -72,7 +73,9 @@ namespace Asv.Mavlink
                 _.MavlinkVersion = 3;
                 _.CustomMode = PayloadHelper.HeartbeatMagicDigit;
             });
-            _srv.Heartbeat.Start();
+
+            if (sendHeartBeatMessages) _srv.Heartbeat.Start();
+
             _srv.V2Extension.OnData.Where(CheckPacketTarget).Subscribe(OnData, _disposeCancel.Token);
         }
 

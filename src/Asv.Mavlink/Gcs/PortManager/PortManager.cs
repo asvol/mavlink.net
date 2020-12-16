@@ -109,7 +109,7 @@ namespace Asv.Mavlink
 
         private void OnRecv(PortWrapper sender, byte[] data,CancellationToken cancel)
         {
-            PortWrapper[] ports;
+            IEnumerable<PortWrapper> ports;
             lock (_sync)
             {
                 // repeat
@@ -119,8 +119,8 @@ namespace Asv.Mavlink
                     // exclude disabled
                     .Where(_ => _.Port.IsEnabled.Value)
                     // only connected
-                    .Where(_ => _.Port.State.Value == PortState.Connected)
-                    .ToArray();
+                    .Where(_ => _.Port.State.Value == PortState.Connected);
+                
             }
             _onRecv.OnNext(data);
             Task.WaitAll(ports.Select(_ => _.Port.Send(data, data.Length, cancel)).ToArray(), cancel);
