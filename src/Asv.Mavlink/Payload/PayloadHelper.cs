@@ -6,9 +6,9 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Asv.Mavlink.Server;
 using Asv.Mavlink.V2.Common;
-using MsgPack.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Bson;
+using Newtonsoft.Json.Linq;
 
 namespace Asv.Mavlink
 {
@@ -117,10 +117,14 @@ namespace Asv.Mavlink
         public static readonly int V2ExtensionMaxDataSize = new V2ExtensionPayload().GetPayloadMaxItemsCount();
         
 
-        public static string PrintData(MemoryStream ms)
+        public static string PrintData(MemoryStream strm)
         {
-            var obj = MessagePackSerializer.UnpackMessagePackObject(ms);
-            return obj.ToString();
+            using (var rdr = new BsonDataReader(new BinaryReader(strm, DefaultEncoding, true)))
+            {
+                return serializer.Deserialize<JToken>(rdr)?.ToString();
+            }
+            // var obj = MessagePackSerializer.UnpackMessagePackObject(ms);
+            // return obj.ToString();
         }
     }
 
