@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Asv.Mavlink.Server;
 using Asv.Mavlink.V2.Common;
 using MsgPack.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Bson;
 
 namespace Asv.Mavlink
 {
@@ -48,30 +50,48 @@ namespace Asv.Mavlink
         /// </summary>
         public const ushort DefaultSuccessMessageType = 32770;
         public const ushort DefaultErrorMessageType = 32771;
-
+        public static Encoding DefaultEncoding => Encoding.UTF8;
+        private static JsonSerializer serializer = JsonSerializer.CreateDefault();
 
         public static void WriteData<T>(Stream strm, T data)
         {
-            var serializer = MessagePackSerializer.Get<T>();
-            serializer.Pack(strm, data);
+            using (var writer = new BsonDataWriter(new BinaryWriter(strm, DefaultEncoding, true)))
+            {
+                serializer.Serialize(writer, data);
+            }
+            // var serializer = MessagePackSerializer.Get<T>();
+            // serializer.Pack(strm, data);
         }
 
         public static T ReadData<T>(Stream strm)
         {
-            var serializer = MessagePackSerializer.Get<T>();
-            return serializer.Unpack(strm);
+            using (var rdr = new BsonDataReader(new BinaryReader(strm, DefaultEncoding, true)))
+            {
+                return serializer.Deserialize<T>(rdr);
+            }
+
+            // var serializer = MessagePackSerializer.Get<T>();
+            // return serializer.Unpack(strm);
         }
 
         public static PayloadPacketHeader ReadHeader(Stream strm)
         {
-            var serializer = MessagePackSerializer.Get<PayloadPacketHeader>();
-            return serializer.Unpack(strm);
+            using (var rdr = new BsonDataReader(new BinaryReader(strm, DefaultEncoding, true)))
+            {
+                return serializer.Deserialize<PayloadPacketHeader>(rdr);
+            }
+            // var serializer = MessagePackSerializer.Get<PayloadPacketHeader>();
+            // return serializer.Unpack(strm);
         }
 
         public static void WriteHeader(Stream strm, PayloadPacketHeader header)
         {
-            var serializer = MessagePackSerializer.Get<PayloadPacketHeader>();
-            serializer.Pack(strm, header);
+            using (var writer = new BsonDataWriter(new BinaryWriter(strm, DefaultEncoding, true)))
+            {
+                serializer.Serialize(writer, header);
+            }
+            // var serializer = MessagePackSerializer.Get<PayloadPacketHeader>();
+            // serializer.Pack(strm, header);
         }
 
         public static void ValidateName(string name)
@@ -95,6 +115,7 @@ namespace Asv.Mavlink
         }
 
         public static readonly int V2ExtensionMaxDataSize = new V2ExtensionPayload().GetPayloadMaxItemsCount();
+        
 
         public static string PrintData(MemoryStream ms)
         {
