@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -113,6 +113,7 @@ namespace Asv.Mavlink
 
         IRxValue<LinkState> Link { get; }
         IRxValue<int> PacketRateHz { get; }
+        IRxValue<double> LinkQuality { get; }
         IRxValue<RadioLinkStatus> RadioStatus { get; }
 
         IRxValue<VehicleClass> Class { get; }
@@ -171,6 +172,7 @@ namespace Asv.Mavlink
         Task SetRoi(GeoPoint location, CancellationToken cancel);
         IRxValue<GeoPoint?> Roi { get; }
         
+
         Task ClearRoi(CancellationToken cancel);
         /// <summary>
         /// Request the reboot or shutdown of system components.

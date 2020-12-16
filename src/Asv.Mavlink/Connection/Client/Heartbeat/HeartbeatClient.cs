@@ -53,19 +53,22 @@ namespace Asv.Mavlink.Client
             {
                 if (_disposeCancel.IsCancellationRequested) return;
                 _lastHeartbeat = DateTime.Now;
-
-                var last = _lastPacketId;
-                var count = Interlocked.Exchange(ref _packetCounter,0);
-                var first = Interlocked.Exchange(ref _prev, last);
-                
-                var seq = last - first;
-                if (seq < 0) seq = last + byte.MaxValue - first + 1;
-                _linkQuality.OnNext(((double)count) / seq);
-                
-
                 _link.Upgrade();
+                CalculateLinqQuality();
             }, _disposeCancel.Token);
             _disposeCancel.Token.Register(() => _link.Dispose());
+        }
+
+        private void CalculateLinqQuality()
+        {
+            if (_packetCounter <= 5) return;
+            var last = _lastPacketId;
+            var count = Interlocked.Exchange(ref _packetCounter, 0);
+            var first = Interlocked.Exchange(ref _prev, last);
+
+            var seq = last - first;
+            if (seq < 0) seq = last + byte.MaxValue - first + 1;
+            _linkQuality.OnNext(((double)count) / seq);
         }
 
         public IRxValue<HeartbeatPayload> RawHeartbeat => _heartBeat;

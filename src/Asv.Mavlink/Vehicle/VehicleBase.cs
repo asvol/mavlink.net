@@ -37,7 +37,8 @@ namespace Asv.Mavlink
         }
 
         public IRxValue<int> PacketRateHz => _mavlink.Heartbeat.PacketRateHz;
-        
+        public IRxValue<double> LinkQuality => _mavlink.Heartbeat.LinkQuality;
+
 
         public IMavlinkClient Mavlink => _mavlink;
 

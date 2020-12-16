@@ -169,6 +169,7 @@ namespace Asv.Mavlink
 
         private bool FilterDoublePackets(PayloadPacketHeader header)
         {
+            if (header == null) return false;
             if (_packetIdCache.Contains(header.PacketId)) return false;
             _packetIdCache.Enqueue(header.PacketId);
             while (_packetIdCache.Count > _maxPacketIdCacheSize)
