@@ -39,12 +39,12 @@ namespace Asv.Mavlink
         private int _doublePacketsCount;
         private int _packetCounter;
 
-        public MavlinkPayloadServer(MavlinkPayloadIdentity identity, IDataStream dataStream, bool sendHeartBeatMessages = true)
+        public MavlinkPayloadServer(MavlinkPayloadIdentity identity, IDataStream dataStream, bool sendHeartBeatMessages = true, IPacketSequenceCalculator sequenceCalculator = null)
         {
             _identity = identity;
             _logger.Info($"Create mavlink payload server: dataStream:{dataStream}, comId:{identity.ComponenId}, sysId:{identity.SystemId}, netId:{identity.NetworkId}");
             _conn = new MavlinkV2Connection(dataStream, _ => _.RegisterCommonDialect());
-            _srv = new MavlinkServerBase(_conn, identity);
+            _srv = new MavlinkServerBase(_conn, identity, sequenceCalculator);
             _srv.Heartbeat.Set(_ =>
             {
                 _.Autopilot = MavAutopilot.MavAutopilotGeneric;

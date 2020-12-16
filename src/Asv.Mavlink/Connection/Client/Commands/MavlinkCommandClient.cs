@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,11 +17,11 @@ namespace Asv.Mavlink
     {
         private readonly IMavlinkV2Connection _connection;
         private readonly MavlinkClientIdentity _identity;
-        private readonly PacketSequenceCalculator _seq;
+        private readonly IPacketSequenceCalculator _seq;
         private readonly CommandProtocolConfig _config;
 
         public MavlinkCommandClient(IMavlinkV2Connection connection, MavlinkClientIdentity identity,
-            PacketSequenceCalculator seq, CommandProtocolConfig config)
+            IPacketSequenceCalculator seq, CommandProtocolConfig config)
         {
             if (connection == null) throw new ArgumentNullException(nameof(connection));
             if (seq == null) throw new ArgumentNullException(nameof(seq));

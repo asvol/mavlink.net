@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.Client;
@@ -11,10 +11,10 @@ namespace Asv.Mavlink
     public class MissionClient : IMissionClient,IDisposable
     {
         private readonly IMavlinkV2Connection _mavlink;
-        private readonly PacketSequenceCalculator _seq;
+        private readonly IPacketSequenceCalculator _seq;
         private readonly MavlinkClientIdentity _config;
 
-        public MissionClient(IMavlinkV2Connection mavlink, PacketSequenceCalculator seq,
+        public MissionClient(IMavlinkV2Connection mavlink, IPacketSequenceCalculator seq,
             MavlinkClientIdentity config)
         {
             if (mavlink == null) throw new ArgumentNullException(nameof(mavlink));

@@ -35,14 +35,15 @@ namespace Asv.Mavlink.Client
         private readonly LoggingClient _logging;
         private readonly DgpsClient _rtk;
         private IV2ExtensionClient _v2Ext;
-        private readonly PacketSequenceCalculator _seq = new PacketSequenceCalculator();
+        private readonly IPacketSequenceCalculator _seq;
         private int _isDisposed;
 
 
-        public MavlinkClient(IMavlinkV2Connection connection, MavlinkClientIdentity identity, MavlinkClientConfig config)
+        public MavlinkClient(IMavlinkV2Connection connection, MavlinkClientIdentity identity, MavlinkClientConfig config, IPacketSequenceCalculator _sequence = null)
         {
             if (connection == null) throw new ArgumentNullException(nameof(connection));
             if (config == null) throw new ArgumentNullException(nameof(config));
+            _seq = _sequence ?? new PacketSequenceCalculator();
             Identity = identity;
             _mavlinkConnection = connection;
 

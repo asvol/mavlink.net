@@ -1,11 +1,12 @@
-﻿namespace Asv.Mavlink.Server
+namespace Asv.Mavlink.Server
 {
     public class MavlinkServerBase:IMavlinkServer
     {
-        private readonly IPacketSequenceCalculator _seq = new PacketSequenceCalculator();
+        private readonly IPacketSequenceCalculator _seq;
 
-        public MavlinkServerBase(IMavlinkV2Connection connection, MavlinkServerIdentity identity)
+        public MavlinkServerBase(IMavlinkV2Connection connection, MavlinkServerIdentity identity,IPacketSequenceCalculator sequenceCalculator = null)
         {
+            _seq = sequenceCalculator ?? new PacketSequenceCalculator();
             Heartbeat = new MavlinkHeartbeatServer(connection, _seq, identity, new MavlinkHeartbeatServerConfig
             {
                 HeartbeatRateMs = 1000
