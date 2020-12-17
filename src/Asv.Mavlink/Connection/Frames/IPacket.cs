@@ -1,4 +1,4 @@
-﻿namespace Asv.Mavlink
+namespace Asv.Mavlink
 {
     public interface IPacket<out TPayload>: ISerializable
         where TPayload:IPayload
@@ -27,5 +27,9 @@
         /// Message payload
         /// </summary>
         TPayload Payload { get; }
+        /// <summary>
+        /// Size in bytes. Used when packet where deserialized
+        /// </summary>
+        int Size { get; set; }
     }
 }

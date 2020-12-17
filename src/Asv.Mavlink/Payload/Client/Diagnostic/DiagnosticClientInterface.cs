@@ -83,9 +83,9 @@ namespace Asv.Mavlink
             }
         }
 
-        private Task SendUpdate(KeyValuePair<string,string> value, CancellationToken cancel)
+        private Task SendUpdate(KeyValueData value, CancellationToken cancel)
         {
-            return Send<KeyValuePair<string, string>,PayloadVoid>(WellKnownDiag.DiagSettingsSetMethodName, value, DefaultTimeout, DefaultAttemptCount,  cancel, null);
+            return Send<KeyValueData, PayloadVoid>(WellKnownDiag.DiagSettingsSetMethodName, value, DefaultTimeout, DefaultAttemptCount,  cancel, null);
         }
 
         private void OnDataDigit(Result<Dictionary<string, double>> val)

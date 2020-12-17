@@ -1,16 +1,16 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Asv.Mavlink
 {
-    public class SettingsValue:ISettingsValue
+    public class SettingsValue : ISettingsValue
     {
-        private readonly Func<KeyValuePair<string, string>, CancellationToken, Task> _sendUpdate;
+        private readonly Func<KeyValueData, CancellationToken, Task> _sendUpdate;
         private readonly RxValue<string> _value = new RxValue<string>();
 
-        public SettingsValue(string name, Func<KeyValuePair<string,string>, CancellationToken, Task> sendUpdate)
+        public SettingsValue(string name, Func<KeyValueData, CancellationToken, Task> sendUpdate)
         {
             _sendUpdate = sendUpdate;
             Name = name;
@@ -27,7 +27,7 @@ namespace Asv.Mavlink
 
         public Task Update(string value, CancellationToken cancel)
         {
-            return _sendUpdate(new KeyValuePair<string, string>(Name, value), cancel);
+            return _sendUpdate(new KeyValueData{ Key = Name,Value = value }, cancel);
         }
 
         public void Dispose()

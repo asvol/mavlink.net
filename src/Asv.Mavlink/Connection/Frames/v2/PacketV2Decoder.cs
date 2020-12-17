@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reactive.Subjects;
@@ -81,7 +81,7 @@ namespace Asv.Mavlink.Decoder
             _buffer[_bufferIndex] = value;
             if (_bufferIndex <= (_bufferStopIndex + PacketV2Helper.SignatureByteSize))
             {
-                TryDecodePacket();
+                TryDecodePacket(_bufferIndex);
                 return DecodeStep.Sync;
             }
             return DecodeStep.FillSignature;
@@ -115,7 +115,7 @@ namespace Asv.Mavlink.Decoder
                 return DecodeStep.FillSignature;
             }
             // packet without sync
-            TryDecodePacket();
+            TryDecodePacket(_bufferIndex);
             return DecodeStep.Sync;
         }
 
@@ -125,11 +125,12 @@ namespace Asv.Mavlink.Decoder
             return _dict.TryGetValue(messageId, out func) ? func() : null;
         }
 
-        private void TryDecodePacket()
+        private void TryDecodePacket(int size)
         {
             var messageId = PacketV2Helper.GetMessageId(_buffer,0);
 
             var packet = CreatePacket(messageId);
+            packet.Size = size;
             if (packet == null)
             {
                 _decodeErrorSubject.OnNext(new MessageIdNotFoundException(messageId));

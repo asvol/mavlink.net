@@ -92,9 +92,9 @@ namespace Asv.Mavlink
             base.Init(server);
             Observable.Timer(UpdateTime, UpdateTime).Subscribe(CheckUpdates, _disposeCancel.Token);
 
-            Register<KeyValuePair<string, string>, PayloadVoid>(WellKnownDiag.DiagGetAll, OnGetAll);
+            Register<KeyValueData, PayloadVoid>(WellKnownDiag.DiagGetAll, OnGetAll);
 
-            Register<KeyValuePair<string,string>,PayloadVoid>(WellKnownDiag.DiagSettingsSetMethodName, OnValueSet);
+            Register<KeyValueData, PayloadVoid>(WellKnownDiag.DiagSettingsSetMethodName, OnValueSet);
         }
 
         private async void CheckUpdates(long obj)
@@ -116,7 +116,7 @@ namespace Asv.Mavlink
             }
         }
 
-        private Task<PayloadVoid> OnGetAll(DeviceIdentity devid, KeyValuePair<string, string> data)
+        private Task<PayloadVoid> OnGetAll(DeviceIdentity devid, KeyValueData data)
         {
             foreach (var item in _valuesDig)
             {
@@ -134,7 +134,7 @@ namespace Asv.Mavlink
             return Task.FromResult(PayloadVoid.Default);
         }
 
-        private Task<PayloadVoid> OnValueSet(DeviceIdentity devid, KeyValuePair<string, string> data)
+        private Task<PayloadVoid> OnValueSet(DeviceIdentity devid, KeyValueData data)
         {
             _logger.Info($"Settings changed[sys:{devid.SystemId}, com:{devid.ComponentId}]: {data.Key} = {data.Value}");
             Status.Log(MavSeverity.MavSeverityInfo, $"Write {data.Key}={data.Value}");
@@ -199,8 +199,8 @@ namespace Asv.Mavlink
     public class SettingsValues : ISettingsValues,IDisposable
     {
         private readonly ConcurrentDictionary<string, ValueWithFlag<string>> _values;
-        private readonly Subject<KeyValuePair<string,string>> _localChanges = new Subject<KeyValuePair<string, string>>();
-        private readonly Subject<KeyValuePair<string, string>> _remoteChanges = new Subject<KeyValuePair<string, string>>();
+        private readonly Subject<KeyValueData> _localChanges = new Subject<KeyValueData>();
+        private readonly Subject<KeyValueData> _remoteChanges = new Subject<KeyValueData>();
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public SettingsValues(ConcurrentDictionary<string, ValueWithFlag<string>> values)
@@ -208,11 +208,11 @@ namespace Asv.Mavlink
             _values = values;
         }
 
-        public IObservable<KeyValuePair<string, string>> OnLocalChanged => _localChanges;
-        public IObservable<KeyValuePair<string, string>> OnRemoteChanged => _remoteChanges;
+        public IObservable<KeyValueData> OnLocalChanged => _localChanges;
+        public IObservable<KeyValueData> OnRemoteChanged => _remoteChanges;
         public bool IsEmpty => _values.IsEmpty;
 
-        public void OnRemoteUpdate(KeyValuePair<string, string> value)
+        public void OnRemoteUpdate(KeyValueData value)
         {
             _values.AddOrUpdate(value.Key, _ => new ValueWithFlag<string>{Value = value.Value}, (k, v) =>
             {
@@ -242,7 +242,7 @@ namespace Asv.Mavlink
                 });
                 try
                 {
-                    _localChanges.OnNext(new KeyValuePair<string, string>(name, value));
+                    _localChanges.OnNext(new KeyValueData{Key = name,Value = value});
                 }
                 catch (Exception e)
                 {

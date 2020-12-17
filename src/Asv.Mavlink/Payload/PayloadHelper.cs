@@ -12,6 +12,8 @@ using Newtonsoft.Json.Linq;
 
 namespace Asv.Mavlink
 {
+
+
     public class ErrorCode
     {
         public ErrorType Res { get; set; }
@@ -146,7 +148,7 @@ namespace Asv.Mavlink
         {
             using (var rdr = new BsonDataReader(new BinaryReader(strm, DefaultEncoding, true)))
             {
-                return Serializer.Deserialize<JToken>(rdr)?.ToString(Formatting.Indented);
+                return Serializer.Deserialize<JToken>(rdr)?.ToString(Formatting.None);
             }
             // var obj = MessagePackSerializer.UnpackMessagePackObject(ms);
             // return obj.ToString();

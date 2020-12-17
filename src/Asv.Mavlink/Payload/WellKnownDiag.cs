@@ -1,3 +1,5 @@
+using Newtonsoft.Json.Bson;
+
 namespace Asv.Mavlink
 {
     public static class WellKnownDiag
@@ -12,5 +14,32 @@ namespace Asv.Mavlink
         public const string DiagGetAll = "GET";
 
         #endregion
+    }
+
+    public class KeyValueData : ISerializablePayloadData
+    {
+        public string Key { get; set; }
+        public string Value { get; set; }
+
+        public void Serialize(BsonDataWriter wrt)
+        {
+            wrt.WriteStartArray();
+            wrt.WriteValue(Key);
+            wrt.WriteValue(Value);
+            wrt.WriteEndArray();
+        }
+
+        public void Deserialize(BsonDataReader rdr)
+        {
+            rdr.Read();
+
+            rdr.Read();
+            Key = rdr.ReadAsString();
+
+            rdr.Read();
+            Value = rdr.ReadAsString();
+
+            rdr.Read();
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 
 namespace Asv.Mavlink
@@ -15,6 +15,7 @@ namespace Asv.Mavlink
         public byte SystemId { get; set; }
         public byte ComponenId { get; set; }
         public abstract TPayload Payload { get; }
+        public int Size { get; set; }
         public abstract string Name { get; }
         public ISignature Signature { get; } = new Signature();
 

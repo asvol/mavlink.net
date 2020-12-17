@@ -4,7 +4,6 @@ using Asv.Avialab.Core;
 
 namespace Asv.Mavlink
 {
-
     public interface IDiagnosticClient
     {
         Task QueryAll(CancellationToken cancel = default);

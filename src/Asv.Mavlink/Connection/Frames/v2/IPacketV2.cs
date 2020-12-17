@@ -1,4 +1,4 @@
-﻿namespace Asv.Mavlink
+namespace Asv.Mavlink
 {
     public interface IPacketV2<out TPayload>:IPacket<TPayload>
         where TPayload:IPayload
@@ -23,5 +23,7 @@
         /// Message name
         /// </summary>
         string Name { get; }
+
+        
     }
 }
