@@ -8,7 +8,11 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.Server;
+using Asv.Mavlink.V2.Ardupilotmega;
 using Asv.Mavlink.V2.Common;
+using Asv.Mavlink.V2.Icarous;
+using Asv.Mavlink.V2.Minimal;
+using Asv.Mavlink.V2.Uavionix;
 using NLog;
 
 namespace Asv.Mavlink
@@ -43,7 +47,14 @@ namespace Asv.Mavlink
         {
             _identity = identity;
             _logger.Info($"Create mavlink payload server: dataStream:{dataStream}, comId:{identity.ComponenId}, sysId:{identity.SystemId}, netId:{identity.NetworkId}");
-            _conn = new MavlinkV2Connection(dataStream, _ => _.RegisterCommonDialect());
+            _conn = new MavlinkV2Connection(dataStream, _ =>
+            {
+                _.RegisterMinimalDialect();
+                _.RegisterCommonDialect();
+                _.RegisterArdupilotmegaDialect();
+                _.RegisterIcarousDialect();
+                _.RegisterUavionixDialect();
+            });
             _srv = new MavlinkServerBase(_conn, identity, sequenceCalculator);
             _srv.Heartbeat.Set(_ =>
             {
@@ -61,7 +72,14 @@ namespace Asv.Mavlink
         public MavlinkPayloadServer(MavlinkPayloadServerConfig cfg, bool sendHeartBeatMessages = true)
         {
             _logger.Info($"Create mavlink payload server: cs:{cfg.ConnectionString}, comId:{cfg.Identity.ComponenId}, sysId:{cfg.Identity.SystemId}, netId:{cfg.Identity.NetworkId}");
-            _conn = new MavlinkV2Connection(cfg.ConnectionString, _ => _.RegisterCommonDialect());
+            _conn = new MavlinkV2Connection(cfg.ConnectionString, _ =>
+            {
+                _.RegisterMinimalDialect();
+                _.RegisterCommonDialect();
+                _.RegisterArdupilotmegaDialect();
+                _.RegisterIcarousDialect();
+                _.RegisterUavionixDialect();
+            });
             _srv = new MavlinkServerBase(_conn, cfg.Identity);
 
             _identity = cfg.Identity;

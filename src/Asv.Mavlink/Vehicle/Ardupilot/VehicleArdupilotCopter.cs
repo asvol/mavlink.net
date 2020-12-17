@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Asv.Mavlink.V2.Ardupilotmega;
 using Asv.Mavlink.V2.Common;
 using Asv.Mavlink.Client;
+using Asv.Mavlink.V2.Minimal;
 using Newtonsoft.Json;
 
 namespace Asv.Mavlink

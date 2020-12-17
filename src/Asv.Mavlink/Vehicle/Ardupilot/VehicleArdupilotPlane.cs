@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Asv.Mavlink.Client;
 using Asv.Mavlink.V2.Ardupilotmega;
 using Asv.Mavlink.V2.Common;
+using Asv.Mavlink.V2.Minimal;
 using NLog;
 using MavCmd = Asv.Mavlink.V2.Common.MavCmd;
 

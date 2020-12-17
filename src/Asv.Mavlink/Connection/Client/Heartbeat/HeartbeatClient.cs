@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
 using Asv.Mavlink.V2.Common;
+using Asv.Mavlink.V2.Minimal;
 
 namespace Asv.Mavlink.Client
 {

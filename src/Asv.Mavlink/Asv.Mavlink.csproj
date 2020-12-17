@@ -124,12 +124,15 @@
     <Compile Include="Connection\Client\Params\ParamConverters\MavParamValueConverter.cs" />
     <Compile Include="Connection\Client\V2_extention\IV2ExtensionClient.cs" />
     <Compile Include="Connection\Client\V2_extention\V2ExtensionClient.cs" />
+    <Compile Include="Connection\Dialects\all.cs" />
     <Compile Include="Connection\Dialects\ardupilotmega.cs" />
     <Compile Include="Connection\Dialects\common.cs" />
     <Compile Include="Connection\Dialects\icarous.cs" />
+    <Compile Include="Connection\Dialects\minimal.cs" />
     <Compile Include="Connection\Dialects\python_array_test.cs" />
     <Compile Include="Connection\Dialects\standard.cs" />
     <Compile Include="Connection\Dialects\test.cs" />
+    <Compile Include="Connection\Dialects\ualberta.cs" />
     <Compile Include="Connection\Dialects\uAvionix.cs" />
     <Compile Include="Files.Designer.cs">
       <AutoGen>True</AutoGen>

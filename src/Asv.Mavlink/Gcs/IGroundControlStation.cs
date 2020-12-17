@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Threading;
 using Asv.Mavlink.V2.Common;
+using Asv.Mavlink.V2.Minimal;
 using IDisposable = System.IDisposable;
 
 namespace Asv.Mavlink

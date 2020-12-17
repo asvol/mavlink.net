@@ -7,6 +7,7 @@ using System.Threading;
 using Asv.Mavlink.V2.Ardupilotmega;
 using Asv.Mavlink.V2.Common;
 using Asv.Mavlink.V2.Icarous;
+using Asv.Mavlink.V2.Minimal;
 using Asv.Mavlink.V2.Uavionix;
 using Newtonsoft.Json;
 using NLog;
@@ -85,6 +86,7 @@ namespace Asv.Mavlink
 
             MavlinkV2 = new MavlinkV2Connection(Ports, _ =>
             {
+                _.RegisterMinimalDialect();
                 _.RegisterCommonDialect();
                 _.RegisterArdupilotmegaDialect();
                 _.RegisterIcarousDialect();

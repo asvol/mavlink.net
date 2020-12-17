@@ -24,6 +24,7 @@
 
 using System;
 using System.Text;
+using Asv.Mavlink.V2.Common;
 
 namespace Asv.Mavlink.V2.Ardupilotmega
 {
@@ -43,7 +44,6 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             src.Register(()=>new MountStatusPacket());
             src.Register(()=>new FencePointPacket());
             src.Register(()=>new FenceFetchPointPacket());
-            src.Register(()=>new FenceStatusPacket());
             src.Register(()=>new AhrsPacket());
             src.Register(()=>new SimstatePacket());
             src.Register(()=>new HwstatusPacket());
@@ -69,7 +69,6 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             src.Register(()=>new RemoteLogBlockStatusPacket());
             src.Register(()=>new LedControlPacket());
             src.Register(()=>new MagCalProgressPacket());
-            src.Register(()=>new MagCalReportPacket());
             src.Register(()=>new EkfStatusReportPacket());
             src.Register(()=>new PidTuningPacket());
             src.Register(()=>new DeepstallPacket());
@@ -92,6 +91,10 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             src.Register(()=>new EscTelemetry1To4Packet());
             src.Register(()=>new EscTelemetry5To8Packet());
             src.Register(()=>new EscTelemetry9To12Packet());
+            src.Register(()=>new OsdParamConfigPacket());
+            src.Register(()=>new OsdParamConfigReplyPacket());
+            src.Register(()=>new OsdParamShowConfigPacket());
+            src.Register(()=>new OsdParamShowConfigReplyPacket());
         }
     }
 
@@ -137,39 +140,57 @@ namespace Asv.Mavlink.V2.Ardupilotmega
     }
 
     /// <summary>
+    ///  HEADING_TYPE
+    /// </summary>
+    public enum HeadingType
+    {
+        /// <summary>
+        /// HEADING_TYPE_COURSE_OVER_GROUND
+        /// </summary>
+        HeadingTypeCourseOverGround = 0,
+        /// <summary>
+        /// HEADING_TYPE_HEADING
+        /// </summary>
+        HeadingTypeHeading = 1,
+    }
+
+    /// <summary>
+    ///  SPEED_TYPE
+    /// </summary>
+    public enum SpeedType
+    {
+        /// <summary>
+        /// SPEED_TYPE_AIRSPEED
+        /// </summary>
+        SpeedTypeAirspeed = 0,
+        /// <summary>
+        /// SPEED_TYPE_GROUNDSPEED
+        /// </summary>
+        SpeedTypeGroundspeed = 1,
+    }
+
+    /// <summary>
     ///  MAV_CMD
     /// </summary>
     public enum MavCmd
     {
         /// <summary>
-        /// Mission command to operate EPM gripper.
-        /// Param 1 - Gripper number (a number from 1 to max number of grippers on the vehicle).
-        /// Param 2 - Gripper action (0=release, 1=grab. See GRIPPER_ACTIONS enum).
-        /// Param 3 - Empty.
-        /// Param 4 - Empty.
-        /// Param 5 - Empty.
-        /// Param 6 - Empty.
-        /// Param 7 - Empty.
-        /// MAV_CMD_DO_GRIPPER
-        /// </summary>
-        MavCmdDoGripper = 211,
-        /// <summary>
-        /// Enable/disable autotune.
-        /// Param 1 - Enable (1: enable, 0:disable).
+        /// Set the distance to be repeated on mission resume
+        /// Param 1 - Distance.
         /// Param 2 - Empty.
         /// Param 3 - Empty.
         /// Param 4 - Empty.
         /// Param 5 - Empty.
         /// Param 6 - Empty.
         /// Param 7 - Empty.
-        /// MAV_CMD_DO_AUTOTUNE_ENABLE
+        /// MAV_CMD_DO_SET_RESUME_REPEAT_DIST
         /// </summary>
-        MavCmdDoAutotuneEnable = 212,
+        MavCmdDoSetResumeRepeatDist = 215,
         /// <summary>
         /// Mission command to wait for an altitude or downwards vertical speed. This is meant for high altitude balloon launches, allowing the aircraft to be idle until either an altitude is reached or a negative vertical speed is reached (indicating early balloon burst). The wiggle time is how often to wiggle the control surfaces to prevent them seizing up.
-        /// Param 1 - Altitude (m).
-        /// Param 2 - Descent speed (m/s).
-        /// Param 3 - Wiggle Time (s).
+        /// Param 1 - Altitude.
+        /// Param 2 - Descent speed.
+        /// Param 3 - How long to wiggle the control surfaces to prevent them seizing up.
         /// Param 4 - Empty.
         /// Param 5 - Empty.
         /// Param 6 - Empty.
@@ -228,10 +249,10 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// <summary>
         /// Magnetometer calibration based on fixed position
         ///         in earth field given by inclination, declination and intensity.
-        /// Param 1 - MagDeclinationDegrees.
-        /// Param 2 - MagInclinationDegrees.
-        /// Param 3 - MagIntensityMilliGauss.
-        /// Param 4 - YawDegrees.
+        /// Param 1 - Magnetic declination.
+        /// Param 2 - Magnetic inclination.
+        /// Param 3 - Magnetic intensity.
+        /// Param 4 - Yaw.
         /// Param 5 - Empty.
         /// Param 6 - Empty.
         /// Param 7 - Empty.
@@ -239,10 +260,10 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// </summary>
         MavCmdFixedMagCal = 42004,
         /// <summary>
-        /// Magnetometer calibration based on fixed expected field values in milliGauss.
-        /// Param 1 - FieldX.
-        /// Param 2 - FieldY.
-        /// Param 3 - FieldZ.
+        /// Magnetometer calibration based on fixed expected field values.
+        /// Param 1 - Field strength X.
+        /// Param 2 - Field strength Y.
+        /// Param 3 - Field strength Z.
         /// Param 4 - Empty.
         /// Param 5 - Empty.
         /// Param 6 - Empty.
@@ -252,10 +273,10 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         MavCmdFixedMagCalField = 42005,
         /// <summary>
         /// Initiate a magnetometer calibration.
-        /// Param 1 - uint8_t bitmask of magnetometers (0 means all).
+        /// Param 1 - Bitmask of magnetometers to calibrate. Use 0 to calibrate all sensors that can be started (sensors may not start if disabled, unhealthy, etc.). The command will NACK if calibration does not start for a sensor explicitly specified by the bitmask.
         /// Param 2 - Automatically retry on failure (0=no retry, 1=retry).
         /// Param 3 - Save without user input (0=require input, 1=autosave).
-        /// Param 4 - Delay (seconds).
+        /// Param 4 - Delay.
         /// Param 5 - Autoreboot (0=user reboot, 1=autoreboot).
         /// Param 6 - Empty.
         /// Param 7 - Empty.
@@ -263,8 +284,8 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// </summary>
         MavCmdDoStartMagCal = 42424,
         /// <summary>
-        /// Initiate a magnetometer calibration.
-        /// Param 1 - uint8_t bitmask of magnetometers (0 means all).
+        /// Accept a magnetometer calibration.
+        /// Param 1 - Bitmask of magnetometers that calibration is accepted (0 means all).
         /// Param 2 - Empty.
         /// Param 3 - Empty.
         /// Param 4 - Empty.
@@ -276,7 +297,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         MavCmdDoAcceptMagCal = 42425,
         /// <summary>
         /// Cancel a running magnetometer calibration.
-        /// Param 1 - uint8_t bitmask of magnetometers (0 means all).
+        /// Param 1 - Bitmask of magnetometers to cancel a running calibration (0 means all).
         /// Param 2 - Empty.
         /// Param 3 - Empty.
         /// Param 4 - Empty.
@@ -288,7 +309,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         MavCmdDoCancelMagCal = 42426,
         /// <summary>
         /// Used when doing accelerometer calibration. When sent to the GCS tells it what position to put the vehicle in. When sent to the vehicle says what position the vehicle is in.
-        /// Param 1 - Position, one of the ACCELCAL_VEHICLE_POS enum values.
+        /// Param 1 - Position.
         /// Param 2 - Empty.
         /// Param 3 - Empty.
         /// Param 4 - Empty.
@@ -312,7 +333,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         MavCmdDoSendBanner = 42428,
         /// <summary>
         /// Command autopilot to get into factory test/diagnostic mode.
-        /// Param 1 - 0 means get out of test mode, 1 means get into test mode.
+        /// Param 1 - 0: activate test mode, 1: exit test mode.
         /// Param 2 - Empty.
         /// Param 3 - Empty.
         /// Param 4 - Empty.
@@ -337,7 +358,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// <summary>
         /// Reports progress and success or failure of gimbal axis calibration procedure.
         /// Param 1 - Gimbal axis we're reporting calibration progress for.
-        /// Param 2 - Current calibration progress for this axis, 0x64=100%.
+        /// Param 2 - Current calibration progress for this axis.
         /// Param 3 - Status of the calibration.
         /// Param 4 - Empty.
         /// Param 5 - Empty.
@@ -371,18 +392,6 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// </summary>
         MavCmdGimbalFullReset = 42505,
         /// <summary>
-        /// Command to operate winch.
-        /// Param 1 - Winch number (0 for the default winch, otherwise a number from 1 to max number of winches on the vehicle).
-        /// Param 2 - Action (0=relax, 1=relative length control, 2=rate control. See WINCH_ACTIONS enum.).
-        /// Param 3 - Release length (cable distance to unwind in meters, negative numbers to wind in cable).
-        /// Param 4 - Release rate (meters/second).
-        /// Param 5 - Empty.
-        /// Param 6 - Empty.
-        /// Param 7 - Empty.
-        /// MAV_CMD_DO_WINCH
-        /// </summary>
-        MavCmdDoWinch = 42600,
-        /// <summary>
         /// Update the bootloader
         /// Param 1 - Empty
         /// Param 2 - Empty
@@ -394,6 +403,84 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// MAV_CMD_FLASH_BOOTLOADER
         /// </summary>
         MavCmdFlashBootloader = 42650,
+        /// <summary>
+        /// Reset battery capacity for batteries that accumulate consumed battery via integration.
+        /// Param 1 - Bitmask of batteries to reset. Least significant bit is for the first battery.
+        /// Param 2 - Battery percentage remaining to set.
+        /// MAV_CMD_BATTERY_RESET
+        /// </summary>
+        MavCmdBatteryReset = 42651,
+        /// <summary>
+        /// Issue a trap signal to the autopilot process, presumably to enter the debugger.
+        /// Param 1 - Magic number - set to 32451 to actually trap.
+        /// Param 2 - Empty.
+        /// Param 3 - Empty.
+        /// Param 4 - Empty.
+        /// Param 5 - Empty.
+        /// Param 6 - Empty.
+        /// Param 7 - Empty.
+        /// MAV_CMD_DEBUG_TRAP
+        /// </summary>
+        MavCmdDebugTrap = 42700,
+        /// <summary>
+        /// Control onboard scripting.
+        /// Param 1 - Scripting command to execute
+        /// MAV_CMD_SCRIPTING
+        /// </summary>
+        MavCmdScripting = 42701,
+        /// <summary>
+        /// Change flight speed at a given rate. This slews the vehicle at a controllable rate between it's previous speed and the new one. (affects GUIDED only. Outside GUIDED, aircraft ignores these commands. Designed for onboard companion-computer command-and-control, not normally operator/GCS control.)
+        /// Param 1 - Airspeed or groundspeed.
+        /// Param 2 - Target Speed
+        /// Param 3 - Acceleration rate, 0 to take effect instantly
+        /// Param 4 - Empty
+        /// Param 5 - Empty
+        /// Param 6 - Empty
+        /// Param 7 - Empty
+        /// MAV_CMD_GUIDED_CHANGE_SPEED
+        /// </summary>
+        MavCmdGuidedChangeSpeed = 43000,
+        /// <summary>
+        /// Change target altitude at a given rate. This slews the vehicle at a controllable rate between it's previous altitude and the new one. (affects GUIDED only. Outside GUIDED, aircraft ignores these commands. Designed for onboard companion-computer command-and-control, not normally operator/GCS control.)
+        /// Param 1 - Empty
+        /// Param 2 - Empty
+        /// Param 3 - Rate of change, toward new altitude. 0 for maximum rate change. Positive numbers only, as negative numbers will not converge on the new target alt.
+        /// Param 4 - Empty
+        /// Param 5 - Empty
+        /// Param 6 - Empty
+        /// Param 7 - Target Altitude
+        /// MAV_CMD_GUIDED_CHANGE_ALTITUDE
+        /// </summary>
+        MavCmdGuidedChangeAltitude = 43001,
+        /// <summary>
+        /// Change to target heading at a given rate, overriding previous heading/s. This slews the vehicle at a controllable rate between it's previous heading and the new one. (affects GUIDED only. Exiting GUIDED returns aircraft to normal behaviour defined elsewhere. Designed for onboard companion-computer command-and-control, not normally operator/GCS control.)
+        /// Param 1 - course-over-ground or raw vehicle heading.
+        /// Param 2 - Target heading.
+        /// Param 3 - Maximum centripetal accelearation, ie rate of change,  toward new heading.
+        /// Param 4 - Empty
+        /// Param 5 - Empty
+        /// Param 6 - Empty
+        /// Param 7 - Empty
+        /// MAV_CMD_GUIDED_CHANGE_HEADING
+        /// </summary>
+        MavCmdGuidedChangeHeading = 43002,
+    }
+
+    /// <summary>
+    ///  SCRIPTING_CMD
+    /// </summary>
+    public enum ScriptingCmd
+    {
+        /// <summary>
+        /// Start a REPL session.
+        /// SCRIPTING_CMD_REPL_START
+        /// </summary>
+        ScriptingCmdReplStart = 0,
+        /// <summary>
+        /// End a REPL session.
+        /// SCRIPTING_CMD_REPL_STOP
+        /// </summary>
+        ScriptingCmdReplStop = 1,
     }
 
     /// <summary>
@@ -471,69 +558,6 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// LAND_IMMEDIATELY
         /// </summary>
         LandImmediately = 2,
-    }
-
-    /// <summary>
-    ///  PARACHUTE_ACTION
-    /// </summary>
-    public enum ParachuteAction
-    {
-        /// <summary>
-        /// Disable parachute release.
-        /// PARACHUTE_DISABLE
-        /// </summary>
-        ParachuteDisable = 0,
-        /// <summary>
-        /// Enable parachute release.
-        /// PARACHUTE_ENABLE
-        /// </summary>
-        ParachuteEnable = 1,
-        /// <summary>
-        /// Release parachute.
-        /// PARACHUTE_RELEASE
-        /// </summary>
-        ParachuteRelease = 2,
-    }
-
-    /// <summary>
-    /// Gripper actions.
-    ///  GRIPPER_ACTIONS
-    /// </summary>
-    public enum GripperActions
-    {
-        /// <summary>
-        /// Gripper release cargo.
-        /// GRIPPER_ACTION_RELEASE
-        /// </summary>
-        GripperActionRelease = 0,
-        /// <summary>
-        /// Gripper grab onto cargo.
-        /// GRIPPER_ACTION_GRAB
-        /// </summary>
-        GripperActionGrab = 1,
-    }
-
-    /// <summary>
-    /// Winch actions.
-    ///  WINCH_ACTIONS
-    /// </summary>
-    public enum WinchActions
-    {
-        /// <summary>
-        /// Relax winch.
-        /// WINCH_RELAXED
-        /// </summary>
-        WinchRelaxed = 0,
-        /// <summary>
-        /// Winch unwinds or winds specified length of cable optionally using specified rate.
-        /// WINCH_RELATIVE_LENGTH_CONTROL
-        /// </summary>
-        WinchRelativeLengthControl = 1,
-        /// <summary>
-        /// Winch unwinds or winds cable at specified rate in meters/seconds.
-        /// WINCH_RATE_CONTROL
-        /// </summary>
-        WinchRateControl = 2,
     }
 
     /// <summary>
@@ -1527,6 +1551,11 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// EKF_PRED_POS_HORIZ_ABS
         /// </summary>
         EkfPredPosHorizAbs = 512,
+        /// <summary>
+        /// Set if EKF has never been healthy.
+        /// EKF_UNINITIALIZED
+        /// </summary>
+        EkfUninitialized = 1024,
     }
 
     /// <summary>
@@ -1558,41 +1587,6 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// PID_TUNING_LANDING
         /// </summary>
         PidTuningLanding = 6,
-    }
-
-    /// <summary>
-    ///  MAG_CAL_STATUS
-    /// </summary>
-    public enum MagCalStatus
-    {
-        /// <summary>
-        /// MAG_CAL_NOT_STARTED
-        /// </summary>
-        MagCalNotStarted = 0,
-        /// <summary>
-        /// MAG_CAL_WAITING_TO_START
-        /// </summary>
-        MagCalWaitingToStart = 1,
-        /// <summary>
-        /// MAG_CAL_RUNNING_STEP_ONE
-        /// </summary>
-        MagCalRunningStepOne = 2,
-        /// <summary>
-        /// MAG_CAL_RUNNING_STEP_TWO
-        /// </summary>
-        MagCalRunningStepTwo = 3,
-        /// <summary>
-        /// MAG_CAL_SUCCESS
-        /// </summary>
-        MagCalSuccess = 4,
-        /// <summary>
-        /// MAG_CAL_FAILED
-        /// </summary>
-        MagCalFailed = 5,
-        /// <summary>
-        /// MAG_CAL_BAD_ORIENTATION
-        /// </summary>
-        MagCalBadOrientation = 6,
     }
 
     /// <summary>
@@ -1747,6 +1741,10 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// </summary>
         PlaneModeLoiter = 12,
         /// <summary>
+        /// PLANE_MODE_TAKEOFF
+        /// </summary>
+        PlaneModeTakeoff = 13,
+        /// <summary>
         /// PLANE_MODE_AVOID_ADSB
         /// </summary>
         PlaneModeAvoidAdsb = 14,
@@ -1778,6 +1776,14 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// PLANE_MODE_QRTL
         /// </summary>
         PlaneModeQrtl = 21,
+        /// <summary>
+        /// PLANE_MODE_QAUTOTUNE
+        /// </summary>
+        PlaneModeQautotune = 22,
+        /// <summary>
+        /// PLANE_MODE_QACRO
+        /// </summary>
+        PlaneModeQacro = 23,
     }
 
     /// <summary>
@@ -1862,6 +1868,26 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// COPTER_MODE_SMART_RTL
         /// </summary>
         CopterModeSmartRtl = 21,
+        /// <summary>
+        /// COPTER_MODE_FLOWHOLD
+        /// </summary>
+        CopterModeFlowhold = 22,
+        /// <summary>
+        /// COPTER_MODE_FOLLOW
+        /// </summary>
+        CopterModeFollow = 23,
+        /// <summary>
+        /// COPTER_MODE_ZIGZAG
+        /// </summary>
+        CopterModeZigzag = 24,
+        /// <summary>
+        /// COPTER_MODE_SYSTEMID
+        /// </summary>
+        CopterModeSystemid = 25,
+        /// <summary>
+        /// COPTER_MODE_AUTOROTATE
+        /// </summary>
+        CopterModeAutorotate = 26,
     }
 
     /// <summary>
@@ -1935,6 +1961,14 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// </summary>
         RoverModeLoiter = 5,
         /// <summary>
+        /// ROVER_MODE_FOLLOW
+        /// </summary>
+        RoverModeFollow = 6,
+        /// <summary>
+        /// ROVER_MODE_SIMPLE
+        /// </summary>
+        RoverModeSimple = 7,
+        /// <summary>
         /// ROVER_MODE_AUTO
         /// </summary>
         RoverModeAuto = 10,
@@ -1986,6 +2020,74 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// TRACKER_MODE_INITIALIZING
         /// </summary>
         TrackerModeInitializing = 16,
+    }
+
+    /// <summary>
+    /// The type of parameter for the OSD parameter editor.
+    ///  OSD_PARAM_CONFIG_TYPE
+    /// </summary>
+    public enum OsdParamConfigType
+    {
+        /// <summary>
+        /// OSD_PARAM_NONE
+        /// </summary>
+        OsdParamNone = 0,
+        /// <summary>
+        /// OSD_PARAM_SERIAL_PROTOCOL
+        /// </summary>
+        OsdParamSerialProtocol = 1,
+        /// <summary>
+        /// OSD_PARAM_SERVO_FUNCTION
+        /// </summary>
+        OsdParamServoFunction = 2,
+        /// <summary>
+        /// OSD_PARAM_AUX_FUNCTION
+        /// </summary>
+        OsdParamAuxFunction = 3,
+        /// <summary>
+        /// OSD_PARAM_FLIGHT_MODE
+        /// </summary>
+        OsdParamFlightMode = 4,
+        /// <summary>
+        /// OSD_PARAM_FAILSAFE_ACTION
+        /// </summary>
+        OsdParamFailsafeAction = 5,
+        /// <summary>
+        /// OSD_PARAM_FAILSAFE_ACTION_1
+        /// </summary>
+        OsdParamFailsafeAction1 = 6,
+        /// <summary>
+        /// OSD_PARAM_FAILSAFE_ACTION_2
+        /// </summary>
+        OsdParamFailsafeAction2 = 7,
+        /// <summary>
+        /// OSD_PARAM_NUM_TYPES
+        /// </summary>
+        OsdParamNumTypes = 8,
+    }
+
+    /// <summary>
+    /// The error type for the OSD parameter editor.
+    ///  OSD_PARAM_CONFIG_ERROR
+    /// </summary>
+    public enum OsdParamConfigError
+    {
+        /// <summary>
+        /// OSD_PARAM_SUCCESS
+        /// </summary>
+        OsdParamSuccess = 0,
+        /// <summary>
+        /// OSD_PARAM_INVALID_SCREEN
+        /// </summary>
+        OsdParamInvalidScreen = 1,
+        /// <summary>
+        /// OSD_PARAM_INVALID_PARAMETER_INDEX
+        /// </summary>
+        OsdParamInvalidParameterIndex = 2,
+        /// <summary>
+        /// OSD_PARAM_INVALID_PARAMETER
+        /// </summary>
+        OsdParamInvalidParameter = 3,
     }
 
 
@@ -2901,70 +3003,6 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// OriginName: idx, Units: , IsExtended: false
         /// </summary>
         public byte Idx { get; set; }
-    }
-    /// <summary>
-    /// Status of geo-fencing. Sent in extended status stream when fencing enabled.
-    ///  FENCE_STATUS
-    /// </summary>
-    public class FenceStatusPacket: PacketV2<FenceStatusPayload>
-    {
-	    public const int PacketMessageId = 162;
-        public override int MessageId => PacketMessageId;
-        public override byte GetCrcEtra() => 189;
-
-        public override FenceStatusPayload Payload { get; } = new FenceStatusPayload();
-
-        public override string Name => "FENCE_STATUS";
-    }
-
-    /// <summary>
-    ///  FENCE_STATUS
-    /// </summary>
-    public class FenceStatusPayload : IPayload
-    {
-        public byte GetMaxByteSize() => 8;
-
-        public void Deserialize(byte[] buffer, int offset, int payloadSize)
-        {
-            var index = offset;
-            var endIndex = offset + payloadSize;
-            var arraySize = 0;
-            BreachTime = BitConverter.ToUInt32(buffer,index);index+=4;
-            BreachCount = BitConverter.ToUInt16(buffer,index);index+=2;
-            BreachStatus = (byte)buffer[index++];
-            BreachType = (FenceBreach)buffer[index++];
-        }
-
-        public int Serialize(byte[] buffer, int index)
-        {
-		var start = index;
-            BitConverter.GetBytes(BreachTime).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(BreachCount).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes(BreachStatus).CopyTo(buffer, index);index+=1;
-            buffer[index] = (byte)BreachType;index+=1;
-            return index - start; // /*PayloadByteSize*/8;
-        }
-
-        /// <summary>
-        /// Time (since boot) of last breach.
-        /// OriginName: breach_time, Units: ms, IsExtended: false
-        /// </summary>
-        public uint BreachTime { get; set; }
-        /// <summary>
-        /// Number of fence breaches.
-        /// OriginName: breach_count, Units: , IsExtended: false
-        /// </summary>
-        public ushort BreachCount { get; set; }
-        /// <summary>
-        /// Breach status (0 if currently inside fence, 1 if outside).
-        /// OriginName: breach_status, Units: , IsExtended: false
-        /// </summary>
-        public byte BreachStatus { get; set; }
-        /// <summary>
-        /// Last breach type.
-        /// OriginName: breach_type, Units: , IsExtended: false
-        /// </summary>
-        public FenceBreach BreachType { get; set; }
     }
     /// <summary>
     /// Status of DCM attitude estimator.
@@ -4982,167 +5020,6 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         public byte GetCompletionMaskMaxItemsCount() => 10;
     }
     /// <summary>
-    /// Reports results of completed compass calibration. Sent until MAG_CAL_ACK received.
-    ///  MAG_CAL_REPORT
-    /// </summary>
-    public class MagCalReportPacket: PacketV2<MagCalReportPayload>
-    {
-	    public const int PacketMessageId = 192;
-        public override int MessageId => PacketMessageId;
-        public override byte GetCrcEtra() => 36;
-
-        public override MagCalReportPayload Payload { get; } = new MagCalReportPayload();
-
-        public override string Name => "MAG_CAL_REPORT";
-    }
-
-    /// <summary>
-    ///  MAG_CAL_REPORT
-    /// </summary>
-    public class MagCalReportPayload : IPayload
-    {
-        public byte GetMaxByteSize() => 50;
-
-        public void Deserialize(byte[] buffer, int offset, int payloadSize)
-        {
-            var index = offset;
-            var endIndex = offset + payloadSize;
-            var arraySize = 0;
-            Fitness = BitConverter.ToSingle(buffer, index);index+=4;
-            OfsX = BitConverter.ToSingle(buffer, index);index+=4;
-            OfsY = BitConverter.ToSingle(buffer, index);index+=4;
-            OfsZ = BitConverter.ToSingle(buffer, index);index+=4;
-            DiagX = BitConverter.ToSingle(buffer, index);index+=4;
-            DiagY = BitConverter.ToSingle(buffer, index);index+=4;
-            DiagZ = BitConverter.ToSingle(buffer, index);index+=4;
-            OffdiagX = BitConverter.ToSingle(buffer, index);index+=4;
-            OffdiagY = BitConverter.ToSingle(buffer, index);index+=4;
-            OffdiagZ = BitConverter.ToSingle(buffer, index);index+=4;
-            CompassId = (byte)buffer[index++];
-            CalMask = (byte)buffer[index++];
-            CalStatus = (MagCalStatus)buffer[index++];
-            Autosaved = (byte)buffer[index++];
-            // extended field 'OrientationConfidence' can be empty
-            if (index >= endIndex) return;
-            OrientationConfidence = BitConverter.ToSingle(buffer, index);index+=4;
-            // extended field 'OldOrientation' can be empty
-            if (index >= endIndex) return;
-            OldOrientation = (MavSensorOrientation)buffer[index++];
-            // extended field 'NewOrientation' can be empty
-            if (index >= endIndex) return;
-            NewOrientation = (MavSensorOrientation)buffer[index++];
-        }
-
-        public int Serialize(byte[] buffer, int index)
-        {
-		var start = index;
-            BitConverter.GetBytes(Fitness).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(OfsX).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(OfsY).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(OfsZ).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(DiagX).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(DiagY).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(DiagZ).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(OffdiagX).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(OffdiagY).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(OffdiagZ).CopyTo(buffer, index);index+=4;
-            BitConverter.GetBytes(CompassId).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes(CalMask).CopyTo(buffer, index);index+=1;
-            buffer[index] = (byte)CalStatus;index+=1;
-            BitConverter.GetBytes(Autosaved).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes(OrientationConfidence).CopyTo(buffer, index);index+=4;
-            buffer[index] = (byte)OldOrientation;index+=1;
-            buffer[index] = (byte)NewOrientation;index+=1;
-            return index - start; // /*PayloadByteSize*/50;
-        }
-
-        /// <summary>
-        /// RMS milligauss residuals.
-        /// OriginName: fitness, Units: mgauss, IsExtended: false
-        /// </summary>
-        public float Fitness { get; set; }
-        /// <summary>
-        /// X offset.
-        /// OriginName: ofs_x, Units: , IsExtended: false
-        /// </summary>
-        public float OfsX { get; set; }
-        /// <summary>
-        /// Y offset.
-        /// OriginName: ofs_y, Units: , IsExtended: false
-        /// </summary>
-        public float OfsY { get; set; }
-        /// <summary>
-        /// Z offset.
-        /// OriginName: ofs_z, Units: , IsExtended: false
-        /// </summary>
-        public float OfsZ { get; set; }
-        /// <summary>
-        /// X diagonal (matrix 11).
-        /// OriginName: diag_x, Units: , IsExtended: false
-        /// </summary>
-        public float DiagX { get; set; }
-        /// <summary>
-        /// Y diagonal (matrix 22).
-        /// OriginName: diag_y, Units: , IsExtended: false
-        /// </summary>
-        public float DiagY { get; set; }
-        /// <summary>
-        /// Z diagonal (matrix 33).
-        /// OriginName: diag_z, Units: , IsExtended: false
-        /// </summary>
-        public float DiagZ { get; set; }
-        /// <summary>
-        /// X off-diagonal (matrix 12 and 21).
-        /// OriginName: offdiag_x, Units: , IsExtended: false
-        /// </summary>
-        public float OffdiagX { get; set; }
-        /// <summary>
-        /// Y off-diagonal (matrix 13 and 31).
-        /// OriginName: offdiag_y, Units: , IsExtended: false
-        /// </summary>
-        public float OffdiagY { get; set; }
-        /// <summary>
-        /// Z off-diagonal (matrix 32 and 23).
-        /// OriginName: offdiag_z, Units: , IsExtended: false
-        /// </summary>
-        public float OffdiagZ { get; set; }
-        /// <summary>
-        /// Compass being calibrated.
-        /// OriginName: compass_id, Units: , IsExtended: false
-        /// </summary>
-        public byte CompassId { get; set; }
-        /// <summary>
-        /// Bitmask of compasses being calibrated.
-        /// OriginName: cal_mask, Units: , IsExtended: false
-        /// </summary>
-        public byte CalMask { get; set; }
-        /// <summary>
-        /// Calibration Status.
-        /// OriginName: cal_status, Units: , IsExtended: false
-        /// </summary>
-        public MagCalStatus CalStatus { get; set; }
-        /// <summary>
-        /// 0=requires a MAV_CMD_DO_ACCEPT_MAG_CAL, 1=saved to parameters.
-        /// OriginName: autosaved, Units: , IsExtended: false
-        /// </summary>
-        public byte Autosaved { get; set; }
-        /// <summary>
-        /// Confidence in orientation (higher is better).
-        /// OriginName: orientation_confidence, Units: , IsExtended: true
-        /// </summary>
-        public float OrientationConfidence { get; set; }
-        /// <summary>
-        /// orientation before calibration.
-        /// OriginName: old_orientation, Units: , IsExtended: true
-        /// </summary>
-        public MavSensorOrientation OldOrientation { get; set; }
-        /// <summary>
-        /// orientation after calibration.
-        /// OriginName: new_orientation, Units: , IsExtended: true
-        /// </summary>
-        public MavSensorOrientation NewOrientation { get; set; }
-    }
-    /// <summary>
     /// EKF Status message including flags and variances.
     ///  EKF_STATUS_REPORT
     /// </summary>
@@ -5280,12 +5157,12 @@ namespace Asv.Mavlink.V2.Ardupilotmega
 
         /// <summary>
         /// Desired rate.
-        /// OriginName: desired, Units: deg/s, IsExtended: false
+        /// OriginName: desired, Units: , IsExtended: false
         /// </summary>
         public float Desired { get; set; }
         /// <summary>
         /// Achieved rate.
-        /// OriginName: achieved, Units: deg/s, IsExtended: false
+        /// OriginName: achieved, Units: , IsExtended: false
         /// </summary>
         public float Achieved { get; set; }
         /// <summary>
@@ -6055,7 +5932,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
     /// </summary>
     public class DeviceOpReadPayload : IPayload
     {
-        public byte GetMaxByteSize() => 51;
+        public byte GetMaxByteSize() => 52;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -6068,12 +5945,15 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             Bustype = (DeviceOpBustype)buffer[index++];
             Bus = (byte)buffer[index++];
             Address = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/40 - Math.Max(0,((/*PayloadByteSize*/51 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/40 - Math.Max(0,((/*PayloadByteSize*/52 - payloadSize - /*ExtendedFieldsLength*/1)/1 /*FieldTypeByteSize*/));
             Busname = new char[arraySize];
             Encoding.ASCII.GetChars(buffer, index,arraySize,Busname,0);
             index+=arraySize;
             Regstart = (byte)buffer[index++];
             Count = (byte)buffer[index++];
+            // extended field 'Bank' can be empty
+            if (index >= endIndex) return;
+            Bank = (byte)buffer[index++];
         }
 
         public int Serialize(byte[] buffer, int index)
@@ -6088,7 +5968,8 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             index+=Encoding.ASCII.GetBytes(Busname,0,Busname.Length,buffer,index);
             BitConverter.GetBytes(Regstart).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(Count).CopyTo(buffer, index);index+=1;
-            return index - start; // /*PayloadByteSize*/51;
+            BitConverter.GetBytes(Bank).CopyTo(buffer, index);index+=1;
+            return index - start; // /*PayloadByteSize*/52;
         }
 
         /// <summary>
@@ -6137,6 +6018,11 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// OriginName: count, Units: , IsExtended: false
         /// </summary>
         public byte Count { get; set; }
+        /// <summary>
+        /// Bank number.
+        /// OriginName: bank, Units: , IsExtended: true
+        /// </summary>
+        public byte Bank { get; set; }
     }
     /// <summary>
     /// Read registers reply.
@@ -6158,7 +6044,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
     /// </summary>
     public class DeviceOpReadReplyPayload : IPayload
     {
-        public byte GetMaxByteSize() => 135;
+        public byte GetMaxByteSize() => 136;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -6169,12 +6055,15 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             Result = (byte)buffer[index++];
             Regstart = (byte)buffer[index++];
             Count = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/128 - Math.Max(0,((/*PayloadByteSize*/135 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/128 - Math.Max(0,((/*PayloadByteSize*/136 - payloadSize - /*ExtendedFieldsLength*/1)/1 /*FieldTypeByteSize*/));
             Data = new byte[arraySize];
             for(var i=0;i<arraySize;i++)
             {
                 Data[i] = (byte)buffer[index++];
             }
+            // extended field 'Bank' can be empty
+            if (index >= endIndex) return;
+            Bank = (byte)buffer[index++];
         }
 
         public int Serialize(byte[] buffer, int index)
@@ -6188,7 +6077,8 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             {
                 buffer[index] = (byte)Data[i];index+=1;
             }
-            return index - start; // /*PayloadByteSize*/135;
+            BitConverter.GetBytes(Bank).CopyTo(buffer, index);index+=1;
+            return index - start; // /*PayloadByteSize*/136;
         }
 
         /// <summary>
@@ -6217,6 +6107,11 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// </summary>
         public byte[] Data { get; set; } = new byte[128];
         public byte GetDataMaxItemsCount() => 128;
+        /// <summary>
+        /// Bank number.
+        /// OriginName: bank, Units: , IsExtended: true
+        /// </summary>
+        public byte Bank { get; set; }
     }
     /// <summary>
     /// Write registers for a device.
@@ -6238,7 +6133,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
     /// </summary>
     public class DeviceOpWritePayload : IPayload
     {
-        public byte GetMaxByteSize() => 179;
+        public byte GetMaxByteSize() => 180;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -6256,12 +6151,15 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             index+=arraySize;
             Regstart = (byte)buffer[index++];
             Count = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/128 - Math.Max(0,((/*PayloadByteSize*/179 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/128 - Math.Max(0,((/*PayloadByteSize*/180 - payloadSize - /*ExtendedFieldsLength*/1)/1 /*FieldTypeByteSize*/));
             Data = new byte[arraySize];
             for(var i=0;i<arraySize;i++)
             {
                 Data[i] = (byte)buffer[index++];
             }
+            // extended field 'Bank' can be empty
+            if (index >= endIndex) return;
+            Bank = (byte)buffer[index++];
         }
 
         public int Serialize(byte[] buffer, int index)
@@ -6280,7 +6178,8 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             {
                 buffer[index] = (byte)Data[i];index+=1;
             }
-            return index - start; // /*PayloadByteSize*/179;
+            BitConverter.GetBytes(Bank).CopyTo(buffer, index);index+=1;
+            return index - start; // /*PayloadByteSize*/180;
         }
 
         /// <summary>
@@ -6334,6 +6233,11 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// </summary>
         public byte[] Data { get; set; } = new byte[128];
         public byte GetDataMaxItemsCount() => 128;
+        /// <summary>
+        /// Bank number.
+        /// OriginName: bank, Units: , IsExtended: true
+        /// </summary>
+        public byte Bank { get; set; }
     }
     /// <summary>
     /// Write registers reply.
@@ -7021,6 +6925,326 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// OriginName: temperature, Units: degC, IsExtended: false
         /// </summary>
         public byte[] Temperature { get; } = new byte[4];
+    }
+    /// <summary>
+    /// Configure an OSD parameter slot.
+    ///  OSD_PARAM_CONFIG
+    /// </summary>
+    public class OsdParamConfigPacket: PacketV2<OsdParamConfigPayload>
+    {
+	    public const int PacketMessageId = 11033;
+        public override int MessageId => PacketMessageId;
+        public override byte GetCrcEtra() => 195;
+
+        public override OsdParamConfigPayload Payload { get; } = new OsdParamConfigPayload();
+
+        public override string Name => "OSD_PARAM_CONFIG";
+    }
+
+    /// <summary>
+    ///  OSD_PARAM_CONFIG
+    /// </summary>
+    public class OsdParamConfigPayload : IPayload
+    {
+        public byte GetMaxByteSize() => 37;
+
+        public void Deserialize(byte[] buffer, int offset, int payloadSize)
+        {
+            var index = offset;
+            var endIndex = offset + payloadSize;
+            var arraySize = 0;
+            RequestId = BitConverter.ToUInt32(buffer,index);index+=4;
+            MinValue = BitConverter.ToSingle(buffer, index);index+=4;
+            MaxValue = BitConverter.ToSingle(buffer, index);index+=4;
+            Increment = BitConverter.ToSingle(buffer, index);index+=4;
+            TargetSystem = (byte)buffer[index++];
+            TargetComponent = (byte)buffer[index++];
+            OsdScreen = (byte)buffer[index++];
+            OsdIndex = (byte)buffer[index++];
+            arraySize = /*ArrayLength*/16 - Math.Max(0,((/*PayloadByteSize*/37 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            ParamId = new char[arraySize];
+            Encoding.ASCII.GetChars(buffer, index,arraySize,ParamId,0);
+            index+=arraySize;
+            ConfigType = (OsdParamConfigType)buffer[index++];
+        }
+
+        public int Serialize(byte[] buffer, int index)
+        {
+		var start = index;
+            BitConverter.GetBytes(RequestId).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(MinValue).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(MaxValue).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(Increment).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
+            BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
+            BitConverter.GetBytes(OsdScreen).CopyTo(buffer, index);index+=1;
+            BitConverter.GetBytes(OsdIndex).CopyTo(buffer, index);index+=1;
+            index+=Encoding.ASCII.GetBytes(ParamId,0,ParamId.Length,buffer,index);
+            buffer[index] = (byte)ConfigType;index+=1;
+            return index - start; // /*PayloadByteSize*/37;
+        }
+
+        /// <summary>
+        /// Request ID - copied to reply.
+        /// OriginName: request_id, Units: , IsExtended: false
+        /// </summary>
+        public uint RequestId { get; set; }
+        /// <summary>
+        /// OSD parameter minimum value.
+        /// OriginName: min_value, Units: , IsExtended: false
+        /// </summary>
+        public float MinValue { get; set; }
+        /// <summary>
+        /// OSD parameter maximum value.
+        /// OriginName: max_value, Units: , IsExtended: false
+        /// </summary>
+        public float MaxValue { get; set; }
+        /// <summary>
+        /// OSD parameter increment.
+        /// OriginName: increment, Units: , IsExtended: false
+        /// </summary>
+        public float Increment { get; set; }
+        /// <summary>
+        /// System ID.
+        /// OriginName: target_system, Units: , IsExtended: false
+        /// </summary>
+        public byte TargetSystem { get; set; }
+        /// <summary>
+        /// Component ID.
+        /// OriginName: target_component, Units: , IsExtended: false
+        /// </summary>
+        public byte TargetComponent { get; set; }
+        /// <summary>
+        /// OSD parameter screen index.
+        /// OriginName: osd_screen, Units: , IsExtended: false
+        /// </summary>
+        public byte OsdScreen { get; set; }
+        /// <summary>
+        /// OSD parameter display index.
+        /// OriginName: osd_index, Units: , IsExtended: false
+        /// </summary>
+        public byte OsdIndex { get; set; }
+        /// <summary>
+        /// Onboard parameter id, terminated by NULL if the length is less than 16 human-readable chars and WITHOUT null termination (NULL) byte if the length is exactly 16 chars - applications have to provide 16+1 bytes storage if the ID is stored as string
+        /// OriginName: param_id, Units: , IsExtended: false
+        /// </summary>
+        public char[] ParamId { get; set; } = new char[16];
+        public byte GetParamIdMaxItemsCount() => 16;
+        /// <summary>
+        /// Config type.
+        /// OriginName: config_type, Units: , IsExtended: false
+        /// </summary>
+        public OsdParamConfigType ConfigType { get; set; }
+    }
+    /// <summary>
+    /// Configure OSD parameter reply.
+    ///  OSD_PARAM_CONFIG_REPLY
+    /// </summary>
+    public class OsdParamConfigReplyPacket: PacketV2<OsdParamConfigReplyPayload>
+    {
+	    public const int PacketMessageId = 11034;
+        public override int MessageId => PacketMessageId;
+        public override byte GetCrcEtra() => 79;
+
+        public override OsdParamConfigReplyPayload Payload { get; } = new OsdParamConfigReplyPayload();
+
+        public override string Name => "OSD_PARAM_CONFIG_REPLY";
+    }
+
+    /// <summary>
+    ///  OSD_PARAM_CONFIG_REPLY
+    /// </summary>
+    public class OsdParamConfigReplyPayload : IPayload
+    {
+        public byte GetMaxByteSize() => 5;
+
+        public void Deserialize(byte[] buffer, int offset, int payloadSize)
+        {
+            var index = offset;
+            var endIndex = offset + payloadSize;
+            var arraySize = 0;
+            RequestId = BitConverter.ToUInt32(buffer,index);index+=4;
+            Result = (OsdParamConfigError)buffer[index++];
+        }
+
+        public int Serialize(byte[] buffer, int index)
+        {
+		var start = index;
+            BitConverter.GetBytes(RequestId).CopyTo(buffer, index);index+=4;
+            buffer[index] = (byte)Result;index+=1;
+            return index - start; // /*PayloadByteSize*/5;
+        }
+
+        /// <summary>
+        /// Request ID - copied from request.
+        /// OriginName: request_id, Units: , IsExtended: false
+        /// </summary>
+        public uint RequestId { get; set; }
+        /// <summary>
+        /// Config error type.
+        /// OriginName: result, Units: , IsExtended: false
+        /// </summary>
+        public OsdParamConfigError Result { get; set; }
+    }
+    /// <summary>
+    /// Read a configured an OSD parameter slot.
+    ///  OSD_PARAM_SHOW_CONFIG
+    /// </summary>
+    public class OsdParamShowConfigPacket: PacketV2<OsdParamShowConfigPayload>
+    {
+	    public const int PacketMessageId = 11035;
+        public override int MessageId => PacketMessageId;
+        public override byte GetCrcEtra() => 128;
+
+        public override OsdParamShowConfigPayload Payload { get; } = new OsdParamShowConfigPayload();
+
+        public override string Name => "OSD_PARAM_SHOW_CONFIG";
+    }
+
+    /// <summary>
+    ///  OSD_PARAM_SHOW_CONFIG
+    /// </summary>
+    public class OsdParamShowConfigPayload : IPayload
+    {
+        public byte GetMaxByteSize() => 8;
+
+        public void Deserialize(byte[] buffer, int offset, int payloadSize)
+        {
+            var index = offset;
+            var endIndex = offset + payloadSize;
+            var arraySize = 0;
+            RequestId = BitConverter.ToUInt32(buffer,index);index+=4;
+            TargetSystem = (byte)buffer[index++];
+            TargetComponent = (byte)buffer[index++];
+            OsdScreen = (byte)buffer[index++];
+            OsdIndex = (byte)buffer[index++];
+        }
+
+        public int Serialize(byte[] buffer, int index)
+        {
+		var start = index;
+            BitConverter.GetBytes(RequestId).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
+            BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
+            BitConverter.GetBytes(OsdScreen).CopyTo(buffer, index);index+=1;
+            BitConverter.GetBytes(OsdIndex).CopyTo(buffer, index);index+=1;
+            return index - start; // /*PayloadByteSize*/8;
+        }
+
+        /// <summary>
+        /// Request ID - copied to reply.
+        /// OriginName: request_id, Units: , IsExtended: false
+        /// </summary>
+        public uint RequestId { get; set; }
+        /// <summary>
+        /// System ID.
+        /// OriginName: target_system, Units: , IsExtended: false
+        /// </summary>
+        public byte TargetSystem { get; set; }
+        /// <summary>
+        /// Component ID.
+        /// OriginName: target_component, Units: , IsExtended: false
+        /// </summary>
+        public byte TargetComponent { get; set; }
+        /// <summary>
+        /// OSD parameter screen index.
+        /// OriginName: osd_screen, Units: , IsExtended: false
+        /// </summary>
+        public byte OsdScreen { get; set; }
+        /// <summary>
+        /// OSD parameter display index.
+        /// OriginName: osd_index, Units: , IsExtended: false
+        /// </summary>
+        public byte OsdIndex { get; set; }
+    }
+    /// <summary>
+    /// Read configured OSD parameter reply.
+    ///  OSD_PARAM_SHOW_CONFIG_REPLY
+    /// </summary>
+    public class OsdParamShowConfigReplyPacket: PacketV2<OsdParamShowConfigReplyPayload>
+    {
+	    public const int PacketMessageId = 11036;
+        public override int MessageId => PacketMessageId;
+        public override byte GetCrcEtra() => 177;
+
+        public override OsdParamShowConfigReplyPayload Payload { get; } = new OsdParamShowConfigReplyPayload();
+
+        public override string Name => "OSD_PARAM_SHOW_CONFIG_REPLY";
+    }
+
+    /// <summary>
+    ///  OSD_PARAM_SHOW_CONFIG_REPLY
+    /// </summary>
+    public class OsdParamShowConfigReplyPayload : IPayload
+    {
+        public byte GetMaxByteSize() => 34;
+
+        public void Deserialize(byte[] buffer, int offset, int payloadSize)
+        {
+            var index = offset;
+            var endIndex = offset + payloadSize;
+            var arraySize = 0;
+            RequestId = BitConverter.ToUInt32(buffer,index);index+=4;
+            MinValue = BitConverter.ToSingle(buffer, index);index+=4;
+            MaxValue = BitConverter.ToSingle(buffer, index);index+=4;
+            Increment = BitConverter.ToSingle(buffer, index);index+=4;
+            Result = (OsdParamConfigError)buffer[index++];
+            arraySize = /*ArrayLength*/16 - Math.Max(0,((/*PayloadByteSize*/34 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
+            ParamId = new char[arraySize];
+            Encoding.ASCII.GetChars(buffer, index,arraySize,ParamId,0);
+            index+=arraySize;
+            ConfigType = (OsdParamConfigType)buffer[index++];
+        }
+
+        public int Serialize(byte[] buffer, int index)
+        {
+		var start = index;
+            BitConverter.GetBytes(RequestId).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(MinValue).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(MaxValue).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(Increment).CopyTo(buffer, index);index+=4;
+            buffer[index] = (byte)Result;index+=1;
+            index+=Encoding.ASCII.GetBytes(ParamId,0,ParamId.Length,buffer,index);
+            buffer[index] = (byte)ConfigType;index+=1;
+            return index - start; // /*PayloadByteSize*/34;
+        }
+
+        /// <summary>
+        /// Request ID - copied from request.
+        /// OriginName: request_id, Units: , IsExtended: false
+        /// </summary>
+        public uint RequestId { get; set; }
+        /// <summary>
+        /// OSD parameter minimum value.
+        /// OriginName: min_value, Units: , IsExtended: false
+        /// </summary>
+        public float MinValue { get; set; }
+        /// <summary>
+        /// OSD parameter maximum value.
+        /// OriginName: max_value, Units: , IsExtended: false
+        /// </summary>
+        public float MaxValue { get; set; }
+        /// <summary>
+        /// OSD parameter increment.
+        /// OriginName: increment, Units: , IsExtended: false
+        /// </summary>
+        public float Increment { get; set; }
+        /// <summary>
+        /// Config error type.
+        /// OriginName: result, Units: , IsExtended: false
+        /// </summary>
+        public OsdParamConfigError Result { get; set; }
+        /// <summary>
+        /// Onboard parameter id, terminated by NULL if the length is less than 16 human-readable chars and WITHOUT null termination (NULL) byte if the length is exactly 16 chars - applications have to provide 16+1 bytes storage if the ID is stored as string
+        /// OriginName: param_id, Units: , IsExtended: false
+        /// </summary>
+        public char[] ParamId { get; set; } = new char[16];
+        public byte GetParamIdMaxItemsCount() => 16;
+        /// <summary>
+        /// Config type.
+        /// OriginName: config_type, Units: , IsExtended: false
+        /// </summary>
+        public OsdParamConfigType ConfigType { get; set; }
     }
 
 

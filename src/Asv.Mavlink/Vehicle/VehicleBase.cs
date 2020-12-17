@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.Client;
 using Asv.Mavlink.V2.Common;
+using Asv.Mavlink.V2.Minimal;
 using NLog;
 
 namespace Asv.Mavlink
