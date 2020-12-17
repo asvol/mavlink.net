@@ -219,7 +219,7 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
 
         public int Serialize(byte[] buffer, int index)
         {
-            var start = index;
+		var start = index;
 {%- for field in msg.Fields -%}
     {%- if field.IsEnum -%}
         {%- if field.IsArray -%}
@@ -248,7 +248,7 @@ namespace Asv.Mavlink.V2.{{ Namespace }}
         {%- if field.IsArray -%}
             {%- case field.Type -%}
             {%- when 'char' -%}
-            Encoding.ASCII.GetBytes({{ field.CamelCaseName }},0,{{ field.CamelCaseName }}.Length,buffer,index);index+={{ field.ArrayLength }};
+            index+=Encoding.ASCII.GetBytes({{ field.CamelCaseName }},0,{{ field.CamelCaseName }}.Length,buffer,index);
             {%- when 'sbyte' or 'byte' -%}
             for(var i=0;i<{{ field.CamelCaseName }}.Length;i++)
             {
