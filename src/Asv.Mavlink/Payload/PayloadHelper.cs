@@ -45,9 +45,17 @@ namespace Asv.Mavlink
 
         public void Deserialize(BsonDataReader rdr)
         {
-            var arr = JArray.ReadFrom(rdr);
-            Path = (string) ((JProperty) arr.First).Value;
-            PacketId = (byte)((JProperty)arr.Last).Value;
+            //begin array
+            rdr.Read();
+
+            rdr.Read();
+            Path = rdr.ReadAsString();
+
+            rdr.Read();
+            PacketId = (byte) (rdr.ReadAsInt32() ?? 0);
+
+            //end array
+            rdr.Read();
         }
     }
 
