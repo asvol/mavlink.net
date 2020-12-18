@@ -15,8 +15,8 @@ namespace Asv.Mavlink
 
     public interface ISettingsValues
     {
-        IObservable<KeyValuePair<string, string>> OnLocalChanged { get; }
-        IObservable<KeyValuePair<string,string>> OnRemoteChanged { get; }
+        IObservable<KeyValueData> OnLocalChanged { get; }
+        IObservable<KeyValueData> OnRemoteChanged { get; }
         bool IsEmpty { get; }
         string this[string name] { get; set; }
     }

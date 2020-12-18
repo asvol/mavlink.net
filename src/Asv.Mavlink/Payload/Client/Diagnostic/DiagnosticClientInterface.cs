@@ -46,9 +46,9 @@ namespace Asv.Mavlink
                 _stringDict.Clear();
                 _digitDict.Clear();
                 _settingsDict.Clear();
-                _stringDict.Clear();
-                _digitDict.Clear();
-                _settingsDict.Clear();
+                _settings.Clear();
+                _digits.Clear();
+                _settings.Clear();
             }
             
             return Send<PayloadVoid, PayloadVoid>(WellKnownDiag.DiagGetAll, PayloadVoid.Default, TimeSpan.FromSeconds(3), 1, cancel, null);
