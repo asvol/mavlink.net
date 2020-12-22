@@ -217,7 +217,7 @@ namespace Asv.Mavlink
         protected override void InternalDisposeOnce()
         {
             base.InternalDisposeOnce();
-            _tcp.Stop();
+            _tcp?.Stop();
         }
 
         private void SendData(TcpClient tcpClient, byte[] data)

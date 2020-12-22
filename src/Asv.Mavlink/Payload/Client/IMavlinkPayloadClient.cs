@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -27,7 +28,6 @@ namespace Asv.Mavlink
         public static async Task<TOut> Send<TIn, TOut>(this IMavlinkPayloadClient src, string path, TIn data, TimeSpan timeout , int attemptsCount, CancellationToken cancel, Action<int> progressCallback) where TOut : new()
         {
             progressCallback = progressCallback ?? ((i) => { });
-            var isSuccessfully = false;
             Exception lastError = null;
             var result = default(TOut);
             for (var i = 0; i < attemptsCount; i++)
@@ -40,7 +40,6 @@ namespace Asv.Mavlink
                 try
                 {
                     result = await src.Send<TIn, TOut>(path, data, linkedToken.Token);
-                    isSuccessfully = true;
                     return result;
                 }
                 catch (TimeoutException e)
@@ -48,10 +47,16 @@ namespace Asv.Mavlink
                     lastError = e;
                     _logger.Warn(e, $"Timeout to call {path}. Attept {i + 1} of {attemptsCount}");
                 }
+                catch (PayloadClientException e)
+                {
+                    lastError = e;
+                    _logger.Error(e,e.Message);
+                    break;
+                }
                 catch (Exception e)
                 {
                     lastError = e;
-                    _logger.Warn(e,$"Error to call {path}. Attept {i +1} of {attemptsCount}");
+                    _logger.Warn(e,$"Error occured to call {path}. Attept {i +1} of {attemptsCount}");
                 }
                 finally
                 {
@@ -59,8 +64,9 @@ namespace Asv.Mavlink
                     tokenWithTimeout?.Dispose();
                 }
             }
-
-            throw new Exception($"Call {path} failed.", lastError);
+            Debug.Assert(lastError != null);
+            throw lastError;
+            
         }
     }
 }

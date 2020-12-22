@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
+using Asv.Mavlink.Server;
 using Asv.Mavlink.V2.Ardupilotmega;
 using Asv.Mavlink.V2.Common;
 using Asv.Mavlink.V2.Icarous;
@@ -30,7 +31,9 @@ namespace Asv.Mavlink
         private readonly Subject<IMavlinkDeviceInfo> _foundDeviceSubject = new Subject<IMavlinkDeviceInfo>();
         private readonly Subject<IMavlinkDeviceInfo> _lostDeviceSubject = new Subject<IMavlinkDeviceInfo>();
         private int _isDisposed;
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private readonly IPacketSequenceCalculator _seq;
+        private readonly MavlinkPacketTransponder<HeartbeatPacket, HeartbeatPayload> _transponder;
 
         public class MavlinkDeviceInfo : IMavlinkDeviceInfo
         {
@@ -79,9 +82,10 @@ namespace Asv.Mavlink
             }
         }
 
-        public GroundControlStation(GroundControlStationIdentity config)
+        public GroundControlStation(GroundControlStationIdentity config, IPacketSequenceCalculator sequenceCalculator = null, int sendHeartBeatMs = 0)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
+            _seq = sequenceCalculator ?? new PacketSequenceCalculator();
             _config = config;
 
             MavlinkV2 = new MavlinkV2Connection(Ports, _ =>
@@ -104,6 +108,23 @@ namespace Asv.Mavlink
             });
             MavlinkV2.Where(_ => _.MessageId == HeartbeatPacket.PacketMessageId).Cast<HeartbeatPacket>().Subscribe(DeviceFounder, _cancel.Token);
             Observable.Timer(TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3)).Subscribe(_ => RemoveOldDevice(), _cancel.Token);
+
+            if (sendHeartBeatMs!=0)
+            {
+                _transponder = new MavlinkPacketTransponder<HeartbeatPacket, HeartbeatPayload>(MavlinkV2, new MavlinkPayloadIdentity { ComponenId = _config.ComponentId, SystemId = _config.SystemId }, _seq);
+                _transponder.Set(_=>
+                {
+                    _.Autopilot = MavAutopilot.MavAutopilotInvalid;
+                    _.BaseMode = 0;
+                    _.CustomMode = 0;
+                    _.MavlinkVersion = 3;
+                    _.SystemStatus = MavState.MavStateActive;
+                    _.Type = MavType.MavTypeGcs;
+                });
+                _transponder.Start(TimeSpan.FromMilliseconds(sendHeartBeatMs));
+            }
+            
+
         }
 
        
@@ -118,7 +139,7 @@ namespace Asv.Mavlink
                 foreach (var device in deviceToRemove)
                 {
                     _info.Remove(device);
-                    _logger.Info($"Delete device {JsonConvert.SerializeObject(device.GetInfo())}");
+                    Logger.Info($"Delete device {JsonConvert.SerializeObject(device.GetInfo())}");
                 }
                 _deviceListLock.ExitWriteLock();
             }
@@ -145,7 +166,7 @@ namespace Asv.Mavlink
                 newItem = new MavlinkDevice(packet);
                 _info.Add(newItem);
                 _deviceListLock.ExitWriteLock();
-                _logger.Info($"Found new device {JsonConvert.SerializeObject(newItem.GetInfo())}");
+                Logger.Info($"Found new device {JsonConvert.SerializeObject(newItem.GetInfo())}");
             }
             _deviceListLock.ExitUpgradeableReadLock();
 
@@ -172,6 +193,7 @@ namespace Asv.Mavlink
         public void Dispose()
         {
             if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) != 0) return;
+            _transponder?.Dispose();
             _cancel.Cancel(false);
             _cancel.Dispose();
             Ports?.Dispose();

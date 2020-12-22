@@ -130,12 +130,12 @@ namespace Asv.Mavlink.Decoder
             var messageId = PacketV2Helper.GetMessageId(_buffer,0);
 
             var packet = CreatePacket(messageId);
-            packet.Size = size;
             if (packet == null)
             {
                 _decodeErrorSubject.OnNext(new MessageIdNotFoundException(messageId));
                 return;
             }
+            packet.Size = size;
             try
             {
                 packet.Deserialize(_buffer, 0);

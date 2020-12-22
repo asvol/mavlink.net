@@ -139,7 +139,7 @@ namespace Asv.Mavlink
                     await eve.WaitAsync(cancel);
                     if (result.IsError)
                     {
-                        throw new PayloadClientException(path, result.Error, result.ErrorMessage);
+                        throw new PayloadClientException(path, result.Error);
                     }
                     Debug.Assert(result.Value != null);
                     return result.Value;
@@ -203,7 +203,6 @@ namespace Asv.Mavlink
                             return new Result<TOut>
                             {
                                 Error = err,
-                                
                                 IsError = true,
                             };
                         }
