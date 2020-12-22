@@ -6,13 +6,13 @@ namespace Asv.Mavlink
     {
         public string Path { get; }
         public ErrorCode Code { get; }
-        public string Message { get; }
+        public string RemoteMessage { get; }
 
-        public PayloadClientException(string path, ErrorCode code, string message):base($"Remote error to execute '{path}' {code:G}:'{message}'")
+        public PayloadClientException(string path, ErrorCode code, string remoteMessage):base($"Remote error to execute '{path}' {code:G}:'{remoteMessage}'")
         {
             Path = path;
             Code = code;
-            Message = message;
+            RemoteMessage = remoteMessage;
         }
     }
 }
