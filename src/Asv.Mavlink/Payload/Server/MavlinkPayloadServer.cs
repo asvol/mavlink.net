@@ -170,7 +170,7 @@ namespace Asv.Mavlink
                 catch (Exception e)
                 {
                     _logger.Warn(e, $"Error to deserialize input data '{path}'. Payload type {typeof(TIn).Name}");
-                    await SendError(devId, path, ErrorType.ArgsError,"Args error", CancellationToken.None);
+                    await SendError(devId, path, ErrorType.ArgsError,e.Message, CancellationToken.None);
                     return;
                 }
 
@@ -183,7 +183,7 @@ namespace Asv.Mavlink
                 {
                     Status.Error($"Execute {path}:{e.Message}");
                     _logger.Warn(e, $"Error to execute '{path}':{e.Message}");
-                    await SendError(devId, path, ErrorType.InternalError, "Execute error", CancellationToken.None);
+                    await SendError(devId, path, ErrorType.InternalError, e.Message, CancellationToken.None);
                 }
             };
         }
@@ -213,6 +213,7 @@ namespace Asv.Mavlink
         {
             try
             {
+                message = message.TrimToMaxLength(PayloadHelper.MaxErrorMessageSize);
                 using (var strm = new MemoryStream())
                 {
                     PayloadHelper.WriteData(strm, new PayloadPacketHeader

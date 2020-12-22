@@ -13,18 +13,42 @@ using Newtonsoft.Json.Linq;
 namespace Asv.Mavlink
 {
 
-
-    public class ErrorCode
-    {
-        public ErrorType Res { get; set; }
-        public string Msg { get; set; }
-    }
-
     public enum ErrorType
     {
         ArgsError,
         InternalError
     }
+
+    public class ErrorCode : ISerializablePayloadData
+    {
+        public ErrorType Res { get; set; }
+        public string Msg { get; set; }
+
+        public void Serialize(BsonDataWriter wrt)
+        {
+            wrt.WriteStartArray();
+            wrt.WriteValue(Res);
+            wrt.WriteValue(Msg);
+            wrt.WriteEndArray();
+        }
+
+        public void Deserialize(BsonDataReader rdr)
+        {
+            //begin array
+            rdr.Read();
+
+            rdr.Read();
+            Res = (ErrorType)(rdr.ReadAsInt32() ?? 0);
+
+            rdr.Read();
+            Msg = rdr.ReadAsString(); 
+
+            //end array
+            rdr.Read();
+        }
+    }
+
+   
 
     public class PayloadVoid
     {
@@ -80,6 +104,8 @@ namespace Asv.Mavlink
         public const ushort DefaultSuccessMessageType = 32770;
         public const ushort DefaultErrorMessageType = 32771;
         public static Encoding DefaultEncoding => Encoding.UTF8;
+        public const int MaxErrorMessageSize = 200;
+
         private static readonly JsonSerializer Serializer = JsonSerializer.CreateDefault();
 
         public static void WriteData<T>(Stream strm, T data)
