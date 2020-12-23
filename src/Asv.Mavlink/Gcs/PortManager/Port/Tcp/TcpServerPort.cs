@@ -222,7 +222,6 @@ namespace Asv.Mavlink
 
         private void SendData(TcpClient tcpClient, byte[] data)
         {
-            if (tcpClient.Available == 0) return;
             if (tcpClient.Connected == false) return;
             if (tcpClient.Client.Connected == false) return;
             try
