@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reactive.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -26,8 +27,22 @@ namespace Asv.Mavlink
         public static IDisposable Set(this ISettingsValues src,string key,  string value, Action<string> onRemoteUpdateCallback)
         {
             src[key] = value;
-            return src.OnRemoteChanged.Where(_=>string.Equals(_.Key,value, StringComparison.CurrentCultureIgnoreCase)).Select(_=>_.Value).Subscribe(onRemoteUpdateCallback);
+            return src.OnRemoteChanged.Where(_=>string.Equals(_.Key, key, StringComparison.CurrentCultureIgnoreCase)).Select(_=>_.Value).Subscribe(onRemoteUpdateCallback);
         }
+
+        public static IDisposable Set(this ISettingsValues src, string key, double value, Action<double?> onRemoteSuccessUpdateCallback, string formatString = "F1")
+        {
+            
+            src[key] = value.ToString(formatString);
+            return src.OnRemoteChanged.Where(_ => string.Equals(_.Key, key, StringComparison.CurrentCultureIgnoreCase)).Select(_ => _.Value).Select(SafeConvertDouble).Subscribe(onRemoteSuccessUpdateCallback);
+        }
+
+        private static double? SafeConvertDouble(string arg)
+        {
+            arg = arg.Replace(",", ".");
+            return double.TryParse(arg, NumberStyles.Any, CultureInfo.InvariantCulture,out var result) ? (double?) result : null;
+        }
+
         public static void Set(this ISettingsValues src, string key, string value, Action<string> onRemoteUpdateCallback, CancellationToken cancel)
         {
             src[key] = value;
