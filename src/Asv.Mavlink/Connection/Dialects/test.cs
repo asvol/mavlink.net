@@ -49,7 +49,7 @@ namespace Asv.Mavlink.V2.Test
     /// </summary>
     public class TestTypesPacket: PacketV2<TestTypesPayload>
     {
-	    public const int PacketMessageId = 0;
+	    public const int PacketMessageId = 17000;
         public override int MessageId => PacketMessageId;
         public override byte GetCrcEtra() => 103;
 

@@ -309,23 +309,39 @@ namespace Asv.Mavlink
 
         private readonly RxValue<GpsInfo>  _gpsInfo = new RxValue<GpsInfo>();
         private readonly RxValue<double> _gVelocity = new RxValue<double>();
-        private readonly RxValue<GeoPoint> _globGps = new RxValue<GeoPoint>();
+        private readonly RxValue<GeoPoint> _globalPosition = new RxValue<GeoPoint>();
 
-        public IRxValue<GeoPoint> GpsLocation => _globGps;
+        private readonly RxValue<GpsInfo> _gps2Info = new RxValue<GpsInfo>();
+        private readonly RxValue<double> _g2Velocity = new RxValue<double>();
+
+        public IRxValue<GeoPoint> GlobalPosition => _globalPosition;
+
         public IRxValue<GpsInfo> GpsInfo => _gpsInfo;
-        public IRxValue<double> GroundVelocity => _gVelocity;
+        public IRxValue<double> GpsGroundVelocity => _gVelocity;
+
         
+        public IRxValue<GpsInfo> Gps2Info => _gps2Info;
+        public IRxValue<double> Gps2GroundVelocity => _g2Velocity;
+
 
         protected virtual void InitGps()
         {
             
-            _mavlink.Rtt.RawGlobalPositionInt.Select(_ => new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, _.Alt / 1000D)).Subscribe(_globGps, DisposeCancel.Token);
+            _mavlink.Rtt.RawGlobalPositionInt.Select(_ => new GeoPoint(_.Lat / 10000000D, _.Lon / 10000000D, _.Alt / 1000D)).Subscribe(_globalPosition, DisposeCancel.Token);
+            DisposeCancel.Token.Register(() => _globalPosition.Dispose());
+
+
             _mavlink.Rtt.RawGpsRawInt.Select(_ => new GpsInfo(_)).Subscribe(_gpsInfo, DisposeCancel.Token);
             _mavlink.Rtt.RawGpsRawInt.Select(_ => _.Vel / 100D).Subscribe(_gVelocity, DisposeCancel.Token);
-
             DisposeCancel.Token.Register(() => _gVelocity.Dispose());
             DisposeCancel.Token.Register(() => _gpsInfo.Dispose());
-            DisposeCancel.Token.Register(() => _globGps.Dispose());
+            
+
+
+            _mavlink.Rtt.RawGps2Raw.Select(_ => new GpsInfo(_)).Subscribe(_gps2Info, DisposeCancel.Token);
+            _mavlink.Rtt.RawGps2Raw.Select(_ => _.Vel / 100D).Subscribe(_g2Velocity, DisposeCancel.Token);
+            DisposeCancel.Token.Register(() => _g2Velocity.Dispose());
+            DisposeCancel.Token.Register(() => _gps2Info.Dispose());
         }
 
         #endregion
@@ -343,7 +359,7 @@ namespace Asv.Mavlink
                 .Subscribe(_home,DisposeCancel.Token);
             DisposeCancel.Token.Register(() => _homeDistance.Dispose());
 
-            this.GpsLocation
+            this.GlobalPosition
                 .Where(_=>_home.Value.HasValue)
                 // ReSharper disable once PossibleInvalidOperationException
                 .Select(_ => (double?)GeoMath.Distance(_home.Value.Value,_))
@@ -446,7 +462,7 @@ namespace Asv.Mavlink
             Logger.Info($"=> TakeOff(altitude:{altitude:F2})");
             await EnsureInGuidedMode(cancel);
             await ArmDisarm(true, cancel);
-            var res = await _mavlink.Commands.CommandLong(MavCmd.MavCmdNavTakeoff, float.NaN, float.NaN, float.NaN, float.NaN, (float)_globGps.Value.Latitude, (float)_globGps.Value.Longitude, (float)altitude, 3, cancel);
+            var res = await _mavlink.Commands.CommandLong(MavCmd.MavCmdNavTakeoff, float.NaN, float.NaN, float.NaN, float.NaN, (float)_globalPosition.Value.Latitude, (float)_globalPosition.Value.Longitude, (float)altitude, 3, cancel);
             Logger.Info($"<= TakeOff(altitude:{altitude:F2}): '{res.Result}'(porgress:{res.Progress};resultParam2:{res.ResultParam2})");
             ValidateCommandResult(res);
         }
@@ -472,7 +488,7 @@ namespace Asv.Mavlink
         {
             await GoToGlob(location, cancel);
             progress = progress ?? new Progress<double>();
-            var startLocation = this.GpsLocation.Value;
+            var startLocation = this.GlobalPosition.Value;
             var startDistance = Math.Abs(GeoMath.Distance(location, startLocation));
 
             Logger.Info("GoToAndWait {0} with precision {2:F1} m. Distance to target {3:F1}", location, precisionMet, startDistance);
@@ -491,7 +507,7 @@ namespace Asv.Mavlink
             double dist = 0;
             while (!cancel.IsCancellationRequested)
             {
-                var loc = this.GpsLocation.Value;
+                var loc = this.GlobalPosition.Value;
                 dist = Math.Abs(GeoMath.Distance(location, loc));
                 var prog = 1 - dist / startDistance;
                 Logger.Trace("Distance to target {0:F1}, location: {1}, progress {2:P2}", dist, loc, prog);
@@ -508,7 +524,7 @@ namespace Asv.Mavlink
         {
             await GoToGlob(location, cancel);
             progress = progress ?? new Progress<double>();
-            var startLocation = this.GpsLocation.Value;
+            var startLocation = this.GlobalPosition.Value;
             var startLocation0 = startLocation.SetAltitude(0);
             var startDistance = Math.Abs(GeoMath.Distance(location, startLocation));
             var startDistance0 = Math.Abs(GeoMath.Distance(location.SetAltitude(0), startLocation0));
@@ -529,7 +545,7 @@ namespace Asv.Mavlink
             double dist = 0;
             while (!cancel.IsCancellationRequested)
             {
-                var loc = this.GpsLocation.Value;
+                var loc = this.GlobalPosition.Value;
                 var loc0 = loc.SetAltitude(0);
                 dist = Math.Abs(GeoMath.Distance(location, loc));
                 var dist0 = Math.Abs(GeoMath.Distance(location.SetAltitude(0), loc0));

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
@@ -15,6 +15,7 @@ namespace Asv.Mavlink
         
         private readonly RxValue<SysStatusPayload> _sysStatus = new RxValue<SysStatusPayload>();
         private readonly RxValue<GpsRawIntPayload> _gpsRawInt = new RxValue<GpsRawIntPayload>();
+        private readonly RxValue<Gps2RawPayload> _gps2Raw = new RxValue<Gps2RawPayload>();
         private readonly RxValue<HighresImuPayload> _highresImu = new RxValue<HighresImuPayload>();
         private readonly RxValue<VfrHudPayload> _vfrHud = new RxValue<VfrHudPayload>();
         private readonly RxValue<AttitudePayload> _attitude = new RxValue<AttitudePayload>();
@@ -30,6 +31,7 @@ namespace Asv.Mavlink
         private readonly CancellationTokenSource _disposeCancel = new CancellationTokenSource();
         private IMavlinkV2Connection _connection;
         private int _isDisposed;
+        
 
 
         public MavlinkTelemetry(IMavlinkV2Connection connection, MavlinkClientIdentity config)
@@ -56,6 +58,7 @@ namespace Asv.Mavlink
         public IRxValue<RadioStatusPayload> RawRadioStatus => _radioStatus;
         public IRxValue<SysStatusPayload> RawSysStatus => _sysStatus;
         public IRxValue<GpsRawIntPayload> RawGpsRawInt => _gpsRawInt;
+        public IRxValue<Gps2RawPayload> RawGps2Raw => _gps2Raw;
         public IRxValue<HighresImuPayload> RawHighresImu => _highresImu;
         public IRxValue<ExtendedSysStatePayload> RawExtendedSysState => _extendedSysState;
         public IRxValue<AltitudePayload> RawAltitude => _altitude;
@@ -162,12 +165,17 @@ namespace Asv.Mavlink
 
         private void HandleGps()
         {
-            var s = _inputPackets
+            _inputPackets
                 .Where(_ => _.MessageId == GpsRawIntPacket.PacketMessageId)
                 .Cast<GpsRawIntPacket>()
-                .Select(_ => _.Payload);
-            s.Subscribe(_gpsRawInt, _disposeCancel.Token);
+                .Select(_ => _.Payload).Subscribe(_gpsRawInt, _disposeCancel.Token);
             _disposeCancel.Token.Register(() => _gpsRawInt.Dispose());
+
+            _inputPackets
+                .Where(_ => _.MessageId == Gps2RawPacket.PacketMessageId)
+                .Cast<Gps2RawPacket>()
+                .Select(_ => _.Payload).Subscribe(_gps2Raw, _disposeCancel.Token);
+            _disposeCancel.Token.Register(() => _gps2Raw.Dispose());
         }
 
         private void HandleSystemStatus()

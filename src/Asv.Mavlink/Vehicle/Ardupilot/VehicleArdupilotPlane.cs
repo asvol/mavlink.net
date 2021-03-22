@@ -218,7 +218,7 @@ namespace Asv.Mavlink
             var attempts = 0;
             while (!cancel.IsCancellationRequested)
             {
-                var location = GpsLocation.Value;
+                var location = GlobalPosition.Value;
                 var currentAzimuth = point.Azimuth(location);
                 _logger.Info($"Azimuth relative to the point {currentAzimuth:F1} deg");
                 if (IsInAzimuthLimits(currentAzimuth, azimuth, precisionDegr))

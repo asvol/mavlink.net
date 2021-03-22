@@ -214,9 +214,6 @@ namespace Asv.Mavlink.V2.Common
             src.Register(()=>new ParamExtValuePacket());
             src.Register(()=>new ParamExtSetPacket());
             src.Register(()=>new ParamExtAckPacket());
-            src.Register(()=>new ParamExtValueTrimmedPacket());
-            src.Register(()=>new ParamExtSetTrimmedPacket());
-            src.Register(()=>new ParamExtAckTrimmedPacket());
             src.Register(()=>new ObstacleDistancePacket());
             src.Register(()=>new OdometryPacket());
             src.Register(()=>new TrajectoryRepresentationWaypointsPacket());
@@ -610,6 +607,11 @@ namespace Asv.Mavlink.V2.Common
         /// MAV_SYS_STATUS_OBSTACLE_AVOIDANCE
         /// </summary>
         MavSysStatusObstacleAvoidance = 536870912,
+        /// <summary>
+        /// 0x40000000 propulsion (actuator, esc, motor or propellor)
+        /// MAV_SYS_STATUS_SENSOR_PROPULSION
+        /// </summary>
+        MavSysStatusSensorPropulsion = 1073741824,
     }
 
     /// <summary>
@@ -884,6 +886,11 @@ namespace Asv.Mavlink.V2.Common
         /// MAV_MOUNT_MODE_SYSID_TARGET
         /// </summary>
         MavMountModeSysidTarget = 5,
+        /// <summary>
+        /// Gimbal tracks home location
+        /// MAV_MOUNT_MODE_HOME_LOCATION
+        /// </summary>
+        MavMountModeHomeLocation = 6,
     }
 
     /// <summary>
@@ -1686,7 +1693,7 @@ namespace Asv.Mavlink.V2.Common
         /// Land at location.
         /// Param 1 - Minimum target altitude if landing is aborted (0 = undefined/use system default).
         /// Param 2 - Precision land mode.
-        /// Param 3 - Empty
+        /// Param 3 - Empty.
         /// Param 4 - Desired yaw angle. NaN to use the current system yaw heading mode (e.g. yaw towards next waypoint, yaw to home, etc.).
         /// Param 5 - Latitude.
         /// Param 6 - Longitude.
@@ -2092,7 +2099,7 @@ namespace Asv.Mavlink.V2.Common
         MavCmdDoFlighttermination = 185,
         /// <summary>
         /// Change altitude set point.
-        /// Param 1 - Altitude
+        /// Param 1 - Altitude.
         /// Param 2 - Frame of new altitude.
         /// Param 3 - Empty
         /// Param 4 - Empty
@@ -2205,8 +2212,8 @@ namespace Asv.Mavlink.V2.Common
         /// Param 3 - Empty
         /// Param 4 - Empty
         /// Param 5 - Pitch offset from next waypoint, positive pitching up
-        /// Param 6 - roll offset from next waypoint, positive rolling to the right
-        /// Param 7 - yaw offset from next waypoint, positive yawing to the right
+        /// Param 6 - Roll offset from next waypoint, positive rolling to the right
+        /// Param 7 - Yaw offset from next waypoint, positive yawing to the right
         /// MAV_CMD_DO_SET_ROI_WPNEXT_OFFSET
         /// </summary>
         MavCmdDoSetRoiWpnextOffset = 196,
@@ -2521,7 +2528,7 @@ namespace Asv.Mavlink.V2.Common
         MavCmdPreflightUavcan = 243,
         /// <summary>
         /// Request storage of different parameter values and logs. This command will be only accepted if in pre-flight mode.
-        /// Param 1 - Parameter storage: 0: READ FROM FLASH/EEPROM, 1: WRITE CURRENT TO FLASH/EEPROM, 2: Reset to defaults
+        /// Param 1 - Parameter storage: 0: READ FROM FLASH/EEPROM, 1: WRITE CURRENT TO FLASH/EEPROM, 2: Reset to defaults, 3: Reset sensor calibration parameter data to factory default (or firmware default if not available)
         /// Param 2 - Mission storage: 0: READ FROM FLASH/EEPROM, 1: WRITE CURRENT TO FLASH/EEPROM, 2: Reset to defaults
         /// Param 3 - Onboard logging: 0: Ignore, 1: Start default rate logging, -1: Stop logging, > 1: logging rate (e.g. set to 1000 for 1000 Hz logging)
         /// Param 4 - Reserved
@@ -2959,7 +2966,8 @@ namespace Asv.Mavlink.V2.Common
         MavCmdPanoramaCreate = 2800,
         /// <summary>
         /// Request VTOL transition
-        /// Param 1 - The target VTOL state. Only MAV_VTOL_STATE_MC and MAV_VTOL_STATE_FW can be used.
+        /// Param 1 - The target VTOL state. For normal transitions, only MAV_VTOL_STATE_MC and MAV_VTOL_STATE_FW can be used.
+        /// Param 2 - Force immediate transition to the specified MAV_VTOL_STATE. 1: Force immediate, 0: normal transition. Can be used, for example, to trigger an emergency "Quadchute". Caution: Can be dangerous/damage vehicle, depending on autopilot implementation of this command.
         /// MAV_CMD_DO_VTOL_TRANSITION
         /// </summary>
         MavCmdDoVtolTransition = 3000,
@@ -3001,8 +3009,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavCmdConditionGate = 4501,
         /// <summary>
-        /// Fence return point. There can only be one fence return point.
-        ///         
+        /// Fence return point (there can only be one such point in a geofence definition). If rally points are supported they should be used instead.
         /// Param 1 - Reserved
         /// Param 2 - Reserved
         /// Param 3 - Reserved
@@ -4162,11 +4169,6 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         MavSensorRotationRoll90Pitch315 = 40,
         /// <summary>
-        /// Roll: 270, Yaw: 180
-        /// MAV_SENSOR_ROTATION_ROLL_270_YAW_180
-        /// </summary>
-        MavSensorRotationRoll270Yaw180 = 41,
-        /// <summary>
         /// Custom orientation
         /// MAV_SENSOR_ROTATION_CUSTOM
         /// </summary>
@@ -4525,6 +4527,16 @@ namespace Asv.Mavlink.V2.Common
         /// MAV_BATTERY_FAULT_INCOMPATIBLE_VOLTAGE
         /// </summary>
         MavBatteryFaultIncompatibleVoltage = 64,
+        /// <summary>
+        /// Battery firmware is not compatible with current autopilot firmware.
+        /// MAV_BATTERY_FAULT_INCOMPATIBLE_FIRMWARE
+        /// </summary>
+        MavBatteryFaultIncompatibleFirmware = 128,
+        /// <summary>
+        /// Battery is not compatible due to cell configuration (e.g. 5s1p when vehicle requires 6s).
+        /// BATTERY_FAULT_INCOMPATIBLE_CELLS_CONFIGURATION
+        /// </summary>
+        BatteryFaultIncompatibleCellsConfiguration = 256,
     }
 
     /// <summary>
@@ -5408,19 +5420,19 @@ namespace Asv.Mavlink.V2.Common
     {
         /// <summary>
         /// Not tracking
-        /// CAMERA_TRACKING_NONE
+        /// CAMERA_TRACKING_MODE_NONE
         /// </summary>
-        CameraTrackingNone = 0,
+        CameraTrackingModeNone = 0,
         /// <summary>
         /// Target is a point
-        /// CAMERA_TRACKING_POINT
+        /// CAMERA_TRACKING_MODE_POINT
         /// </summary>
-        CameraTrackingPoint = 1,
+        CameraTrackingModePoint = 1,
         /// <summary>
         /// Target is a rectangle
-        /// CAMERA_TRACKING_RECTANGLE
+        /// CAMERA_TRACKING_MODE_RECTANGLE
         /// </summary>
-        CameraTrackingRectangle = 2,
+        CameraTrackingModeRectangle = 2,
     }
 
     /// <summary>
@@ -5431,24 +5443,24 @@ namespace Asv.Mavlink.V2.Common
     {
         /// <summary>
         /// No target data
-        /// CAMERA_TRACKING_TARGET_NONE
+        /// CAMERA_TRACKING_TARGET_DATA_NONE
         /// </summary>
-        CameraTrackingTargetNone = 0,
+        CameraTrackingTargetDataNone = 0,
         /// <summary>
         /// Target data embedded in image data (proprietary)
-        /// CAMERA_TRACKING_TARGET_EMBEDDED
+        /// CAMERA_TRACKING_TARGET_DATA_EMBEDDED
         /// </summary>
-        CameraTrackingTargetEmbedded = 1,
+        CameraTrackingTargetDataEmbedded = 1,
         /// <summary>
         /// Target data rendered in image
-        /// CAMERA_TRACKING_TARGET_RENDERED
+        /// CAMERA_TRACKING_TARGET_DATA_RENDERED
         /// </summary>
-        CameraTrackingTargetRendered = 2,
+        CameraTrackingTargetDataRendered = 2,
         /// <summary>
         /// Target data within status message (Point or Rectangle)
-        /// CAMERA_TRACKING_TARGET_IN_STATUS
+        /// CAMERA_TRACKING_TARGET_DATA_IN_STATUS
         /// </summary>
-        CameraTrackingTargetInStatus = 4,
+        CameraTrackingTargetDataInStatus = 4,
     }
 
     /// <summary>
@@ -8233,7 +8245,9 @@ namespace Asv.Mavlink.V2.Common
         public MavParamType ParamType { get; set; }
     }
     /// <summary>
-    /// Set a parameter value (write new value to permanent storage). Within a transaction the recieving componenent should respond with PARAM_ACK_TRANSACTION to the setter component. IMPORTANT: If sent outside a transaction the receiving component should acknowledge the new parameter value by broadcasting a PARAM_VALUE message to all communication partners (broadcasting ensures that multiple GCS all have an up-to-date list of all parameters). If the sending GCS did not receive a PARAM_VALUE or PARAM_ACK_TRANSACTION message within its timeout time, it should re-send the PARAM_SET message. The parameter microservice is documented at https://mavlink.io/en/services/parameter.html
+    /// Set a parameter value (write new value to permanent storage).
+    ///         The receiving component should acknowledge the new parameter value by broadcasting a PARAM_VALUE message (broadcasting ensures that multiple GCS all have an up-to-date list of all parameters). If the sending GCS did not receive a PARAM_VALUE within its timeout time, it should re-send the PARAM_SET message. The parameter microservice is documented at https://mavlink.io/en/services/parameter.html.
+    ///         PARAM_SET may also be called within the context of a transaction (started with MAV_CMD_PARAM_TRANSACTION). Within a transaction the receiving component should respond with PARAM_ACK_TRANSACTION to the setter component (instead of broadcasting PARAM_VALUE), and PARAM_SET should be re-sent if this is ACK not received.
     ///  PARAM_SET
     /// </summary>
     public class ParamSetPacket: PacketV2<ParamSetPayload>
@@ -8408,12 +8422,12 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public int Alt { get; set; }
         /// <summary>
-        /// GPS HDOP horizontal dilution of position (unitless). If unknown, set to: UINT16_MAX
+        /// GPS HDOP horizontal dilution of position (unitless * 100). If unknown, set to: UINT16_MAX
         /// OriginName: eph, Units: , IsExtended: false
         /// </summary>
         public ushort Eph { get; set; }
         /// <summary>
-        /// GPS VDOP vertical dilution of position (unitless). If unknown, set to: UINT16_MAX
+        /// GPS VDOP vertical dilution of position (unitless * 100). If unknown, set to: UINT16_MAX
         /// OriginName: epv, Units: , IsExtended: false
         /// </summary>
         public ushort Epv { get; set; }
@@ -11880,7 +11894,7 @@ namespace Asv.Mavlink.V2.Common
         public byte Target { get; set; }
     }
     /// <summary>
-    /// The RAW values of the RC channels sent to the MAV to override info received from the RC radio. A value of UINT16_MAX means no change to that channel. A value of 0 means control of that channel should be released back to the RC radio. The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%. Individual receivers/transmitters might violate this specification.
+    /// The RAW values of the RC channels sent to the MAV to override info received from the RC radio. The standard PPM modulation is as follows: 1000 microseconds: 0%, 2000 microseconds: 100%. Individual receivers/transmitters might violate this specification.  Note carefully the semantic differences between the first 8 channels and the subsequent channels
     ///  RC_CHANNELS_OVERRIDE
     /// </summary>
     public class RcChannelsOverridePacket: PacketV2<RcChannelsOverridePayload>
@@ -11975,42 +11989,42 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// RC channel 1 value. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 1 value. A value of UINT16_MAX means to ignore this field. A value of 0 means to release this channel back to the RC radio.
         /// OriginName: chan1_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan1Raw { get; set; }
         /// <summary>
-        /// RC channel 2 value. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 2 value. A value of UINT16_MAX means to ignore this field. A value of 0 means to release this channel back to the RC radio.
         /// OriginName: chan2_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan2Raw { get; set; }
         /// <summary>
-        /// RC channel 3 value. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 3 value. A value of UINT16_MAX means to ignore this field. A value of 0 means to release this channel back to the RC radio.
         /// OriginName: chan3_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan3Raw { get; set; }
         /// <summary>
-        /// RC channel 4 value. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 4 value. A value of UINT16_MAX means to ignore this field. A value of 0 means to release this channel back to the RC radio.
         /// OriginName: chan4_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan4Raw { get; set; }
         /// <summary>
-        /// RC channel 5 value. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 5 value. A value of UINT16_MAX means to ignore this field. A value of 0 means to release this channel back to the RC radio.
         /// OriginName: chan5_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan5Raw { get; set; }
         /// <summary>
-        /// RC channel 6 value. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 6 value. A value of UINT16_MAX means to ignore this field. A value of 0 means to release this channel back to the RC radio.
         /// OriginName: chan6_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan6Raw { get; set; }
         /// <summary>
-        /// RC channel 7 value. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 7 value. A value of UINT16_MAX means to ignore this field. A value of 0 means to release this channel back to the RC radio.
         /// OriginName: chan7_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan7Raw { get; set; }
         /// <summary>
-        /// RC channel 8 value. A value of UINT16_MAX means to ignore this field.
+        /// RC channel 8 value. A value of UINT16_MAX means to ignore this field. A value of 0 means to release this channel back to the RC radio.
         /// OriginName: chan8_raw, Units: us, IsExtended: false
         /// </summary>
         public ushort Chan8Raw { get; set; }
@@ -12025,52 +12039,52 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public byte TargetComponent { get; set; }
         /// <summary>
-        /// RC channel 9 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 9 value. A value of 0 or UINT16_MAX means to ignore this field. A value of UINT16_MAX-1 means to release this channel back to the RC radio.
         /// OriginName: chan9_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan9Raw { get; set; }
         /// <summary>
-        /// RC channel 10 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 10 value. A value of 0 or UINT16_MAX means to ignore this field. A value of UINT16_MAX-1 means to release this channel back to the RC radio.
         /// OriginName: chan10_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan10Raw { get; set; }
         /// <summary>
-        /// RC channel 11 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 11 value. A value of 0 or UINT16_MAX means to ignore this field. A value of UINT16_MAX-1 means to release this channel back to the RC radio.
         /// OriginName: chan11_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan11Raw { get; set; }
         /// <summary>
-        /// RC channel 12 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 12 value. A value of 0 or UINT16_MAX means to ignore this field. A value of UINT16_MAX-1 means to release this channel back to the RC radio.
         /// OriginName: chan12_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan12Raw { get; set; }
         /// <summary>
-        /// RC channel 13 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 13 value. A value of 0 or UINT16_MAX means to ignore this field. A value of UINT16_MAX-1 means to release this channel back to the RC radio.
         /// OriginName: chan13_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan13Raw { get; set; }
         /// <summary>
-        /// RC channel 14 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 14 value. A value of 0 or UINT16_MAX means to ignore this field. A value of UINT16_MAX-1 means to release this channel back to the RC radio.
         /// OriginName: chan14_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan14Raw { get; set; }
         /// <summary>
-        /// RC channel 15 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 15 value. A value of 0 or UINT16_MAX means to ignore this field. A value of UINT16_MAX-1 means to release this channel back to the RC radio.
         /// OriginName: chan15_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan15Raw { get; set; }
         /// <summary>
-        /// RC channel 16 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 16 value. A value of 0 or UINT16_MAX means to ignore this field. A value of UINT16_MAX-1 means to release this channel back to the RC radio.
         /// OriginName: chan16_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan16Raw { get; set; }
         /// <summary>
-        /// RC channel 17 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 17 value. A value of 0 or UINT16_MAX means to ignore this field. A value of UINT16_MAX-1 means to release this channel back to the RC radio.
         /// OriginName: chan17_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan17Raw { get; set; }
         /// <summary>
-        /// RC channel 18 value. A value of 0 or UINT16_MAX means to ignore this field.
+        /// RC channel 18 value. A value of 0 or UINT16_MAX means to ignore this field. A value of UINT16_MAX-1 means to release this channel back to the RC radio.
         /// OriginName: chan18_raw, Units: us, IsExtended: true
         /// </summary>
         public ushort Chan18Raw { get; set; }
@@ -15556,13 +15570,13 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public int Alt { get; set; }
         /// <summary>
-        /// GPS HDOP horizontal dilution of position. If unknown, set to: 65535
-        /// OriginName: eph, Units: cm, IsExtended: false
+        /// GPS HDOP horizontal dilution of position (unitless * 100). If unknown, set to: UINT16_MAX
+        /// OriginName: eph, Units: , IsExtended: false
         /// </summary>
         public ushort Eph { get; set; }
         /// <summary>
-        /// GPS VDOP vertical dilution of position. If unknown, set to: 65535
-        /// OriginName: epv, Units: cm, IsExtended: false
+        /// GPS VDOP vertical dilution of position (unitless * 100). If unknown, set to: UINT16_MAX
+        /// OriginName: epv, Units: , IsExtended: false
         /// </summary>
         public ushort Epv { get; set; }
         /// <summary>
@@ -16544,13 +16558,13 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public uint DgpsAge { get; set; }
         /// <summary>
-        /// GPS HDOP horizontal dilution of position. If unknown, set to: UINT16_MAX
-        /// OriginName: eph, Units: cm, IsExtended: false
+        /// GPS HDOP horizontal dilution of position (unitless * 100). If unknown, set to: UINT16_MAX
+        /// OriginName: eph, Units: , IsExtended: false
         /// </summary>
         public ushort Eph { get; set; }
         /// <summary>
-        /// GPS VDOP vertical dilution of position. If unknown, set to: UINT16_MAX
-        /// OriginName: epv, Units: cm, IsExtended: false
+        /// GPS VDOP vertical dilution of position (unitless * 100). If unknown, set to: UINT16_MAX
+        /// OriginName: epv, Units: , IsExtended: false
         /// </summary>
         public ushort Epv { get; set; }
         /// <summary>
@@ -17521,7 +17535,7 @@ namespace Asv.Mavlink.V2.Common
         public byte Gridbit { get; set; }
     }
     /// <summary>
-    /// Request that the vehicle report terrain height at the given location. Used by GCS to check if vehicle has all terrain data needed for a mission.
+    /// Request that the vehicle report terrain height at the given location (expected response is a TERRAIN_REPORT). Used by GCS to check if vehicle has all terrain data needed for a mission.
     ///  TERRAIN_CHECK
     /// </summary>
     public class TerrainCheckPacket: PacketV2<TerrainCheckPayload>
@@ -17571,7 +17585,7 @@ namespace Asv.Mavlink.V2.Common
         public int Lon { get; set; }
     }
     /// <summary>
-    /// Streamed from drone to report progress of terrain map download (or response from a TERRAIN_CHECK request - deprecated). See terrain protocol docs: https://mavlink.io/en/services/terrain.html
+    /// Streamed from drone to report progress of terrain map download (initiated by TERRAIN_REQUEST), or sent as a response to a TERRAIN_CHECK request. See terrain protocol docs: https://mavlink.io/en/services/terrain.html
     ///  TERRAIN_REPORT
     /// </summary>
     public class TerrainReportPacket: PacketV2<TerrainReportPayload>
@@ -19332,12 +19346,12 @@ namespace Asv.Mavlink.V2.Common
         public float Rpm { get; set; }
         /// <summary>
         /// Fuel consumed
-        /// OriginName: fuel_consumed, Units: g, IsExtended: false
+        /// OriginName: fuel_consumed, Units: cm^3, IsExtended: false
         /// </summary>
         public float FuelConsumed { get; set; }
         /// <summary>
         /// Fuel flow rate
-        /// OriginName: fuel_flow, Units: g/min, IsExtended: false
+        /// OriginName: fuel_flow, Units: cm^3/min, IsExtended: false
         /// </summary>
         public float FuelFlow { get; set; }
         /// <summary>
@@ -19712,13 +19726,13 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public float Alt { get; set; }
         /// <summary>
-        /// GPS HDOP horizontal dilution of position
-        /// OriginName: hdop, Units: m, IsExtended: false
+        /// GPS HDOP horizontal dilution of position (unitless). If unknown, set to: UINT16_MAX
+        /// OriginName: hdop, Units: , IsExtended: false
         /// </summary>
         public float Hdop { get; set; }
         /// <summary>
-        /// GPS VDOP vertical dilution of position
-        /// OriginName: vdop, Units: m, IsExtended: false
+        /// GPS VDOP vertical dilution of position (unitless). If unknown, set to: UINT16_MAX
+        /// OriginName: vdop, Units: , IsExtended: false
         /// </summary>
         public float Vdop { get; set; }
         /// <summary>
@@ -22914,37 +22928,37 @@ namespace Asv.Mavlink.V2.Common
         }
 
         /// <summary>
-        /// Current tracked point x value if CAMERA_TRACKING_POINT (normalized 0..1, 0 is left, 1 is right), NAN if unknown
+        /// Current tracked point x value if CAMERA_TRACKING_MODE_POINT (normalized 0..1, 0 is left, 1 is right), NAN if unknown
         /// OriginName: point_x, Units: , IsExtended: false
         /// </summary>
         public float PointX { get; set; }
         /// <summary>
-        /// Current tracked point y value if CAMERA_TRACKING_POINT (normalized 0..1, 0 is top, 1 is bottom), NAN if unknown
+        /// Current tracked point y value if CAMERA_TRACKING_MODE_POINT (normalized 0..1, 0 is top, 1 is bottom), NAN if unknown
         /// OriginName: point_y, Units: , IsExtended: false
         /// </summary>
         public float PointY { get; set; }
         /// <summary>
-        /// Current tracked radius if CAMERA_TRACKING_POINT (normalized 0..1, 0 is image left, 1 is image right), NAN if unknown
+        /// Current tracked radius if CAMERA_TRACKING_MODE_POINT (normalized 0..1, 0 is image left, 1 is image right), NAN if unknown
         /// OriginName: radius, Units: , IsExtended: false
         /// </summary>
         public float Radius { get; set; }
         /// <summary>
-        /// Current tracked rectangle top x value if CAMERA_TRACKING_RECTANGLE (normalized 0..1, 0 is left, 1 is right), NAN if unknown
+        /// Current tracked rectangle top x value if CAMERA_TRACKING_MODE_RECTANGLE (normalized 0..1, 0 is left, 1 is right), NAN if unknown
         /// OriginName: rec_top_x, Units: , IsExtended: false
         /// </summary>
         public float RecTopX { get; set; }
         /// <summary>
-        /// Current tracked rectangle top y value if CAMERA_TRACKING_RECTANGLE (normalized 0..1, 0 is top, 1 is bottom), NAN if unknown
+        /// Current tracked rectangle top y value if CAMERA_TRACKING_MODE_RECTANGLE (normalized 0..1, 0 is top, 1 is bottom), NAN if unknown
         /// OriginName: rec_top_y, Units: , IsExtended: false
         /// </summary>
         public float RecTopY { get; set; }
         /// <summary>
-        /// Current tracked rectangle bottom x value if CAMERA_TRACKING_RECTANGLE (normalized 0..1, 0 is left, 1 is right), NAN if unknown
+        /// Current tracked rectangle bottom x value if CAMERA_TRACKING_MODE_RECTANGLE (normalized 0..1, 0 is left, 1 is right), NAN if unknown
         /// OriginName: rec_bottom_x, Units: , IsExtended: false
         /// </summary>
         public float RecBottomX { get; set; }
         /// <summary>
-        /// Current tracked rectangle bottom y value if CAMERA_TRACKING_RECTANGLE (normalized 0..1, 0 is top, 1 is bottom), NAN if unknown
+        /// Current tracked rectangle bottom y value if CAMERA_TRACKING_MODE_RECTANGLE (normalized 0..1, 0 is top, 1 is bottom), NAN if unknown
         /// OriginName: rec_bottom_y, Units: , IsExtended: false
         /// </summary>
         public float RecBottomY { get; set; }
@@ -24681,7 +24695,7 @@ namespace Asv.Mavlink.V2.Common
         public byte SwVersionMinor { get; set; }
     }
     /// <summary>
-    /// Request to read the value of a parameter with either the param_id string id or param_index. PARAM_EXT_VALUE or PARAM_EXT_VALUE_TRIMMED should be emitted in response (see field: trimmed).
+    /// Request to read the value of a parameter with either the param_id string id or param_index. PARAM_EXT_VALUE should be emitted in response.
     ///  PARAM_EXT_REQUEST_READ
     /// </summary>
     public class ParamExtRequestReadPacket: PacketV2<ParamExtRequestReadPayload>
@@ -24700,7 +24714,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ParamExtRequestReadPayload : IPayload
     {
-        public byte GetMaxByteSize() => 21;
+        public byte GetMaxByteSize() => 20;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -24710,13 +24724,10 @@ namespace Asv.Mavlink.V2.Common
             ParamIndex = BitConverter.ToInt16(buffer,index);index+=2;
             TargetSystem = (byte)buffer[index++];
             TargetComponent = (byte)buffer[index++];
-            arraySize = /*ArrayLength*/16 - Math.Max(0,((/*PayloadByteSize*/21 - payloadSize - /*ExtendedFieldsLength*/1)/1 /*FieldTypeByteSize*/));
+            arraySize = /*ArrayLength*/16 - Math.Max(0,((/*PayloadByteSize*/20 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
             ParamId = new char[arraySize];
             Encoding.ASCII.GetChars(buffer, index,arraySize,ParamId,0);
             index+=arraySize;
-            // extended field 'Trimmed' can be empty
-            if (index >= endIndex) return;
-            Trimmed = (byte)buffer[index++];
         }
 
         public int Serialize(byte[] buffer, int index)
@@ -24726,8 +24737,7 @@ namespace Asv.Mavlink.V2.Common
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
             index+=Encoding.ASCII.GetBytes(ParamId,0,ParamId.Length,buffer,index);
-            BitConverter.GetBytes(Trimmed).CopyTo(buffer, index);index+=1;
-            return index - start; // /*PayloadByteSize*/21;
+            return index - start; // /*PayloadByteSize*/20;
         }
 
         /// <summary>
@@ -24751,14 +24761,9 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public char[] ParamId { get; set; } = new char[16];
         public byte GetParamIdMaxItemsCount() => 16;
-        /// <summary>
-        /// Request _TRIMMED variants of PARAM_EXT_ messages. Set to 1 if _TRIMMED message variants are supported, and 0 otherwise. This signals the recipient that _TRIMMED messages are supported by the sender (and should be used if supported by the recipient).
-        /// OriginName: trimmed, Units: , IsExtended: true
-        /// </summary>
-        public byte Trimmed { get; set; }
     }
     /// <summary>
-    /// Request all parameters of this component. All parameters should be emitted in response (as PARAM_EXT_VALUE or PARAM_EXT_VALUE_TRIMMED messages - see field: trimmed).
+    /// Request all parameters of this component. All parameters should be emitted in response as PARAM_EXT_VALUE.
     ///  PARAM_EXT_REQUEST_LIST
     /// </summary>
     public class ParamExtRequestListPacket: PacketV2<ParamExtRequestListPayload>
@@ -24777,7 +24782,7 @@ namespace Asv.Mavlink.V2.Common
     /// </summary>
     public class ParamExtRequestListPayload : IPayload
     {
-        public byte GetMaxByteSize() => 3;
+        public byte GetMaxByteSize() => 2;
 
         public void Deserialize(byte[] buffer, int offset, int payloadSize)
         {
@@ -24786,9 +24791,6 @@ namespace Asv.Mavlink.V2.Common
             var arraySize = 0;
             TargetSystem = (byte)buffer[index++];
             TargetComponent = (byte)buffer[index++];
-            // extended field 'Trimmed' can be empty
-            if (index >= endIndex) return;
-            Trimmed = (byte)buffer[index++];
         }
 
         public int Serialize(byte[] buffer, int index)
@@ -24796,8 +24798,7 @@ namespace Asv.Mavlink.V2.Common
 		var start = index;
             BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
             BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes(Trimmed).CopyTo(buffer, index);index+=1;
-            return index - start; // /*PayloadByteSize*/3;
+            return index - start; // /*PayloadByteSize*/2;
         }
 
         /// <summary>
@@ -24810,11 +24811,6 @@ namespace Asv.Mavlink.V2.Common
         /// OriginName: target_component, Units: , IsExtended: false
         /// </summary>
         public byte TargetComponent { get; set; }
-        /// <summary>
-        /// Request _TRIMMED variants of PARAM_EXT_ messages. Set to 1 if _TRIMMED message variants are supported, and 0 otherwise. This signals the recipient that _TRIMMED messages are supported by the sender (and should be used if supported by the recipient).
-        /// OriginName: trimmed, Units: , IsExtended: true
-        /// </summary>
-        public byte Trimmed { get; set; }
     }
     /// <summary>
     /// Emit the value of a parameter. The inclusion of param_count and param_index in the message allows the recipient to keep track of received parameters and allows them to re-request missing parameters after a loss or timeout.
@@ -25039,230 +25035,6 @@ namespace Asv.Mavlink.V2.Common
         /// OriginName: param_result, Units: , IsExtended: false
         /// </summary>
         public ParamAck ParamResult { get; set; }
-    }
-    /// <summary>
-    /// Emit the value of a parameter. The inclusion of param_count and param_index in the message allows the recipient to keep track of received parameters and allows them to re-request missing parameters after a loss or timeout. Replacement for PARAM_EXT_VALUE.
-    ///  PARAM_EXT_VALUE_TRIMMED
-    /// </summary>
-    public class ParamExtValueTrimmedPacket: PacketV2<ParamExtValueTrimmedPayload>
-    {
-	    public const int PacketMessageId = 325;
-        public override int MessageId => PacketMessageId;
-        public override byte GetCrcEtra() => 132;
-
-        public override ParamExtValueTrimmedPayload Payload { get; } = new ParamExtValueTrimmedPayload();
-
-        public override string Name => "PARAM_EXT_VALUE_TRIMMED";
-    }
-
-    /// <summary>
-    ///  PARAM_EXT_VALUE_TRIMMED
-    /// </summary>
-    public class ParamExtValueTrimmedPayload : IPayload
-    {
-        public byte GetMaxByteSize() => 149;
-
-        public void Deserialize(byte[] buffer, int offset, int payloadSize)
-        {
-            var index = offset;
-            var endIndex = offset + payloadSize;
-            var arraySize = 0;
-            ParamCount = BitConverter.ToUInt16(buffer,index);index+=2;
-            ParamIndex = BitConverter.ToUInt16(buffer,index);index+=2;
-            ParamType = (MavParamExtType)buffer[index++];
-            arraySize = 16;
-            Encoding.ASCII.GetChars(buffer, index,arraySize,ParamId,0);
-            index+=arraySize;
-            arraySize = /*ArrayLength*/128 - Math.Max(0,((/*PayloadByteSize*/149 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
-            ParamValue = new char[arraySize];
-            Encoding.ASCII.GetChars(buffer, index,arraySize,ParamValue,0);
-            index+=arraySize;
-        }
-
-        public int Serialize(byte[] buffer, int index)
-        {
-		var start = index;
-            BitConverter.GetBytes(ParamCount).CopyTo(buffer, index);index+=2;
-            BitConverter.GetBytes(ParamIndex).CopyTo(buffer, index);index+=2;
-            buffer[index] = (byte)ParamType;index+=1;
-            index+=Encoding.ASCII.GetBytes(ParamId,0,ParamId.Length,buffer,index);
-            index+=Encoding.ASCII.GetBytes(ParamValue,0,ParamValue.Length,buffer,index);
-            return index - start; // /*PayloadByteSize*/149;
-        }
-
-        /// <summary>
-        /// Total number of parameters
-        /// OriginName: param_count, Units: , IsExtended: false
-        /// </summary>
-        public ushort ParamCount { get; set; }
-        /// <summary>
-        /// Index of this parameter
-        /// OriginName: param_index, Units: , IsExtended: false
-        /// </summary>
-        public ushort ParamIndex { get; set; }
-        /// <summary>
-        /// Parameter type.
-        /// OriginName: param_type, Units: , IsExtended: false
-        /// </summary>
-        public MavParamExtType ParamType { get; set; }
-        /// <summary>
-        /// Parameter id, terminated by NULL if the length is less than 16 human-readable chars and WITHOUT null termination (NULL) byte if the length is exactly 16 chars - applications have to provide 16+1 bytes storage if the ID is stored as string
-        /// OriginName: param_id, Units: , IsExtended: false
-        /// </summary>
-        public char[] ParamId { get; } = new char[16];
-        /// <summary>
-        /// Parameter value (zeros get trimmed)
-        /// OriginName: param_value, Units: , IsExtended: false
-        /// </summary>
-        public char[] ParamValue { get; set; } = new char[128];
-        public byte GetParamValueMaxItemsCount() => 128;
-    }
-    /// <summary>
-    /// Set a parameter value. In order to deal with message loss (and retransmission of PARAM_EXT_SET_TRIMMED), when setting a parameter value and the new value is the same as the current value, you will immediately get a PARAM_ACK_ACCEPTED response. If the current state is PARAM_ACK_IN_PROGRESS, you will accordingly receive a PARAM_ACK_IN_PROGRESS in response. If there is no response to this message, and it is unknown whether the _TRIMMED messages are supported (because no PARAM_EXT_REQUEST_READ or PARAM_EXT_REQUEST_LIST has been performed yet), then fall back to PARAM_EXT_SET.
-    ///  PARAM_EXT_SET_TRIMMED
-    /// </summary>
-    public class ParamExtSetTrimmedPacket: PacketV2<ParamExtSetTrimmedPayload>
-    {
-	    public const int PacketMessageId = 326;
-        public override int MessageId => PacketMessageId;
-        public override byte GetCrcEtra() => 120;
-
-        public override ParamExtSetTrimmedPayload Payload { get; } = new ParamExtSetTrimmedPayload();
-
-        public override string Name => "PARAM_EXT_SET_TRIMMED";
-    }
-
-    /// <summary>
-    ///  PARAM_EXT_SET_TRIMMED
-    /// </summary>
-    public class ParamExtSetTrimmedPayload : IPayload
-    {
-        public byte GetMaxByteSize() => 147;
-
-        public void Deserialize(byte[] buffer, int offset, int payloadSize)
-        {
-            var index = offset;
-            var endIndex = offset + payloadSize;
-            var arraySize = 0;
-            TargetSystem = (byte)buffer[index++];
-            TargetComponent = (byte)buffer[index++];
-            ParamType = (MavParamExtType)buffer[index++];
-            arraySize = 16;
-            Encoding.ASCII.GetChars(buffer, index,arraySize,ParamId,0);
-            index+=arraySize;
-            arraySize = /*ArrayLength*/128 - Math.Max(0,((/*PayloadByteSize*/147 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
-            ParamValue = new char[arraySize];
-            Encoding.ASCII.GetChars(buffer, index,arraySize,ParamValue,0);
-            index+=arraySize;
-        }
-
-        public int Serialize(byte[] buffer, int index)
-        {
-		var start = index;
-            BitConverter.GetBytes(TargetSystem).CopyTo(buffer, index);index+=1;
-            BitConverter.GetBytes(TargetComponent).CopyTo(buffer, index);index+=1;
-            buffer[index] = (byte)ParamType;index+=1;
-            index+=Encoding.ASCII.GetBytes(ParamId,0,ParamId.Length,buffer,index);
-            index+=Encoding.ASCII.GetBytes(ParamValue,0,ParamValue.Length,buffer,index);
-            return index - start; // /*PayloadByteSize*/147;
-        }
-
-        /// <summary>
-        /// System ID
-        /// OriginName: target_system, Units: , IsExtended: false
-        /// </summary>
-        public byte TargetSystem { get; set; }
-        /// <summary>
-        /// Component ID
-        /// OriginName: target_component, Units: , IsExtended: false
-        /// </summary>
-        public byte TargetComponent { get; set; }
-        /// <summary>
-        /// Parameter type.
-        /// OriginName: param_type, Units: , IsExtended: false
-        /// </summary>
-        public MavParamExtType ParamType { get; set; }
-        /// <summary>
-        /// Parameter id, terminated by NULL if the length is less than 16 human-readable chars and WITHOUT null termination (NULL) byte if the length is exactly 16 chars - applications have to provide 16+1 bytes storage if the ID is stored as string
-        /// OriginName: param_id, Units: , IsExtended: false
-        /// </summary>
-        public char[] ParamId { get; } = new char[16];
-        /// <summary>
-        /// Parameter value (zeros get trimmed)
-        /// OriginName: param_value, Units: , IsExtended: false
-        /// </summary>
-        public char[] ParamValue { get; set; } = new char[128];
-        public byte GetParamValueMaxItemsCount() => 128;
-    }
-    /// <summary>
-    /// Response from a PARAM_EXT_SET_TRIMMED message.
-    ///  PARAM_EXT_ACK_TRIMMED
-    /// </summary>
-    public class ParamExtAckTrimmedPacket: PacketV2<ParamExtAckTrimmedPayload>
-    {
-	    public const int PacketMessageId = 327;
-        public override int MessageId => PacketMessageId;
-        public override byte GetCrcEtra() => 129;
-
-        public override ParamExtAckTrimmedPayload Payload { get; } = new ParamExtAckTrimmedPayload();
-
-        public override string Name => "PARAM_EXT_ACK_TRIMMED";
-    }
-
-    /// <summary>
-    ///  PARAM_EXT_ACK_TRIMMED
-    /// </summary>
-    public class ParamExtAckTrimmedPayload : IPayload
-    {
-        public byte GetMaxByteSize() => 146;
-
-        public void Deserialize(byte[] buffer, int offset, int payloadSize)
-        {
-            var index = offset;
-            var endIndex = offset + payloadSize;
-            var arraySize = 0;
-            ParamResult = (ParamAck)buffer[index++];
-            ParamType = (MavParamExtType)buffer[index++];
-            arraySize = 16;
-            Encoding.ASCII.GetChars(buffer, index,arraySize,ParamId,0);
-            index+=arraySize;
-            arraySize = /*ArrayLength*/128 - Math.Max(0,((/*PayloadByteSize*/146 - payloadSize - /*ExtendedFieldsLength*/0)/1 /*FieldTypeByteSize*/));
-            ParamValue = new char[arraySize];
-            Encoding.ASCII.GetChars(buffer, index,arraySize,ParamValue,0);
-            index+=arraySize;
-        }
-
-        public int Serialize(byte[] buffer, int index)
-        {
-		var start = index;
-            buffer[index] = (byte)ParamResult;index+=1;
-            buffer[index] = (byte)ParamType;index+=1;
-            index+=Encoding.ASCII.GetBytes(ParamId,0,ParamId.Length,buffer,index);
-            index+=Encoding.ASCII.GetBytes(ParamValue,0,ParamValue.Length,buffer,index);
-            return index - start; // /*PayloadByteSize*/146;
-        }
-
-        /// <summary>
-        /// Result code.
-        /// OriginName: param_result, Units: , IsExtended: false
-        /// </summary>
-        public ParamAck ParamResult { get; set; }
-        /// <summary>
-        /// Parameter type.
-        /// OriginName: param_type, Units: , IsExtended: false
-        /// </summary>
-        public MavParamExtType ParamType { get; set; }
-        /// <summary>
-        /// Parameter id, terminated by NULL if the length is less than 16 human-readable chars and WITHOUT null termination (NULL) byte if the length is exactly 16 chars - applications have to provide 16+1 bytes storage if the ID is stored as string
-        /// OriginName: param_id, Units: , IsExtended: false
-        /// </summary>
-        public char[] ParamId { get; } = new char[16];
-        /// <summary>
-        /// Parameter value (new value if PARAM_ACK_ACCEPTED, current value otherwise, zeros get trimmed)
-        /// OriginName: param_value, Units: , IsExtended: false
-        /// </summary>
-        public char[] ParamValue { get; set; } = new char[128];
-        public byte GetParamValueMaxItemsCount() => 128;
     }
     /// <summary>
     /// Obstacle distances in front of the sensor, starting from the left in increment degrees to the right
@@ -26633,7 +26405,7 @@ namespace Asv.Mavlink.V2.Common
         /// </summary>
         public int CapacityFull { get; set; }
         /// <summary>
-        /// Charge/discharge cycle count. -1: field not provided.
+        /// Charge/discharge cycle count. UINT16_MAX: field not provided.
         /// OriginName: cycle_count, Units: , IsExtended: false
         /// </summary>
         public ushort CycleCount { get; set; }

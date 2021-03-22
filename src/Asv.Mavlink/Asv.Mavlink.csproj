@@ -127,6 +127,7 @@
     <Compile Include="Connection\Dialects\all.cs" />
     <Compile Include="Connection\Dialects\ardupilotmega.cs" />
     <Compile Include="Connection\Dialects\common.cs" />
+    <Compile Include="Connection\Dialects\development.cs" />
     <Compile Include="Connection\Dialects\icarous.cs" />
     <Compile Include="Connection\Dialects\minimal.cs" />
     <Compile Include="Connection\Dialects\python_array_test.cs" />

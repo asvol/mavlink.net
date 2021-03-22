@@ -6,23 +6,39 @@ using System.Windows;
 
 namespace Asv.Mavlink
 {
-    
-
     public class PiecewiseLinearFunction:IEnumerable<KeyValuePair<double,double>>
     {
         private readonly double[,] _values;
+        private readonly bool _isScaleForOnePoint;
 
-
-        public PiecewiseLinearFunction(double[,] values)
+        public PiecewiseLinearFunction(double[,] values, bool isScaleForOnePoint = false)
         {
             _values = values;
+            _isScaleForOnePoint = isScaleForOnePoint;
         }
 
         public double this[double value]
         {
             get
             {
-                if (_values.Length < 4) throw new Exception("Need 2 or more points");
+                // If values is empty, return F(x) = x
+                if (_values.Length == 0) return value;
+
+                // if contain 1 point, then 
+                if (_values.Length == 2)
+                {
+                    // if scale then return F(x) = k*x 
+                    if (_isScaleForOnePoint)
+                    {
+                        return value * _values[0, 1] / _values[0, 0];
+                    }
+                    // if offset then return F(x) = b + x 
+                    else
+                    {
+                        return _values[0, 1] + value;
+                    }
+                }
+
                 var first = true;
                 double x2;
                 double x3;
@@ -31,7 +47,7 @@ namespace Asv.Mavlink
                 double num;
                 var prev = new KeyValuePair<double, double>();
 
-                for (int i = 0; i < _values.Length/_values.Rank; i++)
+                for (var i = 0; i < _values.Length/_values.Rank; i++)
                 {
                     if (value < _values[i,0])
                     {

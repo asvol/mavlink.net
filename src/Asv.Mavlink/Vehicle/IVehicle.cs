@@ -119,8 +119,16 @@ namespace Asv.Mavlink
 
         IRxValue<VehicleClass> Class { get; }
 
-        IRxValue<GeoPoint> GpsLocation { get; }
+        /// <summary>
+        /// The filtered global position (e.g. fused GPS and accelerometers). 
+        /// </summary>
+        IRxValue<GeoPoint> GlobalPosition { get; }
+
         IRxValue<GpsInfo> GpsInfo { get; }
+        IRxValue<double> GpsGroundVelocity { get; }
+
+        IRxValue<GpsInfo> Gps2Info { get; }
+        IRxValue<double> Gps2GroundVelocity { get; }
 
         IRxValue<double> AltitudeAboveHome { get; }
 
@@ -149,7 +157,7 @@ namespace Asv.Mavlink
         IRxValue<double> CpuLoad { get; }
         IRxValue<double> DropRateCommunication { get; }
 
-        IRxValue<double> GroundVelocity { get; }
+        
         
         IEnumerable<VehicleCustomMode> AvailableModes { get; }
         IRxValue<VehicleMode> Mode { get; }

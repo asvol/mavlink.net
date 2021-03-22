@@ -95,6 +95,7 @@ namespace Asv.Mavlink.V2.Ardupilotmega
             src.Register(()=>new OsdParamConfigReplyPacket());
             src.Register(()=>new OsdParamShowConfigPacket());
             src.Register(()=>new OsdParamShowConfigReplyPacket());
+            src.Register(()=>new ObstacleDistance3dPacket());
         }
     }
 
@@ -186,6 +187,18 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// MAV_CMD_DO_SET_RESUME_REPEAT_DIST
         /// </summary>
         MavCmdDoSetResumeRepeatDist = 215,
+        /// <summary>
+        /// Control attached liquid sprayer
+        /// Param 1 - 0: disable sprayer. 1: enable sprayer.
+        /// Param 2 - Empty.
+        /// Param 3 - Empty.
+        /// Param 4 - Empty.
+        /// Param 5 - Empty.
+        /// Param 6 - Empty.
+        /// Param 7 - Empty.
+        /// MAV_CMD_DO_SPRAYER
+        /// </summary>
+        MavCmdDoSprayer = 216,
         /// <summary>
         /// Mission command to wait for an altitude or downwards vertical speed. This is meant for high altitude balloon launches, allowing the aircraft to be idle until either an altitude is reached or a negative vertical speed is reached (indicating early balloon burst). The wiggle time is how often to wiggle the control surfaces to prevent them seizing up.
         /// Param 1 - Altitude.
@@ -1784,6 +1797,10 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// PLANE_MODE_QACRO
         /// </summary>
         PlaneModeQacro = 23,
+        /// <summary>
+        /// PLANE_MODE_THERMAL
+        /// </summary>
+        PlaneModeThermal = 24,
     }
 
     /// <summary>
@@ -6487,13 +6504,13 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// </summary>
         public ulong TimeDeltaUsec { get; set; }
         /// <summary>
-        /// Defines a rotation vector in body frame that rotates the vehicle from the previous to the current orientation.
-        /// OriginName: angle_delta, Units: , IsExtended: false
+        /// Defines a rotation vector [roll, pitch, yaw] to the current MAV_FRAME_BODY_FRD from the previous MAV_FRAME_BODY_FRD.
+        /// OriginName: angle_delta, Units: rad, IsExtended: false
         /// </summary>
         public float[] AngleDelta { get; set; } = new float[3];
         public byte GetAngleDeltaMaxItemsCount() => 3;
         /// <summary>
-        /// Change in position from previous to current frame rotated into body frame (0=forward, 1=right, 2=down).
+        /// Change in position to the current MAV_FRAME_BODY_FRD from the previous FRAME_BODY_FRD rotated to the current MAV_FRAME_BODY_FRD.
         /// OriginName: position_delta, Units: m, IsExtended: false
         /// </summary>
         public float[] PositionDelta { get; } = new float[3];
@@ -7245,6 +7262,105 @@ namespace Asv.Mavlink.V2.Ardupilotmega
         /// OriginName: config_type, Units: , IsExtended: false
         /// </summary>
         public OsdParamConfigType ConfigType { get; set; }
+    }
+    /// <summary>
+    /// Obstacle located as a 3D vector.
+    ///  OBSTACLE_DISTANCE_3D
+    /// </summary>
+    public class ObstacleDistance3dPacket: PacketV2<ObstacleDistance3dPayload>
+    {
+	    public const int PacketMessageId = 11037;
+        public override int MessageId => PacketMessageId;
+        public override byte GetCrcEtra() => 130;
+
+        public override ObstacleDistance3dPayload Payload { get; } = new ObstacleDistance3dPayload();
+
+        public override string Name => "OBSTACLE_DISTANCE_3D";
+    }
+
+    /// <summary>
+    ///  OBSTACLE_DISTANCE_3D
+    /// </summary>
+    public class ObstacleDistance3dPayload : IPayload
+    {
+        public byte GetMaxByteSize() => 28;
+
+        public void Deserialize(byte[] buffer, int offset, int payloadSize)
+        {
+            var index = offset;
+            var endIndex = offset + payloadSize;
+            var arraySize = 0;
+            TimeBootMs = BitConverter.ToUInt32(buffer,index);index+=4;
+            X = BitConverter.ToSingle(buffer, index);index+=4;
+            Y = BitConverter.ToSingle(buffer, index);index+=4;
+            Z = BitConverter.ToSingle(buffer, index);index+=4;
+            MinDistance = BitConverter.ToSingle(buffer, index);index+=4;
+            MaxDistance = BitConverter.ToSingle(buffer, index);index+=4;
+            ObstacleId = BitConverter.ToUInt16(buffer,index);index+=2;
+            SensorType = (MavDistanceSensor)buffer[index++];
+            Frame = (MavFrame)buffer[index++];
+        }
+
+        public int Serialize(byte[] buffer, int index)
+        {
+		var start = index;
+            BitConverter.GetBytes(TimeBootMs).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(X).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(Y).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(Z).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(MinDistance).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(MaxDistance).CopyTo(buffer, index);index+=4;
+            BitConverter.GetBytes(ObstacleId).CopyTo(buffer, index);index+=2;
+            buffer[index] = (byte)SensorType;index+=1;
+            buffer[index] = (byte)Frame;index+=1;
+            return index - start; // /*PayloadByteSize*/28;
+        }
+
+        /// <summary>
+        /// Timestamp (time since system boot).
+        /// OriginName: time_boot_ms, Units: ms, IsExtended: false
+        /// </summary>
+        public uint TimeBootMs { get; set; }
+        /// <summary>
+        ///  X position of the obstacle.
+        /// OriginName: x, Units: m, IsExtended: false
+        /// </summary>
+        public float X { get; set; }
+        /// <summary>
+        ///  Y position of the obstacle.
+        /// OriginName: y, Units: m, IsExtended: false
+        /// </summary>
+        public float Y { get; set; }
+        /// <summary>
+        ///  Z position of the obstacle.
+        /// OriginName: z, Units: m, IsExtended: false
+        /// </summary>
+        public float Z { get; set; }
+        /// <summary>
+        /// Minimum distance the sensor can measure.
+        /// OriginName: min_distance, Units: m, IsExtended: false
+        /// </summary>
+        public float MinDistance { get; set; }
+        /// <summary>
+        /// Maximum distance the sensor can measure.
+        /// OriginName: max_distance, Units: m, IsExtended: false
+        /// </summary>
+        public float MaxDistance { get; set; }
+        /// <summary>
+        ///  Unique ID given to each obstacle so that its movement can be tracked. Use UINT16_MAX if object ID is unknown or cannot be determined.
+        /// OriginName: obstacle_id, Units: , IsExtended: false
+        /// </summary>
+        public ushort ObstacleId { get; set; }
+        /// <summary>
+        /// Class id of the distance sensor type.
+        /// OriginName: sensor_type, Units: , IsExtended: false
+        /// </summary>
+        public MavDistanceSensor SensorType { get; set; }
+        /// <summary>
+        /// Coordinate frame of reference.
+        /// OriginName: frame, Units: , IsExtended: false
+        /// </summary>
+        public MavFrame Frame { get; set; }
     }
 
 

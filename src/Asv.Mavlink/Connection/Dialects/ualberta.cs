@@ -50,27 +50,27 @@ namespace Asv.Mavlink.V2.Ualberta
         /// Raw input pulse widts sent to output
         /// MODE_MANUAL_DIRECT
         /// </summary>
-        ModeManualDirect = 0,
+        ModeManualDirect = 1,
         /// <summary>
         /// Inputs are normalized using calibration, the converted back to raw pulse widths for output
         /// MODE_MANUAL_SCALED
         /// </summary>
-        ModeManualScaled = 1,
+        ModeManualScaled = 2,
         /// <summary>
         ///  dfsdfs
         /// MODE_AUTO_PID_ATT
         /// </summary>
-        ModeAutoPidAtt = 2,
+        ModeAutoPidAtt = 3,
         /// <summary>
         ///  dfsfds
         /// MODE_AUTO_PID_VEL
         /// </summary>
-        ModeAutoPidVel = 3,
+        ModeAutoPidVel = 4,
         /// <summary>
         ///  dfsdfsdfs
         /// MODE_AUTO_PID_POS
         /// </summary>
-        ModeAutoPidPos = 4,
+        ModeAutoPidPos = 5,
     }
 
     /// <summary>
@@ -82,22 +82,22 @@ namespace Asv.Mavlink.V2.Ualberta
         /// <summary>
         /// NAV_AHRS_INIT
         /// </summary>
-        NavAhrsInit = 0,
+        NavAhrsInit = 1,
         /// <summary>
         /// AHRS mode
         /// NAV_AHRS
         /// </summary>
-        NavAhrs = 1,
+        NavAhrs = 2,
         /// <summary>
         /// INS/GPS initialization mode
         /// NAV_INS_GPS_INIT
         /// </summary>
-        NavInsGpsInit = 2,
+        NavInsGpsInit = 3,
         /// <summary>
         /// INS/GPS mode
         /// NAV_INS_GPS
         /// </summary>
-        NavInsGps = 3,
+        NavInsGps = 4,
     }
 
     /// <summary>
@@ -110,17 +110,17 @@ namespace Asv.Mavlink.V2.Ualberta
         ///  sdf
         /// PILOT_MANUAL
         /// </summary>
-        PilotManual = 0,
+        PilotManual = 1,
         /// <summary>
         ///  dfs
         /// PILOT_AUTO
         /// </summary>
-        PilotAuto = 1,
+        PilotAuto = 2,
         /// <summary>
         ///  Rotomotion mode 
         /// PILOT_ROTO
         /// </summary>
-        PilotRoto = 2,
+        PilotRoto = 3,
     }
 
 
