@@ -331,7 +331,7 @@ namespace Asv.Mavlink
             DisposeCancel.Token.Register(() => _globalPosition.Dispose());
 
 
-            _mavlink.Rtt.RawGpsRawInt.Select(_ => new GpsInfo(_)).Subscribe(_gpsInfo, DisposeCancel.Token);
+            _mavlink.Rtt.RawGpsRawInt.IgnoreObserverExceptions().Select(_ => new GpsInfo(_)).Subscribe(_gpsInfo, DisposeCancel.Token);
             _mavlink.Rtt.RawGpsRawInt.Select(_ => _.Vel / 100D).Subscribe(_gVelocity, DisposeCancel.Token);
             DisposeCancel.Token.Register(() => _gVelocity.Dispose());
             DisposeCancel.Token.Register(() => _gpsInfo.Dispose());
@@ -631,6 +631,17 @@ namespace Asv.Mavlink
             ValidateCommandResult(res);
         }
 
+        public abstract Task<FlightTimeStatistic> GetFlightTimeStatistic(CancellationToken cancel);
+
+        public abstract Task ResetFlightStatistic(CancellationToken cancel);
+
+        #endregion
+
+        #region Fail safe
+
+        public abstract IEnumerable<FailSafeInfo> AvailableFailSafe { get; }
+        public abstract Task<FailSafeState[]> ReadFailSafe(CancellationToken cancel = default);
+        public abstract Task WriteFailSafe(IReadOnlyDictionary<string, bool> values, CancellationToken cancel = default);
 
         #endregion
 

@@ -10,6 +10,11 @@ namespace Asv.Mavlink.Client
         public byte ComponentId { get; set; } = 254;
         public byte TargetSystemId { get; set; } = 1;
         public byte TargetComponentId { get; set; } = 1;
+
+        public override string ToString()
+        {
+            return $"SYS:{SystemId};COM:{ComponentId};Target SYS:{TargetSystemId};COM:{TargetComponentId}";
+        }
     }
 
     public class MavlinkClientConfig

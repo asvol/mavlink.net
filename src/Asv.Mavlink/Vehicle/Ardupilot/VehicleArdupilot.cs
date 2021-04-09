@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -19,6 +19,7 @@ namespace Asv.Mavlink
     {
         private readonly IMavlinkClient _mavlink;
         private readonly VehicleBaseConfig _config;
+        private const int DefaultAttemptToReadCount = 3;
 
 
         protected VehicleArdupilot(IMavlinkClient mavlink, VehicleBaseConfig config) : base(mavlink, config)
@@ -84,6 +85,29 @@ namespace Asv.Mavlink
                 await base.ArmDisarm(isArming, cancel);
             }
         }
+        /// <summary>
+        /// https://ardupilot.org/copter/docs/common-flight-time-recorder.html
+        /// ArduPilot includes a flight time recorder which records the board’s total flight time, total run time and number of times the board has been rebooted. These are stored in user resettable parameters meaning they are not protected from being tampered with.
+        /// </summary>
+        /// <param name="cancel"></param>
+        /// <returns></returns>
+        public override async Task<FlightTimeStatistic> GetFlightTimeStatistic(CancellationToken cancel = default(CancellationToken))
+        {
+            var stat = new FlightTimeStatistic
+            {
+                BootCount = (await Params.ReadParam("STAT_BOOTCNT", DefaultAttemptToReadCount,cancel)).IntegerValue.Value,
+                FlightTime = TimeSpan.FromSeconds((double) (await Params.ReadParam("STAT_FLTTIME", DefaultAttemptToReadCount, cancel)).IntegerValue),
+                RunTime = TimeSpan.FromSeconds((double) (await Params.ReadParam("STAT_RUNTIME", DefaultAttemptToReadCount, cancel)).IntegerValue),
+            };
+            return stat;
+        }
+
+        public override async Task ResetFlightStatistic(CancellationToken cancel)
+        {
+            var result = await Params.ReadParam("STAT_BOOTCNT", DefaultAttemptToReadCount, cancel);
+            result.IntegerValue = 0;
+            await Params.WriteParam(result, DefaultAttemptToReadCount, cancel);
+        }
 
         public override async Task TakeOff(double altitude, CancellationToken cancel)
         {
@@ -104,4 +128,6 @@ namespace Asv.Mavlink
             
         }
     }
+
+    
 }

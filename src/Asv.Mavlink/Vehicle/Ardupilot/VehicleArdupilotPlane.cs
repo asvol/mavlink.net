@@ -286,6 +286,18 @@ namespace Asv.Mavlink
             return Mavlink.Common.SetMode(1, (int)PlaneMode.PlaneModeRtl, cancel);
         }
 
+        public override IEnumerable<FailSafeInfo> AvailableFailSafe { get; }
+
+        public override Task<FailSafeState[]> ReadFailSafe(CancellationToken cancel = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task WriteFailSafe(IReadOnlyDictionary<string, bool> values, CancellationToken cancel = default)
+        {
+            throw new NotImplementedException();
+        }
+
         public override void StartListen()
         {
             base.StartListen();

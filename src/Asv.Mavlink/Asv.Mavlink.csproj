@@ -200,6 +200,7 @@
     <Compile Include="Tools\RxCollection\RxCollection.cs" />
     <Compile Include="Tools\RxCollection\SynchronizedList.cs" />
     <Compile Include="Tools\RxValue\CancellationWrapper.cs" />
+    <Compile Include="Tools\RxValue\ObserverHelper.cs" />
     <Compile Include="Tools\Streams\JsonStreamBase.cs" />
     <Compile Include="Tools\Streams\IJsonStream.cs" />
     <Compile Include="Tools\Streams\ITextStream.cs" />
