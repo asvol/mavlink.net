@@ -9,7 +9,8 @@ namespace Asv.Mavlink
 
         public GpsInfo(GpsRawIntPayload rawGps)
         {
-            
+            if (rawGps.FixType == GpsFixType.GpsFixTypeNoGps) return;
+
             Vdop = rawGps.Epv == ushort.MaxValue ? (double?)null : rawGps.Epv / 100D;
             Hdop = rawGps.Eph == ushort.MaxValue ? (double?)null : rawGps.Eph / 100D;
             Pdop = Hdop.HasValue && Vdop.HasValue
@@ -25,6 +26,8 @@ namespace Asv.Mavlink
 
         public GpsInfo(Gps2RawPayload rawGps)
         {
+            if (rawGps.FixType == GpsFixType.GpsFixTypeNoGps) return;
+
             Vdop = rawGps.Epv == ushort.MaxValue ? (double?)null : rawGps.Epv / 100D;
             Hdop = rawGps.Eph == ushort.MaxValue ? (double?)null : rawGps.Eph / 100D;
             Pdop = Hdop.HasValue && Vdop.HasValue
@@ -35,7 +38,14 @@ namespace Asv.Mavlink
             CourseOverGround = rawGps.Cog / 100D;
             FixType = rawGps.FixType;
             SatellitesVisible = rawGps.SatellitesVisible;
-            Time = Epoch.AddSeconds(rawGps.TimeUsec);
+
+            // check because sometime argument out of range exception
+            var num = (long)(rawGps.TimeUsec * (double)1000 + (rawGps.TimeUsec >= 0.0 ? 0.5 : -0.5));
+            if (num > -315537897600000L || num < 315537897600000L)
+            {
+                Time = Epoch.AddSeconds(rawGps.TimeUsec);
+            }
+            
         }
 
         /// <summary>

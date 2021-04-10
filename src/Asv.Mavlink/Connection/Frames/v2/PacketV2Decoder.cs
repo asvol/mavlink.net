@@ -167,7 +167,7 @@ namespace Asv.Mavlink.Decoder
 
         public IDisposable Subscribe(IObserver<IPacketV2<IPayload>> observer)
         {
-            return _packetSubject.Subscribe(observer);
+            return _packetSubject.IgnoreObserverExceptions().Subscribe(observer);
         }
 
         public virtual void Dispose()
