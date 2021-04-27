@@ -1,11 +1,20 @@
 using System;
-using Geodesy;
+using System.Collections.Generic;
 
 namespace Asv.Mavlink
 {
-    public static class GeoMath
+    /// <summary>
+    /// Contains mathematical functions useful when working with KML or, more
+    /// generally, geometry on a Great Circle.
+    /// </summary>
+    /// <remarks>
+    /// Many of the formulae here were copied from the Aviation Formulary
+    /// <see href="http://williams.best.vwh.net/avform.htm"/>.
+    /// </remarks>
+    public static class GeoMathOld
     {
-        private static readonly GeodeticCalculator Calculator = new GeodeticCalculator(Ellipsoid.WGS84);
+        // Equatorial = 6378137, polar = 6356752.
+        private const int EarthRadius = 6366710; // The mean radius of the Earth in meters.
 
         /// <summary>
         /// Calculates the initial azimuth (the angle measured clockwise from
@@ -24,11 +33,14 @@ namespace Asv.Mavlink
         /// </example>
         public static double Azimuth(double latitude1, double longitude1, double latitude2, double longitude2)
         {
-            var measurement = Calculator.CalculateGeodeticMeasurement(
-                new GlobalPosition(new GlobalCoordinates(new Angle(latitude1), new Angle(longitude1))),
-                new GlobalPosition(new GlobalCoordinates(new Angle(latitude2), new Angle(longitude2))));
+            latitude1 = DegreesToRadians(latitude1);
+            longitude1 = DegreesToRadians(longitude1);
+            latitude2 = DegreesToRadians(latitude2);
+            longitude2 = DegreesToRadians(longitude2);
 
-            return measurement.Azimuth.Degrees;
+            double x = (Math.Cos(latitude1) * Math.Sin(latitude2)) - (Math.Sin(latitude1) * Math.Cos(latitude2) * Math.Cos(longitude2 - longitude1));
+            double tan = Math.Atan2(Math.Sin(longitude2 - longitude1) * Math.Cos(latitude2), x);
+            return RadiansToDegrees(tan % (2 * Math.PI));
         }
 
         /// <summary>
@@ -60,11 +72,15 @@ namespace Asv.Mavlink
         /// <remarks>The antemeridian is not considered.</remarks>
         public static double Distance(double latitude1, double longitude1, double latitude2, double longitude2)
         {
-            var measurement = Calculator.CalculateGeodeticMeasurement(
-                new GlobalPosition(new GlobalCoordinates(new Angle(latitude1), new Angle(longitude1))),
-                new GlobalPosition(new GlobalCoordinates(new Angle(latitude2), new Angle(longitude2))));
+            latitude1 = DegreesToRadians(latitude1);
+            longitude1 = DegreesToRadians(longitude1);
+            latitude2 = DegreesToRadians(latitude2);
+            longitude2 = DegreesToRadians(longitude2);
 
-            return measurement.EllipsoidalDistance;
+            double latitudeSqrd = Math.Pow(Math.Sin((latitude1 - latitude2) / 2), 2);
+            double longitudeSqrd = Math.Pow(Math.Sin((longitude1 - longitude2) / 2), 2);
+            double sqrt = Math.Sqrt(latitudeSqrd + (Math.Cos(latitude1) * Math.Cos(latitude2) * longitudeSqrd));
+            return RadiansToMeters(2 * Math.Asin(sqrt));
         }
 
         /// <summary>
@@ -81,11 +97,8 @@ namespace Asv.Mavlink
         /// <remarks>The antemeridian is not considered.</remarks>
         public static double Distance(double latitude1, double longitude1, double altitude1, double latitude2, double longitude2, double altitude2)
         {
-            var measurement = Calculator.CalculateGeodeticMeasurement(
-                new GlobalPosition(new GlobalCoordinates(new Angle(latitude1), new Angle(longitude1)), altitude1),
-                new GlobalPosition(new GlobalCoordinates(new Angle(latitude2), new Angle(longitude2)), altitude2));
-            
-            return measurement.PointToPointDistance;
+            double surfaceDistance = Distance(latitude1, longitude1, latitude2, longitude2);
+            return Math.Sqrt(Math.Pow(surfaceDistance, 2) + Math.Pow(altitude2 - altitude1, 2));
         }
 
         public static double Elevation(GeoPoint p1, GeoPoint p2)
@@ -173,6 +186,7 @@ namespace Asv.Mavlink
 
         /// <summary>
         /// Находит точку на заданной линии, являющуюся пересечением перпендикуляра опущенного из заданной точки к прямой (высота не учитывается)
+        /// Работает на малых расстояниях (считается, что поверхность плоская)
         /// </summary>
         public static GeoPoint IntersectionLineAndPerpendicularFromPoint(GeoPoint lineX, GeoPoint lineY, GeoPoint p)
         {
@@ -184,6 +198,7 @@ namespace Asv.Mavlink
 
         /// <summary>
         /// Находит точку, являющуюся пересечением перпендикуляра опущенного от заданной точки к прямой, проходящей на заданном углу (высота не учитывается)
+        /// Работает на малых расстояниях (считается, что поверхность плоская)
         /// </summary>
         public static GeoPoint IntersectionLineAndPerpendicularFromPoint(GeoPoint lineX, GeoPoint lineY, double alpha)
         {
@@ -195,6 +210,7 @@ namespace Asv.Mavlink
 
         /// <summary>
         /// Находит кратчайшее расстояние (длина перпендикуляра) между точкой и заданной линией  (высота не учитывается)
+        /// Работает на малых расстояниях (считается, что поверхность плоская)
         /// </summary>
         public static double PerpendicularLength(GeoPoint lineX, GeoPoint lineY, GeoPoint p)
         {
@@ -203,6 +219,7 @@ namespace Asv.Mavlink
             return Math.Abs(d * Math.Sin(azimuth * Math.PI / 180));
         }
 
+        
         /// <summary>
         /// Calculates a point at the specified distance along a radial from a
         /// center point.
@@ -220,11 +237,20 @@ namespace Asv.Mavlink
         /// <remarks>The antemeridian is not considered.</remarks>
         public static GeoPoint RadialPoint(double latitude, double longitude, double distance, double radial)
         {
-            radial = !double.IsNaN(radial) ? radial : 0;
-            var coordinates = Calculator.CalculateEndingGlobalCoordinates(
-                new GlobalCoordinates(new Angle(latitude), new Angle(longitude)), new Angle(radial), distance);
+            latitude = DegreesToRadians(latitude);
+            longitude = DegreesToRadians(longitude);
+            distance = MetersToRadians(distance);
+            radial = DegreesToRadians(radial);
 
-            return new GeoPoint(coordinates.Latitude.Degrees, coordinates.Longitude.Degrees);
+            double latitudeDistance = Math.Cos(latitude) * Math.Sin(distance);
+            double radialLat = Math.Asin((Math.Sin(latitude) * Math.Cos(distance)) + (latitudeDistance * Math.Cos(radial)));
+
+            double y = Math.Sin(radial) * latitudeDistance;
+            double x = Math.Cos(distance) - (Math.Sin(latitude) * Math.Sin(radialLat));
+            double deltaLon = Math.Atan2(y, x);
+
+            double radialLon = ((longitude + deltaLon + Math.PI) % (2 * Math.PI)) - Math.PI;
+            return new GeoPoint(RadiansToDegrees(radialLat), RadiansToDegrees(radialLon));
         }
 
         /// <summary>Converts the specified value in radians to degrees.</summary>
@@ -241,5 +267,56 @@ namespace Asv.Mavlink
         {
             return degrees * Math.PI / 180.0;
         }
+
+        /// <summary>Converts the specified angle in radians to meters.</summary>
+        /// <param name="radians">The angle in radians</param>
+        /// <returns>The specified angle converted to meters.</returns>
+        public static double RadiansToMeters(double radians)
+        {
+            return radians * EarthRadius;
+        }
+
+        /// <summary>Converts the specified distance in meters to radians.</summary>
+        /// <param name="meters">The distance in meters.</param>
+        /// <returns>The specified distance converted to radians.</returns>
+        public static double MetersToRadians(double meters)
+        {
+            return meters / EarthRadius;
+        }
+
+        public static IEnumerable<GeoPoint> SplitIntoGeoPoints(GeoPoint startLocation, GeoPoint endLocation, int stepCount)
+        {
+            var dist = startLocation.DistanceTo(endLocation)/stepCount;
+        
+            stepCount = stepCount == 0 ? 1 : Math.Abs(stepCount);
+            
+            var vAlt = 0.0;
+            if (startLocation.Altitude.HasValue && endLocation.Altitude.HasValue)
+            {
+                vAlt = (double) ((endLocation.Altitude - startLocation.Altitude) / stepCount);
+            }
+        
+            var a = startLocation.Azimuth(endLocation);
+        
+        
+            for (var i = 0; i <= stepCount; i++)
+            {
+                yield return startLocation.RadialPoint(i* dist, a).AddAltitude(vAlt*i);
+            }
+        
+            
+        }
+
+        /// <summary>
+        /// Возвращает точку, которая находится на луче, начало которого в точке <paramref name="p1"/>
+        /// Луч проходит через точку p2. Расстояние между p1 и возвращаемой точкой равно указанному <paramref name="distance"/>
+        /// <param name="distance"> Расстояние в метрах</param>
+        /// </summary>
+        public static GeoPoint VectorMove(this GeoPoint p1, GeoPoint p2, int distance)
+        {
+            return p1.RadialPoint(distance, p1.Azimuth(p2));
+        }
+
+
     }
 }

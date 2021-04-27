@@ -53,6 +53,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Geodesy, Version=4.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\src\packages\Geodesy.4.1.0\lib\net45\Geodesy.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Threading.Tasks, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>$(SolutionDir)packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
     </Reference>
@@ -161,6 +164,8 @@
     <Compile Include="Payload\Server\MavlinkPayloadServer.cs" />
     <Compile Include="Payload\Server\PayloadOversizeException.cs" />
     <Compile Include="Payload\WellKnownDiag.cs" />
+    <Compile Include="Tools\GeoMath\GeoMath.cs" />
+    <Compile Include="Tools\GeoMath\GeoPointHelper.cs" />
     <Compile Include="Tools\PiecewiseLinearFunction.cs" />
     <Compile Include="Tools\Configuration\IConfiguration.cs" />
     <Compile Include="Tools\Configuration\Json\JsonConfiguration.cs" />
@@ -190,7 +195,7 @@
     <Compile Include="Connection\Server\V2_extention\V2ExtensionServer.cs" />
     <Compile Include="Connection\Server\V2_extention\IV2ExtensionServer.cs" />
     <Compile Include="Tools\GeoMath\Extension.cs" />
-    <Compile Include="Tools\GeoMath\GeoMath.cs" />
+    <Compile Include="Tools\GeoMath\GeoMathOld.cs" />
     <Compile Include="Tools\GeoMath\GeoPoint.cs" />
     <Compile Include="Tools\MathEx.cs" />
     <Compile Include="Tools\Platform\PlatformHelper.cs" />

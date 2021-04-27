@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 
 namespace Asv.Mavlink
@@ -52,31 +52,6 @@ namespace Asv.Mavlink
         {
             return new GeoPoint(point1.Latitude - GeoPoint.Latitude, point1.Longitude - GeoPoint.Longitude);
         }
-
-        public double DistanceTo(GeoPoint other)
-        {
-            return GeoMath.Distance(this, other);
-        }
-
-        public double AngleBetween(GeoPoint other)
-        {
-            return GeoMath.Azimuth(this, other);
-        }
-
-        public double PlanarDistance(GeoPoint other)
-        {
-            double dx = Latitude - other.Latitude;
-            double dy = Longitude - other.Longitude;
-            return (double)Math.Sqrt((dx * dx) + (dy * dy));
-        }
-        public double PlanarDistanceSquared(GeoPoint other)
-        {
-            double dx = Latitude - other.Latitude;
-            double dy = Longitude - other.Longitude;
-
-            return (dx * dx) + (dy * dy);
-        }
-
        
 
         public static bool operator <(GeoPoint p1, GeoPoint p2)
@@ -118,16 +93,6 @@ namespace Asv.Mavlink
             return string.Concat(Latitude, CultureInfo.InvariantCulture.NumberFormat.NumberGroupSeparator, Longitude);
         }
 
-        public GeoPoint AddAltitude(double alt)
-        {
-            return new GeoPoint(Latitude,Longitude,(Altitude ?? 0) + alt);
-        }
-
-        public GeoPoint SetAltitude(double alt)
-        {
-            return new GeoPoint(Latitude, Longitude, alt);
-        }
-
         public static GeoPoint Parse(string src)
         {
             var source = src.Split(CultureInfo.InvariantCulture.NumberFormat.NumberGroupSeparator);
@@ -143,6 +108,4 @@ namespace Asv.Mavlink
         }
 
     }
-    
-
 }
