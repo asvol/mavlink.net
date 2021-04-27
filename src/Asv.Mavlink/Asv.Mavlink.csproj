@@ -127,6 +127,7 @@
     <Compile Include="Connection\Dialects\all.cs" />
     <Compile Include="Connection\Dialects\ardupilotmega.cs" />
     <Compile Include="Connection\Dialects\common.cs" />
+    <Compile Include="Connection\Dialects\development.cs" />
     <Compile Include="Connection\Dialects\icarous.cs" />
     <Compile Include="Connection\Dialects\minimal.cs" />
     <Compile Include="Connection\Dialects\python_array_test.cs" />
@@ -160,6 +161,7 @@
     <Compile Include="Payload\Server\MavlinkPayloadServer.cs" />
     <Compile Include="Payload\Server\PayloadOversizeException.cs" />
     <Compile Include="Payload\WellKnownDiag.cs" />
+    <Compile Include="Tools\PiecewiseLinearFunction.cs" />
     <Compile Include="Tools\Configuration\IConfiguration.cs" />
     <Compile Include="Tools\Configuration\Json\JsonConfiguration.cs" />
     <Compile Include="Tools\Configuration\Json\JsonOneFileConfiguration.cs" />
@@ -198,6 +200,7 @@
     <Compile Include="Tools\RxCollection\RxCollection.cs" />
     <Compile Include="Tools\RxCollection\SynchronizedList.cs" />
     <Compile Include="Tools\RxValue\CancellationWrapper.cs" />
+    <Compile Include="Tools\RxValue\ObserverHelper.cs" />
     <Compile Include="Tools\Streams\JsonStreamBase.cs" />
     <Compile Include="Tools\Streams\IJsonStream.cs" />
     <Compile Include="Tools\Streams\ITextStream.cs" />

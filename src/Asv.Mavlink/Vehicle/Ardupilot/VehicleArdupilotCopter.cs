@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -10,6 +11,7 @@ using Asv.Mavlink.V2.Common;
 using Asv.Mavlink.Client;
 using Asv.Mavlink.V2.Minimal;
 using Newtonsoft.Json;
+using NLog;
 
 namespace Asv.Mavlink
 {
@@ -66,6 +68,8 @@ namespace Asv.Mavlink
 
     public class VehicleArdupilotCopter : VehicleArdupilot
     {
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
         public VehicleArdupilotCopter(IMavlinkClient mavlink, VehicleBaseConfig config) : base(mavlink, config)
         {
         }
@@ -79,6 +83,8 @@ namespace Asv.Mavlink
 
         public override IEnumerable<VehicleCustomMode> AvailableModes => GetModes();
         private VehicleCustomMode[] _modes;
+        
+
         private IEnumerable<VehicleCustomMode> GetModes()
         {
             return _modes ?? (_modes = Enum.GetValues(typeof(CopterMode)).Cast<CopterMode>()
@@ -156,5 +162,83 @@ namespace Asv.Mavlink
         {
             return Mavlink.Common.SetMode(1, (int)CopterMode.CopterModeRtl, cancel);
         }
+
+        #region Fail safe
+
+        public override IEnumerable<FailSafeInfo> AvailableFailSafe => _availableFailSafe;
+
+        private static readonly FailSafeInfo[] _availableFailSafe = new FailSafeInfo[]
+        {
+            new FailSafeInfo { Name = "All",  Description = "",  DisplayName = "All", Tag=0  },
+            new FailSafeInfo { Name = "Barometer",  Description = "",  DisplayName = "Barometer", Tag=1  },
+            new FailSafeInfo { Name = "Compass",  Description = "",  DisplayName = "Compass", Tag=2  },
+            new FailSafeInfo { Name = "GPSL",  Description = "",  DisplayName = "GPSL", Tag=3    },
+            new FailSafeInfo { Name = "INS",  Description = "",  DisplayName = "INS", Tag=4  },
+            new FailSafeInfo { Name = "Parameters",  Description = "",  DisplayName = "Parameters", Tag=5    },
+            new FailSafeInfo { Name = "RCChann",  Description = "",  DisplayName = "RCChann", Tag=6  },
+            new FailSafeInfo { Name = "BoardVoltage",  Description = "",  DisplayName = "BoardVoltage", Tag=7    },
+            new FailSafeInfo { Name = "BatteryLevel",  Description = "",  DisplayName = "BatteryLevel", Tag=8    },
+            new FailSafeInfo { Name = "LoggingAvailable",  Description = "",  DisplayName = "LoggingAvailable", Tag=9    },
+            new FailSafeInfo { Name = "HardwareSafetySwit",  Description = "",  DisplayName = "HardwareSafetySwit", Tag=10 },
+            new FailSafeInfo { Name = "GPSConfiguration",  Description = "",  DisplayName = "GPSConfiguration", Tag=11 },
+            new FailSafeInfo { Name = "System",  Description = "",  DisplayName = "System", Tag=12 },
+            new FailSafeInfo { Name = "Mission",  Description = "",  DisplayName = "Mission", Tag=13 },
+            new FailSafeInfo { Name = "Rangefinder",  Description = "",  DisplayName = "Rangefinder", Tag=14 },
+            new FailSafeInfo { Name = "Camera",  Description = "",  DisplayName = "Camera", Tag=15 },
+            new FailSafeInfo { Name = "AuxAuth",  Description = "",  DisplayName = "AuxAuth", Tag=16 },
+            new FailSafeInfo { Name = "VisualOdometry",  Description = "",  DisplayName = "VisualOdometry", Tag=17 },
+            new FailSafeInfo { Name = "FFT",  Description = "",  DisplayName = "FFT", Tag=19 },
+        };
+
+        public override async Task<FailSafeState[]> ReadFailSafe(CancellationToken cancel = default)
+        {
+            _logger.Info("Begin to read failsafe state...");
+            var value = await Mavlink.Params.ReadParam("ARMING_CHECK", 1, cancel);
+            Debug.Assert(value.IntegerValue.HasValue,"Something goes wrong. Need uin32");
+
+            _logger.Info($"Ended to read failsafe state value = {value.IntegerValue}:");
+
+            var bitArr = new BitArray(BitConverter.GetBytes((UInt32)value.IntegerValue.Value));
+            var result = new FailSafeState[_availableFailSafe.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                _logger.Debug($"FailSafe {_availableFailSafe[i].Name} = {bitArr[(int)_availableFailSafe[i].Tag]}");
+                result[i] = new FailSafeState
+                {
+                    Info = _availableFailSafe[i],
+                    Value = bitArr[(int) _availableFailSafe[i].Tag]
+                };
+            }
+
+            return result;
+        }
+
+        public override async Task WriteFailSafe(IReadOnlyDictionary<string, bool> values, CancellationToken cancel = default)
+        {
+            _logger.Info("Begin to write failsafe state...");
+            var readed = await ReadFailSafe(cancel);
+            foreach (var pair in values)
+            {
+                var founded = readed.FirstOrDefault(_ => _.Info.Name == pair.Key);
+                if (founded == null) throw new Exception($"Fail safe with key '{pair.Key}' not found. Available keys:{string.Join(",",_availableFailSafe.Select(_=>_.Name))}");
+                _logger.Info($"Chane FailSafe value {pair.Key}: {founded.Value} => {pair.Value}");
+                founded.Value = pair.Value;
+            }
+
+            var source = BitConverter.GetBytes((uint) (0));
+            var bitArr = new BitArray(source);
+            foreach (var item in readed)
+            {
+                bitArr[(int) item.Info.Tag] = item.Value;
+            }
+            bitArr.CopyTo(source, 0);
+            var value = BitConverter.ToUInt32(source, 0);
+            
+            var result = await Mavlink.Params.WriteParam("ARMING_CHECK", value , cancel);
+            _logger.Info($"End to write failsafe state Send {value}. Readed {result.IntegerValue}");
+        }
+
+        #endregion
+
     }
 }

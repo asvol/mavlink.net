@@ -28,9 +28,19 @@
     <!-- ardupilot specific MAV_CMD_* commands -->
     <enum name="MAV_CMD">
       <!-- 200 to 214 used by common.xml -->
-      <entry value="215" name="MAV_CMD_DO_SET_RESUME_REPEAT_DIST">
+      <entry value="215" name="MAV_CMD_DO_SET_RESUME_REPEAT_DIST" hasLocation="false" isDestination="false">
         <description>Set the distance to be repeated on mission resume</description>
         <param index="1" label="Distance" units="m">Distance.</param>
+        <param index="2">Empty.</param>
+        <param index="3">Empty.</param>
+        <param index="4">Empty.</param>
+        <param index="5">Empty.</param>
+        <param index="6">Empty.</param>
+        <param index="7">Empty.</param>
+      </entry>
+      <entry value="216" name="MAV_CMD_DO_SPRAYER" hasLocation="false" isDestination="false">
+        <description>Control attached liquid sprayer</description>
+        <param index="1" label="Sprayer Enable" minValue="0" maxValue="1" increment="1">0: disable sprayer. 1: enable sprayer.</param>
         <param index="2">Empty.</param>
         <param index="3">Empty.</param>
         <param index="4">Empty.</param>
@@ -962,6 +972,7 @@
       <entry value="21" name="PLANE_MODE_QRTL"/>
       <entry value="22" name="PLANE_MODE_QAUTOTUNE"/>
       <entry value="23" name="PLANE_MODE_QACRO"/>
+      <entry value="24" name="PLANE_MODE_THERMAL"/>
     </enum>
     <enum name="COPTER_MODE">
       <description>A mapping of copter flight modes for custom_mode field of heartbeat.</description>
@@ -1578,8 +1589,8 @@
       <description>Camera vision based attitude and position deltas.</description>
       <field name="time_usec" type="uint64_t" units="us">Timestamp (synced to UNIX time or since system boot).</field>
       <field name="time_delta_usec" type="uint64_t" units="us">Time since the last reported camera frame.</field>
-      <field type="float[3]" name="angle_delta">Defines a rotation vector in body frame that rotates the vehicle from the previous to the current orientation.</field>
-      <field type="float[3]" name="position_delta" units="m">Change in position from previous to current frame rotated into body frame (0=forward, 1=right, 2=down).</field>
+      <field type="float[3]" name="angle_delta" units="rad">Defines a rotation vector [roll, pitch, yaw] to the current MAV_FRAME_BODY_FRD from the previous MAV_FRAME_BODY_FRD.</field>
+      <field type="float[3]" name="position_delta" units="m">Change in position to the current MAV_FRAME_BODY_FRD from the previous FRAME_BODY_FRD rotated to the current MAV_FRAME_BODY_FRD.</field>
       <field type="float" name="confidence" units="%">Normalised confidence value from 0 to 100.</field>
     </message>
     <!-- Angle of Attack and Side Slip Angle message -->
@@ -1651,6 +1662,20 @@
       <field type="float" name="min_value">OSD parameter minimum value.</field>
       <field type="float" name="max_value">OSD parameter maximum value.</field>
       <field type="float" name="increment">OSD parameter increment.</field>
+    </message>
+    <message id="11037" name="OBSTACLE_DISTANCE_3D">
+      <wip/>
+      <!-- This message is work-in-progress and it can therefore change, and should NOT be used in stable production environments -->
+      <description>Obstacle located as a 3D vector.</description>
+      <field type="uint32_t" name="time_boot_ms" units="ms">Timestamp (time since system boot).</field>
+      <field type="uint8_t" name="sensor_type" enum="MAV_DISTANCE_SENSOR">Class id of the distance sensor type.</field>
+      <field type="uint8_t" name="frame" enum="MAV_FRAME">Coordinate frame of reference.</field>
+      <field type="uint16_t" name="obstacle_id" instance="true"> Unique ID given to each obstacle so that its movement can be tracked. Use UINT16_MAX if object ID is unknown or cannot be determined.</field>
+      <field type="float" name="x" units="m"> X position of the obstacle.</field>
+      <field type="float" name="y" units="m"> Y position of the obstacle.</field>
+      <field type="float" name="z" units="m"> Z position of the obstacle.</field>
+      <field type="float" name="min_distance" units="m">Minimum distance the sensor can measure.</field>
+      <field type="float" name="max_distance" units="m">Maximum distance the sensor can measure.</field>
     </message>
   </messages>
 </mavlink>

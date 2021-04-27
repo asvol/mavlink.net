@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.Client;
@@ -119,8 +120,16 @@ namespace Asv.Mavlink
 
         IRxValue<VehicleClass> Class { get; }
 
-        IRxValue<GeoPoint> GpsLocation { get; }
+        /// <summary>
+        /// The filtered global position (e.g. fused GPS and accelerometers). 
+        /// </summary>
+        IRxValue<GeoPoint> GlobalPosition { get; }
+
         IRxValue<GpsInfo> GpsInfo { get; }
+        IRxValue<double> GpsGroundVelocity { get; }
+
+        IRxValue<GpsInfo> Gps2Info { get; }
+        IRxValue<double> Gps2GroundVelocity { get; }
 
         IRxValue<double> AltitudeAboveHome { get; }
 
@@ -148,8 +157,6 @@ namespace Asv.Mavlink
         IRxValue<VehicleStatusMessage> TextStatus { get; }
         IRxValue<double> CpuLoad { get; }
         IRxValue<double> DropRateCommunication { get; }
-
-        IRxValue<double> GroundVelocity { get; }
         
         IEnumerable<VehicleCustomMode> AvailableModes { get; }
         IRxValue<VehicleMode> Mode { get; }
@@ -170,11 +177,14 @@ namespace Asv.Mavlink
 
         Task DoRtl(CancellationToken cancel);
 
+        #region Region of Interest
+
         Task SetRoi(GeoPoint location, CancellationToken cancel);
         IRxValue<GeoPoint?> Roi { get; }
-        
-
         Task ClearRoi(CancellationToken cancel);
+
+        #endregion
+
         /// <summary>
         /// Request the reboot or shutdown of system components.
         /// </summary>
@@ -183,6 +193,62 @@ namespace Asv.Mavlink
         /// <param name="cancel"></param>
         /// <returns></returns>
         Task PreflightRebootShutdown(AutopilotRebootShutdown ardupilot, CompanionRebootShutdown companion, CancellationToken cancel);
+
+        #region Flight time statistic
+
+        /// <summary>
+        /// Flight time recorder statistic
+        /// </summary>
+        /// <param name="cancel"></param>
+        /// <returns></returns>
+        Task<FlightTimeStatistic> GetFlightTimeStatistic(CancellationToken cancel = default);
+        /// <summary>
+        /// Reset flight time stat
+        /// </summary>
+        /// <param name="cancel"></param>
+        /// <returns></returns>
+        Task ResetFlightStatistic(CancellationToken cancel = default);
+
+        #endregion
+
+        #region
+
+        IEnumerable<FailSafeInfo> AvailableFailSafe { get; }
+        Task<FailSafeState[]> ReadFailSafe(CancellationToken cancel = default);
+        Task WriteFailSafe(IReadOnlyDictionary<string,bool> values,CancellationToken cancel = default);
+
+        #endregion
+    }
+
+    
+    public class FailSafeInfo
+    {
+        public object Tag { get; set; }
+        public string Name { get; set; }
+        public string DisplayName { get; set; }
+        public string Description { get; set; }
+    }
+
+    public class FailSafeState
+    {
+        public FailSafeInfo Info { get; set; }
+        public bool Value { get; set; }
+    }
+
+    public class FlightTimeStatistic
+    {
+        /// <summary>
+        /// Holds the number of times the board has been booted
+        /// </summary>
+        public long BootCount { get; set; }
+        /// <summary>
+        /// Holds the total number of seconds that the board/vehicle has been flying (including all previous flights)
+        /// </summary>
+        public TimeSpan FlightTime { get; set; }
+        /// <summary>
+        /// Holds the total number of seconds that the board has been powered up (including all previous flights)
+        /// </summary>
+        public TimeSpan RunTime { get; set; }
     }
 
     public class VehicleStatusMessage

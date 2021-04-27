@@ -1,4 +1,4 @@
-﻿using Asv.Mavlink.V2.Common;
+using Asv.Mavlink.V2.Common;
 
 namespace Asv.Mavlink
 {
@@ -7,6 +7,7 @@ namespace Asv.Mavlink
         IRxValue<RadioStatusPayload> RawRadioStatus { get; }
         IRxValue<SysStatusPayload> RawSysStatus { get; }
         IRxValue<GpsRawIntPayload> RawGpsRawInt { get; }
+        IRxValue<Gps2RawPayload> RawGps2Raw { get; }
         IRxValue<HighresImuPayload> RawHighresImu { get; }
         IRxValue<ExtendedSysStatePayload> RawExtendedSysState { get; }
         IRxValue<AltitudePayload> RawAltitude { get; }

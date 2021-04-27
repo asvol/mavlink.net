@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Asv.Mavlink.V2.Common;
 using Nito.AsyncEx;
+using NLog;
 
 namespace Asv.Mavlink.Client
 {
@@ -27,14 +28,13 @@ namespace Asv.Mavlink.Client
         private readonly Subject<MavParam> _paramUpdated = new Subject<MavParam>();
         private readonly RxValue<int?> _paramsCount = new RxValue<int?>();
         private IDisposable _paramsSubscribe;
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public MavlinkParameterClient(IMavlinkV2Connection connection, MavlinkClientIdentity identity, VehicleParameterProtocolConfig config)
         {
-            if (connection == null) throw new ArgumentNullException(nameof(connection));
-            if (config == null) throw new ArgumentNullException(nameof(config));
-            _connection = connection;
+            _connection = connection ?? throw new ArgumentNullException(nameof(connection));
             _identity = identity;
-            _config = config;
+            _config = config ?? throw new ArgumentNullException(nameof(config));
             HandleParams();
             Converter = new MavParamArdupilotValueConverter();
         }
@@ -60,6 +60,7 @@ namespace Asv.Mavlink.Client
 
         public Task RequestAllParams(CancellationToken cancel)
         {
+            _logger.Info($"Request all params from vehicle[{_identity}]");
             var packet = new ParamRequestListPacket
             {
                 ComponenId = _identity.ComponentId,
@@ -92,7 +93,7 @@ namespace Asv.Mavlink.Client
                 .Where(_ => _.MessageId == ParamValuePacket.PacketMessageId)
                 .Cast<ParamValuePacket>().Buffer(TimeSpan.FromSeconds(1)).Next();
 
-
+            _logger.Info($"Request all params from vehicle[{_identity}]");
             await _connection.Send(packet, cancel).ConfigureAwait(false);
 
 
@@ -114,13 +115,17 @@ namespace Asv.Mavlink.Client
                     paramsNames.Add(name);
                 }
                 if (totalCnt.HasValue && totalCnt.Value <= paramsNames.Count) break;
-                progress.Report(totalCnt == null ? 0 : Math.Min(1d, paramsNames.Count / (double)totalCnt));
+                var val = totalCnt == null ? 0 : Math.Min(1d, paramsNames.Count / (double) totalCnt);
+                progress.Report(val);
+                _logger.Trace($"Request all params from vehicle[{_identity}]: {val:P0}");
             }
+            _logger.Trace($"Request all params from vehicle[{_identity}]: SUCCESS");
             progress.Report(1);
         }
 
         public async Task<MavParam> ReadParam(string name, int attemptCount, CancellationToken cancel)
         {
+            _logger.Info($"Read param by name '{name}': BEGIN");
             var packet = new ParamRequestReadPacket
             {
                 ComponenId = _identity.ComponentId,
@@ -158,6 +163,7 @@ namespace Asv.Mavlink.Client
                     }
                     catch (TaskCanceledException)
                     {
+                        _logger.Warn($"Read param by name '{name}': TIMEOUT {currentAttempt} of {attemptCount}");
                         if (!timeoutCancel.IsCancellationRequested)
                         {
                             throw;
@@ -167,15 +173,23 @@ namespace Asv.Mavlink.Client
                     {
                         subscribe?.Dispose();
                     }
+                    _logger.Debug($"Read param by name '{name}': SUCCEES ({result})");
                     return result;
                 }
             }
-            if (result == null) throw new TimeoutException(string.Format("Timeout to read param '{0}' with '{1}' attempts (timeout {1} times by {2:g} )", name, currentAttempt, TimeSpan.FromMilliseconds(_config.ReadWriteTimeoutMs)));
+
+            if (result == null)
+            {
+                var ex = new TimeoutException(string.Format("Timeout to read param '{0}' with '{1}' attempts (timeout {1} times by {2:g} )", name, currentAttempt, TimeSpan.FromMilliseconds(_config.ReadWriteTimeoutMs)));
+                _logger.Error(ex,$"Read param by name '{name}': {ex.Message}");
+                throw ex;
+            }
             return result;
         }
 
         public async Task<MavParam> ReadParam(short index, int attemptCount, CancellationToken cancel)
         {
+            _logger.Info($"Begin read param by index '{index}': BEGIN");
             var packet = new ParamRequestReadPacket
             {
                 ComponenId = _identity.ComponentId,
@@ -212,6 +226,7 @@ namespace Asv.Mavlink.Client
                     }
                     catch (TaskCanceledException)
                     {
+                        _logger.Warn($"Read param by index '{index}': TIMEOUT {currentAttempt} of {attemptCount}");
                         if (!timeoutCancel.IsCancellationRequested)
                         {
                             throw;
@@ -224,7 +239,13 @@ namespace Asv.Mavlink.Client
                     return result;
                 }
             }
-            if (result == null) throw new TimeoutException(string.Format("Timeout to read param with index '{0}' with '{1}' attempts (timeout {1} times by {2:g} )", index, currentAttempt, TimeSpan.FromMilliseconds(_config.ReadWriteTimeoutMs)));
+
+            if (result == null)
+            {
+                var ex = new TimeoutException(string.Format("Timeout to read param with index '{0}' with '{1}' attempts (timeout {1} times by {2:g} )", index, currentAttempt, TimeSpan.FromMilliseconds(_config.ReadWriteTimeoutMs)));
+                _logger.Error(ex, $"Read param by index '{index}': {ex.Message}");
+                throw ex;
+            }
             return result;
         }
 
@@ -232,6 +253,7 @@ namespace Asv.Mavlink.Client
 
         public async Task<MavParam> WriteParam(MavParam param, int attemptCount, CancellationToken cancel)
         {
+            _logger.Info($"Write param '{param}': BEGIN");
             var packet = new ParamSetPacket()
             {
                 ComponenId = _identity.ComponentId,
@@ -268,6 +290,7 @@ namespace Asv.Mavlink.Client
                     }
                     catch (TaskCanceledException)
                     {
+                        _logger.Warn($"Write param '{param}': TIMEOUT {currentAttempt} of {attemptCount}");
                         if (!timeoutCancel.IsCancellationRequested)
                         {
                             throw;
@@ -282,9 +305,13 @@ namespace Asv.Mavlink.Client
 
             }
 
-            if (result == null) throw new TimeoutException(string.Format("Timeout to write param '{0}' with '{1}' attempts (timeout {1} times by {2:g} )", param.Name, currentAttempt, TimeSpan.FromMilliseconds(_config.ReadWriteTimeoutMs)));
+            if (result == null)
+            {
+                var ex = new TimeoutException(string.Format("Timeout to write param '{0}' with '{1}' attempts (timeout {1} times by {2:g} )", param.Name, currentAttempt, TimeSpan.FromMilliseconds(_config.ReadWriteTimeoutMs)));
+                _logger.Error(ex, $"Write param '{param}': {ex.Message}");
+                throw ex;
+            }
             return result;
-
 
         }
 
@@ -308,6 +335,7 @@ namespace Asv.Mavlink.Client
             _params.AddOrUpdate(name, mavParam, (s, param) => mavParam);
             _paramUpdated.OnNext(mavParam);
             _paramsCount.OnNext(p.Payload.ParamCount);
+            _logger.Trace($"Recieve new param: {mavParam}");
         }
 
         

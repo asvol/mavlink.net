@@ -333,6 +333,11 @@ namespace Asv.Mavlink.V2.Minimal
         /// MAV_TYPE_DECAROTOR
         /// </summary>
         MavTypeDecarotor = 35,
+        /// <summary>
+        /// Battery
+        /// MAV_TYPE_BATTERY
+        /// </summary>
+        MavTypeBattery = 36,
     }
 
     /// <summary>
@@ -1036,6 +1041,16 @@ namespace Asv.Mavlink.V2.Minimal
         /// MAV_COMP_ID_GIMBAL6
         /// </summary>
         MavCompIdGimbal6 = 175,
+        /// <summary>
+        /// Battery #1.
+        /// MAV_COMP_ID_BATTERY
+        /// </summary>
+        MavCompIdBattery = 180,
+        /// <summary>
+        /// Battery #2.
+        /// MAV_COMP_ID_BATTERY2
+        /// </summary>
+        MavCompIdBattery2 = 181,
         /// <summary>
         /// Component that can generate/supply a mission flight plan (e.g. GCS or developer API).
         /// MAV_COMP_ID_MISSIONPLANNER

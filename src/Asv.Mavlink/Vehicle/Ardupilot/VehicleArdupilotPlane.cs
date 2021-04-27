@@ -218,7 +218,7 @@ namespace Asv.Mavlink
             var attempts = 0;
             while (!cancel.IsCancellationRequested)
             {
-                var location = GpsLocation.Value;
+                var location = GlobalPosition.Value;
                 var currentAzimuth = point.Azimuth(location);
                 _logger.Info($"Azimuth relative to the point {currentAzimuth:F1} deg");
                 if (IsInAzimuthLimits(currentAzimuth, azimuth, precisionDegr))
@@ -284,6 +284,18 @@ namespace Asv.Mavlink
         public override Task DoRtl(CancellationToken cancel)
         {
             return Mavlink.Common.SetMode(1, (int)PlaneMode.PlaneModeRtl, cancel);
+        }
+
+        public override IEnumerable<FailSafeInfo> AvailableFailSafe { get; }
+
+        public override Task<FailSafeState[]> ReadFailSafe(CancellationToken cancel = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Task WriteFailSafe(IReadOnlyDictionary<string, bool> values, CancellationToken cancel = default)
+        {
+            throw new NotImplementedException();
         }
 
         public override void StartListen()

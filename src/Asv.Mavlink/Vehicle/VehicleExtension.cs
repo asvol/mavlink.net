@@ -42,7 +42,7 @@ namespace Asv.Mavlink.Vehicle
                 logger($"Send command GoTo to vehicle . Attempt number {i + 1}. {startLocation}");
                 await vehicle.GoToGlob(targetLocation, cancel).ConfigureAwait(false);
                 await Task.Delay(FlightCheckFrequency, cancel).ConfigureAwait(false);
-                var loc = vehicle.GpsLocation.Value;
+                var loc = vehicle.GlobalPosition.Value;
                 var dist = isWithoutAltitude
                     ? Math.Abs(GeoMath.Distance(targetLocation.SetAltitude(0), loc.SetAltitude(0)))
                     : Math.Abs(GeoMath.Distance(targetLocation, loc));
@@ -64,7 +64,7 @@ namespace Asv.Mavlink.Vehicle
             logger = logger ?? (_ => { });
 
 
-            var startLocation = vehicle.GpsLocation.Value;
+            var startLocation = vehicle.GlobalPosition.Value;
             var startDistance = isWithoutAltitude
                 ? Math.Abs(GeoMath.Distance(location.SetAltitude(0), startLocation.SetAltitude(0)))
                 : Math.Abs(GeoMath.Distance(location, startLocation));
@@ -96,7 +96,7 @@ namespace Asv.Mavlink.Vehicle
                 logger($"Send command GoTo to vehicle . Attempt number {i + 1}. {startLocation}");
                 await vehicle.GoToGlob(location, cancel).ConfigureAwait(false);
                 await Task.Delay(FlightCheckFrequency, cancel).ConfigureAwait(false);
-                var loc = vehicle.GpsLocation.Value;
+                var loc = vehicle.GlobalPosition.Value;
                 dist = isWithoutAltitude
                     ? Math.Abs(GeoMath.Distance(location.SetAltitude(0), loc.SetAltitude(0)))
                     : Math.Abs(GeoMath.Distance(location, loc));
@@ -117,7 +117,7 @@ namespace Asv.Mavlink.Vehicle
 
             while (!cancel.IsCancellationRequested)
             {
-                var loc = vehicle.GpsLocation.Value;
+                var loc = vehicle.GlobalPosition.Value;
                 dist = isWithoutAltitude
                     ? Math.Abs(GeoMath.Distance(location.SetAltitude(0), loc.SetAltitude(0)))
                     : Math.Abs(GeoMath.Distance(location, loc));
