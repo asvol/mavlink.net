@@ -55,6 +55,16 @@ namespace Asv.Mavlink
         /// <summary>
         /// Calculate дБм в мВт
         /// </summary>
+        /// <param name="mW"></param>
+        /// <returns></returns>
+        public static double mW2dBm(double mW)
+        {
+            return 10*Math.Log10(mW);
+        }
+
+        /// <summary>
+        /// Calculate мВт в дБм
+        /// </summary>
         /// <param name="dBm"></param>
         /// <returns></returns>
         public static double dBm2mW(double dBm)
