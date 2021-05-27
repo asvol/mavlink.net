@@ -61,7 +61,7 @@ namespace Asv.Mavlink.Client
             _mavlinkCommands = new MavlinkCommandClient(_mavlinkConnection, identity, _seq,new CommandProtocolConfig { CommandTimeoutMs = config.CommandTimeoutMs});
             _disposeCancel.Token.Register(() => _mavlinkCommands.Dispose());
 
-            _mission = new MissionClient(_mavlinkConnection,_seq, identity);
+            _mission = new MissionClient(_mavlinkConnection,_seq, identity, new MissionClientConfig{ CommandTimeoutMs = config.CommandTimeoutMs});
             _disposeCancel.Token.Register(() => _mission.Dispose());
 
             _mavlinkOffboard = new MavlinkOffboardMode(_mavlinkConnection,identity);

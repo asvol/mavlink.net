@@ -218,6 +218,12 @@ namespace Asv.Mavlink
         Task WriteFailSafe(IReadOnlyDictionary<string,bool> values,CancellationToken cancel = default);
 
         #endregion
+
+        #region Missions
+
+        
+
+        #endregion
     }
 
     

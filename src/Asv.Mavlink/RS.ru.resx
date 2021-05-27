@@ -114,8 +114,8 @@
     <value>Bad X25Crc: want {0}, got {1}</value>
   </data>
     <data name="RemoteStreamFactory_CreateStream_Connection_string_is_invalid" xml:space="preserve">
-    <value>Connection string '{0}' is invalid</value>
-  </data>
+        <value>Строка подключения '{0}' имеет неверный формат</value>
+    </data>
     <data name="Vehicle_ReadAllParams_Timeout_to_read_all_params_from_Vehicle" xml:space="preserve">
     <value>Timeout ({0} ms) to read all params from Vehicle.</value>
   </data>
@@ -135,44 +135,44 @@
     <value>Altitude of end point is null</value>
   </data>
     <data name="GpsInfoHelper_GetDescription_Ideal" xml:space="preserve">
-    <value>Highest possible confidence level to be used for applications demanding the highest possible precision at all times.</value>
-  </data>
+        <value>Рекомендуется к использованию в системах, требующих максимально возможную точность во всё время их работы</value>
+    </data>
     <data name="GpsInfoHelper_GetDisplayName_Ideal" xml:space="preserve">
-    <value>Ideal</value>
-  </data>
+        <value>Идеальная</value>
+    </data>
     <data name="GpsInfoHelper_GetDescription_Excellent" xml:space="preserve">
-    <value>At this confidence level, positional measurements are considered accurate enough to meet all but the most sensitive applications.</value>
-  </data>
+        <value>Достаточная точность для использования результатов измерений в достаточно чувствительной аппаратуре и программах</value>
+    </data>
     <data name="GpsInfoHelper_GetDescription_Good" xml:space="preserve">
-    <value>Represents a level that marks the minimum appropriate for making accurate decisions. Positional measurements could be used to make reliable in-route navigation suggestions to the user.</value>
-  </data>
+        <value>Рекомендуемый минимум для принятия решений по полученным результатам. Результаты могут быть использованы для достаточно точных навигационных указаний.</value>
+    </data>
     <data name="GpsInfoHelper_GetDescription_Moderate" xml:space="preserve">
-    <value>Positional measurements could be used for calculations, but the fix quality could still be improved. A more open view of the sky is recommended.</value>
-  </data>
+        <value>Результаты можно использовать в вычислениях, однако рекомендуется озаботиться повышением точности, например, выйти на более открытое место.</value>
+    </data>
     <data name="GpsInfoHelper_GetDescription_Fair" xml:space="preserve">
-    <value>Represents a low confidence level. Positional measurements should be discarded or used only to indicate a very rough estimate of the current location.</value>
-  </data>
+        <value>Результаты могут использоваться только для грубого приближения местоположения</value>
+    </data>
     <data name="GpsInfoHelper_GetDescription_Poor" xml:space="preserve">
-    <value>At this level, measurements are inaccurate by as much as 300 meters with a 6-meter accurate device (50 DOP × 6 meters) and should be discarded.</value>
-  </data>
+        <value>Выходная точность ниже половины футбольного поля. Обычно такие результаты должны быть отброшены.</value>
+    </data>
     <data name="GpsInfoHelper_GetDisplayName_Excellent" xml:space="preserve">
-    <value>Excellent</value>
-  </data>
+        <value>Отличная</value>
+    </data>
     <data name="GpsInfoHelper_GetDisplayName_Good" xml:space="preserve">
-    <value>Good</value>
-  </data>
+        <value>Хорошая</value>
+    </data>
     <data name="GpsInfoHelper_GetDisplayName_Moderate" xml:space="preserve">
-    <value>Moderate</value>
-  </data>
+        <value>Средняя</value>
+    </data>
     <data name="GpsInfoHelper_GetDisplayName_Fair" xml:space="preserve">
-    <value>Fair</value>
-  </data>
+        <value>Ниже среднего </value>
+    </data>
     <data name="GpsInfoHelper_GetDisplayName_Poor" xml:space="preserve">
-    <value>Poor</value>
-  </data>
+        <value>Плохая</value>
+    </data>
     <data name="GpsInfoHelper_GetDescription_Unknown" xml:space="preserve">
-    <value>Unknown</value>
-  </data>
+        <value>Неизвестно</value>
+    </data>
     <data name="PayloadDiagnosticRtt_PayloadDiagnosticRtt_Payload" xml:space="preserve">
       <value>Полезная нагрузка</value>
   </data>

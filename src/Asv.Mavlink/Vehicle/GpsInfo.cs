@@ -21,6 +21,11 @@ namespace Asv.Mavlink
             CourseOverGround = rawGps.Cog / 100D;
             FixType = rawGps.FixType;
             SatellitesVisible = rawGps.SatellitesVisible;
+            var num = (long)(rawGps.TimeUsec * (double)1000 + (rawGps.TimeUsec >= 0.0 ? 0.5 : -0.5));
+            if (num > -315537897600000L && num < 315537897600000L)
+            {
+                Time = Epoch.AddSeconds(rawGps.TimeUsec);
+            }
             Time = Epoch.AddSeconds(rawGps.TimeUsec);
         }
 
@@ -41,7 +46,7 @@ namespace Asv.Mavlink
 
             // check because sometime argument out of range exception
             var num = (long)(rawGps.TimeUsec * (double)1000 + (rawGps.TimeUsec >= 0.0 ? 0.5 : -0.5));
-            if (num > -315537897600000L || num < 315537897600000L)
+            if (num > -315537897600000L && num < 315537897600000L)
             {
                 Time = Epoch.AddSeconds(rawGps.TimeUsec);
             }
